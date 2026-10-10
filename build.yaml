@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # Generated data classes double as the backup JSON format.
+          store_date_time_values_as_text: false
+          named_parameters: true
+          sql:
+            dialect: sqlite
+            options:
+              version: "3.45"
+              modules:
+                - fts5

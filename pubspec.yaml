@@ -1,0 +1,152 @@
+name: focusflow
+description: "FocusFlow — offline-first notes, tasks, reminders, habits and password vault."
+publish_to: 'none'
+
+# Rename the app in ONE place: lib/core/constants/app_info.dart (+ store
+# listings / launcher label). The package name stays `focusflow`.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # ── State management / DI ──
+  # Same approach as Fresh LPG: plain Riverpod providers + Notifier /
+  # AsyncNotifier ViewModels (no codegen), so every screen reads live streams.
+  flutter_riverpod: ^2.6.1
+
+  # ── Navigation ──
+  # GoRouter with a StatefulShellRoute for the 4 tabs + centre FAB.
+  go_router: ^18.0.2
+
+  # ── Local database ──
+  # Drift ≈ Room. The SQLite native library is bundled by sqlite3's build hook;
+  # we select the SQLite3MultipleCiphers build (see `hooks:` below) so the
+  # whole DB is encrypted at rest — the same "encrypted at rest" rule Fresh LPG
+  # follows with SQLCipher — and FTS5 powers global search.
+  drift: ^2.35.1
+  sqlite3: ^3.5.2
+  path_provider: ^2.1.6
+  path: ^1.9.1
+
+  # ── Security ──
+  # AES-256-GCM + Argon2id for the vault (per-item encryption on top of the
+  # encrypted DB); keys wrapped in Keychain / Keystore.
+  cryptography: ^2.7.0
+  flutter_secure_storage: ^11.2.0
+  local_auth: ^3.0.2
+  screen_protector: ^1.4.2
+  crypto: ^3.0.6
+  otp: ^3.1.4
+
+  # ── Notifications ──
+  flutter_local_notifications: ^22.3.1
+  timezone: ^0.11.1
+  flutter_timezone: ^5.1.1
+  permission_handler: ^13.0.2
+
+  # ── Google sign-in + Drive (drive.appdata only) ──
+  google_sign_in: ^7.2.0
+  googleapis: ^17.0.0
+  extension_google_sign_in_as_googleapis_auth: ^3.0.0
+  sign_in_with_apple: ^8.2.0
+  http: ^1.2.2
+
+  # ── Files / backup / share ──
+  file_picker: ^13.1.0
+  share_plus: ^13.3.1
+  archive: ^4.0.9
+  pdf: ^3.13.1
+  workmanager: ^0.10.10
+  connectivity_plus: ^7.0.0
+
+  # ── Editors / capture ──
+  flutter_quill: ^11.4.0
+  image_picker: ^1.2.3
+  speech_to_text: ^7.3.0
+  mobile_scanner: ^7.0.1
+
+  # ── UI ──
+  fl_chart: ^1.1.0
+  font_awesome_flutter: 10.9.1 # FA 6.7 = the mockups; 11.x (FA 7) drops IconData
+  flutter_animate: ^4.5.2
+
+  # ── Utilities ──
+  uuid: ^4.6.0
+  intl: ^0.20.2
+  collection: ^1.19.1
+  logger: ^2.6.1
+  shared_preferences: ^2.5.3
+  package_info_plus: ^10.2.2
+  device_info_plus: ^13.3.0
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # ── Code generation (Drift only) ──
+  build_runner: ^2.7.0
+  drift_dev: ^2.35.1
+
+  # ── Testing ──
+  mocktail: ^1.0.4
+
+  flutter_launcher_icons: ^0.14.4
+
+# SQLite3MultipleCiphers: an encrypted SQLite build with FTS5. The key is a
+# random 256-bit value kept in the platform keystore (core/storage).
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/wordlists/
+    - assets/licenses/
+
+  # Bundled (offline-first): no runtime font downloads.
+  fonts:
+    - family: LexendDeca
+      fonts:
+        - asset: assets/fonts/LexendDeca-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/LexendDeca-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/LexendDeca-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/LexendDeca-Bold.ttf
+          weight: 700
+    - family: NunitoSans
+      fonts:
+        - asset: assets/fonts/NunitoSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NunitoSans-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/NunitoSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NunitoSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/NunitoSans-ExtraBold.ttf
+          weight: 800
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  adaptive_icon_background: "#F0FDFA"
+  adaptive_icon_foreground: "assets/images/app_icon_foreground.png"
+  remove_alpha_ios: true

@@ -1,0 +1,8 @@
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
+#include "Generated.xcconfig"
+
+// Google Drive backup (optional): the iOS OAuth client's REVERSED client id
+// is the URL scheme Google sign-in returns to. Placeholder until the owner
+// creates ios/Flutter/GoogleSignIn.xcconfig (docs/google_drive_setup.md).
+GOOGLE_REVERSED_CLIENT_ID = com.iqballab.focusflow.google-not-configured
+#include? "GoogleSignIn.xcconfig"
