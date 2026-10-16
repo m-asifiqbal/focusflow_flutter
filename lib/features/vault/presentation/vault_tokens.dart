@@ -139,6 +139,10 @@ abstract final class VaultSizes {
 
   /// [VaultRoundButton] disc and its glyph.
   static const double roundButton = 40;
+
+  /// Header buttons (favourite disc, lock, add): a size down from the
+  /// shared 44 pt round button so the vault toolbars stay light.
+  static const double toolbarButton = 38;
   static const double roundGlyph = iconButton;
   static const double segmented = 40;
   static const double historyRow = 45;

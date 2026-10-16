@@ -171,8 +171,9 @@ class _OpenContainerTransitionState extends State<OpenContainerTransition> {
     final ff = context.ff;
     final screen = MediaQuery.sizeOf(context);
     final origin = widget.origin;
-    // The card's fill: what the container starts as.
-    final cardFill = Color.alphaBlend(origin.color ?? ff.surface, ff.canvas);
+    // The page the container settles as, and the card it starts as.
+    final pageFill = origin.pageColor ?? ff.canvas;
+    final cardFill = Color.alphaBlend(origin.color ?? ff.surface, pageFill);
     return AnimatedBuilder(
       animation: widget.animation,
       child: widget.child,
@@ -210,7 +211,7 @@ class _OpenContainerTransitionState extends State<OpenContainerTransition> {
                 child: ColoredBox(
                   color: Color.lerp(
                     cardFill,
-                    ff.canvas,
+                    pageFill,
                     p,
                   )!.withValues(alpha: surface),
                   child: FittedBox(

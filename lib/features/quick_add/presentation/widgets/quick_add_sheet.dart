@@ -29,9 +29,9 @@ class QuickAddSheet extends StatelessWidget {
     void close([QuickAddResult? result]) => Navigator.of(context).pop(result);
     return FFBottomSheet(
       padding: const EdgeInsetsDirectional.fromSTEB(
-        AppSpacing.screen,
+        FFBottomSheet.inset,
         AppSpacing.xxl,
-        AppSpacing.screen,
+        FFBottomSheet.inset,
         AppSpacing.xl,
       ),
       footer: FFSecondaryButton(

@@ -125,9 +125,9 @@ class FFActionSheet extends StatelessWidget {
     final hasFooter = data.onArchive != null || data.onDelete != null;
     return FFBottomSheet(
       padding: const EdgeInsetsDirectional.fromSTEB(
-        AppSpacing.screen,
+        FFBottomSheet.inset,
         AppSpacing.xl,
-        AppSpacing.screen,
+        FFBottomSheet.inset,
         AppSpacing.sm,
       ),
       footer: hasFooter

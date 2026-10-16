@@ -75,7 +75,11 @@ class VaultGeneratorView extends ConsumerWidget {
       horizontal: AppSpacing.grouped,
     );
     return ListView(
-      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xxxl),
+      // The inner tab bar overlays the body: MediaQuery's bottom padding
+      // here is its height, so the last card can scroll clear of it.
+      padding: EdgeInsetsDirectional.only(
+        bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.xxl,
+      ),
       children: [
         VaultTabTitle(
           title: 'Generator',

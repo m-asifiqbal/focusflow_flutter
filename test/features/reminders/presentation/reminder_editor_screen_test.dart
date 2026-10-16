@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'dart:ui' show Tristate;
 
 import 'package:flutter/semantics.dart';
@@ -71,6 +72,46 @@ Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
+  // Regression: a bare Text in a taller pill is stretched to the pill's
+  // minimum height, but its glyphs are painted at the TOP of that box — the
+  // label sat high in the capsule. The test measures where the text line is
+  // actually drawn, not the stretched box.
+  testWidgets('repeat pills centre their label', (tester) async {
+    final h = await _harness(tester);
+    await pumpApp(tester, h, AppRoutes.newReminder(), size: _tall);
+    for (final label in const [
+      'Once',
+      'Daily',
+      'Weekdays',
+      'Weekly',
+      'Monthly',
+      'Custom',
+    ]) {
+      await _scrollTo(tester, find.text(label));
+      final paragraph = tester.renderObject<RenderParagraph>(find.text(label));
+      final line = paragraph
+          .getBoxesForSelection(
+            TextSelection(baseOffset: 0, extentOffset: label.length),
+          )
+          .first
+          .toRect();
+      final drawnCenter = paragraph.localToGlobal(line.center).dy;
+      final pill = tester.getRect(
+        find
+            .ancestor(
+              of: find.text(label),
+              matching: find.byType(AnimatedContainer),
+            )
+            .first,
+      );
+      expect(
+        (drawnCenter - pill.center.dy).abs(),
+        lessThan(0.75),
+        reason: '$label is not vertically centred in its pill',
+      );
+    }
+  });
+
   testWidgets('new reminder matches the mockup (light + dark captures)', (
     tester,
   ) async {

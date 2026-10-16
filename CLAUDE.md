@@ -94,6 +94,14 @@ vault, archive, insights, calendar, notifications_center, settings, backup.
   swipe-back); tab switches fade (`FFAnimatedBranchContainer`). For element → details, wrap the
   list card in `FFOpenOriginTracker` (core/widgets) — the page then grows out of the tapped card
   and closes back into it. Navigation code stays a plain `context.push`.
+  The container takes its card/page colours from the tapped card's own theme (the always-dark vault
+  must not grow a light page) and lands on the card's *live* position; container pages also swipe
+  back from the leading edge (`ContainerBackGesture`, needs routes built by `withMaterialPages`/`FFPage`).
+- Sheets: `showFFBottomSheet` / `FFBottomSheet` float — 12 pt from the side edges, clear of the home
+  indicator, all four corners rounded. Don't add bottom safe-area padding or full-bleed backgrounds
+  inside; use `FFBottomSheet.inset` for custom horizontal padding.
+- Back button (Android): `AppShell` owns it at the tab roots — another tab → Home, Home → "Exit?"
+  dialog. Pushed pages, sheets and dialogs close first. iOS has no back button, nothing is intercepted.
 - Comments: a header block per file (what / why), doc comments on public APIs; explain *why*.
 - Keep files < ~400 lines; split widgets into `widgets/`.
 
@@ -111,7 +119,11 @@ Xcode 27: a universal (arm64+x86_64) simulator build fails in `lipo -verify_arch
 Android: `compileSdk` is pinned to ≥ 37 (permission_handler_android requires it) and
 android/build.gradle.kts applies the Kotlin Gradle plugin to `screen_protector` (it skips KGP on
 AGP 9, but this project keeps `android.builtInKotlin=false` for workmanager_android).
-Tests: `test/helpers/test_container.dart` gives a fully wired ProviderContainer over a keyed temp
+`dart format` only the files you changed (a directory-wide run reformats generated/vendored files).
+Tests: `settle()` in the screen harness keeps pumping until late provider disposals (Drift closes a
+dropped stream with a zero-length timer) are flushed — end screen tests with it. `captureFilmstrip`
+(test/helpers/filmstrip.dart) writes a contact sheet of a transition's frames for eyeballing motion.
+`test/helpers/test_container.dart` gives a fully wired ProviderContainer over a keyed temp
 DB + FakeClock; `test/helpers/screen_harness.dart` pumps the real app / a screen with the bundled
 fonts and `captureScreen` writes `build/screens/<name>.png` at the mockups' exact size (1170×2532)
 for side-by-side comparison with `design/NN_*.png`. (Helpers must not end in `_test.dart`.)

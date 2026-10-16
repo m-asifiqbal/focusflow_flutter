@@ -1,15 +1,19 @@
 /// ============================================================
-/// FF BOTTOM SHEET — 34-radius sheet with handle, blur scrim, drag-dismiss
+/// FF BOTTOM SHEET — floating rounded sheet with handle, blur scrim, drag-dismiss
 /// ============================================================
 ///
 /// [showFFBottomSheet] pushes a [ModalBottomSheetRoute] whose barrier is
 /// `ff.scrim` + a σ 3 backdrop blur, slides up with [AppMotion] timings
 /// (instant under reduce motion) and supports drag-to-dismiss.
-/// [FFBottomSheet] is the visual: `ff.sheet` background, 44×6 handle,
-/// scrollable content, an optional sticky [FFBottomSheet.footer], and
-/// keyboard + home-indicator safe padding.
+/// [FFBottomSheet] is the visual: a card that *floats* — 12 pt from the left
+/// and right edges and clear of the home indicator / gesture bar (the same
+/// gap as the nav pill), all four corners rounded like iOS sheets — with
+/// the `ff.sheet` background, a 44×6 handle, scrollable content, an optional
+/// sticky [FFBottomSheet.footer], and keyboard-aware spacing.
 /// ============================================================
 library;
+
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -96,17 +100,23 @@ class FFBottomSheet extends StatelessWidget {
     required this.child,
     this.footer,
     this.padding = const EdgeInsetsDirectional.fromSTEB(
-      AppSpacing.screen,
+      inset,
       AppSpacing.xl,
-      AppSpacing.screen,
+      inset,
       AppSpacing.lg,
     ),
     this.showHandle = true,
     this.scrollable = true,
     this.vault = false,
-    this.maxHeightFactor = 0.94,
+    this.maxHeightFactor = 0.9,
     super.key,
   });
+
+  /// Gap between the sheet and the left / right edge of the screen.
+  static const double margin = AppSpacing.md;
+
+  /// Default horizontal padding of the content inside the card.
+  static const double inset = AppSpacing.xl;
 
   final Widget child;
 
@@ -122,65 +132,79 @@ class FFBottomSheet extends StatelessWidget {
   /// Always-dark vault sheet.
   final bool vault;
 
-  /// Max height as a fraction of the screen.
+  /// Max height as a fraction of the available height.
   final double maxHeightFactor;
+
+  /// Distance from the bottom of the screen: just above the home indicator
+  /// or gesture bar ([safeBottom], like the nav pill), or [AppSpacing.sm]
+  /// above the keyboard while it is open ([keyboard]).
+  static double bottomGap({
+    required double keyboard,
+    required double safeBottom,
+  }) {
+    if (keyboard > 0) return keyboard + AppSpacing.sm;
+    return safeBottom > 0
+        ? math.max(safeBottom - AppSpacing.sm, AppSpacing.md)
+        : AppSpacing.md;
+  }
 
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
-    final media = MediaQuery.of(context);
-    final bottomSafe = media.viewPadding.bottom > 0
-        ? media.viewPadding.bottom
-        : AppSpacing.sm;
+    // Only the aspects it needs, so the sheet doesn't rebuild for unrelated
+    // MediaQuery changes (text scale, brightness…).
+    final gap = bottomGap(
+      keyboard: MediaQuery.viewInsetsOf(context).bottom,
+      safeBottom: MediaQuery.viewPaddingOf(context).bottom,
+    );
+    final radius = BorderRadius.circular(AppRadii.sheetFloating);
     final body = scrollable
         ? SingleChildScrollView(padding: padding, child: child)
         : Padding(padding: padding, child: child);
     return Padding(
-      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+      padding: EdgeInsets.fromLTRB(margin, 0, margin, gap),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: media.size.height * maxHeightFactor,
+          maxHeight:
+              (MediaQuery.sizeOf(context).height - gap) * maxHeightFactor,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: vault ? ff.vaultCanvas : ff.sheet,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppRadii.sheet),
-            ),
-            border: ff.isDark || vault
-                ? Border(top: BorderSide(color: ff.surfaceBorder))
-                : null,
+            borderRadius: radius,
+            border: Border.all(color: ff.surfaceBorder),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (showHandle)
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: AppSpacing.md),
-                    width: AppSizes.sheetHandleWidth,
-                    height: AppSizes.sheetHandleHeight,
-                    decoration: BoxDecoration(
-                      color: vault ? ff.vaultBorder : ff.sheetHandle,
-                      borderRadius: BorderRadius.circular(AppRadii.pill),
+          child: ClipRRect(
+            borderRadius: radius,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (showHandle)
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(top: AppSpacing.md),
+                      width: AppSizes.sheetHandleWidth,
+                      height: AppSizes.sheetHandleHeight,
+                      decoration: BoxDecoration(
+                        color: vault ? ff.vaultBorder : ff.sheetHandle,
+                        borderRadius: BorderRadius.circular(AppRadii.pill),
+                      ),
                     ),
                   ),
-                ),
-              Flexible(child: body),
-              if (footer != null)
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                    AppSpacing.screen,
-                    0,
-                    AppSpacing.screen,
-                    media.viewInsets.bottom > 0 ? AppSpacing.md : bottomSafe,
+                Flexible(child: body),
+                if (footer != null)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      inset,
+                      0,
+                      inset,
+                      AppSpacing.lg,
+                    ),
+                    child: footer,
                   ),
-                  child: footer,
-                )
-              else
-                SizedBox(height: media.viewInsets.bottom > 0 ? 0 : bottomSafe),
-            ],
+              ],
+            ),
           ),
         ),
       ),

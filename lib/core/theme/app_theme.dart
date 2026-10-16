@@ -190,6 +190,25 @@ abstract final class AppTheme {
         titleTextStyle: text.title,
         contentTextStyle: text.body,
       ),
+      // The Material pickers float like the app's own dialogs: same fill,
+      // same corner radius, no tint.
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: brightness == Brightness.light
+            ? Colors.white
+            : const Color(0xFF0C2F26),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.dialog),
+        ),
+      ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: brightness == Brightness.light
+            ? Colors.white
+            : const Color(0xFF0C2F26),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.dialog),
+        ),
+      ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: c.snackbar,
         contentTextStyle: text.rowTitle.copyWith(color: c.onSnackbar),

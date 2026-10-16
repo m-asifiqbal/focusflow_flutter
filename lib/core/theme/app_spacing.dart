@@ -57,7 +57,11 @@ abstract final class AppRadii {
   static const double row = 20;
   static const double hero = 28;
   static const double sheet = 34;
+
+  /// Floating bottom sheet (all four corners, inset from the screen edges).
+  static const double sheetFloating = 30;
   static const double dialog = 30;
+
   static const double tileSm = 9;
   static const double tile = 12;
   static const double tileLg = 14;

@@ -91,7 +91,11 @@ class _VaultSecurityViewState extends ConsumerState<VaultSecurityView> {
       onRefresh: () => rescanVault(context, ref),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xxxl),
+        // The inner tab bar overlays the body: MediaQuery's bottom padding
+        // here is its height, so the last card can scroll clear of it.
+        padding: EdgeInsetsDirectional.only(
+          bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.xxl,
+        ),
         children: [
           VaultTabTitle(title: 'Security', subtitle: subtitle),
           ...body,

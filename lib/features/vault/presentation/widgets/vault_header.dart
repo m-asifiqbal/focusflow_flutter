@@ -52,8 +52,8 @@ class VaultHeader extends StatelessWidget {
             child: FFPressable(
               onTap: canPop ? () => context.pop() : null,
               child: Container(
-                width: AppSizes.roundButton,
-                height: AppSizes.roundButton,
+                width: VaultSizes.toolbarButton + 2,
+                height: VaultSizes.toolbarButton + 2,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: ff.vaultAccent,
@@ -107,6 +107,8 @@ class VaultHeader extends StatelessWidget {
             icon: FontAwesomeIcons.lock,
             semanticLabel: lockLabel,
             onPressed: onLock,
+            size: VaultSizes.toolbarButton,
+            iconSize: VaultSizes.iconMd,
             variant: FFRoundIconButtonVariant.dark,
           ),
           const SizedBox(width: VaultSizes.gapSm),
@@ -114,6 +116,8 @@ class VaultHeader extends StatelessWidget {
             icon: FontAwesomeIcons.plus,
             semanticLabel: 'Add password',
             onPressed: onAdd,
+            size: VaultSizes.toolbarButton,
+            iconSize: VaultSizes.iconMd,
             variant: FFRoundIconButtonVariant.dark,
           ),
         ],

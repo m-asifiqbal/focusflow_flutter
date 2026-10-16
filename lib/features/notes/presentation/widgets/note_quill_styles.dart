@@ -231,6 +231,12 @@ class NoteImageEmbedBuilder extends EmbedBuilder {
                   file,
                   fit: BoxFit.cover,
                   width: double.infinity,
+                  // Decode at screen width, not at camera resolution: a
+                  // 12 MP photo would otherwise be a ~48 MB bitmap.
+                  cacheWidth:
+                      (MediaQuery.sizeOf(context).width *
+                              MediaQuery.devicePixelRatioOf(context))
+                          .round(),
                   errorBuilder: (_, _, _) => placeholder,
                 ),
         ),

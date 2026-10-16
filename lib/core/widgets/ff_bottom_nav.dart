@@ -39,6 +39,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/widgets/ff_haptics.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
 import 'package:focusflow/core/widgets/src/ff_token_gaps.dart';
 
@@ -170,7 +171,13 @@ class _FFBottomNavState extends State<FFBottomNav>
               child: _Pill(glass: glass, state: this),
             ),
             const SizedBox(width: FFBottomNav._gap),
-            _Fab(onTap: widget.onFab, semanticLabel: widget.fabSemanticLabel),
+            _Fab(
+              onTap: () {
+                FFHaptics.light(context);
+                widget.onFab();
+              },
+              semanticLabel: widget.fabSemanticLabel,
+            ),
           ],
         ),
       ),
@@ -317,7 +324,11 @@ class _Pill extends StatelessWidget {
             strength: strengths[i],
             selected: i == w.currentIndex,
             glass: glass,
-            onTap: () => w.onTap(i),
+            onTap: () {
+              // A soft tick when the tab actually changes.
+              if (i != w.currentIndex) FFHaptics.selection(state.context);
+              w.onTap(i);
+            },
           ),
         ),
       );

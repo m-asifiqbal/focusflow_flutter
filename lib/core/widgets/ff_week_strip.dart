@@ -65,7 +65,10 @@ class FFWeekStrip extends StatefulWidget {
 
 class _FFWeekStripState extends State<FFWeekStrip> {
   static const double _pillWidth = FFCalendarDayTile.width;
-  static const double _pillGap = 10;
+  // 10 dp + 0.5 dp of breathing room on each side of every tile (the first
+  // tile's left and the last tile's right edge get none — they only sit
+  // between neighbours, as a gap).
+  static const double _pillGap = 10 + 2 * 0.5;
   final _scroll = ScrollController();
 
   @override

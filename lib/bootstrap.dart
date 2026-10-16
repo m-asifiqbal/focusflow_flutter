@@ -75,11 +75,14 @@ Future<Widget> buildRoot({
   final SharedPreferences prefs;
   final String dbKey;
   try {
-    prefs = await (loadPrefs ?? SharedPreferences.getInstance)();
-    dbKey = await secure.getOrCreateDatabaseKey();
+    // Independent reads (disk vs keychain): run them together.
+    (prefs, dbKey) = await (
+      (loadPrefs ?? SharedPreferences.getInstance)(),
+      secure.getOrCreateDatabaseKey(),
+    ).wait;
   } on Object catch (e) {
     // The type is enough to triage; never log key material.
-    AppLogger.w('Startup blocked: ${e.runtimeType}');
+    AppLogger.w('Startup blocked: ${_errorTypes(e)}');
     return StartupErrorApp(onRetry: onRetry);
   }
   final deviceId = await _deviceId(prefs);
@@ -104,6 +107,21 @@ Future<Widget> buildRoot({
     ],
     child: const FocusFlowApp(),
   );
+}
+
+/// Error type(s) behind a failed startup read — unwraps the record `.wait`'s
+/// [ParallelWaitError] so the log names the real failure.
+String _errorTypes(Object e) {
+  if (e is ParallelWaitError) {
+    final errors = e.errors;
+    if (errors is (AsyncError?, AsyncError?)) {
+      return [
+        errors.$1,
+        errors.$2,
+      ].whereType<AsyncError>().map((a) => a.error.runtimeType).join(', ');
+    }
+  }
+  return e.runtimeType.toString();
 }
 
 /// Minimal recovery screen shown when the data can't be unlocked (the

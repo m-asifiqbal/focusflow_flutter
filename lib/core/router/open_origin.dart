@@ -21,6 +21,7 @@ class FFOpenOriginData {
     required this.rect,
     required this.radius,
     this.color,
+    this.pageColor,
     this.live,
   });
 
@@ -30,8 +31,15 @@ class FFOpenOriginData {
   /// The card's corner radius.
   final double radius;
 
-  /// The card's fill, when it isn't the standard surface (tinted notes…).
+  /// The card's fill (composited over the page colour when translucent).
+  /// Null: the standard surface.
   final Color? color;
+
+  /// The fill of the page the card sits on — and so of the page it opens.
+  /// Resolved from the card's own theme, because the transition is built
+  /// above it: the always-dark vault must not grow a light container. Null:
+  /// the app canvas.
+  final Color? pageColor;
 
   /// Where the card is *now*, or null once it is gone. Lets the page land
   /// exactly on the card even if the list scrolled or re-sorted while the
@@ -62,12 +70,14 @@ abstract final class FFOpenOrigin {
     Rect rect, {
     double radius = AppRadii.card,
     Color? color,
+    Color? pageColor,
     Rect? Function()? live,
   }) {
     _pending = FFOpenOriginData(
       rect: rect,
       radius: radius,
       color: color,
+      pageColor: pageColor,
       live: live,
     );
     _pendingAt = DateTime.now();

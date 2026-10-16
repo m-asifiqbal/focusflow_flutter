@@ -54,8 +54,8 @@ class VaultDetailTopBar extends StatelessWidget {
               onTap: onFavorite,
               scale: 0.92,
               child: Container(
-                width: AppSizes.roundButton,
-                height: AppSizes.roundButton,
+                width: VaultSizes.toolbarButton,
+                height: VaultSizes.toolbarButton,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -80,12 +80,9 @@ class VaultDetailTopBar extends StatelessWidget {
             child: FFPressable(
               onTap: onEdit,
               child: Container(
-                height: AppSizes.roundButton,
-                constraints: const BoxConstraints(
-                  minWidth: VaultSizes.backLabel,
-                ),
+                height: VaultSizes.toolbarButton - 4,
                 padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.lg,
+                  horizontal: AppSpacing.md + 2,
                 ),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -95,7 +92,7 @@ class VaultDetailTopBar extends StatelessWidget {
                 child: Text(
                   'Edit',
                   style: context.text.rowTitle.copyWith(
-                    fontSize: VaultType.navLg,
+                    fontSize: VaultType.value,
                     fontWeight: FontWeight.w600,
                     color: ff.vaultOnAccentInk,
                   ),

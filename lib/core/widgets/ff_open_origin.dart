@@ -18,6 +18,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:focusflow/core/router/open_origin.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
+import 'package:focusflow/core/theme/app_theme.dart';
 
 class FFOpenOriginTracker extends StatefulWidget {
   const FFOpenOriginTracker({
@@ -58,10 +59,13 @@ class _FFOpenOriginTrackerState extends State<FFOpenOriginTracker> {
     final rect = _rectOf(box);
     if (rect == null) return;
     final weak = WeakReference<RenderBox>(box);
+    // Colours come from the card's own theme (the vault is always dark).
+    final ff = context.ff;
     FFOpenOrigin.record(
       rect,
       radius: widget.radius,
-      color: widget.color,
+      color: widget.color ?? ff.surface,
+      pageColor: ff.canvas,
       live: () => _rectOf(weak.target),
     );
   }
