@@ -2,7 +2,7 @@
 /// NOTES MENUS — the sheets behind the notes list controls (screen 07)
 /// ============================================================
 ///
-/// * [showNotesMoreMenu]   header ⋯: select, sort, new folder, tags &
+/// * [showNotesMoreMenu]   header ⋯: add note, select, sort, new folder, tags &
 ///   folders, archive, recently deleted.
 /// * [pickNotesSort]       "Last edited ⇅": Last edited, Created,
 ///   Title A–Z, Colour, Manual (drag).
@@ -48,6 +48,17 @@ Future<void> showNotesMoreMenu(BuildContext context, WidgetRef ref) =>
           meta: 'View options',
         ),
         actions: [
+          FFActionItem(
+            icon: FontAwesomeIcons.plus,
+            label: 'Add new note',
+            colors: ModuleStyle.notes.colors,
+            // Into the folder being viewed, like the screen's own New note.
+            onTap: () => context.push(
+              AppRoutes.newNoteWith(
+                folderId: ref.read(notesListFilterProvider).folderId,
+              ),
+            ),
+          ),
           FFActionItem(
             icon: FontAwesomeIcons.solidSquareCheck,
             label: 'Select notes',

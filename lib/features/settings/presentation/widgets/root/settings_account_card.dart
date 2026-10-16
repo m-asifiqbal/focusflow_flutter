@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/features/auth/presentation/widgets/profile_avatar.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
@@ -84,7 +85,7 @@ class _SignedInCard extends ConsumerWidget {
       onTap: () => context.push(AppRoutes.settingsAccount),
       child: Row(
         children: [
-          FFAvatar(
+          ProfileAvatar(
             initial: name.isEmpty ? null : name.characters.first.toUpperCase(),
             size: SettingsAccountCard._avatar,
             border: false,
@@ -154,7 +155,7 @@ class _SignedOutCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              FFAvatar(
+              ProfileAvatar(
                 initial: name.trim().isEmpty
                     ? null
                     : name.trim().characters.first.toUpperCase(),

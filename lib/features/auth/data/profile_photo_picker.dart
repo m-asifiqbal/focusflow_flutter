@@ -2,7 +2,7 @@
 /// PROFILE PHOTO PICKER — gallery / camera picture for the avatar
 /// ============================================================
 ///
-/// Returns small JPEG bytes (≤ 512 px) for the local profile picture on
+/// Returns JPEG bytes (≤ 1024 px) for the local profile picture on
 /// Account & profile (screen 36). The picture never leaves the device.
 /// Behind a provider so widget tests can fake it.
 /// ============================================================
@@ -23,8 +23,9 @@ class DeviceProfilePhotoPicker implements ProfilePhotoPicker {
 
   final ImagePicker _picker;
 
-  /// The avatar is at most 96 pt (@3x ≈ 288 px); 512 leaves headroom.
-  static const double maxDimension = 512;
+  /// Big enough for a sharp full-screen preview (avatars decode it down to
+  /// their own size), small enough to stay a few hundred KB.
+  static const double maxDimension = 1024;
 
   @override
   Future<Uint8List?> pick({required bool camera}) async {

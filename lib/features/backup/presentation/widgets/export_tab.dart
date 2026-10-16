@@ -312,12 +312,22 @@ class _AppPill extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadii.pill),
             border: Border.all(color: ff.chipBorder, width: AppSizes.hairline),
           ),
-          child: Text(
-            label,
-            style: context.text.rowTitle.copyWith(
-              fontSize: 13.5,
-              color: ff.primaryStrong,
-            ),
+          // In a Row so the label is centred in the chip's 44 pt minimum
+          // height on every font (a bare Text hugs the top).
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  label,
+                  style: context.text.rowTitle.copyWith(
+                    fontSize: 13.5,
+                    color: ff.primaryStrong,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

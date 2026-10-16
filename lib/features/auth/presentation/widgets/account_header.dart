@@ -19,6 +19,7 @@ import 'package:focusflow/core/widgets/src/ff_token_gaps.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/auth/presentation/providers/account_providers.dart';
 import 'package:focusflow/features/auth/presentation/widgets/google_logo.dart';
+import 'package:focusflow/features/auth/presentation/widgets/profile_avatar.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
 /// The name shown under the avatar: the account's full name, else the
@@ -44,7 +45,6 @@ class AccountHeader extends ConsumerWidget {
     final displayName = ref.watch(
       settingsProvider.select((s) => s.displayName),
     );
-    final photo = ref.watch(profilePhotoProvider).valueOrNull;
     final name = accountHeaderName(account, displayName);
 
     final Widget providerIcon = switch (account?.provider) {
@@ -71,9 +71,8 @@ class AccountHeader extends ConsumerWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            FFAvatar(
+            ProfileAvatar(
               initial: name == 'Your profile' ? null : name,
-              image: photo == null ? null : MemoryImage(photo),
               size: 96,
               onTap: onPhotoTap,
               semanticLabel: 'Change profile photo',

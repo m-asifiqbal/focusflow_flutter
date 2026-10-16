@@ -30,6 +30,7 @@ import 'package:focusflow/features/auth/presentation/widgets/account_danger_sect
 import 'package:focusflow/features/auth/presentation/widgets/account_editors.dart';
 import 'package:focusflow/features/auth/presentation/widgets/account_header.dart';
 import 'package:focusflow/features/auth/presentation/widgets/account_profile_section.dart';
+import 'package:focusflow/features/auth/presentation/widgets/profile_photo_preview.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -70,6 +71,16 @@ class AccountScreen extends ConsumerWidget {
           colors: tint,
         ),
         actions: [
+          if (hasPhoto)
+            FFActionItem(
+              icon: FontAwesomeIcons.expand,
+              label: 'View photo',
+              colors: ModuleStyle.habits.colors,
+              onTap: () {
+                final bytes = ref.read(profilePhotoProvider).valueOrNull;
+                if (bytes != null) showProfilePhotoPreview(context, bytes);
+              },
+            ),
           FFActionItem(
             icon: FontAwesomeIcons.solidImage,
             label: 'Choose photo',

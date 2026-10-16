@@ -142,6 +142,7 @@ class _HabitsListScreenState extends ConsumerState<HabitsListScreen> {
               children: [
                 FFLargeHeader(
                   title: 'Habits',
+                  leading: const FFBackButton(),
                   subtitle: _reordering
                       ? 'Drag to reorder'
                       : summary == null

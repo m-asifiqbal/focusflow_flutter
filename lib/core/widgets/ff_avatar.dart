@@ -41,6 +41,14 @@ class FFAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final ff = context.ff;
     final g = ff.primaryGradient.colors;
+    // Decode the picture at the size it is shown, not at its own resolution.
+    final photo = image == null
+        ? null
+        : ResizeImage.resizeIfNeeded(
+            (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
+            null,
+            image!,
+          );
     final hasInitial = initial != null && initial!.trim().isNotEmpty;
     final letter = hasInitial
         ? initial!.trim().characters.first.toUpperCase()
@@ -68,8 +76,8 @@ class FFAvatar extends StatelessWidget {
             border: border ? Border.all(color: ff.onGradient, width: 3) : null,
           ),
           child: ClipOval(
-            child: image != null
-                ? Image(image: image!, fit: BoxFit.cover)
+            child: photo != null
+                ? Image(image: photo, fit: BoxFit.cover)
                 : Center(
                     // No name yet: a person glyph instead of a "?".
                     child: hasInitial

@@ -18,6 +18,7 @@ import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
+import 'package:focusflow/features/auth/presentation/widgets/profile_avatar.dart';
 import 'package:focusflow/features/home/domain/services/home_focus.dart';
 import 'package:focusflow/features/home/presentation/home_tokens.dart';
 import 'package:focusflow/features/home/presentation/providers/home_providers.dart';
@@ -47,7 +48,7 @@ class HomeHeader extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          FFAvatar(
+          ProfileAvatar(
             initial: first.isEmpty ? null : first,
             size: HomeDimens.avatar,
             semanticLabel: first.isEmpty ? 'Profile' : 'Profile, $first',

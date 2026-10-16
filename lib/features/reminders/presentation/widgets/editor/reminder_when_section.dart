@@ -185,7 +185,16 @@ class _ReminderChip extends StatelessWidget {
                   )
                 : null,
           ),
-          child: pill ? text : FittedBox(fit: BoxFit.scaleDown, child: text),
+          // A pill's label sits in a Row so it is centred in the pill's
+          // minimum height on every font (a bare Text would hug the top
+          // whenever the font's line is shorter than the slot).
+          child: pill
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Flexible(child: text)],
+                )
+              : FittedBox(fit: BoxFit.scaleDown, child: text),
         ),
       ),
     );

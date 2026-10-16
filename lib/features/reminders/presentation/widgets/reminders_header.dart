@@ -39,6 +39,7 @@ class RemindersToolbar extends ConsumerWidget {
     final subtitle = ref.watch(remindersSubtitleProvider);
     return FFLargeHeader(
       title: 'Reminders',
+      leading: const FFBackButton(),
       fitTitle: true,
       subtitle: subtitle ?? ' ',
       padding: const EdgeInsetsDirectional.fromSTEB(

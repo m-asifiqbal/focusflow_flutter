@@ -43,6 +43,7 @@ class NotesHeader extends ConsumerWidget {
     final grid = ref.watch(notesViewProvider) == settings.NotesView.grid;
     return FFLargeHeader(
       title: 'Notes',
+      leading: const FFBackButton(),
       padding: _padding,
       subtitle: counts == null
           ? ' '

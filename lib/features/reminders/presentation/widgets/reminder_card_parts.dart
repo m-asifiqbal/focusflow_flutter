@@ -251,10 +251,19 @@ class ReminderActionPill extends StatelessWidget {
               color: bg,
               borderRadius: BorderRadius.circular(AppRadii.tileSm),
             ),
-            child: Text(
-              label,
-              maxLines: 1,
-              style: context.text.reminderPill.copyWith(color: fg),
+            // In a Row so the label is centred in the pill's minimum height.
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: context.text.reminderPill.copyWith(color: fg),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

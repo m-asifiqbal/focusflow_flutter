@@ -44,6 +44,7 @@ class TasksHeader extends ConsumerWidget {
     final board = view == TaskView.board;
     return FFLargeHeader(
       title: 'Tasks',
+      leading: const FFBackButton(),
       fitTitle: true,
       padding: _padding,
       subtitle: TaskLabels.headerSubtitle(
