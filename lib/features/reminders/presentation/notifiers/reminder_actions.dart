@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/notifications/background_delivery.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/utils/clock.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
@@ -123,6 +124,12 @@ final exactAlarmRequestProvider =
       (ref) =>
           () => requestExactAlarmPermission(ref),
     );
+
+/// Lifts battery optimisation (Android; opt-in).
+final backgroundDeliveryRequestProvider = Provider<Future<bool?> Function()>(
+  (ref) =>
+      () => requestUnrestrictedBackground(ref),
+);
 
 /// Asks for full-screen alarms (Android 14+) when alarm-style is chosen.
 final fullScreenAlarmRequestProvider = Provider<Future<bool> Function()>(

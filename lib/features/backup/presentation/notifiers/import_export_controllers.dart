@@ -8,7 +8,10 @@
 /// * [ImportController] runs pick → detect → preview → import with
 ///   progress, then a summary (with the partial-failure list). A
 ///   `.ffbackup` previews as a backup and is restored through
-///   BackupActions (Merge / Replace, PIN when encrypted).
+///   BackupActions (Merge / Replace, PIN when encrypted). Password CSVs
+///   ask to unlock the vault before they are parsed; any read error
+///   (even a TypeError from an odd JSON shape) ends in a clear error
+///   state, never a stuck "Reading file…".
 /// Why: no business logic in widgets; the tab widgets render these states.
 /// The picked file's temporary copy is discarded as soon as it is parsed
 /// (password CSVs are plaintext).
@@ -20,9 +23,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
+import 'package:focusflow/core/sync/backup_key_policy.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
+import 'package:focusflow/core/sync/vault_bridge.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/features/backup/data/export_service.dart';
+import 'package:focusflow/features/backup/data/import_file_source.dart';
 import 'package:focusflow/features/backup/domain/entities/export_options.dart';
 import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/domain/services/importers/import_detector.dart';
@@ -95,9 +101,19 @@ class ExportController extends AutoDisposeNotifier<ExportState> {
         ExportTarget.device => 'to this device',
         ExportTarget.share => '',
       };
-      return 'Exported $n ${n == 1 ? 'item' : 'items'} $where'.trim();
+      final sealed = file.backup == null
+          ? ''
+          : file.isEncrypted
+          ? ' · encrypted'
+          : ' · not encrypted';
+      return 'Exported $n ${n == 1 ? 'item' : 'items'} $where'.trim() + sealed;
     } on VaultExportNeedsKey {
-      return 'Turn on "Encrypt backups" in Backup & Sync to export the vault.';
+      return 'Set a backup PIN in Backup & Sync to export the vault.';
+    } on BackupPinRequired {
+      return '"Encrypt backups" is on: set a backup PIN in Backup & Sync, '
+          'or turn encryption off to export unencrypted.';
+    } on BackupKeyUnavailable catch (e) {
+      return e.message;
     } on DriveFailure catch (f) {
       return f.message;
     } catch (e) {
@@ -121,26 +137,40 @@ class ImportState {
     this.bundle,
     this.archive,
     this.progress = 0,
+    this.total = 0,
     this.result,
     this.error,
     this.summary,
+    this.notice,
   });
 
   final ImportPhase phase;
   final String? fileName;
 
-  /// Parsed items (anything but a .ffbackup).
+  /// Parsed items (anything but a .ffbackup). Holds plaintext logins, so
+  /// it is dropped as soon as the import ends (done / error).
   final ImportBundle? bundle;
 
   /// A picked .ffbackup (restored via BackupActions).
   final BackupArchive? archive;
   final double progress;
+
+  /// Items being imported (kept after [bundle] is dropped).
+  final int total;
   final ImportResult? result;
   final String? error;
 
   /// One-line outcome of a .ffbackup restore.
   final String? summary;
+
+  /// Secondary note after a successful import (e.g. alerts not refreshed).
+  final String? notice;
 }
+
+/// Shown when a file could not be read for an unexpected reason.
+const String kImportUnreadable =
+    "This file couldn't be read. It may be damaged or in a format "
+    'FocusFlow doesn’t support.';
 
 final importControllerProvider =
     NotifierProvider.autoDispose<ImportController, ImportState>(
@@ -156,96 +186,155 @@ class ImportController extends AutoDisposeNotifier<ImportState> {
     return const ImportState();
   }
 
+  void _set(ImportState s) {
+    if (_alive) state = s;
+  }
+
   /// Picks a file and detects its format. False when cancelled.
-  Future<bool> pick() async {
-    final picked = await ref.read(importFileSourceProvider).pick();
-    if (picked == null) return false;
-    state = ImportState(phase: ImportPhase.reading, fileName: picked.name);
+  /// [unlockVault] is asked *before* a password-manager CSV is parsed
+  /// (false → nothing is parsed and the file copy is discarded).
+  /// Never throws: any failure ends in [ImportPhase.error].
+  Future<bool> pick({Future<bool> Function()? unlockVault}) async {
+    final PickedImportFile? picked;
     try {
-      if (ImportDetector.isFfBackup(picked.name, picked.bytes)) {
+      picked = await ref.read(importFileSourceProvider).pick();
+    } on Object catch (e) {
+      AppLogger.w('Import pick failed (${e.runtimeType})');
+      _set(
+        const ImportState(
+          phase: ImportPhase.error,
+          error: "Couldn't open the file picker. Please try again.",
+        ),
+      );
+      return true;
+    }
+    if (picked == null) return false;
+    final name = picked.name;
+    _set(ImportState(phase: ImportPhase.reading, fileName: name));
+    ImportState error(String message) =>
+        ImportState(phase: ImportPhase.error, fileName: name, error: message);
+    try {
+      if (ImportDetector.isFfBackup(name, picked.bytes)) {
         final archive = ref.read(backupEngineProvider).inspect(picked.bytes);
-        state = ImportState(
-          phase: ImportPhase.preview,
-          fileName: picked.name,
-          archive: archive,
+        _set(
+          ImportState(
+            phase: ImportPhase.preview,
+            fileName: name,
+            archive: archive,
+          ),
         );
-      } else {
-        final bundle = ImportDetector.parse(picked.name, picked.bytes);
-        state = bundle.isEmpty
-            ? ImportState(
-                phase: ImportPhase.error,
-                fileName: picked.name,
-                error: 'Nothing to import in this file.',
-              )
+        return true;
+      }
+      if (ImportDetector.isPasswordExport(name, picked.bytes) &&
+          !(await unlockVault?.call() ?? false)) {
+        _set(error('Unlock the vault to import passwords.'));
+        return true;
+      }
+      final bundle = ImportDetector.parse(name, picked.bytes);
+      _set(
+        bundle.isEmpty
+            ? error('Nothing to import in this file.')
             : ImportState(
                 phase: ImportPhase.preview,
-                fileName: picked.name,
+                fileName: name,
                 bundle: bundle,
-              );
-      }
+                total: bundle.itemCount,
+              ),
+      );
     } on ImportFormatException catch (e) {
-      state = ImportState(
-        phase: ImportPhase.error,
-        fileName: picked.name,
-        error: e.message,
-      );
+      _set(error(e.message));
     } on FormatException catch (e) {
-      state = ImportState(
-        phase: ImportPhase.error,
-        fileName: picked.name,
-        error: e.message,
-      );
+      _set(error(e.message));
+    } on Object catch (e) {
+      // TypeError from an unexpected JSON shape, a corrupt zip entry, …
+      AppLogger.w('Import read failed (${e.runtimeType})');
+      _set(error(kImportUnreadable));
     } finally {
       // Parsed into memory: the plaintext temporary copy goes now.
-      await picked.discard();
+      try {
+        await picked.discard();
+      } on Object {
+        // Best effort: the OS clears the cache folder eventually.
+      }
     }
     return true;
   }
 
   /// Writes the previewed bundle (the caller has unlocked the vault when
-  /// it contains logins).
+  /// it contains logins). The import's own outcome is reported first; a
+  /// failing notification re-plan afterwards only adds a [notice].
   Future<void> confirm() async {
     final bundle = state.bundle;
     if (bundle == null || state.phase != ImportPhase.preview) return;
     final name = state.fileName;
-    state = ImportState(
-      phase: ImportPhase.importing,
-      fileName: name,
-      bundle: bundle,
+    final total = bundle.itemCount;
+    _set(
+      ImportState(
+        phase: ImportPhase.importing,
+        fileName: name,
+        bundle: bundle,
+        total: total,
+      ),
     );
+    final ImportResult result;
     try {
-      final result = await ref
+      result = await ref
           .read(importWriterProvider)
           .write(
             bundle,
-            onProgress: (done, total) {
-              if (!_alive) return;
-              state = ImportState(
+            onProgress: (done, total) => _set(
+              ImportState(
                 phase: ImportPhase.importing,
                 fileName: name,
                 bundle: bundle,
+                total: total,
                 progress: total == 0 ? 1 : done / total,
-              );
-            },
+              ),
+            ),
           );
-      if (!_alive) return;
-      state = ImportState(
+    } on VaultUnavailable catch (e) {
+      // The writer throws only before anything was written.
+      _set(
+        ImportState(phase: ImportPhase.error, fileName: name, error: e.message),
+      );
+      return;
+    } on Object catch (e) {
+      AppLogger.w('Import failed (${e.runtimeType})');
+      _set(
+        ImportState(
+          phase: ImportPhase.error,
+          fileName: name,
+          error: 'Import failed. Nothing was changed.',
+        ),
+      );
+      return;
+    }
+    // Done: the parsed plaintext (logins) is dropped from state now.
+    _set(
+      ImportState(
         phase: ImportPhase.done,
         fileName: name,
-        bundle: bundle,
+        total: total,
         progress: 1,
         result: result,
-      );
-      if (bundle.reminders.isNotEmpty || bundle.habits.isNotEmpty) {
-        await ref.read(notificationEngineProvider).onResume();
-      }
-    } catch (e) {
-      AppLogger.w('Import failed (${e.runtimeType})');
-      if (!_alive) return;
-      state = ImportState(
-        phase: ImportPhase.error,
-        fileName: name,
-        error: 'Import failed. Nothing more was changed.',
+      ),
+    );
+    if (bundle.reminders.isEmpty && bundle.habits.isEmpty) return;
+    try {
+      await ref.read(notificationEngineProvider).onResume();
+    } on Object catch (e) {
+      AppLogger.w('Re-plan after import failed (${e.runtimeType})');
+      _set(
+        ImportState(
+          phase: ImportPhase.done,
+          fileName: name,
+          total: total,
+          progress: 1,
+          result: result,
+          notice:
+              "Imported reminders and habits will get their alerts the next "
+              'time FocusFlow opens.',
+        ),
       );
     }
   }

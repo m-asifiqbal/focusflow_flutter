@@ -2,6 +2,7 @@
 /// scheduled, cancelled and the badge; permission is configurable.
 library;
 
+import 'package:focusflow/core/notifications/background_delivery.dart';
 import 'package:focusflow/core/notifications/engine/notification_gateway.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
@@ -102,4 +103,28 @@ class FakeGateway implements NotificationGateway {
 
   @override
   Future<String?> deviceTimeZone() async => zone;
+
+  int retired = 0;
+
+  @override
+  Future<void> retireLegacyChannels() async => retired++;
+}
+
+/// In-memory battery-optimisation state ([BackgroundDelivery]).
+class FakeBackgroundDelivery implements BackgroundDelivery {
+  FakeBackgroundDelivery({this.unrestricted, this.grantOnRequest = true});
+
+  bool? unrestricted;
+  bool grantOnRequest;
+  int requests = 0;
+
+  @override
+  Future<bool?> isUnrestricted() async => unrestricted;
+
+  @override
+  Future<bool?> requestUnrestricted() async {
+    requests++;
+    if (unrestricted != null) unrestricted = grantOnRequest;
+    return unrestricted;
+  }
 }

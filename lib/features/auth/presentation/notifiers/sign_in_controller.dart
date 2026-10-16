@@ -9,9 +9,14 @@
 ///
 /// * Google → CloudAccountController.signInWithGoogle (drive.appdata), then
 ///   — unless the user came for a restore — a quiet look in Drive's
-///   appDataFolder for backups ("Backup found" sheet).
+///   appDataFolder for backups ("Backup found" sheet). When backups from
+///   another device exist (after a reinstall the user's own old ones count
+///   as "another device"), automatic merging is held until the user picks
+///   Restore or Start fresh ([startFresh] records the baseline).
 /// * Apple → profile only (no Drive).
 /// * Offline → optional display name, accountMode = offline.
+/// * With `?intent=restore` every choice ends in the restore picker, and
+///   [restoreFromFile] goes there without an account.
 /// Every success also marks onboarding as seen. Cancelling is silent.
 /// ============================================================
 library;
@@ -23,6 +28,7 @@ import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/drive_backup_file.dart';
 import 'package:focusflow/core/sync/google_account.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
+import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
 enum SignInMethod { google, apple, offline }
@@ -78,21 +84,33 @@ class SignInController extends AutoDisposeNotifier<SignInMethod?> {
         final account = await _cloud.signInWithGoogle();
         if (account == null) return const SignInCancelled();
         await _markSeen();
+        final backups = await _driveBackups();
+        final deviceId = ref.read(deviceIdProvider);
+        if (backups.any((b) => b.deviceId != deviceId)) {
+          // Restore vs Start fresh is the user's call: merge nothing yet.
+          await _holdMerging();
+        }
         if (restoreIntent) return const SignInRestore();
-        final newest = await _newestDriveBackup();
-        return newest == null ? const SignInDone() : SignInBackupFound(newest);
+        if (backups.isEmpty) return const SignInDone();
+        return SignInBackupFound(
+          backups.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b),
+        );
       });
 
-  /// Continue with Apple (profile only).
-  Future<SignInOutcome> apple() => _run(SignInMethod.apple, () async {
-    final account = await _cloud.signInWithApple();
-    if (account == null) return const SignInCancelled();
-    await _markSeen();
-    return const SignInDone(appleNoDrive: true);
-  });
+  /// Continue with Apple (profile only). [restoreIntent] → restore picker
+  /// (local / file backups).
+  Future<SignInOutcome> apple({bool restoreIntent = false}) =>
+      _run(SignInMethod.apple, () async {
+        final account = await _cloud.signInWithApple();
+        if (account == null) return const SignInCancelled();
+        await _markSeen();
+        if (restoreIntent) return const SignInRestore();
+        return const SignInDone(appleNoDrive: true);
+      });
 
-  /// Use offline with an optional display name.
-  Future<SignInOutcome> offline({String? name}) =>
+  /// Use offline with an optional display name. [restoreIntent] →
+  /// restore picker (local / file backups).
+  Future<SignInOutcome> offline({String? name, bool restoreIntent = false}) =>
       _run(SignInMethod.offline, () async {
         final trimmed = name?.trim() ?? '';
         await ref
@@ -104,8 +122,48 @@ class SignInController extends AutoDisposeNotifier<SignInMethod?> {
                 displayName: trimmed.isEmpty ? null : trimmed,
               ),
             );
-        return const SignInDone();
+        return restoreIntent ? const SignInRestore() : const SignInDone();
       });
+
+  /// "Restore from a backup file" (sign-in with `?intent=restore`): no
+  /// account needed — offline unless one is already set — then the
+  /// restore picker ("Choose a backup file…").
+  Future<SignInOutcome> restoreFromFile() =>
+      _run(SignInMethod.offline, () async {
+        await ref
+            .read(settingsProvider.notifier)
+            .update(
+              (s) => s.copyWith(
+                onboardingSeen: true,
+                accountMode: s.accountMode == AccountMode.none
+                    ? AccountMode.offline
+                    : null,
+              ),
+            );
+        return const SignInRestore();
+      });
+
+  /// "Start fresh" on the Backup found sheet: the Drive backups there now
+  /// are not merged automatically (a manual Restore still offers them).
+  /// False when Drive couldn't be reached — merging then stays on hold
+  /// and Backup & Sync asks again.
+  Future<bool> startFresh() async {
+    try {
+      await ref.read(driveSyncProvider).startFresh();
+      return true;
+    } on Object catch (e) {
+      debugPrint('Start fresh not recorded: ${e.runtimeType}');
+      return false;
+    }
+  }
+
+  Future<void> _holdMerging() async {
+    try {
+      await ref.read(driveSyncProvider).holdMergeForDecision();
+    } on Object {
+      // Prefs unavailable: nothing to hold.
+    }
+  }
 
   Future<SignInOutcome> _run(
     SignInMethod method,
@@ -137,16 +195,14 @@ class SignInController extends AutoDisposeNotifier<SignInMethod?> {
       .read(settingsProvider.notifier)
       .update((s) => s.copyWith(onboardingSeen: true));
 
-  /// Newest backup in Drive, or null (none / Drive unreachable — the
+  /// Every backup in Drive (empty when none / Drive unreachable — the
   /// sign-in itself succeeded, so failures here stay quiet).
-  Future<DriveBackupFile?> _newestDriveBackup() async {
+  Future<List<DriveBackupFile>> _driveBackups() async {
     try {
-      final backups = await ref.read(driveSyncProvider).listBackups();
-      if (backups.isEmpty) return null;
-      return backups.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
+      return await ref.read(driveSyncProvider).listBackups();
     } on Object catch (e) {
       debugPrint('Drive backup check skipped: ${e.runtimeType}');
-      return null;
+      return const [];
     }
   }
 }

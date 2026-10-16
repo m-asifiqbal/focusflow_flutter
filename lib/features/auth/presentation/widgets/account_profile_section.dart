@@ -105,21 +105,15 @@ class AccountDevicesSection extends ConsumerWidget {
     WidgetRef ref,
     DeviceEntry device,
   ) async {
-    final ok = await showFFConfirm(
-      context,
-      title: 'Remove ${device.name}?',
-      message:
-          'It stops appearing here. Its backups stay in Drive until you '
-          'delete them; it is linked again when it next syncs.',
-      confirmLabel: 'Remove',
-      destructive: true,
-      icon: FontAwesomeIcons.mobileScreenButton,
-    );
-    if (!ok || !context.mounted) return;
+    final choice = await showRemoveDeviceDialog(context, device.name);
+    if (choice == null || !context.mounted) return;
     try {
       await ref
           .read(accountActionsProvider.notifier)
-          .removeDevice(device.deviceId);
+          .removeDevice(
+            device.deviceId,
+            deleteBackups: choice == RemoveDeviceChoice.alsoDeleteBackups,
+          );
     } on Object {
       if (context.mounted) {
         showUndoSnackbar(
@@ -166,6 +160,39 @@ class AccountDevicesSection extends ConsumerWidget {
     );
   }
 }
+
+/// What "Remove device" should do.
+enum RemoveDeviceChoice { keepBackups, alsoDeleteBackups }
+
+/// "Remove [name]?" — Remove (its backups stay in Drive, still
+/// restorable) or Also delete its backups. Null = cancelled.
+Future<RemoveDeviceChoice?> showRemoveDeviceDialog(
+  BuildContext context,
+  String name,
+) => showFFDialog<RemoveDeviceChoice>(
+  context,
+  builder: (ctx) => FFDialog(
+    icon: FontAwesomeIcons.mobileScreenButton,
+    iconColor: ctx.ff.dangerSolid,
+    iconBackground: ctx.ff.dangerSoft,
+    title: 'Remove $name?',
+    message:
+        'It stops appearing here and is linked again if it syncs. Its '
+        'backups stay in Google Drive, so you can still restore them.',
+    actions: [
+      FFDangerButton(
+        label: 'Remove',
+        onPressed: () => Navigator.of(ctx).pop(RemoveDeviceChoice.keepBackups),
+      ),
+      FFSoftDangerButton(
+        label: 'Also delete its backups',
+        onPressed: () =>
+            Navigator.of(ctx).pop(RemoveDeviceChoice.alsoDeleteBackups),
+      ),
+      FFTextButton(label: 'Cancel', onPressed: () => Navigator.of(ctx).pop()),
+    ],
+  ),
+);
 
 class _DeviceRow extends StatelessWidget {
   const _DeviceRow({

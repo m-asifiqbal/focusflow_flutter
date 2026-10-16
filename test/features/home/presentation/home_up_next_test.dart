@@ -1,6 +1,7 @@
 /// Home › Up Next: the card stays on screen while the minute tick
-/// re-queries "next" (no skeleton flash), Retry re-runs the failed query,
-/// and the "Get started" checklist ticks steps off as items appear.
+/// re-queries "next" (no skeleton flash), Retry re-runs the failed query;
+/// the "Get started" checklist ticks steps off as items exist; "View all"
+/// opens Tasks.
 library;
 
 import 'package:flutter/material.dart';
@@ -89,38 +90,49 @@ void main() {
     expect(find.text('Nothing coming up'), findsOneWidget);
   });
 
-  testWidgets('Get started ticks steps off and leaves when all are done', (
-    tester,
-  ) async {
+  // Data is written before Home is pumped: writing from runAsync while
+  // Home's fake-zone queries hold the DB can deadlock the test.
+  testWidgets('Get started: first run shows three open steps', (tester) async {
     await boot(tester);
     await pumpApp(tester, h, AppRoutes.home, size: const Size(390, 1538));
     expect(find.text('Get started'), findsOneWidget);
     expect(find.text('3 quick steps'), findsOneWidget);
     expect(find.byType(HomeGetStartedCard), findsOneWidget);
+  });
 
+  testWidgets('Get started ticks off a step once its item exists', (
+    tester,
+  ) async {
+    await boot(tester);
     await tester.runAsync(
       () => h.read(notesRepositoryProvider).createEmpty(title: 'First'),
     );
-    await settle(tester);
+    await pumpApp(tester, h, AppRoutes.home, size: const Size(390, 1538));
     expect(find.text('1 of 3 done'), findsOneWidget);
     expect(
-      find.bySemanticsLabel('Write your first note, done'),
+      find.bySemanticsLabel(RegExp(r'^Write your first note, done')),
       findsOneWidget,
     );
-    expect(find.bySemanticsLabel('Add your first task'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'^Add your first task\n')),
+      findsOneWidget,
+    );
+  });
 
-    // Steps 2 and 3, with no task due today: the empty state takes over.
+  testWidgets('Get started leaves once every step is done', (tester) async {
+    await boot(tester);
+    // Note, task (Thu) and reminders/habits exist; nothing is due today.
     await tester.runAsync(() async {
       await seedHomeMockup(h);
       final today = await h
           .read(tasksRepositoryProvider)
           .watchTasksForDay(homeToday)
           .first;
-      for (final t in today) {
-        await h.read(itemsRepositoryProvider).archive([t.ref]);
-      }
+      await h.read(itemsRepositoryProvider).archive([
+        for (final t in today) t.ref,
+      ]);
     });
-    await settle(tester);
+    await pumpApp(tester, h, AppRoutes.home, size: const Size(390, 1538));
     expect(find.byType(HomeGetStartedCard), findsNothing);
     expect(find.text('No tasks today'), findsOneWidget);
   });

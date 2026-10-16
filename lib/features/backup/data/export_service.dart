@@ -10,14 +10,18 @@
 /// Why: one place that enforces "vault only inside an encrypted
 /// .ffbackup": vault rows are dropped from every other format, and a
 /// .ffbackup with vault items refuses to build without a backup key.
+/// A .ffbackup is sealed whenever a backup key exists; with "Encrypt
+/// backups" on and no key it refuses ([BackupPinRequired]) instead of
+/// silently writing plaintext, and a keychain error fails the export
+/// ([BackupKeyUnavailable]). [ExportFile.isEncrypted] tells the truth.
 /// ============================================================
 library;
 
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
+import 'package:focusflow/core/sync/backup_key_policy.dart';
 import 'package:focusflow/core/sync/drive_sync.dart';
 import 'package:focusflow/core/sync/local_backups.dart';
 import 'package:focusflow/core/sync/snapshot.dart';
@@ -40,6 +44,7 @@ class ExportFile {
     required this.mimeType,
     required this.itemCount,
     this.backup,
+    this.isEncrypted = false,
   });
 
   final String name;
@@ -49,6 +54,9 @@ class ExportFile {
 
   /// Set for .ffbackup (Drive upload needs the manifest).
   final BuiltBackup? backup;
+
+  /// Sealed with the backup key (only ever true for a .ffbackup).
+  final bool isEncrypted;
 }
 
 /// Vault items were chosen but no backup key exists to encrypt them.
@@ -62,6 +70,7 @@ class ExportService {
   ExportService({
     required this.engine,
     required this.keys,
+    required this.encryptBackups,
     required this.drive,
     required this.local,
     required this.clock,
@@ -70,7 +79,8 @@ class ExportService {
   }) : _share = share ?? _platformShare;
 
   final BackupEngine engine;
-  final BackupKeyStore keys;
+  final BackupKeyPolicy keys;
+  final bool Function() encryptBackups;
   final DriveSync drive;
   final LocalBackups local;
   final Clock clock;
@@ -89,9 +99,12 @@ class ExportService {
     final filter = _filter(o);
     switch (o.format) {
       case ExportFormat.ffbackup:
-        final key = await keys.current();
-        if (key == null && o.effectiveModules.contains(ExportModule.vault)) {
-          throw const VaultExportNeedsKey();
+        final key = await keys.storedKey();
+        if (key == null) {
+          if (o.effectiveModules.contains(ExportModule.vault)) {
+            throw const VaultExportNeedsKey();
+          }
+          if (encryptBackups()) throw const BackupPinRequired();
         }
         final built = await engine.build(
           key: key,
@@ -104,6 +117,7 @@ class ExportService {
           mimeType: 'application/octet-stream',
           itemCount: built.manifest.itemCount,
           backup: built,
+          isEncrypted: built.manifest.isEncrypted,
         );
       case ExportFormat.json:
         final s = filter(await engine.snapshot());

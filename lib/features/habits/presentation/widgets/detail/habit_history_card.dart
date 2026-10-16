@@ -106,7 +106,8 @@ class HabitHistoryCard extends StatelessWidget {
               ? Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                   child: Text(
-                    'No check-ins yet',
+                    // A quit habit's clean days need no log.
+                    habit.isQuit ? 'No slips logged yet' : 'No check-ins yet',
                     textAlign: TextAlign.center,
                     style: context.text.meta,
                   ),

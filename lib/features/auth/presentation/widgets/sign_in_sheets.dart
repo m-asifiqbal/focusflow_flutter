@@ -6,7 +6,9 @@
 ///   profile. Returns the typed name ('' = skipped) or null when the sheet
 ///   is dismissed (the user changed their mind; stay on Sign in).
 /// * [showBackupFoundSheet] — after Google sign-in finds a Drive backup:
-///   Restore (→ restore picker) or Start fresh. Returns true for Restore.
+///   Restore (→ restore picker) or Start fresh (its backups are not merged
+///   automatically). Returns true for Restore, false for Start fresh, null
+///   when dismissed (undecided: merging stays on hold).
 /// ============================================================
 library;
 
@@ -119,7 +121,8 @@ class _BackupFoundSheet extends StatelessWidget {
         Text(
           'Your Google Drive has a backup$device — $when, '
           '${backup.itemCount == 1 ? '1 item' : '$items items'}. '
-          'Restore it to pick up where you left off, or start fresh.',
+          'Restore it to pick up where you left off, or start fresh — '
+          "the backup stays in Drive and isn't merged unless you restore it.",
           style: text.bodySmall,
         ),
         const SizedBox(height: AppSpacing.xl),

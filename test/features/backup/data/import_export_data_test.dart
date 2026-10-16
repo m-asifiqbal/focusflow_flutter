@@ -43,6 +43,7 @@ void main() {
     secure = MemorySecureStore();
     h = await TestHarness.create(
       now: DateTime(2026, 6, 13, 9, 41),
+      prefs: plaintextBackupPrefs(),
       overrides: [
         vaultBridgeProvider.overrideWithValue(vault),
         secureStoreProvider.overrideWithValue(secure),

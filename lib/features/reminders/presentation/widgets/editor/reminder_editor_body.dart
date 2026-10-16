@@ -2,8 +2,8 @@
 /// REMINDER EDITOR BODY — the scrolling form of screen 13
 /// ============================================================
 ///
-/// What: (notifications-off banner | Android 12+ "Allow exact alarms"
-/// banner) → title card → WHEN (day chips + time
+/// What: (notifications-off banner | reliability banners: exact alarms,
+/// background delivery) → title card → WHEN (day chips + time
 /// wheel) → REPEAT chips → ALERT → LINK TO → Archive / Delete (existing
 /// reminders), spaced like the task editor (same section rhythm).
 /// Why: keeps the screen file to navigation and lifecycle flows.
@@ -22,6 +22,7 @@ import 'package:focusflow/features/reminders/presentation/notifiers/reminder_edi
 import 'package:focusflow/features/reminders/presentation/reminder_flows.dart';
 import 'package:focusflow/features/reminders/presentation/state/reminder_editor_state.dart';
 import 'package:focusflow/features/reminders/presentation/widgets/editor/reminder_alert_card.dart';
+import 'package:focusflow/features/reminders/presentation/widgets/reminder_reliability_banners.dart';
 import 'package:focusflow/features/reminders/presentation/widgets/editor/reminder_time_wheel.dart';
 import 'package:focusflow/features/reminders/presentation/widgets/editor/reminder_title_card.dart';
 import 'package:focusflow/features/reminders/presentation/widgets/editor/reminder_when_section.dart';
@@ -58,11 +59,6 @@ class ReminderEditorBody extends ConsumerWidget {
     final use24h = ref.watch(settingsProvider.select((s) => s.use24HourTime));
     final permission = ref.watch(notificationPermissionProvider).valueOrNull;
     final denied = permission == NotificationPermission.denied;
-    // Only meaningful once notifications themselves are allowed.
-    final inexact =
-        permission == NotificationPermission.granted &&
-        ref.watch(exactAlarmPermissionProvider).valueOrNull ==
-            ExactAlarmPermission.denied;
     final r = state.draft;
     final fullScreenOff =
         r.alertStyle == AlertStyle.alarm &&
@@ -91,16 +87,8 @@ class ReminderEditorBody extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.md),
         ],
-        if (inexact) ...[
-          FFInfoBanner(
-            icon: FontAwesomeIcons.solidClock,
-            colors: ModuleStyle.reminders.colors,
-            text: 'Reminders may be late — allow exact alarms.',
-            actionLabel: 'Allow',
-            onAction: () => allowExactAlarms(ref),
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
+        // Exact alarms / background delivery (Android; nothing on iOS).
+        const ReminderReliabilityBanners(),
         ReminderTitleCard(
           title: r.title,
           note: r.note,

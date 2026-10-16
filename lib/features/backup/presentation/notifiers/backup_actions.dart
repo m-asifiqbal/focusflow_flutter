@@ -4,7 +4,8 @@
 ///
 /// What: back up to the device now, open a backup for preview (Drive or
 /// local), restore it (Merge / Replace, PIN when encrypted), download /
-/// delete history rows, turn on backup encryption, disconnect Google.
+/// delete history rows, turn on backup encryption (or explicitly back up
+/// without it), settle the Restore / Start fresh choice, disconnect.
 /// Why: widgets only call these; every service comes from providers. After
 /// a restore the notification plan is rebuilt (restored reminders/habits
 /// get their alerts back, removed ones lose them).
@@ -64,12 +65,30 @@ class BackupActions {
       await engine.openSnapshot(archive, key: key);
     }
     final result = await engine.restore(archive, mode: mode, key: key);
+    await _noteRestored(archive.manifest, mode);
     try {
       await ref.read(notificationEngineProvider).onResume();
     } on Object catch (e) {
       AppLogger.w('Re-plan after restore failed (${e.runtimeType})');
     }
     return result;
+  }
+
+  /// Sync bookkeeping after a restore: the restored backup counts as
+  /// merged, a pending Restore / Start fresh choice is settled, and after
+  /// Replace earlier merges and "Last sync" no longer describe this
+  /// device's data (the next sync backs the restored state up again).
+  Future<void> _noteRestored(BackupManifest m, RestoreMode mode) async {
+    final replace = mode == RestoreMode.replace;
+    try {
+      await ref.read(driveSyncProvider).noteRestored(m, replace: replace);
+      if (replace) {
+        await ref.read(syncStatusProvider.notifier).forgetLastSync();
+      }
+      ref.invalidate(mergeDecisionPendingProvider);
+    } on Object catch (e) {
+      AppLogger.w('Sync state after restore not saved (${e.runtimeType})');
+    }
   }
 
   /// "Download" a history row → system save dialog. False = cancelled.
@@ -113,12 +132,32 @@ class BackupActions {
     await ref
         .read(settingsProvider.notifier)
         .update((s) => s.copyWith(encryptBackups: true));
-    ref.invalidate(backupKeyExistsProvider);
+    ref.invalidate(backupKeyStateProvider);
   }
 
-  Future<void> setEncrypt(bool on) => ref
-      .read(settingsProvider.notifier)
-      .update((s) => s.copyWith(encryptBackups: on));
+  Future<void> setEncrypt(bool on) async {
+    await ref
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(encryptBackups: on));
+    ref.invalidate(backupKeyStateProvider);
+  }
+
+  /// The explicit "Back up without encryption" choice: turns "Encrypt
+  /// backups" off so backups run (labelled "not encrypted").
+  Future<void> backUpWithoutEncryption() => setEncrypt(false);
+
+  /// "Start fresh": existing Drive backups from other devices are not
+  /// merged automatically (a manual Restore still offers them).
+  Future<void> startFresh() async {
+    await ref.read(driveSyncProvider).startFresh();
+    ref.invalidate(mergeDecisionPendingProvider);
+  }
+
+  /// "Merge them automatically": resume merging other devices' backups.
+  Future<void> resumeMerging() async {
+    await ref.read(driveSyncProvider).resumeMerging();
+    ref.invalidate(mergeDecisionPendingProvider);
+  }
 
   /// "Disconnect Google account" (local data stays).
   Future<void> disconnect() =>

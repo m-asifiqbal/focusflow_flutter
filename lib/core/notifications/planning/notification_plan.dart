@@ -22,38 +22,122 @@ import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
 
-/// Android notification channels (created once at start-up).
+/// Android notification channels (created at start-up).
+///
+/// A channel's importance and sound are fixed once the OS has created it —
+/// later code changes never reach devices that already have it. So ids are
+/// *versioned* (`_v2`): changing a channel's sound / importance means a new
+/// id, and the old ids ([legacyIds]) are deleted once every pending
+/// notification has been re-scheduled onto the new ones.
+///
+/// Reminder tones ([tone] = a `Reminder.sound` key shipped as
+/// `res/raw/<tone>.wav`, see tool/sounds/) get one channel each, shared by
+/// plain and task reminders; any other sound key uses the system default
+/// sound of [reminders] / [tasks].
 enum NotificationChannelId {
-  reminders('reminders', 'Reminders', 'Your reminders at the time you set'),
-  alarms('alarms', 'Alarms', 'Alarm-style reminders shown full screen'),
-  tasks('tasks', 'Tasks', 'Task due and overdue alerts'),
-  habits('habits', 'Habits', "Habit check-ins and streaks at risk"),
+  reminders(
+    'reminders_v2',
+    'Reminders',
+    'Your reminders at the time you set (system sound)',
+  ),
+  chime(
+    'reminders_chime_v2',
+    'Reminders · Chime',
+    'Reminders that use the Chime sound',
+    tone: 'chime',
+  ),
+  bell(
+    'reminders_bell_v2',
+    'Reminders · Bell',
+    'Reminders that use the Bell sound',
+    tone: 'bell',
+  ),
+  gentle(
+    'reminders_gentle_v2',
+    'Reminders · Gentle',
+    'Reminders that use the Gentle sound',
+    tone: 'gentle',
+  ),
+  pulse(
+    'reminders_pulse_v2',
+    'Reminders · Pulse',
+    'Reminders that use the Pulse sound',
+    tone: 'pulse',
+  ),
+  alarms('alarms_v2', 'Alarms', 'Alarm-style reminders shown full screen'),
+  tasks('tasks_v2', 'Tasks', 'Task due and overdue alerts'),
+  habits('habits_v2', 'Habits', "Habit check-ins and streaks at risk"),
 
   /// Reminders whose sound is "Silent" (Android channel sounds are fixed,
   /// so silence needs a channel of its own).
   silentReminders(
-    'reminders_silent',
+    'reminders_silent_v2',
     'Silent reminders',
     'Reminders set to Silent: shown without a sound',
+    playSound: false,
   ),
   digests(
-    'digests',
+    'digests_v2',
     'Daily digest',
     'Morning briefing, evening review and '
         'weekly report',
   ),
   system(
-    'system',
+    'system_v2',
     'Security & sync',
     'Vault security alerts and backup / '
         'sync status',
   );
 
-  const NotificationChannelId(this.id, this.label, this.description);
+  const NotificationChannelId(
+    this.id,
+    this.label,
+    this.description, {
+    this.tone,
+    this.playSound = true,
+  });
 
   final String id;
   final String label;
   final String description;
+
+  /// Bundled sound (`res/raw/<tone>`, iOS `Library/Sounds/<tone>.wav`);
+  /// null = the system default sound.
+  final String? tone;
+  final bool playSound;
+
+  /// Channel ids of earlier versions (deleted by the gateway).
+  static const List<String> legacyIds = [
+    'reminders',
+    'alarms',
+    'tasks',
+    'habits',
+    'reminders_silent',
+    'digests',
+    'system',
+  ];
+
+  /// Sound keys that ship as a file (the tone channels above).
+  static Set<String> get tones => {
+    for (final c in values)
+      if (c.tone != null) c.tone!,
+  };
+
+  /// The channel [n] is posted on: silent → [silentReminders], alarm →
+  /// [alarms], a reminder / task notification with a bundled tone → that
+  /// tone's channel, anything else → its category's channel.
+  static NotificationChannelId forNotification(PlannedNotification n) {
+    if (n.isSilent) return silentReminders;
+    final category = n.category;
+    if (category == NotificationCategory.alarm) return alarms;
+    if (category == NotificationCategory.reminder ||
+        category == NotificationCategory.task) {
+      for (final c in values) {
+        if (c.tone != null && c.tone == n.sound) return c;
+      }
+    }
+    return category.channel;
+  }
 }
 
 enum NotificationCategory {
@@ -216,7 +300,8 @@ class PlannedNotification {
   });
 
   /// The reminder's sound name (`Reminder.sound`: chime, bell, gentle,
-  /// pulse, silent); null = the channel's default sound.
+  /// pulse — bundled tones — or silent; anything else / null = the system
+  /// default sound).
   static const String silentSound = 'silent';
 
   /// Stable positive 31-bit OS id (reminders: `Reminder.notificationId`).
@@ -251,6 +336,13 @@ class PlannedNotification {
   /// Shown without any sound (silent channel / no iOS sound).
   bool get isSilent => sound == silentSound;
 
+  /// The bundled tone to play ([NotificationChannelId.tones]); null = the
+  /// system default sound (or none when [isSilent]).
+  String? get tone =>
+      sound != null && NotificationChannelId.tones.contains(sound)
+      ? sound
+      : null;
+
   InboxKind get inboxKind => category.inboxKind;
 
   /// Changes whenever the OS copy must be replaced (time, text, actions,
@@ -266,6 +358,8 @@ class PlannedNotification {
       buttons.map((b) => b.id).join(','),
       badge ?? -1,
       sound ?? '',
+      // The channel is part of the OS copy (channels are versioned).
+      NotificationChannelId.forNotification(this).id,
     ].join('\u0001');
     return fnv1a32(s).toRadixString(16);
   }

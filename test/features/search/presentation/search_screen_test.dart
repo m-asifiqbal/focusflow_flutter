@@ -1,17 +1,25 @@
 /// Screen 06 — Global search: mockup state ("design", 14 matches) in light
 /// and dark, debounced typing, module chips, recent searches, filters,
-/// no-results copy, opening a result, and no overflow at 360 pt / 1.3.
+/// no-results copy, opening a result, recent searches in the secure store
+/// (migrated from settings; vault opens never recorded), pinned
+/// suggestions, and no overflow at 360 pt / 1.3.
 library;
+
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/router/app_router.dart';
+import 'package:focusflow/features/search/data/datasource/recent_searches_store.dart';
 import 'package:focusflow/features/search/domain/entities/search_hit.dart';
 import 'package:focusflow/features/search/presentation/widgets/search_result_row.dart';
+import 'package:focusflow/shared/providers/core_providers.dart';
+import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
+import '../../../core/sync/drive_fakes.dart' show MemorySecureStore;
 import '../../../helpers/screen_harness.dart';
 import '../../../helpers/test_container.dart';
 import '../search_seed.dart';
@@ -21,12 +29,33 @@ const _mockup = Size(390, 874);
 
 void main() {
   late TestHarness h;
+  late MemorySecureStore secure;
+  late SearchSeed data;
+
+  /// What the secure store holds (newest first).
+  List<String> stored() {
+    final raw = secure.values[RecentSearchesStore.storageKey];
+    return raw == null ? const [] : List<String>.from(jsonDecode(raw) as List);
+  }
+
+  String location() => h
+      .read(routerProvider)
+      .routerDelegate
+      .currentConfiguration
+      .last
+      .matchedLocation;
 
   Future<void> setUp(WidgetTester tester, {bool seed = true}) async {
     await loadAppFonts();
-    h = (await tester.runAsync(() => TestHarness.create(now: searchNow)))!;
+    secure = MemorySecureStore();
+    h = (await tester.runAsync(
+      () => TestHarness.create(
+        now: searchNow,
+        overrides: [secureStoreProvider.overrideWithValue(secure)],
+      ),
+    ))!;
     addTearDown(() => tester.runAsync(h.dispose));
-    if (seed) await tester.runAsync(() => seedSearchMockup(h));
+    if (seed) data = (await tester.runAsync(() => seedSearchMockup(h)))!;
     await tester.runAsync(
       () => h.updateSettings(
         (s) => s.copyWith(
@@ -93,6 +122,7 @@ void main() {
     await tester.tap(find.text('Clear'));
     await settle(tester);
     expect(h.read(settingsProvider).recentSearches, isEmpty);
+    expect(stored(), isEmpty);
     expect(find.text('groceries'), findsNothing);
   });
 
@@ -116,14 +146,48 @@ void main() {
     await pumpApp(tester, h, q('mobile'), size: _mockup);
     await tester.tap(find.byType(SearchResultRow).first);
     await settle(tester);
-    expect(h.read(settingsProvider).recentSearches.first, 'mobile');
-    final location = h
-        .read(routerProvider)
-        .routerDelegate
-        .currentConfiguration
-        .last
-        .matchedLocation;
-    expect(location, startsWith('/notes/'));
+    // Stored in the secure store — not in plaintext settings.
+    expect(stored().first, 'mobile');
+    expect(h.read(settingsProvider).recentSearches, isEmpty);
+    expect(location(), startsWith('/notes/'));
+  });
+
+  testWidgets('settings recent searches migrate to the secure store', (
+    tester,
+  ) async {
+    await setUp(tester);
+    await pumpApp(tester, h, AppRoutes.search, size: _mockup);
+    expect(find.text('netflix'), findsOneWidget);
+    expect(stored(), ['groceries', 'Q3 strategy', 'netflix', '#finance']);
+    expect(h.read(settingsProvider).recentSearches, isEmpty);
+  });
+
+  testWidgets('opening a vault result does not record the query', (
+    tester,
+  ) async {
+    await setUp(tester);
+    await pumpApp(tester, h, q('figma'), size: _mockup);
+    await tester.tap(find.text('Vault · unlock to view'));
+    await settle(tester);
+    expect(stored(), isNot(contains('figma')));
+    expect(location(), AppRoutes.search);
+  });
+
+  testWidgets('pinned items are suggested before typing', (tester) async {
+    await setUp(tester);
+    await tester.runAsync(
+      () => h.read(itemsRepositoryProvider).setPinned([
+        ItemRef(ItemType.note, data.note),
+        ItemRef(ItemType.vault, data.vault),
+      ], true),
+    );
+    await pumpApp(tester, h, AppRoutes.search, size: _mockup);
+    expect(find.text('PINNED'), findsOneWidget);
+    expect(find.text('Mobile App Design Trends'), findsOneWidget);
+    expect(find.text('Figma — design account'), findsNothing);
+    await tester.tap(find.text('Mobile App Design Trends'));
+    await settle(tester);
+    expect(location(), '/notes/${data.note}');
   });
 
   testWidgets('no overflow at 360 pt and text scale 1.3', (tester) async {

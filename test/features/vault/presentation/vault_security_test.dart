@@ -189,6 +189,14 @@ void main() {
     );
     await settle(tester);
     await tester.tap(find.byType(FFSwitch).first);
+    await settle(tester);
+    // Re-auth first (as in Settings): nothing changes until the PIN.
+    expect(find.text("Confirm it's you"), findsOneWidget);
+    expect(b.h.read(settingsProvider).breachMonitoring, isFalse);
+    for (final d in '123456'.split('')) {
+      await tester.tap(find.bySemanticsLabel(d).last);
+      await tester.pump();
+    }
     for (var i = 0; i < 5; i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 50)),

@@ -115,6 +115,9 @@ flutter:
     - assets/images/
     - assets/wordlists/
     - assets/licenses/
+    # Reminder tones (tool/sounds/generate_sounds.py); iOS copies them to
+    # Library/Sounds at start-up (Android uses res/raw copies).
+    - assets/sounds/
 
   # Bundled (offline-first): no runtime font downloads.
   fonts:

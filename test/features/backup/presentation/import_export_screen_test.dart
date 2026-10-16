@@ -19,6 +19,7 @@ import 'package:focusflow/features/backup/presentation/providers/backup_provider
 import 'package:focusflow/features/backup/presentation/screens/import_export_screen.dart';
 import 'package:focusflow/features/tasks/domain/repository/tasks_repository.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
 import '../../../helpers/screen_harness.dart';
@@ -94,7 +95,8 @@ void main() {
         exportServiceProvider.overrideWith(
           (ref) => ExportService(
             engine: ref.watch(backupEngineProvider),
-            keys: ref.watch(backupKeyStoreProvider),
+            keys: ref.watch(backupKeyPolicyProvider),
+            encryptBackups: () => ref.read(settingsProvider).encryptBackups,
             drive: ref.watch(driveSyncProvider),
             local: ref.watch(localBackupsProvider),
             clock: ref.watch(clockProvider),

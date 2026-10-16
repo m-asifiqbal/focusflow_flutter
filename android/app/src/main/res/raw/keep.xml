@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resource shrinking keeps these: they are only referenced by name from
+     Dart (flutter_local_notifications), so R8 would otherwise drop them and
+     notifications would silently lose their sound / icon. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/chime,@raw/bell,@raw/gentle,@raw/pulse,@mipmap/ic_launcher" />

@@ -13,6 +13,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/library_counts.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
+import 'package:focusflow/core/sync/backup_key_policy.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
@@ -24,7 +25,10 @@ import 'package:focusflow/features/backup/data/import_writer.dart';
 import 'package:focusflow/features/backup/domain/entities/backup_record.dart';
 import 'package:focusflow/features/backup/domain/entities/export_options.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
+import 'package:focusflow/features/vault/domain/services/vault_payload_codec.dart';
+import 'package:focusflow/features/vault/presentation/notifiers/vault_session_controller.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 
 /// HISTORY rows (this device's Drive + local backups), newest first.
 final backupHistoryProvider = StreamProvider.autoDispose<List<BackupRecord>>(
@@ -59,9 +63,23 @@ final driveUsageProvider = FutureProvider.autoDispose<DriveUsage?>((ref) async {
   }
 });
 
-/// Whether a backup key exists (Encrypt backups row subtitle).
+/// What the keychain holds for "Encrypt backups" (present / absent /
+/// unreadable) — drives the Encrypt row and the "set a backup PIN" banner.
+final backupKeyStateProvider = FutureProvider.autoDispose<BackupKeyState>(
+  (ref) => ref.watch(backupKeyPolicyProvider).state(),
+);
+
+/// Sign-in found Drive backups and the user hasn't chosen Restore or Start
+/// fresh yet (merging waits; Backup & Sync shows a banner).
+final mergeDecisionPendingProvider = Provider.autoDispose<bool>((ref) {
+  ref.watch(syncStatusProvider.select((s) => s.phase));
+  return ref.read(driveSyncProvider).state.decisionPending;
+});
+
+/// Whether a usable backup key exists (Encrypt backups row subtitle).
 final backupKeyExistsProvider = FutureProvider.autoDispose<bool>(
-  (ref) => ref.watch(backupKeyStoreProvider).hasKey(),
+  (ref) async =>
+      await ref.watch(backupKeyStateProvider.future) == BackupKeyState.present,
 );
 
 /// Where a restore candidate lives.
@@ -150,7 +168,8 @@ final restoreCandidatesProvider = FutureProvider.autoDispose<RestoreCandidates>(
 final exportServiceProvider = Provider<ExportService>(
   (ref) => ExportService(
     engine: ref.watch(backupEngineProvider),
-    keys: ref.watch(backupKeyStoreProvider),
+    keys: ref.watch(backupKeyPolicyProvider),
+    encryptBackups: () => ref.read(settingsProvider).encryptBackups,
     drive: ref.watch(driveSyncProvider),
     local: ref.watch(localBackupsProvider),
     clock: ref.watch(clockProvider),
@@ -177,6 +196,18 @@ final importWriterProvider = Provider<ImportWriter>((ref) {
     habits: ref.watch(habitsRepositoryProvider),
     items: ref.watch(itemsRepositoryProvider),
     vault: ref.watch(vaultBridgeProvider),
+    vaultLogin: (id, blob) async {
+      // Only while the vault is unlocked (password import requires it);
+      // anything unreadable is "unknown", never a duplicate.
+      final key = ref.read(vaultSessionProvider).key;
+      if (key == null || key.isDestroyed) return null;
+      try {
+        final p = await VaultPayloadCodec.open(key, blob, itemId: id);
+        return (username: p.username, url: p.url);
+      } on Object {
+        return null;
+      }
+    },
     clock: ref.watch(clockProvider),
   );
 });

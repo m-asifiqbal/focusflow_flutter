@@ -5,7 +5,21 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Reminders, task due alerts, habit nudges. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Exact reminder times. Android 13+ (API 33): USE_EXACT_ALARM is
+         granted at install for apps whose core function is reminders /
+         alarms (Play policy: declare "reminders" as the use case in the
+         Play Console's exact-alarm declaration). SCHEDULE_EXACT_ALARM is
+         only needed up to Android 12L (granted by default there); on
+         Android 14 it would be denied by default for new installs and the
+         alarms would fall back to inexact delivery (late by hours in Doze).
+         See docs/notifications.md. -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+    <!-- Opt-in "Allow reminders in the background" (battery optimisation
+         exemption; asked only when the user taps Allow). -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />

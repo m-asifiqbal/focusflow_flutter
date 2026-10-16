@@ -55,6 +55,23 @@ String backupSignature(AppSettings s, CloudAccount? account) {
   ].join('|');
 }
 
+/// The backup settings and the *loaded* account. The stored account is
+/// read from the keychain after launch; computing the job signature
+/// before that finished saw "no account", re-registered the job with
+/// `replace` and reset Android's periodic timer on every launch.
+@visibleForTesting
+Future<(AppSettings, CloudAccount?)> scheduleInputs(
+  ProviderReader read, {
+  Duration wait = const Duration(seconds: 10),
+}) async {
+  try {
+    await read(cloudAccountProvider.notifier).loaded.timeout(wait);
+  } on TimeoutException {
+    // A stuck keychain must not block scheduling forever.
+  }
+  return (read(settingsProvider), read(cloudAccountProvider));
+}
+
 class WorkmanagerBackgroundTasks implements BackgroundTasks {
   WorkmanagerBackgroundTasks(this._ref);
 
@@ -92,8 +109,7 @@ class WorkmanagerBackgroundTasks implements BackgroundTasks {
   );
 
   Future<void> _scheduleBackup() async {
-    final s = _ref.read(settingsProvider);
-    final account = _ref.read(cloudAccountProvider);
+    final (s, account) = await scheduleInputs(_ref.read);
     final prefs = _ref.read(sharedPreferencesProvider);
     final drive = s.autoBackupDrive && (account?.hasDrive ?? false);
     final local = s.localBackupFrequency != LocalBackupFrequency.off;

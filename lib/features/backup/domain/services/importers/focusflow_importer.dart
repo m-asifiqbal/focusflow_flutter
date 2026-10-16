@@ -38,8 +38,10 @@ abstract final class FocusFlowImporter {
       );
     }
     final m = json as Map;
+    // Defensive: a hand-edited file may hold anything where a list of
+    // objects belongs — non-objects are skipped, never a crash.
     List<Map> list(String k) => [
-      for (final e in (m[k] as List? ?? const [])) e as Map,
+      if (m[k] case final List l) ...l.whereType<Map>(),
     ];
     return ImportBundle(
       source: ImportSource.focusflowJson,
@@ -79,8 +81,8 @@ abstract final class FocusFlowImporter {
       completedAt: ImportParsing.dateTime(r['completed']),
       subtasks: subs is List
           ? [
-              for (final s in subs)
-                (title: '${(s as Map)['title']}', done: s['done'] == true),
+              for (final s in subs.whereType<Map>())
+                (title: '${s['title'] ?? ''}', done: s['done'] == true),
             ]
           : _subtaskLines('${subs ?? ''}'),
       tags: ImportParsing.tags(r['tags']),
@@ -102,9 +104,9 @@ abstract final class FocusFlowImporter {
     final logs = <String, int>{};
     final raw = r['logs'];
     if (raw is List) {
-      for (final l in raw) {
-        final m = l as Map;
-        final n = (m['count'] as num?)?.toInt() ?? 0;
+      for (final m in raw.whereType<Map>()) {
+        final c = m['count'];
+        final n = c is num ? c.toInt() : int.tryParse('${c ?? ''}') ?? 0;
         if (m['skipped'] != true && n > 0) logs['${m['date']}'] = n;
       }
     } else {

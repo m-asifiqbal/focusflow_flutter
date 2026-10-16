@@ -3,7 +3,8 @@
 /// ============================================================
 ///
 /// What: Auto backup to Drive, Frequency (Daily · 9:00 PM), Wi-Fi only,
-/// Encrypt backups (sets the backup PIN the first time), Keep last N;
+/// Encrypt backups (sets the backup PIN — separate from the vault PIN —
+/// the first time), Keep last N;
 /// Back up to device now, Backup location, Auto local backup.
 /// Why: every row writes [settingsProvider]; BackgroundTasks reschedules
 /// itself on settings changes, so nothing else needs to be told.
@@ -14,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
+import 'package:focusflow/core/sync/backup_key_policy.dart';
 import 'package:focusflow/core/sync/local_backups.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
@@ -22,6 +24,7 @@ import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/backup/presentation/backup_style.dart';
 import 'package:focusflow/features/backup/presentation/notifiers/backup_actions.dart';
 import 'package:focusflow/features/backup/presentation/providers/backup_providers.dart';
+import 'package:focusflow/features/backup/presentation/widgets/backup_prompts.dart';
 import 'package:focusflow/features/backup/presentation/widgets/restore_sheets.dart';
 import 'package:focusflow/features/settings/presentation/widgets/notifications/notification_pickers.dart';
 import 'package:focusflow/features/settings/presentation/widgets/settings_option_sheet.dart';
@@ -92,13 +95,21 @@ class AutomaticBackupSection extends ConsumerWidget {
     final pin = await showBackupPinSheet(
       context,
       title: 'Set a backup PIN',
-      message:
-          'Backups are encrypted with this PIN. Use the same PIN on your '
-          'other devices — without it a backup cannot be opened.',
+      message: kBackupPinMessage,
       confirm: true,
     );
     if (pin == null) return;
-    await actions.enableEncryption(pin);
+    try {
+      await actions.enableEncryption(pin);
+    } on Object {
+      if (context.mounted) {
+        showFFToast(
+          context,
+          "Couldn't save the backup PIN on this device. Try again.",
+          icon: FontAwesomeIcons.triangleExclamation,
+        );
+      }
+    }
   }
 
   @override
@@ -139,7 +150,9 @@ class AutomaticBackupSection extends ConsumerWidget {
           leading: _tile(FontAwesomeIcons.lock, BackupTints.encrypt),
           title: 'Encrypt backups',
           subtitle: encrypted
-              ? 'Protected with your master PIN'
+              ? 'Protected with your backup PIN'
+              : s.encryptBackups
+              ? 'Set a backup PIN to keep backing up'
               : 'Backups can be opened without a PIN',
           value: encrypted,
           onChanged: (v) => _encrypt(context, ref, v),
@@ -167,14 +180,37 @@ class _LocalBackupSectionState extends ConsumerState<LocalBackupSection> {
 
   Future<void> _backUpNow() async {
     if (_busy) return;
+    // First backup with "Encrypt backups" on and no PIN: ask, never write
+    // plaintext silently.
+    if (await backupEncryptionUnresolved(ref)) {
+      if (!mounted || !await resolveBackupEncryption(context, ref)) return;
+    }
+    if (!mounted) return;
     setState(() => _busy = true);
     try {
       final r = await ref.read(backupActionsProvider).backUpToDevice();
       if (mounted) {
         showFFToast(
           context,
-          'Backed up ${r.itemCount} items · ${BackupLabels.size(r.sizeBytes)}',
+          'Backed up ${r.itemCount} items · ${BackupLabels.size(r.sizeBytes)}'
+          '${r.isEncrypted ? ' · encrypted' : ' · not encrypted'}',
           icon: FontAwesomeIcons.check,
+        );
+      }
+    } on BackupKeyUnavailable catch (e) {
+      if (mounted) {
+        showFFToast(
+          context,
+          e.message,
+          icon: FontAwesomeIcons.triangleExclamation,
+        );
+      }
+    } on BackupPinRequired catch (e) {
+      if (mounted) {
+        showFFToast(
+          context,
+          e.message,
+          icon: FontAwesomeIcons.triangleExclamation,
         );
       }
     } on Object {

@@ -20,6 +20,7 @@ void main() {
   Future<TestHarness> harness({bool signedIn = true}) async {
     final h = await TestHarness.create(
       now: syncNow,
+      prefs: plaintextBackupPrefs(),
       overrides: driveOverrides(
         drive: signedIn ? store : null,
         files: tempFiles(addTearDown),

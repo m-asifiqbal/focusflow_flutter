@@ -8,6 +8,9 @@
 /// / "Download" hands any backup to the system save dialog (file_picker:
 /// SAF on Android, document picker on iOS). The auto local backup runs
 /// daily/weekly from the background job and on launch when overdue.
+/// Encryption follows BackupKeyPolicy: "Encrypt backups" on without a
+/// backup PIN throws BackupPinRequired (Backup & Sync shows a banner)
+/// instead of writing plaintext; a keychain error fails the backup.
 /// ============================================================
 library;
 
@@ -55,7 +58,8 @@ class LocalBackups {
   static const String folder = 'FocusFlow';
 
   /// Builds a backup into [folder] and records it. Old local backups past
-  /// "Keep last N" are deleted (file + record).
+  /// "Keep last N" are deleted (file + record). Throws BackupPinRequired /
+  /// BackupKeyUnavailable before anything is written.
   Future<BackupRecord> backupNow({bool isAuto = false}) async {
     final key = await keys.forBackup(encrypt: encryptBackups());
     final built = await engine.build(key: key, isAuto: isAuto);

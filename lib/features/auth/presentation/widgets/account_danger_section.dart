@@ -7,7 +7,8 @@
 ///   exists); wipes this device and returns to onboarding. Drive backups
 ///   are kept.
 /// * Delete account & Drive data (rose, signed-in only) — same
-///   confirmation; deletes the app's Drive folder first, then erases.
+///   confirmation; deletes the app's Drive folder first, then erases. A
+///   part-way stop reports exactly what was deleted / erased.
 /// The busy row shows a spinner; other rows are disabled meanwhile.
 /// ============================================================
 library;
@@ -102,16 +103,12 @@ class AccountDangerSection extends ConsumerWidget {
         await actions.eraseLocalData();
       }
       router.go(AppRoutes.onboarding);
+    } on AccountActionFailure catch (e) {
+      // Says exactly what was and wasn't done (partial Drive delete, …).
+      if (context.mounted) _toast(context, e.message, error: true);
     } on Object {
       if (context.mounted) {
-        _toast(
-          context,
-          deleteAccount
-              ? "Couldn't reach Google Drive — nothing was deleted. Try "
-                    'again when online.'
-              : "Couldn't erase everything. Try again.",
-          error: true,
-        );
+        _toast(context, "Couldn't erase everything. Try again.", error: true);
       }
     }
   }

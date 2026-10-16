@@ -111,4 +111,9 @@ abstract class NotificationGateway {
 
   /// IANA name of the device zone (null when unknown).
   Future<String?> deviceTimeZone();
+
+  /// Deletes Android channels of earlier versions. Called by the engine
+  /// after a pass has moved every pending notification onto the current
+  /// channels (a notification on a deleted channel is never shown).
+  Future<void> retireLegacyChannels();
 }

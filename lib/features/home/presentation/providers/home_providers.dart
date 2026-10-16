@@ -27,11 +27,11 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:focusflow/core/items/library_counts.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/presentation/providers/habits_providers.dart';
 import 'package:focusflow/features/home/domain/services/home_focus.dart';
+import 'package:focusflow/features/library/presentation/providers/library_providers.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
 import 'package:focusflow/features/notes/domain/repository/notes_repository.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
@@ -204,21 +204,18 @@ final homeDisplayNameProvider = Provider.autoDispose<String>((ref) {
   return ref.watch(cloudAccountProvider)?.displayName?.trim() ?? '';
 });
 
-/// Live library totals (every module, archive and trash).
-final _libraryCountsProvider = StreamProvider.autoDispose<LibraryCounts>(
-  (ref) => ref.watch(itemsRepositoryProvider).watchLibraryCounts(),
-);
-
 /// Progress of the 3-step "Get started" checklist (null while loading).
+/// Built on the Library hub's live totals (one shared counts stream, safe
+/// to tear down in widget tests — see `libraryCountsProvider`).
 final homeGetStartedProvider = Provider.autoDispose<HomeGetStarted?>((ref) {
-  final c = ref.watch(_libraryCountsProvider).valueOrNull;
+  final c = ref.watch(libraryCountsProvider).valueOrNull;
   return c == null ? null : HomeGetStarted.of(c);
 });
 
 /// True while the library is completely empty — no note, task, reminder,
 /// habit or vault item, not even archived or in Recently Deleted.
 final homeFirstRunProvider = Provider.autoDispose<bool>((ref) {
-  final c = ref.watch(_libraryCountsProvider).valueOrNull;
+  final c = ref.watch(libraryCountsProvider).valueOrNull;
   if (c == null) return false;
   return c.notesTotal +
           c.tasksTotal +

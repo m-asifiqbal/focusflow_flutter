@@ -10,8 +10,14 @@
 ///   backup key, every item / file, settings (back to onboarding). Drive
 ///   backups are kept, so signing in again can restore them.
 /// * Delete account & Drive data — deletes everything FocusFlow stored in
-///   Drive's appDataFolder FIRST (fails without touching local data when
-///   Drive is unreachable), then erases locally and revokes the grant.
+///   Drive's appDataFolder FIRST (local data is untouched unless every
+///   Drive file went), then erases locally and revokes the grant. Failures
+///   are [AccountActionFailure]s that say exactly what happened ("Deleted
+///   3 of 5 files… local data was not erased"); running it again resumes.
+/// * Remove device — forgets it from the account's device list; its Drive
+///   backups stay unless the user also chose to delete them.
+/// Sign-out and erase also forget the Drive sync bookkeeping (merged
+/// backups, last sync time).
 /// ============================================================
 library;
 
@@ -21,6 +27,7 @@ import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
+import 'package:focusflow/core/sync/cloud_account_controller.dart';
 import 'package:focusflow/core/sync/local_data_eraser.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
@@ -29,6 +36,17 @@ import 'package:focusflow/features/vault/presentation/notifiers/vault_session_co
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
 enum AccountAction { signOut, erase, deleteAccount, removeDevice, photo }
+
+/// A danger-zone action stopped part-way; [message] says exactly what
+/// was and wasn't done (shown verbatim).
+class AccountActionFailure implements Exception {
+  const AccountActionFailure(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'AccountActionFailure: $message';
+}
 
 class AccountActionsController extends AutoDisposeNotifier<AccountAction?> {
   @override
@@ -82,24 +100,50 @@ class AccountActionsController extends AutoDisposeNotifier<AccountAction?> {
     () => ref.read(cloudAccountControllerProvider).signOut(),
   );
 
-  /// Unlinks another device from the Drive manifest.
-  Future<void> removeDevice(String deviceId) =>
+  /// Unlinks another device from the Drive device list. Its backups stay
+  /// in Drive (restorable) unless [deleteBackups].
+  Future<void> removeDevice(String deviceId, {bool deleteBackups = false}) =>
       _run(AccountAction.removeDevice, () async {
-        await ref.read(driveSyncProvider).removeDevice(deviceId);
+        await ref
+            .read(driveSyncProvider)
+            .removeDevice(deviceId, deleteBackups: deleteBackups);
         ref.invalidate(linkedDevicesProvider);
       });
 
   Future<void> eraseLocalData() =>
       _run(AccountAction.erase, () => _eraseEverything(revoke: false));
 
-  /// Throws (DriveFailure, …) before any local change if Drive fails.
+  /// Throws [AccountActionFailure] with exactly what happened when it
+  /// stops part-way; local data is only erased once Drive is empty.
   Future<void> deleteAccountAndDriveData() =>
       _run(AccountAction.deleteAccount, () async {
         final account = ref.read(cloudAccountProvider);
+        var driveFiles = 0;
         if (account?.hasDrive ?? false) {
-          await ref.read(driveSyncProvider).deleteAllCloudData();
+          try {
+            driveFiles = await ref.read(driveSyncProvider).deleteAllCloudData();
+          } on CloudDeleteIncomplete catch (e) {
+            throw AccountActionFailure(
+              'Deleted ${e.deleted} of ${e.total} files from Google Drive; '
+              '${e.remaining} could not be deleted. Your local data was not '
+              'erased. Try again to finish.',
+            );
+          } on Object {
+            throw const AccountActionFailure(
+              "Couldn't reach Google Drive — nothing was deleted and your "
+              'local data was not erased. Try again when online.',
+            );
+          }
         }
-        await _eraseEverything(revoke: true);
+        try {
+          await _eraseEverything(revoke: true);
+        } on Object {
+          throw AccountActionFailure(
+            '${driveFiles == 1 ? '1 file was' : '$driveFiles files were'} '
+            'deleted from Google Drive, but erasing this device did not '
+            'finish. Try again to finish.',
+          );
+        }
       });
 
   Future<void> _eraseEverything({required bool revoke}) async {
@@ -109,6 +153,7 @@ class AccountActionsController extends AutoDisposeNotifier<AccountAction?> {
       debugPrint('Vault wipe during erase failed: ${e.runtimeType}');
     }
     await ref.read(localDataEraserProvider).eraseAll();
+    await forgetSyncState(ref);
     try {
       await ref.read(backupKeyStoreProvider).disable();
     } on Object {

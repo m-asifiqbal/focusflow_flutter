@@ -18,6 +18,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/utils/recurrence.dart';
@@ -162,7 +163,8 @@ class ReminderEditorController
   /// the form is invalid / already saving. A one-time reminder whose time
   /// has passed is saved for its next occurrence
   /// ([ReminderEditorState.pastTimeRollsTo]). The first save asks for
-  /// notification permission (and exact alarms on Android 12+).
+  /// notification permission (and exact alarms on Android 12+), and the
+  /// OS schedule is updated before this returns ([flushNotifications]).
   Future<String?> save() async {
     final s = _form;
     if (s == null || !s.canSave) return null;
@@ -172,9 +174,13 @@ class ReminderEditorController
       // A one-time time that has passed moves to its next occurrence
       // (the editor shows the hint; the screen confirms with a toast).
       final now = ref.read(clockProvider).now();
-      return await ref
+      final id = await ref
           .read(remindersRepositoryProvider)
           .save(s.toReminder(now: now));
+      // Hand it to the OS before the editor closes: the user may close the
+      // app right away, and the OS delivers it with the app closed.
+      await flushNotifications(ref);
+      return id;
     } finally {
       final now = _form;
       if (now != null) state = AsyncData(now.copyWith(saving: false));

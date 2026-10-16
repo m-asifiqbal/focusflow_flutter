@@ -28,13 +28,21 @@
 /// zone (TaskReminderZones.align, at the start of every pass) before planning.
 ///
 /// Passes never overlap: a change during a pass schedules one more pass.
+///
+/// Edits reach the OS without waiting for the debounce when it matters:
+/// editors await [flush] after saving (see `flushNotifications`), and the
+/// engine flushes when the app goes to the background (paused / hidden /
+/// detached) — a reminder saved right before the app is swiped away is
+/// still handed to the OS, which delivers it with the app closed.
 /// ============================================================
 library;
 
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/notifications/background_delivery.dart';
 import 'package:focusflow/core/notifications/engine/notification_actions.dart';
 import 'package:focusflow/core/notifications/engine/notification_gateway.dart';
 import 'package:focusflow/core/notifications/engine/notification_reconciler.dart';
@@ -85,6 +93,9 @@ class ReconcilingNotificationEngine implements NotificationEngine {
   /// Result of the last pass (tests, diagnostics).
   ReconcileResult? lastResult;
 
+  _BackgroundFlush? _lifecycle;
+  bool _legacyRetired = false;
+
   NotificationGateway get _gateway => _ref.read(notificationGatewayProvider);
 
   @override
@@ -107,6 +118,7 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       () => unawaited(_refreshFromOtherIsolate()),
     );
     _watchRepositories();
+    _observeLifecycle();
     _listeners
       ..add(
         _ref.listen<AppSettings>(settingsProvider, (prev, next) {
@@ -127,7 +139,8 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     if (!_started || !_supported || _disposed) return;
     _ref
       ..invalidate(exactAlarmPermissionProvider)
-      ..invalidate(fullScreenAlarmsAllowedProvider);
+      ..invalidate(fullScreenAlarmsAllowedProvider)
+      ..invalidate(unrestrictedBackgroundProvider);
     await _refreshFromOtherIsolate();
   }
 
@@ -149,6 +162,35 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     await _resolveZone();
     _ref.invalidate(notificationPermissionProvider);
     await reconcileNow();
+  }
+
+  /// Runs a pass that includes every write made before this call (skips
+  /// the debounce; waits for a running pass first, since that one may have
+  /// read the database before the write). Bounded by [timeout] so a caller
+  /// (an editor closing) never hangs.
+  Future<void> flush({Duration timeout = const Duration(seconds: 4)}) async {
+    if (!_started || !_supported || _disposed) return;
+    Future<void> run() async {
+      final running = _pass;
+      if (running != null) await running;
+      await reconcileNow();
+    }
+
+    try {
+      await run().timeout(timeout);
+    } on TimeoutException {
+      AppLogger.w('Notification flush timed out');
+    }
+  }
+
+  void _observeLifecycle() {
+    try {
+      final observer = _BackgroundFlush(() => unawaited(flush()));
+      WidgetsBinding.instance.addObserver(observer);
+      _lifecycle = observer;
+    } catch (_) {
+      // No binding (plain unit tests): nothing to observe.
+    }
   }
 
   /// Requests a pass after the debounce period.
@@ -204,6 +246,11 @@ class ReconcilingNotificationEngine implements NotificationEngine {
             location: _location,
           );
       lastResult = result;
+      if (!_legacyRetired) {
+        // Every pending request now uses the current channels.
+        _legacyRetired = true;
+        await _gateway.retireLegacyChannels();
+      }
       _armWake(
         result.nextFireAt,
         input.calendar.at(ZoneCalendar.addDays(today, 1), 0),
@@ -305,6 +352,12 @@ class ReconcilingNotificationEngine implements NotificationEngine {
 
   void dispose() {
     _disposed = true;
+    final lifecycle = _lifecycle;
+    if (lifecycle != null) {
+      try {
+        WidgetsBinding.instance.removeObserver(lifecycle);
+      } catch (_) {}
+    }
     final port = _refreshPort;
     if (port != null) NotificationRefreshPort.close(port);
     _debounceTimer?.cancel();
@@ -314,6 +367,26 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     }
     for (final l in _listeners) {
       l.close();
+    }
+  }
+}
+
+/// Flushes pending notification work when the app leaves the foreground.
+class _BackgroundFlush with WidgetsBindingObserver {
+  _BackgroundFlush(this._flush);
+
+  final void Function() _flush;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        _flush();
+      case AppLifecycleState.resumed:
+      case AppLifecycleState.inactive:
+        break;
     }
   }
 }

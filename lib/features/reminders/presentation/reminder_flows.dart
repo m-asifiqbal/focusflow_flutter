@@ -132,3 +132,8 @@ Future<ExactAlarmPermission> allowExactAlarms(WidgetRef ref) =>
 /// "Full-screen alarms are off — Allow" (Android 14+).
 Future<bool> allowFullScreenAlarms(WidgetRef ref) =>
     ref.read(fullScreenAlarmRequestProvider)();
+
+/// "Allow reminders in the background — Allow" (Android battery
+/// optimisation; opt-in, asked once from the editor).
+Future<bool?> allowRemindersInBackground(WidgetRef ref) =>
+    ref.read(backgroundDeliveryRequestProvider)();

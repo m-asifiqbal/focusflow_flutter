@@ -5,7 +5,9 @@
 /// What: [runRestoreFlow] drives the whole restore of an opened backup:
 /// preview sheet (device, date, counts per module), the Merge / Replace
 /// choice (Replace asks once more), the backup PIN when encrypted (retry
-/// on a wrong PIN), a blocking progress dialog, and a summary toast.
+/// on a wrong PIN), a blocking progress dialog, and a summary toast that
+/// says what was *not* restored too (vault kept, missing attachments) and,
+/// on failure, exactly what changed.
 /// [showBackupPinSheet] is also used to turn on "Encrypt backups".
 /// Why: Backup & Sync, the restore picker and the Import tab restore the
 /// same way; nothing is written before the PIN has been verified.
@@ -265,19 +267,48 @@ Future<String?> runRestoreFlow(
     try {
       final r = await actions.restore(archive, mode: mode, pin: pin);
       nav.pop();
-      final rep = r.report;
-      return mode == RestoreMode.replace
-          ? 'Restored ${rep.added} items'
-          : 'Restore done · ${rep.added} added · ${rep.updated} updated';
+      return restoreSummary(r);
     } on WrongBackupPin {
       nav.pop();
       error = 'Wrong PIN. Try again.';
     } on FormatException catch (e) {
+      // Damaged / newer-version backups fail before anything changes.
       nav.pop();
       return e.message;
+    } on RestoreFailed catch (e) {
+      nav.pop();
+      return restoreFailedMessage(e);
     } on Object {
+      // Everything else fails before writing (PIN / file checks).
       nav.pop();
       return "Restore failed. Your data wasn't changed.";
     }
   }
 }
+
+/// The toast after a restore: what came back, and what didn't (vault
+/// rows kept because this phone's vault uses another key, files missing).
+@visibleForTesting
+String restoreSummary(RestoreResult r) {
+  final rep = r.report;
+  final parts = <String>[
+    if (r.mode == RestoreMode.replace)
+      'Restored ${rep.added} ${rep.added == 1 ? 'item' : 'items'}'
+    else
+      'Restore done · ${rep.added} added · ${rep.updated} updated',
+    if (!r.vaultRestored)
+      "Vault items weren't restored — this phone's vault uses a different "
+          'PIN',
+    if (r.filesMissing > 0)
+      '${r.filesMissing} ${r.filesMissing == 1 ? 'attachment is' : 'attachments are'} '
+          'missing',
+  ];
+  return parts.join(' · ');
+}
+
+/// Exactly what a failed restore left behind (see RestoreFailed).
+@visibleForTesting
+String restoreFailedMessage(RestoreFailed e) => e.vaultKeyChanged
+    ? "Restore failed — your items weren't changed, but your vault now "
+          "opens with the backup's PIN."
+    : "Restore failed. Your data wasn't changed.";

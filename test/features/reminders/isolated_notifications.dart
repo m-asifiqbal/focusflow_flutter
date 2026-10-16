@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/notifications/background_delivery.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/notifications/notification_providers.dart';
@@ -27,13 +28,18 @@ class NoopNotificationEngine implements NotificationEngine {
 
 /// Overrides [notificationEngineProvider] with a no-op engine and
 /// [notificationGatewayProvider] with an in-memory [FakeGateway] whose
-/// permission is [permission] (or the given [gateway]).
+/// permission is [permission] (or the given [gateway]); battery
+/// optimisation is "not applicable" unless [background] says otherwise.
 List<Override> isolatedNotifications({
   NotificationPermission permission = NotificationPermission.granted,
   FakeGateway? gateway,
+  FakeBackgroundDelivery? background,
 }) => [
   notificationGatewayProvider.overrideWithValue(
     gateway ?? (FakeGateway()..state = permission),
   ),
   notificationEngineProvider.overrideWithValue(const NoopNotificationEngine()),
+  backgroundDeliveryProvider.overrideWithValue(
+    background ?? FakeBackgroundDelivery(),
+  ),
 ];

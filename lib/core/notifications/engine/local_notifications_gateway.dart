@@ -29,8 +29,19 @@
 ///                    title stays when iOS hides previews,
 ///       hidden     → a generic "Reminder" / "Open FocusFlow" text on both
 ///                    platforms (+ Android secret: nothing while locked).
-///   • Sound: reminders set to "Silent" use the silent Android channel and
-///     no iOS sound. (Custom tones need bundled sound files — not shipped.)
+///   • Sound: Chime / Bell / Gentle / Pulse are real bundled tones
+///     (tool/sounds/generate_sounds.py): Android plays `res/raw/<tone>.wav`
+///     through one channel per tone (channel sounds are immutable, and the
+///     channel ids are versioned — see NotificationChannelId); iOS plays
+///     `<tone>.wav` from `Library/Sounds`, where [initialize] copies the
+///     assets (no Xcode project change; a missing file falls back to the
+///     default sound). Any other sound key plays the system default;
+///     "Silent" uses the silent Android channel and no iOS sound. iOS
+///     requests set `presentSound` / `sound` explicitly instead of relying
+///     on the plugin's persisted defaults (a nil sound is silent).
+///   • Alarm-style: Android alarm audio usage (alarm volume, plays in
+///     Do-not-disturb's alarm allowance), insistent (repeats until opened
+///     or dismissed), full-screen intent.
 ///   • Badge: Android launchers count notifications (`number`); iOS badge
 ///     is set per notification (`badgeNumber`) and, while the app is in the
 ///     foreground, immediately via a silent request.
@@ -40,6 +51,8 @@
 ///     see `NotificationRefreshPort`); "Open" brings the app forward.
 /// ============================================================
 library;
+
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -53,6 +66,7 @@ import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationsGateway implements NotificationGateway {
@@ -156,35 +170,91 @@ class LocalNotificationsGateway implements NotificationGateway {
           onTap(NotificationTap(payload: r.payload, actionId: r.actionId)),
       onDidReceiveBackgroundNotificationResponse: notificationBackgroundHandler,
     );
-    final android = _android;
-    if (android != null) {
-      for (final c in NotificationChannelId.values) {
-        await android.createNotificationChannel(_channel(c));
-      }
-    }
+    await _createChannels();
+    if (_isIOS) await _installIosSounds();
     _ready = ok ?? false;
     _exactAllowed = null;
     return _ready;
   }
 
-  /// Initialization for the background isolate (no tap callback).
+  /// Initialization for the background isolate (no tap callback). Also
+  /// creates the channels: after an update the app may not have run yet,
+  /// and a notification posted to a missing channel is dropped.
   Future<void> initializeInBackground() async {
     await _plugin.initialize(settings: initializationSettings);
+    await _createChannels();
     _ready = true;
   }
 
-  static AndroidNotificationChannel _channel(NotificationChannelId c) =>
-      AndroidNotificationChannel(
-        c.id,
-        c.label,
-        description: c.description,
-        importance: switch (c) {
-          NotificationChannelId.alarms => Importance.max,
-          NotificationChannelId.digests => Importance.defaultImportance,
-          _ => Importance.high,
-        },
-        playSound: c != NotificationChannelId.silentReminders,
-      );
+  Future<void> _createChannels() async {
+    final android = _android;
+    if (android == null) return;
+    for (final c in NotificationChannelId.values) {
+      await android.createNotificationChannel(channel(c));
+    }
+  }
+
+  @override
+  Future<void> retireLegacyChannels() async {
+    final android = _android;
+    if (!_ready || android == null) return;
+    for (final id in NotificationChannelId.legacyIds) {
+      try {
+        await android.deleteNotificationChannel(channelId: id);
+      } catch (e) {
+        AppLogger.w('Deleting channel $id failed: $e');
+      }
+    }
+  }
+
+  /// The Android channel for [c]: high importance (max for alarms),
+  /// sound + vibration, the bundled tone where it has one.
+  @visibleForTesting
+  static AndroidNotificationChannel channel(NotificationChannelId c) {
+    final alarm = c == NotificationChannelId.alarms;
+    final tone = c.tone;
+    return AndroidNotificationChannel(
+      c.id,
+      c.label,
+      description: c.description,
+      importance: switch (c) {
+        NotificationChannelId.alarms => Importance.max,
+        NotificationChannelId.digests => Importance.defaultImportance,
+        _ => Importance.high,
+      },
+      playSound: c.playSound,
+      sound: tone == null ? null : RawResourceAndroidNotificationSound(tone),
+      enableVibration: c.playSound,
+      audioAttributesUsage: alarm
+          ? AudioAttributesUsage.alarm
+          : AudioAttributesUsage.notification,
+    );
+  }
+
+  /// iOS plays custom notification sounds from the app's
+  /// `Library/Sounds` (or the bundle root): copy the bundled tones there
+  /// once (and again whenever an asset changes size).
+  Future<void> _installIosSounds() async {
+    try {
+      final library = await getLibraryDirectory();
+      final dir = Directory('${library.path}/Sounds');
+      if (!dir.existsSync()) dir.createSync(recursive: true);
+      for (final tone in NotificationChannelId.tones) {
+        final data = await rootBundle.load('assets/sounds/$tone.wav');
+        final file = File('${dir.path}/$tone.wav');
+        if (file.existsSync() && file.lengthSync() == data.lengthInBytes) {
+          continue;
+        }
+        await file.writeAsBytes(
+          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+          flush: true,
+        );
+      }
+    } catch (e) {
+      // The default sound plays instead.
+      AppLogger.w('Installing notification sounds failed: $e');
+    }
+  }
 
   @override
   Future<NotificationTap?> launchTap() async {
@@ -251,14 +321,23 @@ class LocalNotificationsGateway implements NotificationGateway {
         : AndroidScheduleMode.exactAllowWhileIdle;
   }
 
+  @visibleForTesting
+  static NotificationDetails details(
+    PlannedNotification n,
+    DeliveryOptions o,
+  ) => _details(n, o);
+
+  /// FLAG_INSISTENT: the sound repeats until the alarm is opened or
+  /// dismissed.
+  static final Int32List _insistent = Int32List.fromList([4]);
+
   static NotificationDetails _details(
     PlannedNotification n,
     DeliveryOptions o,
   ) {
-    final c = n.isSilent
-        ? NotificationChannelId.silentReminders
-        : n.category.channel;
+    final c = NotificationChannelId.forNotification(n);
     final alarm = n.category == NotificationCategory.alarm;
+    final tone = n.tone;
     final (_, body) = _text(n, o);
     return NotificationDetails(
       android: AndroidNotificationDetails(
@@ -277,6 +356,14 @@ class LocalNotificationsGateway implements NotificationGateway {
           LockScreenVisibility.hidden => NotificationVisibility.secret,
         },
         playSound: !n.isSilent,
+        enableVibration: !n.isSilent,
+        sound: tone == null || alarm
+            ? null
+            : RawResourceAndroidNotificationSound(tone),
+        audioAttributesUsage: alarm
+            ? AudioAttributesUsage.alarm
+            : AudioAttributesUsage.notification,
+        additionalFlags: alarm ? _insistent : null,
         styleInformation: body != null && body.length > 40
             ? BigTextStyleInformation(body)
             : null,
@@ -292,7 +379,14 @@ class LocalNotificationsGateway implements NotificationGateway {
       ),
       iOS: DarwinNotificationDetails(
         categoryIdentifier: _iosCategory(n.buttons),
-        presentSound: n.isSilent ? false : null,
+        // Explicit: the plugin leaves `sound` nil (= silent) unless
+        // presentSound is true, and otherwise falls back to defaults
+        // persisted at initialization.
+        presentAlert: true,
+        presentBanner: true,
+        presentList: true,
+        presentSound: !n.isSilent,
+        sound: n.isSilent || tone == null ? null : '$tone.wav',
         badgeNumber: n.badge,
         threadIdentifier: c.id,
         interruptionLevel: alarm

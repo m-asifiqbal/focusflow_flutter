@@ -29,6 +29,35 @@ abstract final class ImportDetector {
         zip?.findFile('db.json') != null;
   }
 
+  /// Whether [bytes] is a password-manager CSV export (Bitwarden /
+  /// 1Password), judged from the header line(s) only — so the import flow
+  /// can ask to unlock the vault *before* any login is parsed into memory.
+  static bool isPasswordExport(String fileName, List<int> bytes) {
+    try {
+      final zip = ImportParsing.zip(bytes);
+      if (zip != null) {
+        return zip.files.any(
+          (f) =>
+              f.isFile &&
+              f.name.toLowerCase().endsWith('.csv') &&
+              _passwordHeader(ImportParsing.text(f.content)),
+        );
+      }
+      return _passwordHeader(ImportParsing.text(bytes));
+    } on Object {
+      return false;
+    }
+  }
+
+  static bool _passwordHeader(String text) {
+    final firstLine = text.split(RegExp(r'\r?\n')).first;
+    final rows = CsvCodec.decode(firstLine);
+    if (rows.isEmpty) return false;
+    final h = {for (final c in rows.first) c.trim().toLowerCase()};
+    return PasswordImporters.isBitwarden(h) ||
+        PasswordImporters.isOnePassword(h);
+  }
+
   /// Parses [bytes] (anything but a .ffbackup). Throws
   /// [ImportFormatException] with a readable message.
   static ImportBundle parse(String fileName, List<int> bytes) {

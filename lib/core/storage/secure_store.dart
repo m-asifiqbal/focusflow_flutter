@@ -37,14 +37,40 @@ class SecureStore {
 
   Future<void> delete(String key) => _storage.delete(key: key);
 
-  /// Returns the SQLite key, generating and persisting one on first launch.
+  /// Where a malformed database key is moved before a new one is made.
+  static const String damagedDatabaseKey = 'db.key.damaged';
+
+  /// Returns the SQLite key, generating and persisting one only when none
+  /// exists (first launch).
+  ///
+  /// A keychain *failure* (locked before first unlock, plugin error) throws
+  /// [DatabaseKeyUnavailable] — making a new key then would orphan the
+  /// user's encrypted database. A stored value that is not a key is kept
+  /// under [damagedDatabaseKey] (never overwritten) before a new key is
+  /// made; the unreadable database is quarantined by EncryptedDatabase.
+  /// A new key that could not be saved also throws, so the app never runs
+  /// on a key it will not have next launch.
   Future<String> getOrCreateDatabaseKey() async {
-    final existing = await read(databaseKey);
-    if (existing != null && existing.length == 64) return existing;
-    final key = randomHex(32);
-    await write(databaseKey, key);
-    return key;
+    final String? existing;
+    try {
+      existing = await read(databaseKey);
+    } on Object catch (e) {
+      throw DatabaseKeyUnavailable(e.runtimeType.toString());
+    }
+    if (existing != null && isValidDatabaseKey(existing)) return existing;
+    try {
+      if (existing != null) await write(damagedDatabaseKey, existing);
+      final key = randomHex(32);
+      await write(databaseKey, key);
+      return key;
+    } on Object catch (e) {
+      throw DatabaseKeyUnavailable(e.runtimeType.toString());
+    }
   }
+
+  /// A stored key as written by [randomHex] (64 characters). Kept as
+  /// lenient as before so no key that ever worked is treated as damaged.
+  static bool isValidDatabaseKey(String key) => key.length == 64;
 
   /// [bytes] cryptographically secure random bytes as lower-case hex.
   static String randomHex(int bytes) {
@@ -55,4 +81,16 @@ class SecureStore {
     }
     return buffer.toString();
   }
+}
+
+/// The database key could not be read from (or saved to) the keychain.
+class DatabaseKeyUnavailable implements Exception {
+  const DatabaseKeyUnavailable([this.detail]);
+
+  /// Error type for logs (never the key).
+  final String? detail;
+
+  @override
+  String toString() =>
+      'DatabaseKeyUnavailable${detail == null ? '' : ' ($detail)'}';
 }

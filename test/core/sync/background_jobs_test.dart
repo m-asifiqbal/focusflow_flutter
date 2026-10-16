@@ -90,6 +90,7 @@ void main() {
     Future<TestHarness> harness({required DateTime now}) async {
       final h = await TestHarness.create(
         now: now,
+        prefs: plaintextBackupPrefs(),
         overrides: [
           ...driveOverrides(
             drive: store,
@@ -165,6 +166,7 @@ void main() {
     final files = tempFiles(addTearDown);
     final h = await TestHarness.create(
       now: syncNow,
+      prefs: plaintextBackupPrefs(),
       overrides: driveOverrides(
         drive: null,
         files: files,

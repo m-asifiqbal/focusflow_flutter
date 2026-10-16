@@ -8,10 +8,11 @@
 /// a key id) — never a plain key. Importing passwords (Bitwarden /
 /// 1Password CSV) must encrypt each entry with the unlocked vault session.
 ///
-/// The vault feature (core/crypto + vault session) implements this
-/// interface and overrides [vaultBridgeProvider]; until then the default
-/// reports "no vault" and refuses password imports, so nothing is ever
-/// stored unencrypted.
+/// The vault feature implements this interface (VaultSessionBackupBridge,
+/// features/vault — the default of [vaultBridgeProvider]).
+/// [NoVaultBackupBridge] reports "no vault" and refuses password imports
+/// (tests, and any build without a vault), so nothing is ever stored
+/// unencrypted.
 /// ============================================================
 library;
 

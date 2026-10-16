@@ -4,7 +4,9 @@
 ///
 /// What: "‹ Settings | Backup & Sync" over the Drive card (or "Connect
 /// Google Drive"), AUTOMATIC BACKUP, LOCAL BACKUP, HISTORY and
-/// "Disconnect Google account".
+/// "Disconnect Google account". Banners on top while backups are paused
+/// for a missing backup PIN, or while other devices' backups wait for the
+/// Restore / Start fresh choice.
 /// Why: one place for the optional cloud; everything is live (sync status,
 /// history, settings) and works without an account (local backups).
 /// ============================================================
@@ -19,6 +21,7 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/backup/presentation/notifiers/backup_actions.dart';
 import 'package:focusflow/features/backup/presentation/widgets/backup_history_section.dart';
+import 'package:focusflow/features/backup/presentation/widgets/backup_prompts.dart';
 import 'package:focusflow/features/backup/presentation/widgets/backup_settings_sections.dart';
 import 'package:focusflow/features/backup/presentation/widgets/connect_drive_card.dart';
 import 'package:focusflow/features/backup/presentation/widgets/drive_card.dart';
@@ -63,6 +66,8 @@ class BackupSyncScreen extends ConsumerWidget {
                 AppSpacing.xxl,
               ),
               children: [
+                const BackupEncryptionBanner(),
+                if (drive) const MergeDecisionBanner(),
                 if (drive)
                   DriveCard(account: account)
                 else

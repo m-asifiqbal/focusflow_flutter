@@ -37,6 +37,7 @@ void main() {
     files = tempFiles(addTearDown);
     h = await TestHarness.create(
       now: syncNow,
+      prefs: plaintextBackupPrefs(),
       overrides: driveOverrides(
         drive: store,
         files: files,
@@ -83,7 +84,7 @@ void main() {
       final f = store.files[out.uploaded.fileId]!;
       expect(f.properties['deviceId'], TestHarness.deviceId);
       expect(f.properties[DriveBackupFile.kindKey], DriveBackupFile.kindBackup);
-      expect(out.uploaded.isEncrypted, isFalse); // no backup key stored
+      expect(out.uploaded.isEncrypted, isFalse); // "Encrypt backups" off
 
       final manifest = await h.read(driveSyncProvider).manifest();
       expect(manifest.devices.map((d) => d.deviceId), [TestHarness.deviceId]);

@@ -12,8 +12,11 @@
 /// Behaviour: the pressed button shows a spinner and the others are
 /// disabled ([signInControllerProvider]); cancelling a provider sheet is
 /// silent; failures show a snackbar. After Google sign-in a Drive backup
-/// shows the "Backup found" sheet; with `?intent=restore` the restore
-/// picker opens straight away.
+/// shows the "Backup found" sheet (Start fresh records a baseline so old
+/// backups aren't merged automatically), and with "Encrypt backups" on but
+/// no backup PIN the user picks how backups are protected. With
+/// `?intent=restore` every account choice ends in the restore picker, and
+/// "Restore from a backup file" gets there without an account.
 /// ============================================================
 library;
 
@@ -31,6 +34,7 @@ import 'package:focusflow/features/auth/presentation/notifiers/sign_in_controlle
 import 'package:focusflow/features/auth/presentation/widgets/sign_in_benefits_card.dart';
 import 'package:focusflow/features/auth/presentation/widgets/sign_in_button.dart';
 import 'package:focusflow/features/auth/presentation/widgets/sign_in_sheets.dart';
+import 'package:focusflow/features/backup/presentation/widgets/backup_prompts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -45,7 +49,8 @@ class SignInScreen extends ConsumerWidget {
       ref.read(signInControllerProvider.notifier);
 
   Future<void> _google(BuildContext context, WidgetRef ref) async {
-    final outcome = await _controller(ref).google(restoreIntent: restoreIntent);
+    final controller = _controller(ref);
+    final outcome = await controller.google(restoreIntent: restoreIntent);
     if (!context.mounted) return;
     switch (outcome) {
       case SignInRestore():
@@ -55,23 +60,56 @@ class SignInScreen extends ConsumerWidget {
         if (!context.mounted) return;
         if (restore ?? false) {
           context.go(AppRoutes.settingsBackupRestore);
-        } else {
-          _leave(context);
+          return;
         }
+        // Start fresh: existing backups are not merged automatically.
+        // Dismissed: nothing decided — merging stays on hold and Backup &
+        // Sync asks again.
+        if (restore == false && !await controller.startFresh()) {
+          if (context.mounted) {
+            showUndoSnackbar(
+              context,
+              message:
+                  "Couldn't reach Google Drive. Choose again in Settings › "
+                  'Backup.',
+              icon: FontAwesomeIcons.circleInfo,
+            );
+          }
+        }
+        if (context.mounted) await _connectDrive(context, ref);
+      case SignInDone():
+        await _connectDrive(context, ref);
       case _:
         _handle(context, outcome);
     }
   }
 
+  /// Drive just got connected: with "Encrypt backups" on and no backup
+  /// PIN yet, ask how backups should be protected before the first one
+  /// (dismissing leaves a banner in Backup & Sync), then leave.
+  Future<void> _connectDrive(BuildContext context, WidgetRef ref) async {
+    if (await backupEncryptionUnresolved(ref) && context.mounted) {
+      await resolveBackupEncryption(context, ref);
+    }
+    if (context.mounted) _leave(context);
+  }
+
   Future<void> _apple(BuildContext context, WidgetRef ref) async {
-    final outcome = await _controller(ref).apple();
+    final outcome = await _controller(ref).apple(restoreIntent: restoreIntent);
     if (context.mounted) _handle(context, outcome);
   }
 
   Future<void> _offline(BuildContext context, WidgetRef ref) async {
     final name = await showOfflineNameSheet(context);
     if (name == null || !context.mounted) return;
-    final outcome = await _controller(ref).offline(name: name);
+    final outcome = await _controller(
+      ref,
+    ).offline(name: name, restoreIntent: restoreIntent);
+    if (context.mounted) _handle(context, outcome);
+  }
+
+  Future<void> _fromFile(BuildContext context, WidgetRef ref) async {
+    final outcome = await _controller(ref).restoreFromFile();
     if (context.mounted) _handle(context, outcome);
   }
 
@@ -164,7 +202,8 @@ class SignInScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.lg),
             Text(
               restoreIntent
-                  ? 'Sign in with Google to restore your backup from Drive.'
+                  ? 'Sign in with Google to restore your backup from Drive, '
+                        'or restore from a backup file.'
                   : 'Sign in to keep your workspace safe and synced. '
                         'You can also start offline and connect later.',
               style: text.body.copyWith(fontSize: 15),
@@ -197,6 +236,17 @@ class SignInScreen extends ConsumerWidget {
                 () => _offline(context, ref),
               ),
             ),
+            if (restoreIntent) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Center(
+                child: FFTextButton(
+                  label: 'Restore from a backup file',
+                  onPressed: busy == null
+                      ? () => _fromFile(context, ref)
+                      : null,
+                ),
+              ),
+            ],
             const SizedBox(height: AppSpacing.xxl),
             const Padding(
               padding: EdgeInsetsDirectional.symmetric(

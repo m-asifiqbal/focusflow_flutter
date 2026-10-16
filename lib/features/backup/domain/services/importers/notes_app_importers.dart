@@ -44,7 +44,11 @@ abstract final class KeepImporter {
         trashed++;
         return;
       }
-      notes.add(_note(m));
+      try {
+        notes.add(_note(m));
+      } on Object {
+        problems.add(ImportProblem('$name: unexpected note format'));
+      }
     }
 
     final zip = ImportParsing.zip(bytes);
@@ -75,19 +79,19 @@ abstract final class KeepImporter {
 
   static ImportedNote _note(Map m) {
     final list = m['listContent'];
+    final labels = m['labels'];
     final text = list is List
         ? [
-            for (final i in list)
-              '- [${(i as Map)['isChecked'] == true ? 'x' : ' '}] '
-                  '${i['text'] ?? ''}',
+            for (final i in list.whereType<Map>())
+              '- [${i['isChecked'] == true ? 'x' : ' '}] ${i['text'] ?? ''}',
           ].join('\n')
         : '${m['textContent'] ?? ''}';
     return ImportedNote(
       title: '${m['title'] ?? ''}'.trim(),
       text: text,
       tags: [
-        for (final l in (m['labels'] as List? ?? const []))
-          '${(l as Map)['name'] ?? ''}'.trim(),
+        if (labels is List)
+          for (final l in labels.whereType<Map>()) '${l['name'] ?? ''}'.trim(),
       ]..removeWhere((t) => t.isEmpty),
       createdAt: ImportParsing.dateTime(m['createdTimestampUsec']),
       archived: m['isArchived'] == true,

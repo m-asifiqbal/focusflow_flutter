@@ -13,7 +13,8 @@ import 'package:flutter/foundation.dart';
 
 /// The FORMAT tiles.
 enum ExportFormat {
-  /// Full FocusFlow backup (encrypted when "Encrypt backups" is on).
+  /// Full FocusFlow backup (encrypted whenever a backup PIN is set; the
+  /// Export tab says "not encrypted" otherwise).
   ffbackup('.ffbackup', 'Full · encrypted', 'ffbackup'),
 
   /// Readable JSON for developers.

@@ -17,6 +17,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/utils/recurrence.dart';
@@ -279,13 +280,20 @@ class TaskEditorController
   // ───────────────────────── Save ─────────────────────────
 
   /// Writes the task (create or update). Returns its id, or null when the
-  /// form is invalid / already saving.
+  /// form is invalid / already saving. When the task has (or had) a
+  /// "Remind me", the OS schedule is updated before this returns, so the
+  /// reminder fires even if the app is closed right after saving.
   Future<String?> save() async {
     final s = _form;
     if (s == null || !s.canSave) return null;
     state = AsyncData(s.copyWith(saving: true));
     try {
-      return await ref.read(tasksRepositoryProvider).save(s.toTask());
+      final task = s.toTask();
+      final id = await ref.read(tasksRepositoryProvider).save(task);
+      if (task.remindOffsetMinutes != null || task.reminderId != null) {
+        await flushNotifications(ref);
+      }
+      return id;
     } finally {
       final now = _form;
       if (now != null) state = AsyncData(now.copyWith(saving: false));

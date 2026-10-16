@@ -117,6 +117,8 @@ class _Chart extends StatelessWidget {
         MediaQuery.textScalerOf(
           context,
         ).scale((labelStyle.fontSize ?? AppSpacing.md) * 1.5);
+    // Opaque dot centre: the dark-mode surface is translucent.
+    final dotFill = Color.alphaBlend(ff.surface, ff.canvas);
     final spots = [
       for (var i = 0; i < n; i++)
         FlSpot(i.toDouble(), points[i].score.toDouble()),
@@ -203,7 +205,7 @@ class _Chart extends StatelessWidget {
                     getDotPainter: (spot, percent, bar, index) =>
                         FlDotCirclePainter(
                           radius: InsightsDimens.dotRadius + 1,
-                          color: ff.surface,
+                          color: dotFill,
                           strokeWidth: InsightsDimens.dotStroke,
                           strokeColor: ff.primary,
                         ),
@@ -225,7 +227,7 @@ class _Chart extends StatelessWidget {
                 getDotPainter: (spot, percent, bar, index) =>
                     FlDotCirclePainter(
                       radius: InsightsDimens.dotRadius,
-                      color: ff.surface,
+                      color: dotFill,
                       strokeWidth: InsightsDimens.dotStroke,
                       strokeColor: ff.primary,
                     ),

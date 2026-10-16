@@ -6,7 +6,7 @@
 /// that will be skipped) → Import (dedupe by title + date) with progress →
 /// summary with the partial-failure report. A .ffbackup goes through the
 /// restore flow (Merge / Replace, PIN). Password CSVs ask to unlock the
-/// vault first and are encrypted on write.
+/// vault before they are even parsed, and are encrypted on write.
 /// Why: one linear flow driven by [importControllerProvider]; the widget
 /// only renders its phases.
 /// ============================================================
@@ -38,8 +38,13 @@ const List<(String, String)> kImportFormats = [
 class ImportTab extends ConsumerWidget {
   const ImportTab({super.key});
 
-  Future<void> _pick(BuildContext context, WidgetRef ref) =>
-      ref.read(importControllerProvider.notifier).pick();
+  Future<void> _pick(BuildContext context, WidgetRef ref) => ref
+      .read(importControllerProvider.notifier)
+      .pick(
+        // Password CSVs: unlock first, parse after.
+        unlockVault: () async =>
+            context.mounted && await ensureVaultUnlocked(context),
+      );
 
   Future<void> _confirm(BuildContext context, WidgetRef ref) async {
     final c = ref.read(importControllerProvider.notifier);
@@ -222,7 +227,7 @@ class _Progress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
-    final total = state.bundle?.itemCount ?? 0;
+    final total = state.total;
     final done = (state.progress * total).round();
     return FFCard(
       padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
@@ -301,6 +306,10 @@ class _Summary extends StatelessWidget {
             ],
           ),
         ),
+        if (state.notice case final notice?) ...[
+          const SizedBox(height: AppSpacing.lg),
+          FFInfoBanner(icon: FontAwesomeIcons.circleInfo, text: notice),
+        ],
         if (failed) ...[
           const SizedBox(height: AppSpacing.section),
           FFGroupedList(

@@ -16,7 +16,9 @@ import '../../core/sync/drive_fakes.dart';
 import '../../helpers/test_container.dart';
 
 class AuthFakes {
-  final drive = FakeDriveStore();
+  AuthFakes({FakeDriveStore? drive}) : drive = drive ?? FakeDriveStore();
+
+  final FakeDriveStore drive;
   final google = FakeGoogleAuth();
   final apple = FakeAppleAuth();
   final secure = MemorySecureStore();
@@ -43,14 +45,17 @@ class AuthFakes {
   );
 }
 
-/// A harness at [now] wired to [fakes]; disposed on tear-down.
+/// A harness at [now] wired to [fakes]; disposed on tear-down. Backups
+/// are plaintext by choice unless [encryptBackups] (the app default).
 Future<TestHarness> authHarness(
   AuthFakes fakes, {
   required DateTime now,
   List<Override> overrides = const [],
+  bool encryptBackups = false,
 }) async {
   final h = await TestHarness.create(
     now: now,
+    prefs: encryptBackups ? const {} : plaintextBackupPrefs(),
     overrides: [
       ...driveOverrides(
         drive: fakes.drive,

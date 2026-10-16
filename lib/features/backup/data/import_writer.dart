@@ -8,13 +8,21 @@
 /// the partial-failure report.
 /// Dedupe ("title + date"): notes by title + created day (or title + body
 /// when the source has no date), tasks by title + due day, reminders by
-/// title + time, habits by name, logins by title (+ username within the
-/// file). Existing items are read from one DB snapshot up front.
+/// title + time, habits by name, logins by title + username + website
+/// (the username / URL of existing vault items live in the encrypted
+/// payload and are read with the unlocked vault through [vaultLogin]; an
+/// item that can't be read never counts as a duplicate, so distinct logins
+/// are never dropped). Existing items are read from one DB snapshot.
 /// Why: importing the same export twice must not double everything.
-/// Logins go to the vault bridge (encrypted with the unlocked session);
-/// nothing here logs item contents.
+/// Logins go to the vault bridge one by one (encrypted with the unlocked
+/// session), so the counts stay exact if the vault locks half-way.
+/// [write] throws only before anything was written; after that every
+/// failure is per item and listed in the [ImportResult].
+/// Nothing here logs item contents.
 /// ============================================================
 library;
+
+import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show Variable;
 import 'package:focusflow/core/database/app_database.dart';
@@ -37,6 +45,14 @@ import 'package:focusflow/features/tasks/domain/repository/tasks_repository.dart
 /// Progress callback: items written so far of [total].
 typedef ImportProgress = void Function(int done, int total);
 
+/// Username + website of an existing vault item (decrypted in memory with
+/// the unlocked vault), or null when it can't be read.
+typedef VaultLoginReader =
+    Future<({String username, String url})?> Function(
+      String itemId,
+      Uint8List encryptedPayload,
+    );
+
 class ImportWriter {
   ImportWriter({
     required this.db,
@@ -48,6 +64,7 @@ class ImportWriter {
     required this.items,
     required this.vault,
     required this.clock,
+    this.vaultLogin,
   });
 
   final AppDatabase db;
@@ -60,10 +77,24 @@ class ImportWriter {
   final VaultBackupBridge vault;
   final Clock clock;
 
+  /// Reads existing vault logins for dedupe (null = titles can't be
+  /// compared with usernames: nothing in the vault counts as a duplicate).
+  final VaultLoginReader? vaultLogin;
+
   static String _n(Object? s) => '${s ?? ''}'.trim().toLowerCase();
   static String _day(DateTime? d) => d == null ? '' : DateUtilsX.dayKey(d);
   static DateTime? _sec(Object? v) =>
       v is int ? DateTime.fromMillisecondsSinceEpoch(v * 1000) : null;
+
+  /// Website for dedupe: no scheme, no `www.`, no trailing slash.
+  static String _site(String url) => _n(url)
+      .replaceFirst(RegExp(r'^[a-z][a-z0-9+.-]*://'), '')
+      .replaceFirst(RegExp(r'^www\.'), '')
+      .replaceFirst(RegExp(r'/+$'), '');
+
+  static String _loginKey(String title, String username, String url) =>
+      '${_n(title)}|${_n(username)}|${_site(url)}';
+
   static String _body(String text) {
     final t = text.trim();
     return _n(t.length > 80 ? t.substring(0, 80) : t);
@@ -97,10 +128,20 @@ class ImportWriter {
     for (final r in existing.rows('habits')) {
       if (r['deleted_at'] == null) seen.add('h|${_n(r['name'])}');
     }
-    final vaultTitles = {
-      for (final r in existing.rows('vault_items'))
-        if (r['deleted_at'] == null) _n(r['title']),
-    };
+    final vaultLogins = <String>{};
+    if (b.logins.isNotEmpty && vaultLogin != null) {
+      for (final r in existing.rows('vault_items')) {
+        final id = r['id'], blob = r['encrypted_payload'];
+        if (r['deleted_at'] != null || id is! String || blob is! Uint8List) {
+          continue;
+        }
+        final login = await vaultLogin!(id, blob);
+        if (login == null) continue; // unreadable: never a duplicate
+        vaultLogins.add(
+          _loginKey('${r['title'] ?? ''}', login.username, login.url),
+        );
+      }
+    }
 
     var imported = 0, duplicates = 0;
     final failures = <String>[];
@@ -125,26 +166,39 @@ class ImportWriter {
       final fresh = <ImportedLogin>[];
       final inFile = <String>{};
       for (final l in b.logins) {
-        final dup =
-            vaultTitles.contains(_n(l.title)) ||
-            !inFile.add('${_n(l.title)}|${_n(l.username)}');
-        if (dup) {
+        final key = _loginKey(l.title, l.username, l.url);
+        if (vaultLogins.contains(key) || !inFile.add(key)) {
           duplicates++;
           tick();
         } else {
           fresh.add(l);
         }
       }
-      if (fresh.isNotEmpty) {
-        // Throws VaultUnavailable when locked: nothing half-written.
-        final saved = await vault.importLogins(fresh);
-        imported += saved;
-        if (saved < fresh.length) {
-          failures.add('${fresh.length - saved} passwords could not be saved');
+      for (final (i, l) in fresh.indexed) {
+        try {
+          final saved = await vault.importLogins([l]);
+          if (saved == 1) {
+            imported++;
+          } else {
+            failures.add('${_label(l)}: could not be saved');
+          }
+        } on VaultUnavailable catch (e) {
+          // Nothing written yet → the caller unlocks and retries.
+          if (i == 0) rethrow;
+          final left = fresh.length - i;
+          failures.add(
+            '$left ${left == 1 ? 'password was' : 'passwords were'} not '
+            'imported: ${e.message}',
+          );
+          for (var j = i; j < fresh.length; j++) {
+            tick();
+          }
+          break;
+        } on Object {
+          if (i == 0) rethrow;
+          failures.add('${_label(l)}: could not be saved');
         }
-        for (var i = 0; i < fresh.length; i++) {
-          tick();
-        }
+        tick();
       }
     }
 
@@ -269,4 +323,8 @@ class ImportWriter {
       failures: failures,
     );
   }
+
+  /// A login's name for the failure list (never its secrets).
+  static String _label(ImportedLogin l) =>
+      l.title.trim().isEmpty ? 'Imported login' : l.title.trim();
 }

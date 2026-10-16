@@ -24,8 +24,10 @@ import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/auth/presentation/widgets/google_logo.dart';
 import 'package:focusflow/features/backup/presentation/backup_style.dart';
 import 'package:focusflow/features/backup/presentation/providers/backup_providers.dart';
+import 'package:focusflow/features/backup/presentation/widgets/backup_prompts.dart';
 import 'package:focusflow/features/backup/presentation/widgets/drive_logo.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class DriveCard extends ConsumerWidget {
@@ -140,7 +142,7 @@ class DriveCard extends ConsumerWidget {
                   busy: status.isBusy,
                   onPressed: status.isBusy
                       ? null
-                      : () => ref.read(syncStatusProvider.notifier).syncNow(),
+                      : () => syncNowWithPrompt(context, ref),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -159,6 +161,18 @@ class DriveCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// "Sync now": with "Encrypt backups" on and no backup PIN, asks first
+/// (Set a backup PIN / Back up without encryption) — never uploads
+/// plaintext silently.
+Future<void> syncNowWithPrompt(BuildContext context, WidgetRef ref) async {
+  if (await backupEncryptionUnresolved(ref)) {
+    if (!context.mounted || !await resolveBackupEncryption(context, ref)) {
+      return;
+    }
+  }
+  await ref.read(syncStatusProvider.notifier).syncNow();
 }
 
 /// The two half-width card buttons (Sync now / Restore). The shared
@@ -253,7 +267,10 @@ class _StatusBox extends ConsumerWidget {
     switch (status.phase) {
       case SyncPhase.preparing:
         title = 'Preparing…';
-        subtitle = 'Building an encrypted backup';
+        // Sync refuses to run unencrypted while the setting is on.
+        subtitle = ref.read(settingsProvider).encryptBackups
+            ? 'Building an encrypted backup'
+            : 'Building a backup';
       case SyncPhase.uploading:
         final pct = ((status.progress ?? 0) * 100).round();
         title = 'Uploading $pct%…';
@@ -266,6 +283,7 @@ class _StatusBox extends ConsumerWidget {
         subtitle = 'Newest edit of each item wins';
       case SyncPhase.error:
         title = switch (status.failure) {
+          _ when status.needsBackupPin => 'Set a backup PIN to sync',
           DriveFailureKind.offline => "You're offline",
           DriveFailureKind.authExpired ||
           DriveFailureKind.notSignedIn => 'Sign in again to sync',
@@ -285,6 +303,7 @@ class _StatusBox extends ConsumerWidget {
           if (items != null &&
               !(status.phase == SyncPhase.done && conflicts > 0))
             '$items items',
+          if (status.phase == SyncPhase.done) ...status.warnings,
         ].join(' · ');
     }
     final busy = status.isBusy;
@@ -359,6 +378,16 @@ class _StatusBox extends ConsumerWidget {
                 ),
               ],
             ),
+            if (error && status.needsBackupPin) ...[
+              const SizedBox(height: AppSpacing.md),
+              FFSecondaryButton(
+                label: 'Set backup PIN',
+                icon: FontAwesomeIcons.lock,
+                height: 44,
+                variant: FFSecondaryVariant.outlined,
+                onPressed: () => syncNowWithPrompt(context, ref),
+              ),
+            ],
             if (reauth) ...[
               const SizedBox(height: AppSpacing.md),
               FFSecondaryButton(

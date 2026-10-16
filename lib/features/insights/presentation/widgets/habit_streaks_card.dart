@@ -148,6 +148,7 @@ class _StreakTile extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.rowLeadingGap),
               Expanded(
+                flex: 3,
                 child: Text(
                   row.name,
                   maxLines: 1,
@@ -158,20 +159,35 @@ class _StreakTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              SizedBox(
-                width: InsightsDimens.streakBarWidth,
-                height: InsightsDimens.streakBar,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadii.pill),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(child: ColoredBox(color: ff.divider)),
-                      FractionallySizedBox(
-                        widthFactor: row.progress.clamp(0.0, 1.0),
-                        heightFactor: 1,
-                        child: ColoredBox(color: colors.solid),
+              // The bar gives way to the name on narrow / large-text
+              // layouts (never wider than in the mockup).
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: InsightsDimens.streakBarWidth,
+                    ),
+                    child: SizedBox(
+                      height: InsightsDimens.streakBar,
+                      width: double.infinity,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadii.pill),
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: ColoredBox(color: ff.divider),
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: row.progress.clamp(0.0, 1.0),
+                              heightFactor: 1,
+                              child: ColoredBox(color: colors.solid),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

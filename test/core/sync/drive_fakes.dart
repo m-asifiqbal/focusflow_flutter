@@ -3,8 +3,11 @@
 /// and background jobs run without plugins or network.
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/storage/secure_store.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_files.dart';
@@ -14,6 +17,7 @@ import 'package:focusflow/core/sync/network_info.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 
 import '../../helpers/test_container.dart';
 import 'sync_fixtures.dart';
@@ -198,3 +202,13 @@ List<Override> driveOverrides({
     ),
   ),
 ];
+
+/// Initial prefs with "Encrypt backups" off. Plaintext backups now only
+/// happen when the user chose "Back up without encryption" (the default
+/// is on, and on + no backup PIN refuses to back up), so tests that
+/// exercise plaintext backups state that choice explicitly.
+Map<String, Object> plaintextBackupPrefs() => {
+  SettingsController.prefsKey: jsonEncode(
+    const AppSettings(encryptBackups: false).toJson(),
+  ),
+};

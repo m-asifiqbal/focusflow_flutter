@@ -30,3 +30,17 @@ final notificationEngineProvider = Provider<NotificationEngine>((ref) {
   ref.onDispose(engine.dispose);
   return engine;
 });
+
+/// Hands every write made so far to the OS now (no debounce) and waits
+/// for it — call after saving a reminder / a task with "Remind me", so the
+/// notification is scheduled even if the app is closed right away. A
+/// no-op for other engines (tests) and when notifications are unavailable;
+/// never throws.
+Future<void> flushNotifications(Ref ref) async {
+  try {
+    final engine = ref.read(notificationEngineProvider);
+    if (engine is ReconcilingNotificationEngine) await engine.flush();
+  } catch (_) {
+    // Best effort: the debounced pass and the background flush follow.
+  }
+}
