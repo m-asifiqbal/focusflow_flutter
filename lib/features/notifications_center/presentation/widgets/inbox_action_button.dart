@@ -64,7 +64,10 @@ class InboxActionButton extends StatelessWidget {
             child: Text(
               label,
               maxLines: 1,
-              style: context.text.buttonSmall.copyWith(fontSize: labelSize, color: fg),
+              style: context.text.buttonSmall.copyWith(
+                fontSize: labelSize,
+                color: fg,
+              ),
             ),
           ),
         ),

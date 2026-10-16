@@ -50,3 +50,5 @@ android/key.properties
 *.jks
 *.keystore
 ios/Flutter/GoogleSignIn.xcconfig
+# Google OAuth client ids (see config/README.md).
+config/google.json

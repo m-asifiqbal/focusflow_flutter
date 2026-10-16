@@ -176,11 +176,14 @@ class _ItemGroups extends ConsumerWidget {
           dividerIndent: ItemSummaryRow.dividerIndent,
           children: [
             for (final s in e.value)
-              ItemSummaryRow(
-                item: s,
-                meta: LibraryFormat.rowMeta(s, now, use24h: use24h),
-                onTap: () => openLibraryItem(context, s.ref),
-                onLongPress: () => showItemActions(context, ref, s.ref),
+              FFOpenOriginTracker(
+                radius: 0,
+                child: ItemSummaryRow(
+                  item: s,
+                  meta: LibraryFormat.rowMeta(s, now, use24h: use24h),
+                  onTap: () => openLibraryItem(context, s.ref),
+                  onLongPress: () => showItemActions(context, ref, s.ref),
+                ),
               ),
           ],
         ),

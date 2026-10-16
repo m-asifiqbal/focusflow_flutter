@@ -172,7 +172,8 @@ class VaultItemRow extends ConsumerWidget {
       isFavorite: r.isFavorite,
       radius: 0,
       title: title,
-      child: row,
+      // The detail grows out of this row (open-container transition).
+      child: FFOpenOriginTracker(radius: 0, child: row),
     );
   }
 }

@@ -39,9 +39,8 @@ class HomeHabitsSection extends ConsumerWidget {
     // The habit day rolls at midnight (a reload): keep the rings meanwhile.
     final Widget body = habits.when(
       skipLoadingOnReload: true,
-      error: (_, _) => HomeErrorCard(
-        onRetry: () => ref.invalidate(todayHabitsProvider),
-      ),
+      error: (_, _) =>
+          HomeErrorCard(onRetry: () => ref.invalidate(todayHabitsProvider)),
       loading: () => const FFSkeletonList(count: 1),
       data: (value) => value.isEmpty
           ? HomeEmptyCard(

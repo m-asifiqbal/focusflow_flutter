@@ -20,6 +20,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart' show kTouchSlop;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/widgets/ff_open_origin.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -172,6 +173,11 @@ class _NoteItem extends ConsumerWidget {
             onTap: onTap,
             onLongPress: onLongPress,
           );
+    // The editor grows out of this card (open-container transition).
+    child = FFOpenOriginTracker(
+      radius: grid ? AppRadii.card : AppRadii.row,
+      child: child,
+    );
     if (manual) {
       child = _DragToReorder(
         id: note.id,

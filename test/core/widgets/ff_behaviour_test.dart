@@ -423,7 +423,10 @@ void main() {
       tester,
       FFBottomNav(currentIndex: 0, onTap: (i) => tab = i, onFab: () => fab++),
     );
-    await tester.tap(find.text('Insights'));
+    // Inactive tabs are icon-only; their label lives in Semantics.
+    expect(find.text('Insights'), findsNothing);
+    expect(find.text('Home'), findsOneWidget); // active tab shows its label
+    await tester.tap(find.bySemanticsLabel('Insights'));
     await tester.tap(find.bySemanticsLabel('Quick add'));
     await tester.pumpAndSettle();
     expect(tab, 2);

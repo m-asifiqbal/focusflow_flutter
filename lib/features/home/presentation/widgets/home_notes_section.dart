@@ -34,9 +34,8 @@ class HomeNotesSection extends ConsumerWidget {
     final notes = ref.watch(homeRecentNotesProvider);
     final Widget body = notes.when(
       skipLoadingOnReload: true,
-      error: (_, _) => HomeErrorCard(
-        onRetry: () => ref.invalidate(homeRecentNotesProvider),
-      ),
+      error: (_, _) =>
+          HomeErrorCard(onRetry: () => ref.invalidate(homeRecentNotesProvider)),
       loading: () => const FFSkeletonList(count: 1),
       data: (value) => value.isEmpty
           ? HomeEmptyCard(
@@ -75,12 +74,14 @@ class _NotesGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final now = ref.watch(minuteClockProvider);
-    Widget card(Note n) => NoteCard(
+    Widget card(Note n) => FFOpenOriginTracker(
       key: ValueKey(n.id),
-      note: n,
-      now: now,
-      onTap: () => context.push(AppRoutes.note(n.id)),
-      onLongPress: () => showItemActions(context, ref, n.ref),
+      child: NoteCard(
+        note: n,
+        now: now,
+        onTap: () => context.push(AppRoutes.note(n.id)),
+        onLongPress: () => showItemActions(context, ref, n.ref),
+      ),
     );
 
     final rows = <Widget>[];

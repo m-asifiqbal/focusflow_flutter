@@ -1,7 +1,9 @@
 /// Reminder editor (screen 13) permission states on Android 12+ / 14+:
 /// "Reminders may be late — allow exact alarms" with an Allow button that
 /// opens the system page, and alarm-style asking for full-screen intents
-/// (with a hint while they stay off). Neither shows when allowed.
+/// (with a hint while they stay off); "Allow reminders in the background"
+/// (battery optimisation) once exact alarms are fine, suggested until
+/// asked once. None shows when allowed.
 library;
 
 import 'package:flutter/widgets.dart';
@@ -20,10 +22,15 @@ const _fullScreenText =
     'Full-screen alarms are off — this reminder will show as a regular '
     'alert.';
 
+const _backgroundText =
+    'Allow reminders in the background — some phones stop them when the '
+    'app is closed.';
+
 Future<(TestHarness, FakeGateway)> _harness(
   WidgetTester tester, {
   required ExactAlarmPermission exact,
   required bool fullScreen,
+  FakeBackgroundDelivery? battery,
 }) async {
   final os = FakeGateway()
     ..exact = exact
@@ -31,7 +38,7 @@ Future<(TestHarness, FakeGateway)> _harness(
   final h = (await tester.runAsync(
     () => TestHarness.create(
       now: _now,
-      overrides: isolatedNotifications(gateway: os),
+      overrides: isolatedNotifications(gateway: os, background: battery),
     ),
   ))!;
   addTearDown(() => tester.runAsync(h.dispose));
@@ -101,5 +108,35 @@ void main() {
     await settle(tester);
     expect(os.fullScreenRequests, 0);
     expect(find.text(_fullScreenText), findsNothing);
+  });
+
+  testWidgets('battery optimisation: opt-in banner, asked once', (
+    tester,
+  ) async {
+    final battery = FakeBackgroundDelivery(
+      unrestricted: false,
+      grantOnRequest: false, // the user says no in the system dialog
+    );
+    final (h, _) = await _harness(
+      tester,
+      exact: ExactAlarmPermission.granted,
+      fullScreen: true,
+      battery: battery,
+    );
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.newReminder(title: 'Pills'),
+      size: const Size(390, 1400),
+    );
+    await settle(tester);
+    expect(find.text(_exactText), findsNothing);
+    expect(find.text(_backgroundText), findsOneWidget);
+    expect(battery.requests, 0); // never asked without a tap
+    await tester.tap(find.text('Allow'));
+    await settle(tester);
+    expect(battery.requests, 1);
+    // Refused once: the editor stops suggesting it.
+    expect(find.text(_backgroundText), findsNothing);
   });
 }

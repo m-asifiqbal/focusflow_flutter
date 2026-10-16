@@ -185,7 +185,7 @@ class _UpNextCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppRadii.card),
         border: Border.all(color: module.solid.withValues(alpha: 0.12)),
       ),
-      child: card,
+      child: FFOpenOriginTracker(child: card),
     );
   }
 }

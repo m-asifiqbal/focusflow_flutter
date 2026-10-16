@@ -2,6 +2,9 @@ package com.iqballab.focusflow
 
 import android.app.KeyguardManager
 import android.app.NotificationManager
+import android.content.ClipData
+import android.content.ClipDescription
+import android.content.ClipboardManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,6 +12,7 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.WindowManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
@@ -17,6 +21,7 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import java.security.MessageDigest
 import org.json.JSONObject
 
 /**
@@ -120,6 +125,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        configureSecureClipboard(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focusflow/notifications")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -157,4 +163,55 @@ class MainActivity : FlutterFragmentActivity() {
                 }
             }
     }
+
+    /**
+     * `focusflow/secure_clipboard` (Dart: core/crypto/secure_clipboard.dart).
+     * Copied secrets are flagged sensitive so Android 13+ hides them in the
+     * clipboard preview / keyboard suggestions; "clear" only wipes the clip
+     * if it still holds what the vault copied (matched by SHA-256), so a
+     * newer copy by the user is never erased.
+     */
+    private fun configureSecureClipboard(flutterEngine: FlutterEngine) {
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focusflow/secure_clipboard")
+            .setMethodCallHandler { call, result ->
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                when (call.method) {
+                    "setSensitive" -> {
+                        val text = call.argument<String>("text") ?: ""
+                        val clip = ClipData.newPlainText("FocusFlow", text)
+                        val extras = PersistableBundle()
+                        if (Build.VERSION.SDK_INT >= 33) {
+                            extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true)
+                        } else {
+                            extras.putBoolean("android.content.extra.IS_SENSITIVE", true)
+                        }
+                        clip.description.extras = extras
+                        clipboard.setPrimaryClip(clip)
+                        result.success(null)
+                    }
+                    "clear" -> {
+                        val expected = call.argument<String>("sha256")
+                        val current = clipboard.primaryClip
+                            ?.takeIf { it.itemCount > 0 }
+                            ?.getItemAt(0)?.coerceToText(this)?.toString()
+                        val matches = expected == null ||
+                            (current != null && sha256Hex(current) == expected)
+                        if (matches) {
+                            if (Build.VERSION.SDK_INT >= 28) {
+                                clipboard.clearPrimaryClip()
+                            } else {
+                                clipboard.setPrimaryClip(ClipData.newPlainText("", ""))
+                            }
+                        }
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    private fun sha256Hex(text: String): String =
+        MessageDigest.getInstance("SHA-256")
+            .digest(text.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
 }

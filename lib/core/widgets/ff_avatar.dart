@@ -41,9 +41,10 @@ class FFAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final ff = context.ff;
     final g = ff.primaryGradient.colors;
-    final letter = (initial == null || initial!.trim().isEmpty)
-        ? '?'
-        : initial!.trim().characters.first.toUpperCase();
+    final hasInitial = initial != null && initial!.trim().isNotEmpty;
+    final letter = hasInitial
+        ? initial!.trim().characters.first.toUpperCase()
+        : '';
     final avatar = SizedBox.square(
       dimension: size,
       child: DecoratedBox(
@@ -70,15 +71,22 @@ class FFAvatar extends StatelessWidget {
             child: image != null
                 ? Image(image: image!, fit: BoxFit.cover)
                 : Center(
-                    child: MediaQuery.withNoTextScaling(
-                      child: Text(
-                        letter,
-                        style: context.text.stat.copyWith(
-                          fontSize: size * 0.4,
-                          color: ff.onGradient,
-                        ),
-                      ),
-                    ),
+                    // No name yet: a person glyph instead of a "?".
+                    child: hasInitial
+                        ? MediaQuery.withNoTextScaling(
+                            child: Text(
+                              letter,
+                              style: context.text.stat.copyWith(
+                                fontSize: size * 0.4,
+                                color: ff.onGradient,
+                              ),
+                            ),
+                          )
+                        : Icon(
+                            FontAwesomeIcons.solidUser,
+                            size: size * 0.38,
+                            color: ff.onGradient,
+                          ),
                   ),
           ),
         ),

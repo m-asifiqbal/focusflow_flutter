@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
@@ -22,9 +23,14 @@ void main() {
 
   late AuthFakes fakes;
 
-  Future<TestHarness> harness(WidgetTester tester) async {
+  Future<TestHarness> harness(
+    WidgetTester tester, {
+    bool encryptBackups = false,
+  }) async {
     fakes = AuthFakes();
-    final h = (await tester.runAsync(() => authHarness(fakes, now: _now)))!;
+    final h = (await tester.runAsync(
+      () => authHarness(fakes, now: _now, encryptBackups: encryptBackups),
+    ))!;
     addTearDown(() async {
       await tester.runAsync(h.dispose);
       fakes.dir.deleteSync(recursive: true);
@@ -137,6 +143,59 @@ void main() {
     await tester.tap(find.text('Continue with Google'));
     await settle(tester);
     expect(find.text('Backup found'), findsNothing);
+    expect(location(h), AppRoutes.settingsBackupRestore);
+  });
+
+  testWidgets('Start fresh records a baseline: old backups are not merged '
+      'automatically', (tester) async {
+    final h = await harness(tester);
+    await tester.runAsync(
+      () => fakes.addDriveBackup(createdAt: DateTime(2026, 10, 12, 21, 5)),
+    );
+    await open(tester, h);
+    await tester.tap(find.text('Continue with Google'));
+    await settle(tester);
+    final state = h.read(driveSyncProvider).state;
+    // Undecided: nothing merges yet.
+    expect(state.decisionPending, isTrue);
+
+    await tester.tap(find.text('Start fresh'));
+    await settle(tester);
+    expect(location(h), AppRoutes.home);
+    expect(state.decisionPending, isFalse);
+    expect(state.merged().keys, ['other-device']);
+  });
+
+  testWidgets('Encrypt backups on: connecting Drive asks how to protect '
+      'backups', (tester) async {
+    final h = await harness(tester, encryptBackups: true);
+    await open(tester, h);
+    await tester.tap(find.text('Continue with Google'));
+    await settle(tester);
+    expect(find.text('Protect your backups'), findsOneWidget);
+    await tester.tap(find.text('Back up without encryption'));
+    await settle(tester);
+    expect(h.read(settingsProvider).encryptBackups, isFalse);
+    expect(location(h), AppRoutes.home);
+  });
+
+  testWidgets('intent=restore: "Restore from a backup file" opens the '
+      'restore picker without an account', (tester) async {
+    final h = await harness(tester);
+    await open(tester, h, path: AppRoutes.signInRestore);
+    await tester.tap(find.text('Restore from a backup file'));
+    await settle(tester);
+    expect(location(h), AppRoutes.settingsBackupRestore);
+    expect(h.read(settingsProvider).accountMode, AccountMode.offline);
+  });
+
+  testWidgets('intent=restore survives choosing offline', (tester) async {
+    final h = await harness(tester);
+    await open(tester, h, path: AppRoutes.signInRestore);
+    await tester.tap(find.text('Use offline (local only)'));
+    await settle(tester);
+    await tester.tap(find.text('Skip'));
+    await settle(tester);
     expect(location(h), AppRoutes.settingsBackupRestore);
   });
 

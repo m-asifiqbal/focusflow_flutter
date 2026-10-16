@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -56,9 +57,8 @@ class HomeTasksSection extends ConsumerWidget {
 
     final Widget body = tasks.when(
       skipLoadingOnReload: true,
-      error: (_, _) => HomeErrorCard(
-        onRetry: () => ref.invalidate(homeTasksProvider(day)),
-      ),
+      error: (_, _) =>
+          HomeErrorCard(onRetry: () => ref.invalidate(homeTasksProvider(day))),
       loading: () => const FFSkeletonList(count: 2, kind: FFSkeletonKind.row),
       data: (value) {
         if (value.isNotEmpty) return _TaskList(tasks: value, use24h: use24h);
@@ -106,15 +106,18 @@ class _TaskList extends ConsumerWidget {
       children: [
         for (final (i, t) in shown.indexed) ...[
           if (i > 0) const SizedBox(height: HomeDimens.taskGap),
-          HomeTaskTile(
+          FFOpenOriginTracker(
             key: ValueKey(t.id),
-            task: t,
-            use24h: use24h,
-            onTap: () => context.push(AppRoutes.task(t.id)),
-            onLongPress: () => showItemActions(context, ref, t.ref),
-            onCheck: (complete) => complete
-                ? completeTask(context, ref, t.id, title: t.title)
-                : reopenTask(ref, t.id),
+            radius: AppRadii.row,
+            child: HomeTaskTile(
+              task: t,
+              use24h: use24h,
+              onTap: () => context.push(AppRoutes.task(t.id)),
+              onLongPress: () => showItemActions(context, ref, t.ref),
+              onCheck: (complete) => complete
+                  ? completeTask(context, ref, t.id, title: t.title)
+                  : reopenTask(ref, t.id),
+            ),
           ),
         ],
         if (more > 0)

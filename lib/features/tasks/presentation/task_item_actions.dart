@@ -18,6 +18,7 @@ import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/widgets/ff_action_sheet.dart';
+import 'package:focusflow/features/insights/presentation/widgets/focus_timer_sheet.dart';
 import 'package:focusflow/features/tasks/presentation/task_flows.dart';
 import 'package:focusflow/shared/item_actions/module_item_actions.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
@@ -57,6 +58,18 @@ Future<ModuleItemActions> taskItemActions(
           }
         },
       ),
+      if (!task.isCompleted)
+        FFActionItem(
+          icon: FontAwesomeIcons.stopwatch,
+          label: 'Focus on this task',
+          colors: ModuleStyle.notes.colors,
+          onTap: () {
+            if (context.mounted) {
+              // Logs a focus session against the task (Insights › Focus hours).
+              showFocusTimer(context, taskId: task.id, taskTitle: task.title);
+            }
+          },
+        ),
       FFActionItem(
         icon: FontAwesomeIcons.solidFlag,
         label: 'Priority',

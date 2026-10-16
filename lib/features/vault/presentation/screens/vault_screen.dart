@@ -96,7 +96,7 @@ class _FinishRecovery extends StatelessWidget {
     child: Padding(
       padding: const EdgeInsetsDirectional.all(AppSpacing.screen),
       child: FFPrimaryButton(
-        label: 'Set a new PIN',
+        label: 'Choose a new PIN to finish',
         onPressed: () => unawaited(showVaultNewPinSheet(context)),
       ),
     ),

@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/widgets/ff_open_origin.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/features/reminders/presentation/reminder_tokens.dart';
@@ -91,7 +92,8 @@ class ReminderTimelineItem extends ConsumerWidget {
                 occurrence: occurrence.at,
               )
             : null,
-        child: card,
+        // The editor grows out of this card (open-container transition).
+        child: FFOpenOriginTracker(child: card),
       ),
     );
     // The next-due row is emphasised: it pulls into the time gutter and

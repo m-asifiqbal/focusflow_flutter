@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.iqballab.focusflow.backup</string>
+		<string>com.iqballab.focusflow.maintenance</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -22,10 +27,47 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.iqballab.focusflow.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>focusflow</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>FocusFlow uses the camera to scan text into notes, add photos and scan 2FA QR codes.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>FocusFlow uses Face ID to unlock the app when App lock is on and to open your password vault.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>FocusFlow uses the microphone when you dictate a note or a quick capture.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FocusFlow lets you add photos from your library to notes and scan text from them.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>FocusFlow turns your speech into text for notes and quick capture.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -47,58 +89,13 @@
 			</array>
 		</dict>
 	</dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>com.iqballab.focusflow.deeplink</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>focusflow</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<!-- Google sign-in returns here: the iOS client's REVERSED id,
-				     set in ios/Flutter/GoogleSignIn.xcconfig
-				     (docs/google_drive_setup.md). -->
-				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
-			</array>
-		</dict>
-	</array>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>https</string>
-	</array>
-	<key>NSFaceIDUsageDescription</key>
-	<string>FocusFlow uses Face ID to unlock your password vault.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>FocusFlow uses the camera to scan text into notes, add photos and scan 2FA QR codes.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>FocusFlow lets you add photos from your library to notes and scan text from them.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>FocusFlow uses the microphone when you dictate a note or a quick capture.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>FocusFlow turns your speech into text for notes and quick capture.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>processing</string>
 	</array>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.iqballab.focusflow.backup</string>
-		<string>com.iqballab.focusflow.maintenance</string>
-	</array>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

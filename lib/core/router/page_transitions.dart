@@ -3,9 +3,9 @@
 /// ============================================================
 ///
 /// - Pushes (editors, details, settings sub-pages): [FFPageTransitionsBuilder],
-///   registered once in the theme so every `GoRoute(builder:)` gets it.
-///   iOS keeps the native Cupertino slide + edge swipe-back; Android gets a
-///   calm "fade-through + slight rise", the same feel as the mockups' sheets.
+///   registered once in the theme so every `GoRoute(builder:)` gets it:
+///   slide-in / slide-out with parallax and edge swipe-back, on both
+///   platforms.
 /// - Tab switches: [FFAnimatedBranchContainer] cross-fades the tab's
 ///   navigators with a small scale, keeping each tab's state alive
 ///   (StatefulShellRoute.indexedStack semantics).
@@ -15,21 +15,26 @@
 /// ============================================================
 library;
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 
-/// Theme-level transition for every MaterialPage route.
+/// Theme-level transition for every MaterialPage route: the page slides in
+/// from the trailing edge while the page underneath slides out a third of
+/// the way with a soft shadow (iOS-style parallax), and slides back on pop.
+/// The same slide runs on Android and iOS so the app feels identical on
+/// both, and the edge swipe-back gesture works on both.
 class FFPageTransitionsBuilder extends PageTransitionsBuilder {
   const FFPageTransitionsBuilder();
 
-  static const _cupertino = CupertinoPageTransitionsBuilder();
+  static const _slide = CupertinoPageTransitionsBuilder();
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 320);
+  Duration get transitionDuration => const Duration(milliseconds: 380);
 
   @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 260);
+  Duration get reverseTransitionDuration => const Duration(milliseconds: 320);
 
   @override
   Widget buildTransitions<T>(
@@ -40,63 +45,122 @@ class FFPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return child;
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      return _cupertino.buildTransitions(
-        route,
-        context,
-        animation,
-        secondaryAnimation,
-        child,
+    // Opened from a list card: grow out of that card (open container).
+    final origin = FFOpenOrigin.claim(route);
+    if (origin != null) {
+      return _OpenContainerTransition(
+        origin: origin,
+        animation: animation,
+        child: child,
       );
     }
-    return FFFadeThroughTransition(
-      animation: animation,
-      secondaryAnimation: secondaryAnimation,
-      child: child,
+    return _slide.buildTransitions(
+      route,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
     );
   }
 }
 
-/// Incoming page fades in while rising 4% / scaling from 0.97; the page
-/// underneath fades back slightly so the two never fight for attention.
-class FFFadeThroughTransition extends StatelessWidget {
-  const FFFadeThroughTransition({
+/// Where the next pushed page grows from (element → details transition).
+///
+/// List cards are wrapped in `FFOpenOriginTracker` (core/widgets), which
+/// calls [record] with the card's on-screen rect when it is tapped. The
+/// next page route that starts its transition within [window] claims it:
+/// it opens from the card and closes back into it. Any other navigation
+/// (FAB, settings rows, deep links) finds nothing pending and slides.
+abstract final class FFOpenOrigin {
+  static const Duration window = Duration(milliseconds: 700);
+
+  static ({Rect rect, double radius, DateTime at})? _pending;
+  static final Expando<Object> _claimed = Expando('ff-open-origin');
+  static final Object _none = Object();
+
+  /// Records a tapped card's global [rect] and corner [radius].
+  static void record(Rect rect, {double radius = AppRadii.card}) =>
+      _pending = (rect: rect, radius: radius, at: DateTime.now());
+
+  /// The origin of [route] (decided once, on its first transition build).
+  static ({Rect rect, double radius})? claim(Route<Object?> route) {
+    final seen = _claimed[route];
+    if (seen != null) {
+      return identical(seen, _none) ? null : seen as ({Rect rect, double radius});
+    }
+    final p = _pending;
+    _pending = null;
+    final fresh = p != null && DateTime.now().difference(p.at) <= window;
+    final origin = fresh ? (rect: p.rect, radius: p.radius) : null;
+    _claimed[route] = origin ?? _none;
+    return origin;
+  }
+}
+
+/// Open container: the page is clipped to a rounded rect that grows from
+/// the tapped card to full screen (and shrinks back on pop) while its
+/// content fades in, over a softly dimmed page.
+class _OpenContainerTransition extends StatelessWidget {
+  const _OpenContainerTransition({
+    required this.origin,
     required this.animation,
-    required this.secondaryAnimation,
     required this.child,
-    super.key,
   });
 
+  final ({Rect rect, double radius}) origin;
   final Animation<double> animation;
-  final Animation<double> secondaryAnimation;
   final Widget child;
 
-  static final _enterCurve = CurveTween(curve: AppMotion.curve);
-  static final _fadeIn = CurveTween(
-    curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
-  );
+  static const _fadeIn = Interval(0.15, 0.6, curve: Curves.easeOut);
 
   @override
   Widget build(BuildContext context) {
-    final enter = animation.drive(_enterCurve);
-    final exit = secondaryAnimation.drive(_enterCurve);
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Curves.fastOutSlowIn,
+      reverseCurve: Curves.fastOutSlowIn.flipped,
+    );
+    final canvas = CupertinoTheme.of(context).scaffoldBackgroundColor;
     return AnimatedBuilder(
-      animation: Listenable.merge([animation, secondaryAnimation]),
-      builder: (context, child) {
-        final t = enter.value;
-        final out = exit.value;
-        return Opacity(
-          opacity: (_fadeIn.transform(animation.value)) * (1 - 0.25 * out),
-          child: Transform.translate(
-            offset: Offset(0, 24 * (1 - t)),
-            child: Transform.scale(
-              scale: (0.97 + 0.03 * t) * (1 - 0.02 * out),
-              child: child,
+      animation: curved,
+      child: child,
+      builder: (context, page) {
+        final size = MediaQuery.sizeOf(context);
+        final t = curved.value;
+        final rect = Rect.lerp(origin.rect, Offset.zero & size, t)!;
+        final radius = lerpDouble(origin.radius, 0, t)!;
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: ColoredBox(
+                  color: const Color(0xFF000000).withValues(alpha: 0.16 * t),
+                ),
+              ),
             ),
-          ),
+            Positioned.fromRect(
+              rect: rect,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius),
+                child: ColoredBox(
+                  color: canvas,
+                  child: FittedBox(
+                    fit: BoxFit.fitWidth,
+                    alignment: Alignment.topCenter,
+                    child: SizedBox.fromSize(
+                      size: size,
+                      child: Opacity(
+                        opacity: _fadeIn.transform(animation.value),
+                        child: page,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
-      child: child,
     );
   }
 }

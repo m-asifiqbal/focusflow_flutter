@@ -90,6 +90,10 @@ vault, archive, insights, calendar, notifications_center, settings, backup.
 - Destructive item actions (archive / delete / restore / delete forever) ALWAYS go through
   `lib/shared/item_actions/item_lifecycle_actions.dart` (confirmation + Undo snackbar), from any
   screen, sheet or multi-select bar.
+- Motion: screen pushes slide in/out (theme-level `FFPageTransitionsBuilder`, both platforms,
+  swipe-back); tab switches fade (`FFAnimatedBranchContainer`). For element → details, wrap the
+  list card in `FFOpenOriginTracker` (core/widgets) — the page then grows out of the tapped card
+  and closes back into it. Navigation code stays a plain `context.push`.
 - Comments: a header block per file (what / why), doc comments on public APIs; explain *why*.
 - Keep files < ~400 lines; split widgets into `widgets/`.
 
@@ -101,9 +105,9 @@ flutter analyze
 flutter test
 flutter run -d "iPhone 17 Pro"
 ```
-Xcode 27: `flutter build ios --simulator` (universal arm64+x86_64) fails in `lipo -verify_arch`
-(Flutter 3.44.2 passes two archs, Xcode 27's lipo accepts one). Build for the active arch instead:
-`flutter run -d <simulator>` or xcodebuild of `ios/Runner.xcworkspace` for a specific simulator.
+Xcode 27: a universal (arm64+x86_64) simulator build fails in `lipo -verify_arch`, so
+`ios/Flutter/{Debug,Release}.xcconfig` pin `ARCHS[sdk=iphonesimulator*] = arm64` — keep those lines;
+`flutter build ios --simulator` and `flutter run -d <simulator>` both work.
 Android: `compileSdk` is pinned to ≥ 37 (permission_handler_android requires it) and
 android/build.gradle.kts applies the Kotlin Gradle plugin to `screen_protector` (it skips KGP on
 AGP 9, but this project keeps `android.builtInKotlin=false` for workmanager_android).
@@ -111,7 +115,8 @@ Tests: `test/helpers/test_container.dart` gives a fully wired ProviderContainer 
 DB + FakeClock; `test/helpers/screen_harness.dart` pumps the real app / a screen with the bundled
 fonts and `captureScreen` writes `build/screens/<name>.png` at the mockups' exact size (1170×2532)
 for side-by-side comparison with `design/NN_*.png`. (Helpers must not end in `_test.dart`.)
-Google Drive needs OAuth client ids at build time:
-`--dart-define=GOOGLE_SERVER_CLIENT_ID=… --dart-define=GOOGLE_IOS_CLIENT_ID=…`
+Google Drive needs OAuth client ids at build time: fill `config/google.json` (git-ignored, from
+`config/google.example.json`), run `dart run tool/google/apply_google_config.dart` (validates + writes
+the iOS URL scheme), then `flutter run --dart-define-from-file=config/google.json`
 (see docs/google_drive_setup.md). Without them, Drive shows "not set up in this build" and local
 backups still work.

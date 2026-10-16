@@ -71,6 +71,15 @@ class ExportTab extends ConsumerWidget {
     final account = ref.watch(cloudAccountProvider);
     final drive = account != null && account.hasDrive;
     final total = counts.valueOrNull?.total(o) ?? 0;
+    // A .ffbackup is sealed only when a backup PIN exists: say so.
+    final sealed = ref.watch(backupKeyExistsProvider).valueOrNull;
+    String? subtitleOf(ExportFormat f) => f != ExportFormat.ffbackup
+        ? f.subtitle
+        : switch (sealed) {
+            true => f.subtitle,
+            false => 'Full · not encrypted',
+            null => 'Full backup',
+          };
     const gap = SizedBox(height: AppSpacing.section);
     const tileGap = SizedBox(width: AppSpacing.sm);
 
@@ -87,7 +96,7 @@ class ExportTab extends ConsumerWidget {
                 Expanded(
                   child: ExportChoiceTile(
                     label: f.label,
-                    subtitle: f.subtitle,
+                    subtitle: subtitleOf(f),
                     icon: _formatIcons[f],
                     selected: o.format == f,
                     onTap: () => c.setFormat(f),

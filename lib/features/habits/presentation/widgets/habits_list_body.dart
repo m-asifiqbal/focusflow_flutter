@@ -111,7 +111,9 @@ class _HabitRow extends ConsumerWidget {
           ? null
           : () => showHabitAmountSheet(context, status),
     );
-    if (archived) return card;
+    // The detail grows out of this card (open-container transition).
+    final tracked = FFOpenOriginTracker(child: card);
+    if (archived) return tracked;
     return ItemSwipe(
       item: itemRef,
       isPinned: habit.isPinned,
@@ -119,7 +121,7 @@ class _HabitRow extends ConsumerWidget {
       title: habit.name,
       completeLabel: 'Log',
       onComplete: () => logHabitToday(context, ref, habit.id),
-      child: card,
+      child: tracked,
     );
   }
 

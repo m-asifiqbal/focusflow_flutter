@@ -40,6 +40,51 @@ import workmanager_apple
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "TextScannerPlugin") {
       TextScannerPlugin.register(with: registrar)
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "SecureClipboardPlugin") {
+      SecureClipboardPlugin.register(with: registrar)
+    }
+  }
+}
+
+/// `focusflow/secure_clipboard` (Dart: core/crypto/secure_clipboard.dart).
+/// Copied vault secrets are local-only (never synced to other devices via
+/// Universal Clipboard) and expire on their own; "clear" only wipes the
+/// pasteboard if it still holds what the vault copied (unchanged
+/// changeCount), so a newer copy by the user is never erased.
+final class SecureClipboardPlugin: NSObject, FlutterPlugin {
+  private var lastChangeCount: Int?
+
+  static func register(with registrar: FlutterPluginRegistrar) {
+    let channel = FlutterMethodChannel(
+      name: "focusflow/secure_clipboard",
+      binaryMessenger: registrar.messenger()
+    )
+    registrar.addMethodCallDelegate(SecureClipboardPlugin(), channel: channel)
+  }
+
+  func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let args = call.arguments as? [String: Any]
+    let pasteboard = UIPasteboard.general
+    switch call.method {
+    case "setSensitive":
+      let text = args?["text"] as? String ?? ""
+      var options: [UIPasteboard.OptionsKey: Any] = [.localOnly: true]
+      if let ms = args?["expiresInMs"] as? Int, ms > 0 {
+        options[.expirationDate] = Date().addingTimeInterval(Double(ms) / 1000)
+      }
+      pasteboard.setItems([["public.utf8-plain-text": text]], options: options)
+      lastChangeCount = pasteboard.changeCount
+      result(nil)
+    case "clear":
+      let unconditional = (args?["sha256"] as? String) == nil
+      if unconditional || pasteboard.changeCount == lastChangeCount {
+        pasteboard.items = []
+        lastChangeCount = nil
+      }
+      result(nil)
+    default:
+      result(FlutterMethodNotImplemented)
+    }
   }
 }
 

@@ -2,9 +2,11 @@
 /// FF WEEK STRIP — day picker (home "June 2023" pills, reminders circles)
 /// ============================================================
 ///
-/// * pill   — horizontally scrolling 52 pt-wide day pills (radius 18):
-///            "TUE" + "13"; selected = filled accent, white text; a dot
-///            under days that have items (screen 03).
+/// * pill   — horizontally scrolling "glass calendar" day tiles
+///            (FFCalendarDayTile): little desk calendars with binder rings;
+///            the selected day is the vivid accent calendar with a frosted
+///            panel, the others are light paper calendars; a dot under days
+///            that have items (screen 03).
 /// * circle — 7 equal columns: "T" over "13"; selected day sits in a
 ///            filled accent circle; today's letter in the accent (screen 12,
 ///            orange). Wrap it in an [FFCard] like the mockup.
@@ -15,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
+import 'package:focusflow/core/widgets/src/ff_calendar_day_tile.dart';
 import 'package:focusflow/core/widgets/src/ff_token_gaps.dart';
 import 'package:intl/intl.dart';
 
@@ -61,7 +64,7 @@ class FFWeekStrip extends StatefulWidget {
 }
 
 class _FFWeekStripState extends State<FFWeekStrip> {
-  static const double _pillWidth = 52;
+  static const double _pillWidth = FFCalendarDayTile.width;
   static const double _pillGap = 10;
   final _scroll = ScrollController();
 
@@ -118,7 +121,7 @@ class _FFWeekStripState extends State<FFWeekStrip> {
       scrollDirection: Axis.horizontal,
       clipBehavior: Clip.none,
       padding: widget.padding.add(
-        const EdgeInsetsDirectional.only(top: 2, bottom: AppSpacing.md),
+        const EdgeInsetsDirectional.only(top: 4, bottom: AppSpacing.md),
       ),
       child: Row(
         children: [
@@ -138,14 +141,8 @@ class _FFWeekStripState extends State<FFWeekStrip> {
     Color dot,
     DateTime today,
   ) {
-    final ff = context.ff;
     final selected = DateUtils.isSameDay(d, widget.selected);
-    final isToday = DateUtils.isSameDay(d, today);
     final items = widget.hasItems?.call(d) ?? false;
-    final fg = selected ? ff.onGradient : ff.ink;
-    final labelColor = selected
-        ? ff.onGradient.withValues(alpha: 0.85)
-        : accent.withValues(alpha: 0.7);
     return Semantics(
       button: true,
       selected: selected,
@@ -153,58 +150,13 @@ class _FFWeekStripState extends State<FFWeekStrip> {
       excludeSemantics: true,
       child: FFPressable(
         onTap: () => widget.onSelected(d),
-        scale: 0.95,
-        child: AnimatedContainer(
-          duration: context.motion(AppMotion.fast),
-          width: _pillWidth,
-          constraints: const BoxConstraints(minHeight: 78),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected ? accent : ff.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isToday && !selected
-                  ? accent.withValues(alpha: 0.5)
-                  : (selected ? accent : ff.surfaceBorder),
-              width: isToday && !selected ? 1.5 : 1,
-            ),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      offset: const Offset(0, 10),
-                      blurRadius: 20,
-                      spreadRadius: -8,
-                      color: accent.withValues(alpha: 0.55),
-                    ),
-                  ]
-                : ff.cardShadow,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                DateFormat.E().format(d).toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.clip,
-                softWrap: false,
-                style: context.text.meta.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: labelColor,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '${d.day}',
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.clip,
-                style: context.text.stat.copyWith(color: fg),
-              ),
-              const SizedBox(height: 6),
-              _Dot(color: items ? (selected ? ff.onGradient : dot) : null),
-            ],
-          ),
+        scale: 0.94,
+        child: FFCalendarDayTile(
+          day: d,
+          selected: selected,
+          isToday: DateUtils.isSameDay(d, today),
+          accent: accent,
+          dotColor: items ? dot : null,
         ),
       ),
     );

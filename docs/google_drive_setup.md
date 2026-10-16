@@ -48,33 +48,45 @@ Get the debug SHA-1 with
 `keytool -list -v -alias androiddebugkey -keystore ~/.android/debug.keystore -storepass android`.
 Get the Play signing SHA-1 from Play Console → App integrity.
 
-## 3. iOS URL scheme
-
-Create `ios/Flutter/GoogleSignIn.xcconfig`. It is git-ignored, and both
-Debug.xcconfig and Release.xcconfig include it if it exists:
-
-```
-GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.1234567890-abcdef
-```
-
-The value is the iOS client's *reversed* client id, from the iOS client's
-plist download. Info.plist registers it as a URL scheme, and Google sign-in
-returns to the app through that scheme.
-
-## 4. Build / run with the ids
+## 3. Put the ids in one file
 
 ```bash
-flutter run -d "iPhone 17 Pro" \
-  --dart-define=GOOGLE_SERVER_CLIENT_ID=1234567890-web.apps.googleusercontent.com \
-  --dart-define=GOOGLE_IOS_CLIENT_ID=1234567890-ios.apps.googleusercontent.com
-
-flutter build appbundle --dart-define=GOOGLE_SERVER_CLIENT_ID=… --dart-define=GOOGLE_IOS_CLIENT_ID=…
+cp config/google.example.json config/google.json     # git-ignored
+# paste the Web client id → GOOGLE_SERVER_CLIENT_ID
+# paste the iOS client id → GOOGLE_IOS_CLIENT_ID
+dart run tool/google/apply_google_config.dart
 ```
 
-A `--dart-define-from-file=google.json` file works too. Keep it out of git.
+The script validates both ids and writes `ios/Flutter/GoogleSignIn.xcconfig`
+(git-ignored) with `GOOGLE_REVERSED_CLIENT_ID`: the iOS id reversed, which
+Info.plist registers as the URL scheme Google sign-in returns to. Re-run it
+whenever the ids change. Android needs no file: its OAuth client is matched
+by package name + SHA-1.
+
+## 4. Run / build with the ids
+
+```bash
+flutter run --dart-define-from-file=config/google.json
+flutter build appbundle --dart-define-from-file=config/google.json
+flutter build ipa --dart-define-from-file=config/google.json
+```
+
+IDE: pick the **"main.dart (Google Drive)"** run configuration (Android
+Studio) or **"FocusFlow (Google Drive)"** (VS Code, `.vscode/launch.json`).
+The plain configurations keep working without `config/google.json`.
 
 Availability (`GoogleConfig.isConfigured`): Android needs
-`GOOGLE_SERVER_CLIENT_ID`, and iOS needs `GOOGLE_IOS_CLIENT_ID`.
+`GOOGLE_SERVER_CLIENT_ID`, and iOS needs `GOOGLE_IOS_CLIENT_ID`. Without
+them the app builds and runs; Drive says "not set up in this build".
+
+### Checklist to hand over
+
+- [ ] Google Drive API enabled in the Cloud project
+- [ ] OAuth consent screen: External, scope `.../auth/drive.appdata`, test users added
+- [ ] Android OAuth client: package `com.iqballab.focusflow` + SHA-1 of the debug,
+      upload and Play app-signing keys
+- [ ] Web OAuth client id → `GOOGLE_SERVER_CLIENT_ID`
+- [ ] iOS OAuth client (bundle id `com.iqballab.focusflow`) id → `GOOGLE_IOS_CLIENT_ID`
 
 ## How it behaves
 

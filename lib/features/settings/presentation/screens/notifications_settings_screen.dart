@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
+import 'package:focusflow/features/reminders/presentation/widgets/reminder_reliability_banners.dart';
 import 'package:focusflow/features/settings/presentation/widgets/notifications/notification_behaviour_section.dart';
 import 'package:focusflow/features/settings/presentation/widgets/notifications/notification_digest_section.dart';
 import 'package:focusflow/features/settings/presentation/widgets/notifications/notification_module_section.dart';
@@ -71,6 +72,9 @@ class _NotificationsSettingsScreenState
               children: const [
                 NotificationPermissionCard(),
                 SizedBox(height: AppSpacing.section),
+                // "Allow exact alarms" / "Allow reminders in the background"
+                // when the OS would delay or drop reminders (empty if fine).
+                ReminderReliabilityBanners(showAll: true),
                 NotificationDigestSection(),
                 SizedBox(height: AppSpacing.section),
                 NotificationModuleSection(),

@@ -61,10 +61,7 @@ class SearchRepositoryImpl implements SearchRepository {
     }
     final tables = {
       // Priority exists on tasks only, so such a query reads tasks only.
-      if (query.filters.minPriority != null)
-        db.tasks
-      else
-        ...db.allItemTables,
+      if (query.filters.minPriority != null) db.tasks else ...db.allItemTables,
       db.folders,
       db.itemTags,
       db.tags,

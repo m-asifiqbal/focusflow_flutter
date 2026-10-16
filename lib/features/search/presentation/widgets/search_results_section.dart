@@ -106,11 +106,14 @@ class SearchResultsSection extends StatelessWidget {
               child: Column(
                 children: [
                   for (final hit in shown)
-                    SearchResultRow(
+                    FFOpenOriginTracker(
                       key: ValueKey(hit.ref),
-                      hit: hit,
-                      query: query,
-                      onTap: () => onOpen(hit),
+                      radius: 0,
+                      child: SearchResultRow(
+                        hit: hit,
+                        query: query,
+                        onTap: () => onOpen(hit),
+                      ),
                     ),
                 ],
               ),

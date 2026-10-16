@@ -1,7 +1,8 @@
 /// Screen 27 — Notification center: mockup data (light + dark captures),
 /// filter chips, Read all, inline Done / Snooze through the shared
-/// notification actions, swipe-dismiss with Undo, tap opens the item, the
-/// empty state and no overflow at 360 pt / text scale 1.3.
+/// notification actions, swipe-dismiss with Undo, tap opens the item (or
+/// its list, pushed so back returns here), the empty state and no
+/// overflow at 360 pt / text scale 1.3.
 library;
 
 import 'package:flutter/material.dart';
@@ -139,6 +140,23 @@ void main() {
     final loc = h.read(routerProvider).state.uri.toString();
     expect(loc, AppRoutes.reminder(seed.reminderId));
     expect(await unread(tester), 2);
+  });
+
+  testWidgets('a row without an item opens its list as a drill-in', (
+    tester,
+  ) async {
+    await boot(tester);
+    await pumpApp(tester, h, AppRoutes.notificationCenter);
+    await tester.tap(find.text('View'));
+    await settle(tester);
+    final router = h.read(routerProvider);
+    expect(router.state.uri.toString(), AppRoutes.tasks);
+    // Pushed, not `go`: back returns to the notification center.
+    expect(router.canPop(), isTrue);
+    router.pop();
+    await settle(tester);
+    expect(router.state.uri.toString(), AppRoutes.notificationCenter);
+    expect(find.text('2 tasks are overdue'), findsOneWidget);
   });
 
   testWidgets('empty state', (tester) async {

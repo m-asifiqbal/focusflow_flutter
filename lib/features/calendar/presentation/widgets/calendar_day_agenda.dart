@@ -67,12 +67,14 @@ class CalendarDayAgenda extends ConsumerWidget {
         else
           for (var i = 0; i < entries.length; i++) ...[
             if (i > 0) const SizedBox(height: CalendarDimens.cardGap),
-            CalendarAgendaRow(
+            FFOpenOriginTracker(
               key: ValueKey(entries[i].ref),
-              entry: entries[i],
-              use24h: use24h,
-              draggable: draggable,
-              onTap: () => openCalendarEntry(context, entries[i]),
+              child: CalendarAgendaRow(
+                entry: entries[i],
+                use24h: use24h,
+                draggable: draggable,
+                onTap: () => openCalendarEntry(context, entries[i]),
+              ),
             ),
           ],
       ],

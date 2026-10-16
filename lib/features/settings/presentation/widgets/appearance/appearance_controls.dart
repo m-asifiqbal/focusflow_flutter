@@ -110,6 +110,18 @@ class _TextSizeCardState extends State<TextSizeCard> {
 
   int get _shown => _drag ?? widget.index;
 
+  /// "Default", "Large"… for a scale (stops are 0.85 … 1.3).
+  static String nameOf(double scale) {
+    if ((scale - 1).abs() < 0.001) return 'Default';
+    const smaller = ['Small', 'Smaller', 'Smallest'];
+    const larger = ['Large', 'Larger', 'Largest'];
+    final steps = ((scale - 1).abs() / 0.05).round();
+    if (scale < 1) return smaller[(steps - 1).clamp(0, 2)];
+    return larger[((steps ~/ 2) - 1).clamp(0, 2)];
+  }
+
+  static String percentOf(double scale) => '${(scale * 100).round()}%';
+
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
@@ -129,6 +141,54 @@ class _TextSizeCardState extends State<TextSizeCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Live size indicator: follows the thumb while dragging.
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  'Text size',
+                  style: context.text.rowTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: AnimatedSwitcher(
+                  duration: context.motion(AppMotion.fast),
+                  transitionBuilder: (child, a) => FadeTransition(
+                    opacity: a,
+                    child: ScaleTransition(
+                      scale: Tween<double>(begin: 0.85, end: 1).animate(a),
+                      child: child,
+                    ),
+                  ),
+                  child: Container(
+                    key: ValueKey(_shown),
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs + 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ff.primarySoft,
+                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                    ),
+                    child: Text(
+                      '${nameOf(widget.scales[_shown])} · '
+                      '${percentOf(widget.scales[_shown])}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.buttonSmall.copyWith(
+                        color: ff.primaryStrong,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               ExcludeSemantics(child: Text('A', style: small)),
@@ -144,16 +204,28 @@ class _TextSizeCardState extends State<TextSizeCard> {
                       fill: ff.isDark ? ff.ink : ff.surface,
                       shadow: ff.ink.withValues(alpha: 0.22),
                     ),
-                    activeTickMarkColor: Colors.transparent,
-                    inactiveTickMarkColor: Colors.transparent,
+                    // A tick for every size stop; the bubble shows the size
+                    // under the thumb while dragging.
+                    activeTickMarkColor: ff.onPrimary.withValues(alpha: 0.9),
+                    inactiveTickMarkColor: ff.inkFaint,
+                    tickMarkShape: const RoundSliderTickMarkShape(
+                      tickMarkRadius: 2.5,
+                    ),
+                    showValueIndicator: ShowValueIndicator.onDrag,
+                    valueIndicatorColor: ff.primary,
+                    valueIndicatorTextStyle: context.text.buttonSmall.copyWith(
+                      color: ff.onPrimary,
+                    ),
                     trackShape: const RoundedRectSliderTrackShape(),
                   ),
                   child: Slider(
                     value: _shown.toDouble(),
                     max: (stops - 1).toDouble(),
                     divisions: stops - 1,
+                    label: percentOf(widget.scales[_shown]),
                     semanticFormatterCallback: (v) =>
-                        'Text size ${v.round() + 1} of $stops',
+                        'Text size ${nameOf(widget.scales[v.round()])}, '
+                        '${percentOf(widget.scales[v.round()])}',
                     // Drag ticks only move the local preview; the setting
                     // (one JSON write + an app-wide relayout) is saved
                     // once, when the gesture ends.

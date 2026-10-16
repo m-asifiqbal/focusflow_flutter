@@ -39,6 +39,7 @@
 library;
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,7 +68,8 @@ class VaultSessionController extends Notifier<VaultSessionState> {
   int _holds = 0;
   bool _disposed = false;
   bool _busy = false;
-  Future<void> _pinLock = Future<void>.value();
+  bool _pinBusy = false;
+  final Queue<Completer<void>> _pinWaiters = Queue();
   bool _autoEnrollTried = false;
   PendingRecoveryCode? _pendingCode;
   Future<void>? _loading;
@@ -106,12 +108,22 @@ class VaultSessionController extends Notifier<VaultSessionState> {
     return VaultSessionState.loading;
   }
 
-  /// Runs PIN checks one at a time.
-  Future<T> _exclusive<T>(Future<T> Function() action) {
-    final previous = _pinLock;
-    final done = Completer<void>();
-    _pinLock = done.future;
-    return previous.then((_) => action()).whenComplete(done.complete);
+  /// Runs PIN checks one at a time (a `_busy` guard that queues instead
+  /// of rejecting, so no attempt is lost or skips the back-off). No future
+  /// is kept between calls: an idle lock never awaits anything.
+  Future<T> _exclusive<T>(Future<T> Function() action) async {
+    while (_pinBusy) {
+      final turn = Completer<void>();
+      _pinWaiters.add(turn);
+      await turn.future;
+    }
+    _pinBusy = true;
+    try {
+      return await action();
+    } finally {
+      _pinBusy = false;
+      if (_pinWaiters.isNotEmpty) _pinWaiters.removeFirst().complete();
+    }
   }
 
   /// Completes once the initial load (vault set up? attempts?) is done.

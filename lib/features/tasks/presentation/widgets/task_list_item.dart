@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/widgets/ff_open_origin.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
@@ -97,7 +98,8 @@ class TaskListItem extends ConsumerWidget {
       onComplete: () => task.isCompleted
           ? reopenTask(ref, task.id)
           : completeTask(context, ref, task.id, title: task.title),
-      child: row,
+      // The editor grows out of this row (open-container transition).
+      child: FFOpenOriginTracker(radius: AppRadii.row, child: row),
     );
   }
 }
