@@ -29,63 +29,35 @@ import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dar
 import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 
-/// Header, permission banner, week card and chips (a list of slivers'
-/// worth of boxes, top to bottom).
-class RemindersHeader extends ConsumerWidget {
-  const RemindersHeader({super.key});
+/// The fixed toolbar (title, subtitle, calendar + more); the timeline below
+/// it scrolls.
+class RemindersToolbar extends ConsumerWidget {
+  const RemindersToolbar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subtitle = ref.watch(remindersSubtitleProvider);
-    final denied =
-        ref.watch(notificationPermissionProvider).valueOrNull ==
-        NotificationPermission.denied;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FFLargeHeader(
-          title: 'Reminders',
-          fitTitle: true,
-          subtitle: subtitle ?? ' ',
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.screen,
-            ReminderSizes.headerTop,
-            AppSpacing.screen,
-            AppSpacing.sm,
-          ),
-          actions: [
-            FFRoundIconButton(
-              icon: FontAwesomeIcons.solidCalendarDays,
-              semanticLabel: 'Open calendar',
-              onPressed: () => context.push(AppRoutes.calendar),
-            ),
-            FFRoundIconButton(
-              icon: FontAwesomeIcons.ellipsis,
-              semanticLabel: 'More options',
-              onPressed: () => _showMore(context),
-            ),
-          ],
+    return FFLargeHeader(
+      title: 'Reminders',
+      fitTitle: true,
+      subtitle: subtitle ?? ' ',
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.screen,
+        ReminderSizes.headerTop,
+        AppSpacing.screen,
+        AppSpacing.sm,
+      ),
+      actions: [
+        FFRoundIconButton(
+          icon: FontAwesomeIcons.solidCalendarDays,
+          semanticLabel: 'Open calendar',
+          onPressed: () => context.push(AppRoutes.calendar),
         ),
-        if (denied)
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.screen,
-              AppSpacing.sm,
-              AppSpacing.screen,
-              0,
-            ),
-            child: FFInfoBanner(
-              icon: FontAwesomeIcons.solidBellSlash,
-              colors: ModuleStyle.reminders.colors,
-              text: 'Notifications are off — reminders can\'t alert you.',
-              actionLabel: 'Enable',
-              onAction: () => enableReminderNotifications(ref),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        const _WeekCard(),
-        const SizedBox(height: AppSpacing.lg),
-        const _FilterChips(),
+        FFRoundIconButton(
+          icon: FontAwesomeIcons.ellipsis,
+          semanticLabel: 'More options',
+          onPressed: () => _showMore(context),
+        ),
       ],
     );
   }
@@ -115,6 +87,44 @@ class RemindersHeader extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Header, permission banner, week card and chips (a list of slivers'
+/// worth of boxes, top to bottom).
+class RemindersHeader extends ConsumerWidget {
+  const RemindersHeader({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final denied =
+        ref.watch(notificationPermissionProvider).valueOrNull ==
+        NotificationPermission.denied;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (denied)
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.screen,
+              AppSpacing.sm,
+              AppSpacing.screen,
+              0,
+            ),
+            child: FFInfoBanner(
+              icon: FontAwesomeIcons.solidBellSlash,
+              colors: ModuleStyle.reminders.colors,
+              text: 'Notifications are off — reminders can\'t alert you.',
+              actionLabel: 'Enable',
+              onAction: () => enableReminderNotifications(ref),
+            ),
+          ),
+        const SizedBox(height: AppSpacing.md),
+        const _WeekCard(),
+        const SizedBox(height: AppSpacing.lg),
+        const _FilterChips(),
+      ],
     );
   }
 }

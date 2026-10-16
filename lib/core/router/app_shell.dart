@@ -27,10 +27,8 @@ class AppShell extends StatelessWidget {
       body: shell,
       bottomNavigationBar: FFBottomNav(
         currentIndex: shell.currentIndex,
-        onTap: (index) => shell.goBranch(
-          index,
-          initialLocation: index == shell.currentIndex,
-        ),
+        onTap: (index) =>
+            shell.goBranch(index, initialLocation: index == shell.currentIndex),
         onFab: () => showQuickAdd(context),
       ),
     );

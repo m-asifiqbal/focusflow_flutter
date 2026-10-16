@@ -29,6 +29,7 @@ import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/router/app_shell.dart';
 import 'package:focusflow/core/router/navigator_keys.dart';
 import 'package:focusflow/core/router/page_transitions.dart';
+import 'package:focusflow/core/router/route_pages.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/features/archive/presentation/archive_routes.dart';
 import 'package:focusflow/features/auth/presentation/auth_routes.dart';
@@ -104,9 +105,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               children: children,
             ),
         branches: [
-          StatefulShellBranch(routes: [homeTabRoute]),
+          StatefulShellBranch(routes: withMaterialPages([homeTabRoute])),
           StatefulShellBranch(
-            routes: [
+            routes: withMaterialPages([
               libraryTabRoute([
                 ...notesLibraryRoutes,
                 ...tasksLibraryRoutes,
@@ -115,41 +116,44 @@ final routerProvider = Provider<GoRouter>((ref) {
                 ...vaultLibraryRoutes,
                 ...archiveLibraryRoutes,
               ]),
-            ],
+            ]),
           ),
-          StatefulShellBranch(routes: [insightsTabRoute]),
+          StatefulShellBranch(routes: withMaterialPages([insightsTabRoute])),
           StatefulShellBranch(
-            routes: [
+            routes: withMaterialPages([
               settingsTabRoute([
                 ...accountSettingsRoutes,
                 ...backupSettingsRoutes,
                 ...vaultSettingsRoutes,
               ]),
-            ],
+            ]),
           ),
         ],
       ),
-      ...onboardingRootRoutes,
-      ...authRootRoutes,
-      ...searchRootRoutes,
-      ...calendarRootRoutes,
-      ...notificationsCenterRootRoutes,
-      ...notesRootRoutes,
-      ...tasksRootRoutes,
-      ...remindersRootRoutes,
-      ...habitsRootRoutes,
-      ...vaultRootRoutes,
-      // focusflow://item/{type}/{id} → the item's editor/detail.
-      GoRoute(
-        path: '/item/:type/:id',
-        parentNavigatorKey: rootNavigatorKey,
-        redirect: (context, state) {
-          final type = ItemType.fromKey(state.pathParameters['type']);
-          final id = state.pathParameters['id'];
-          if (type == null || id == null) return AppRoutes.home;
-          return AppRoutes.open(ItemRef(type, id));
-        },
-      ),
+      // Explicit Material pages: see core/router/route_pages.dart.
+      ...withMaterialPages([
+        ...onboardingRootRoutes,
+        ...authRootRoutes,
+        ...searchRootRoutes,
+        ...calendarRootRoutes,
+        ...notificationsCenterRootRoutes,
+        ...notesRootRoutes,
+        ...tasksRootRoutes,
+        ...remindersRootRoutes,
+        ...habitsRootRoutes,
+        ...vaultRootRoutes,
+        // focusflow://item/{type}/{id} → the item's editor/detail.
+        GoRoute(
+          path: '/item/:type/:id',
+          parentNavigatorKey: rootNavigatorKey,
+          redirect: (context, state) {
+            final type = ItemType.fromKey(state.pathParameters['type']);
+            final id = state.pathParameters['id'];
+            if (type == null || id == null) return AppRoutes.home;
+            return AppRoutes.open(ItemRef(type, id));
+          },
+        ),
+      ]),
     ],
   );
   ref.onDispose(router.dispose);

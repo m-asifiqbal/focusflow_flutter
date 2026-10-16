@@ -249,4 +249,9 @@ extension FFThemeContext on BuildContext {
   FFTextStyles get text => Theme.of(this).extension<FFTextStyles>()!;
 
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
+
+  /// Bottom padding for a scroll view on a tab screen: lets the last item
+  /// scroll clear of the floating nav bar (MediaQuery bottom = bar height).
+  double get barClearance =>
+      MediaQuery.paddingOf(this).bottom + AppSpacing.bottomBarClearance;
 }

@@ -76,23 +76,33 @@ class HomeScreen extends ConsumerWidget {
     return MinuteTicker(
       child: HabitDayTicker(
         child: FFScaffold(
-          body: RefreshIndicator(
-            color: context.ff.primary,
-            onRefresh: () => _refresh(ref),
-            child: ListView(
-              padding: const EdgeInsetsDirectional.only(
-                bottom: AppSpacing.bottomBarClearance,
-              ),
-              children: [
-                const HomeHeader(),
-                for (final (i, s) in sections.indexed) ...[
-                  SizedBox(
-                    height: i == 0 ? AppSpacing.xxl : HomeDimens.sectionGap,
+          safeBottom: false,
+          // Greeting / search / bell stay fixed; the sections scroll.
+          body: Column(
+            children: [
+              const HomeHeader(),
+              Expanded(
+                child: RefreshIndicator(
+                  color: context.ff.primary,
+                  onRefresh: () => _refresh(ref),
+                  child: ListView(
+                    padding: EdgeInsetsDirectional.only(
+                      bottom: context.barClearance,
+                    ),
+                    children: [
+                      for (final (i, s) in sections.indexed) ...[
+                        SizedBox(
+                          height: i == 0
+                              ? AppSpacing.xxl
+                              : HomeDimens.sectionGap,
+                        ),
+                        KeyedSubtree(key: ValueKey(s), child: section(s)),
+                      ],
+                    ],
                   ),
-                  KeyedSubtree(key: ValueKey(s), child: section(s)),
-                ],
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

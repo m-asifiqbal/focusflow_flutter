@@ -46,10 +46,7 @@ class PlaceholderScreen extends ConsumerWidget {
               ],
               if (kDebugMode && launchFlow) ...[
                 const SizedBox(height: AppSpacing.xxl),
-                Text(
-                  'This screen is not built yet.',
-                  style: context.text.meta,
-                ),
+                Text('This screen is not built yet.', style: context.text.meta),
                 const SizedBox(height: AppSpacing.lg),
                 FFPrimaryButton(
                   label: 'Continue to app',

@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -133,50 +134,58 @@ class _HabitsListScreenState extends ConsumerState<HabitsListScreen> {
     // app was in background) refreshes every card.
     return HabitDayTicker(
       child: FFScaffold(
+        safeBottom: false,
         body: Stack(
           children: [
-            CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: FFLargeHeader(
-                    title: 'Habits',
-                    subtitle: _reordering
-                        ? 'Drag to reorder'
-                        : summary == null
-                        ? ' '
-                        : HabitsListScreen.subtitle(summary),
-                    actions: actions,
-                  ),
+            // Title + actions stay fixed; hero, chips and habits scroll.
+            Column(
+              children: [
+                FFLargeHeader(
+                  title: 'Habits',
+                  subtitle: _reordering
+                      ? 'Drag to reorder'
+                      : summary == null
+                      ? ' '
+                      : HabitsListScreen.subtitle(summary),
+                  actions: actions,
                 ),
-                if (summary != null && summary.total > 0 && !_reordering)
-                  SliverPadding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      AppSpacing.screen,
-                      AppSpacing.sm + AppSpacing.xxs,
-                      AppSpacing.screen,
-                      AppSpacing.lg + AppSpacing.xxs,
-                    ),
-                    sliver: SliverToBoxAdapter(
-                      child: HabitsHeroCard(summary: summary),
-                    ),
+                Expanded(
+                  child: CustomScrollView(
+                    slivers: [
+                      if (summary != null && summary.total > 0 && !_reordering)
+                        SliverPadding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                            AppSpacing.screen,
+                            AppSpacing.sm + AppSpacing.xxs,
+                            AppSpacing.screen,
+                            AppSpacing.lg + AppSpacing.xxs,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: HabitsHeroCard(summary: summary),
+                          ),
+                        ),
+                      if (!_reordering)
+                        SliverToBoxAdapter(
+                          child: FFChipBar<HabitsScope>(
+                            items: HabitsListScreen.chips,
+                            selected: scope,
+                            onSelected: ref
+                                .read(habitsScopeProvider.notifier)
+                                .select,
+                          ),
+                        ),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: AppSpacing.sm),
+                      ),
+                      HabitsListBody(
+                        scope: _reordering ? HabitsScope.all : scope,
+                        reordering: _reordering,
+                      ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(height: context.barClearance),
+                      ),
+                    ],
                   ),
-                if (!_reordering)
-                  SliverToBoxAdapter(
-                    child: FFChipBar<HabitsScope>(
-                      items: HabitsListScreen.chips,
-                      selected: scope,
-                      onSelected: ref.read(habitsScopeProvider.notifier).select,
-                    ),
-                  ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: AppSpacing.sm),
-                ),
-                HabitsListBody(
-                  scope: _reordering ? HabitsScope.all : scope,
-                  reordering: _reordering,
-                ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: AppSpacing.bottomBarClearance),
                 ),
               ],
             ),

@@ -104,40 +104,50 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                 module: ItemType.note,
               )
             : null,
-        body: CustomScrollView(
-          slivers: [
-            SliverList(
-              delegate: SliverChildListDelegate([
-                const NotesHeader(),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                    AppSpacing.screen,
-                    AppSpacing.md,
-                    AppSpacing.screen,
-                    AppSpacing.lg,
+        // Title + view/more stay fixed; search, folders and notes scroll.
+        body: Column(
+          children: [
+            const NotesHeader(),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverList(
+                    delegate: SliverChildListDelegate([
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          AppSpacing.screen,
+                          AppSpacing.md,
+                          AppSpacing.screen,
+                          AppSpacing.lg,
+                        ),
+                        child: FFSearchField(
+                          controller: _search,
+                          hint: 'Search notes...',
+                          onChanged: ref
+                              .read(notesListFilterProvider.notifier)
+                              .search,
+                          onClear: () => ref
+                              .read(notesListFilterProvider.notifier)
+                              .search(''),
+                          onFilter: () => pickNotesTagFilter(context, ref),
+                          filterActive: tagActive,
+                          filterSemanticLabel: 'Filter by tag',
+                        ),
+                      ),
+                      const NotesFolderChips(),
+                      const NotesSortRow(),
+                      const SizedBox(height: AppSpacing.xxs),
+                    ]),
                   ),
-                  child: FFSearchField(
-                    controller: _search,
-                    hint: 'Search notes...',
-                    onChanged: ref
-                        .read(notesListFilterProvider.notifier)
-                        .search,
-                    onClear: () =>
-                        ref.read(notesListFilterProvider.notifier).search(''),
-                    onFilter: () => pickNotesTagFilter(context, ref),
-                    filterActive: tagActive,
-                    filterSemanticLabel: 'Filter by tag',
+                  _body(),
+                  SliverPadding(
+                    padding: EdgeInsetsDirectional.only(
+                      bottom:
+                          bottom +
+                          (selecting ? 96 : AppSpacing.bottomBarClearance),
+                    ),
                   ),
-                ),
-                const NotesFolderChips(),
-                const NotesSortRow(),
-                const SizedBox(height: AppSpacing.xxs),
-              ]),
-            ),
-            _body(),
-            SliverPadding(
-              padding: EdgeInsetsDirectional.only(
-                bottom: bottom + (selecting ? 96 : AppSpacing.xxxl),
+                ],
               ),
             ),
           ],

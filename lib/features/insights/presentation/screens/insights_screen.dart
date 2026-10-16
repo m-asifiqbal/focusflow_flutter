@@ -91,43 +91,53 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
     return MinuteTicker(
       child: FFScaffold(
-        body: SingleChildScrollView(
-          padding: const EdgeInsetsDirectional.only(
-            bottom: AppSpacing.bottomBarClearance,
-          ),
-          child: RepaintBoundary(
-            key: _boundary,
-            child: ColoredBox(
-              color: ff.canvas,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FFLargeHeader(
-                    title: 'Insights',
-                    subtitle: 'Your productivity at a glance',
-                    fitTitle: true,
-                    actions: [
-                      FFRoundIconButton(
-                        icon: FontAwesomeIcons.shareNodes,
-                        semanticLabel: 'Share insights',
-                        iconColor: ff.primary,
-                        onPressed: async.hasValue && !_sharing ? _share : null,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: InsightsDimens.chipsGap),
-                  const InsightsRangeBar(),
-                  const SizedBox(height: InsightsDimens.chipsGap),
-                  Padding(
-                    padding: pad.add(
-                      const EdgeInsetsDirectional.only(bottom: AppSpacing.xxl),
+        safeBottom: false,
+        // Title + share stay fixed; the charts scroll beneath them.
+        body: Column(
+          children: [
+            FFLargeHeader(
+              title: 'Insights',
+              subtitle: 'Your productivity at a glance',
+              fitTitle: true,
+              actions: [
+                FFRoundIconButton(
+                  icon: FontAwesomeIcons.shareNodes,
+                  semanticLabel: 'Share insights',
+                  iconColor: ff.primary,
+                  onPressed: async.hasValue && !_sharing ? _share : null,
+                ),
+              ],
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsetsDirectional.only(
+                  bottom: context.barClearance,
+                ),
+                child: RepaintBoundary(
+                  key: _boundary,
+                  child: ColoredBox(
+                    color: ff.canvas,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: InsightsDimens.chipsGap),
+                        const InsightsRangeBar(),
+                        const SizedBox(height: InsightsDimens.chipsGap),
+                        Padding(
+                          padding: pad.add(
+                            const EdgeInsetsDirectional.only(
+                              bottom: AppSpacing.xxl,
+                            ),
+                          ),
+                          child: body,
+                        ),
+                      ],
                     ),
-                    child: body,
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

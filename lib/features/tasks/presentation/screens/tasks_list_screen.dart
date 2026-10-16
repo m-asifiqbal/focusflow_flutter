@@ -61,7 +61,6 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
     final bottom = MediaQuery.paddingOf(context).bottom;
 
     final top = <Widget>[
-      const TasksHeader(),
       Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(
           AppSpacing.screen,
@@ -97,7 +96,8 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
               ..._sectionSlivers(),
               SliverPadding(
                 padding: EdgeInsetsDirectional.only(
-                  bottom: bottom + (selecting ? 96 : AppSpacing.xxxl),
+                  bottom:
+                      bottom + (selecting ? 96 : AppSpacing.bottomBarClearance),
                 ),
               ),
             ],
@@ -118,9 +118,17 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
           // Not FFScaffold.floating: the bar's own SafeArea already clears
           // the shell's tab bar (MediaQuery bottom padding), so it is
           // aligned here without extra inset.
+          // Title + view/more stay fixed; stats, chips and tasks scroll.
           body: Stack(
             children: [
-              Positioned.fill(child: body),
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    const TasksHeader(),
+                    Expanded(child: body),
+                  ],
+                ),
+              ),
               if (selecting)
                 const Align(
                   alignment: Alignment.bottomCenter,

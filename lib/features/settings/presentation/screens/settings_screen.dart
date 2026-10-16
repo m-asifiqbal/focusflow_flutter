@@ -48,74 +48,84 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final signedIn = ref.watch(cloudAccountProvider.select((a) => a != null));
     const gap = SizedBox(height: AppSpacing.section);
     return FFScaffold(
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: ListView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.zero,
-          children: [
-            const FFLargeHeader(title: 'Settings', fitTitle: true),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                AppSpacing.screen,
-                AppSpacing.sm,
-                AppSpacing.screen,
-                AppSpacing.lg,
-              ),
-              child: FFSearchField(
-                controller: _search,
-                hint: 'Search settings…',
-                onChanged: ref.read(settingsQueryProvider.notifier).set,
-                onClear: () {
-                  _search.clear();
-                  ref.read(settingsQueryProvider.notifier).clear();
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: AppSpacing.grouped,
-              ),
-              child: searching
-                  ? const SettingsSearchResults()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SettingsAccountCard(),
-                        gap,
-                        const SettingsGeneralSection(),
-                        gap,
-                        const SettingsPreferencesSection(),
-                        gap,
-                        const SettingsModulesSection(),
-                        gap,
-                        const SettingsSecuritySection(),
-                        gap,
-                        const SettingsDataSection(),
-                        gap,
-                        const SettingsSupportSection(),
-                        if (signedIn) ...[
-                          const SizedBox(height: AppSpacing.xxl),
-                          _SignOutButton(
-                            onPressed: () => confirmSignOut(context, ref),
-                          ),
-                        ],
-                        const SizedBox(height: AppSpacing.xxl),
-                        Text(
-                          'Made with care · Your data stays yours',
-                          textAlign: TextAlign.center,
-                          style: context.text.meta.copyWith(
-                            color: context.ff.inkFaint,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
+      safeBottom: false,
+      // Toolbar stays put; only the settings list scrolls beneath it.
+      body: Column(
+        children: [
+          const FFLargeHeader(title: 'Settings', fitTitle: true),
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsetsDirectional.only(
+                  bottom: context.barClearance,
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.screen,
+                      AppSpacing.sm,
+                      AppSpacing.screen,
+                      AppSpacing.lg,
                     ),
+                    child: FFSearchField(
+                      controller: _search,
+                      hint: 'Search settings…',
+                      onChanged: ref.read(settingsQueryProvider.notifier).set,
+                      onClear: () {
+                        _search.clear();
+                        ref.read(settingsQueryProvider.notifier).clear();
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.grouped,
+                    ),
+                    child: searching
+                        ? const SettingsSearchResults()
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SettingsAccountCard(),
+                              gap,
+                              const SettingsGeneralSection(),
+                              gap,
+                              const SettingsPreferencesSection(),
+                              gap,
+                              const SettingsModulesSection(),
+                              gap,
+                              const SettingsSecuritySection(),
+                              gap,
+                              const SettingsDataSection(),
+                              gap,
+                              const SettingsSupportSection(),
+                              if (signedIn) ...[
+                                const SizedBox(height: AppSpacing.xxl),
+                                _SignOutButton(
+                                  onPressed: () => confirmSignOut(context, ref),
+                                ),
+                              ],
+                              const SizedBox(height: AppSpacing.xxl),
+                              Text(
+                                'Made with care · Your data stays yours',
+                                textAlign: TextAlign.center,
+                                style: context.text.meta.copyWith(
+                                  color: context.ff.inkFaint,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.bottomBarClearance),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

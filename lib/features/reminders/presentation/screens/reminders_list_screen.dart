@@ -39,13 +39,21 @@ class RemindersListScreen extends ConsumerWidget {
     return MinuteTicker(
       child: FFScaffold(
         safeBottom: false,
-        body: CustomScrollView(
-          slivers: [
-            const SliverToBoxAdapter(child: RemindersHeader()),
-            ..._timelineSlivers(context, ref),
-            SliverPadding(
-              padding: EdgeInsetsDirectional.only(
-                bottom: bottom + AppSpacing.xxxl,
+        // Title + calendar/more stay fixed; week card, chips and timeline scroll.
+        body: Column(
+          children: [
+            const RemindersToolbar(),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(child: RemindersHeader()),
+                  ..._timelineSlivers(context, ref),
+                  SliverPadding(
+                    padding: EdgeInsetsDirectional.only(
+                      bottom: bottom + AppSpacing.bottomBarClearance,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

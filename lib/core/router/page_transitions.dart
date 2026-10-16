@@ -86,7 +86,9 @@ abstract final class FFOpenOrigin {
   static ({Rect rect, double radius})? claim(Route<Object?> route) {
     final seen = _claimed[route];
     if (seen != null) {
-      return identical(seen, _none) ? null : seen as ({Rect rect, double radius});
+      return identical(seen, _none)
+          ? null
+          : seen as ({Rect rect, double radius});
     }
     final p = _pending;
     _pending = null;
@@ -215,7 +217,7 @@ class _Branch extends StatefulWidget {
 class _BranchState extends State<_Branch> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
-    duration: AppMotion.normal,
+    duration: const Duration(milliseconds: 150),
     value: widget.active ? 1 : 0,
   );
   late final Animation<double> _t = CurvedAnimation(
@@ -245,16 +247,15 @@ class _BranchState extends State<_Branch> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // Inactive tabs are Offstage (state kept, not painted). The tab being
+    // shown fades in over a short 150 ms — opacity only: no scale/transform,
+    // so a whole screen is never re-rasterised through a transform layer.
     return Offstage(
       offstage: !widget.active,
       child: TickerMode(
         enabled: widget.active,
-        child: FadeTransition(
-          opacity: _t,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.985, end: 1).animate(_t),
-            child: widget.child,
-          ),
+        child: RepaintBoundary(
+          child: FadeTransition(opacity: _t, child: widget.child),
         ),
       ),
     );

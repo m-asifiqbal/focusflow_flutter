@@ -34,8 +34,10 @@ abstract final class AppSpacing {
   /// Row separators are inset this far from the left edge.
   static const double dividerInset = 60;
 
-  /// Bottom padding so content clears the tab bar + raised FAB.
-  static const double bottomBarClearance = 120;
+  /// Gap between the last scrollable item and the floating nav bar. Add it
+  /// to `MediaQuery.paddingOf(context).bottom` (the shell reserves the bar's
+  /// height there) — or just use `context.barClearance`.
+  static const double bottomBarClearance = 8;
 
   /// Gap between a list row's leading tile and its title.
   static const double rowLeadingGap = 14;

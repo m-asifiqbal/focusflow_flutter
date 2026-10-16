@@ -77,54 +77,59 @@ class FFBottomNav extends StatelessWidget {
 
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.15,
-      child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(
-          _sideMargin,
-          AppSpacing.sm,
-          _sideMargin,
-          bottomGap,
-        ),
-        child: DecoratedBox(
-          // Shadow outside the clip so the capsule lifts off the content.
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(_radius),
-            boxShadow: glass.shadow,
+      child: RepaintBoundary(
+        child: Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(
+            _sideMargin,
+            AppSpacing.sm,
+            _sideMargin,
+            bottomGap,
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(_radius),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: glass.fill,
-                  borderRadius: BorderRadius.circular(_radius),
-                  border: Border.all(color: glass.border),
-                ),
-                child: SizedBox(
-                  height: height,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, c) {
-                        // Icon-only tabs get a fixed slot; the active pill
-                        // gets whatever is left, so nothing can overflow.
-                        final activeMax =
-                            (c.maxWidth - _Fab._size - 3 * _tabSlot)
-                                .clamp(AppSizes.minTap, double.infinity)
-                                .toDouble();
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _tab(0, activeMax),
-                            _tab(1, activeMax),
-                            _Fab(onTap: onFab, semanticLabel: fabSemanticLabel),
-                            _tab(2, activeMax),
-                            _tab(3, activeMax),
-                          ],
-                        );
-                      },
+          child: DecoratedBox(
+            // Shadow outside the clip so the capsule lifts off the content.
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(_radius),
+              boxShadow: glass.shadow,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(_radius),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: glass.fill,
+                    borderRadius: BorderRadius.circular(_radius),
+                    border: Border.all(color: glass.border),
+                  ),
+                  child: SizedBox(
+                    height: height,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                      ),
+                      child: LayoutBuilder(
+                        builder: (context, c) {
+                          // Icon-only tabs get a fixed slot; the active pill
+                          // gets whatever is left, so nothing can overflow.
+                          final activeMax =
+                              (c.maxWidth - _Fab._size - 3 * _tabSlot)
+                                  .clamp(AppSizes.minTap, double.infinity)
+                                  .toDouble();
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _tab(0, activeMax),
+                              _tab(1, activeMax),
+                              _Fab(
+                                onTap: onFab,
+                                semanticLabel: fabSemanticLabel,
+                              ),
+                              _tab(2, activeMax),
+                              _tab(3, activeMax),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

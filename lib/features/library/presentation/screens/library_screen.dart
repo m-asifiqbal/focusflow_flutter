@@ -45,40 +45,49 @@ class LibraryScreen extends ConsumerWidget {
     return MinuteTicker(
       child: FFScaffold(
         safeBottom: false,
-        body: ListView(
-          padding: EdgeInsetsDirectional.only(bottom: bottom + AppSpacing.xxxl),
+        // Title + search/more stay fixed; the spaces and collections scroll.
+        body: Column(
           children: [
             const _Header(),
-            const SizedBox(height: AppSpacing.sm),
-            Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: AppSpacing.screen,
+            Expanded(
+              child: ListView(
+                padding: EdgeInsetsDirectional.only(
+                  bottom: bottom + AppSpacing.bottomBarClearance,
+                ),
+                children: [
+                  const SizedBox(height: AppSpacing.sm),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.screen,
+                    ),
+                    child: failed
+                        ? FFEmptyState.compact(
+                            colors: TagPalette.high,
+                            icon: FontAwesomeIcons.triangleExclamation,
+                            title: "Couldn't load your library",
+                            body: 'Your items are safe. Try again.',
+                            ctaLabel: 'Retry',
+                            ctaIcon: FontAwesomeIcons.arrowsRotate,
+                            onCta: () => ref.invalidate(libraryCountsProvider),
+                          )
+                        : const LibraryModuleGrid(),
+                  ),
+                  const SizedBox(height: _sectionGap),
+                  const Padding(
+                    padding: EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.grouped,
+                    ),
+                    child: LibraryCollections(),
+                  ),
+                  const SizedBox(height: _sectionGap),
+                  const Padding(
+                    padding: EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.screen,
+                    ),
+                    child: LibraryTagsSection(),
+                  ),
+                ],
               ),
-              child: failed
-                  ? FFEmptyState.compact(
-                      colors: TagPalette.high,
-                      icon: FontAwesomeIcons.triangleExclamation,
-                      title: "Couldn't load your library",
-                      body: 'Your items are safe. Try again.',
-                      ctaLabel: 'Retry',
-                      ctaIcon: FontAwesomeIcons.arrowsRotate,
-                      onCta: () => ref.invalidate(libraryCountsProvider),
-                    )
-                  : const LibraryModuleGrid(),
-            ),
-            const SizedBox(height: _sectionGap),
-            const Padding(
-              padding: EdgeInsetsDirectional.symmetric(
-                horizontal: AppSpacing.grouped,
-              ),
-              child: LibraryCollections(),
-            ),
-            const SizedBox(height: _sectionGap),
-            const Padding(
-              padding: EdgeInsetsDirectional.symmetric(
-                horizontal: AppSpacing.screen,
-              ),
-              child: LibraryTagsSection(),
             ),
           ],
         ),

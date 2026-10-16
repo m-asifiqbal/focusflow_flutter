@@ -129,19 +129,19 @@ class FFTextStyles extends ThemeExtension<FFTextStyles> {
           leadingDistribution: TextLeadingDistribution.even,
         );
     return FFTextStyles(
-      largeTitle: h(30, FontWeight.w700, height: 1.15).copyWith(
+      largeTitle: h(26, FontWeight.w700, height: 1.15).copyWith(
         letterSpacing: -0.5,
       ),
       title: h(23, FontWeight.w700, height: 1.2).copyWith(letterSpacing: -0.3),
       navTitle: h(16, FontWeight.w600, height: 1.25),
       sectionTitle: h(19, FontWeight.w600, height: 1.25),
-      cardTitle: h(15.5, FontWeight.w600, height: 1.3),
-      rowTitle: b(15.5, FontWeight.w600, height: 1.3),
-      body: b(15.5, FontWeight.w400, height: 1.6, color: c.inkMuted),
-      bodySmall: b(14, FontWeight.w400, height: 1.5, color: c.inkMuted),
-      meta: b(12.5, FontWeight.w600, height: 1.35, color: c.inkMuted),
-      caption: b(11, FontWeight.w600, height: 1.3, color: c.inkMuted),
-      sectionLabel: b(11.5, FontWeight.w800, height: 1.2, color: c.inkFaint)
+      cardTitle: h(16, FontWeight.w600, height: 1.3),
+      rowTitle: b(16, FontWeight.w600, height: 1.3),
+      body: b(16, FontWeight.w500, height: 1.55, color: c.inkMuted),
+      bodySmall: b(14.5, FontWeight.w500, height: 1.45, color: c.inkMuted),
+      meta: b(13.5, FontWeight.w600, height: 1.35, color: c.inkMuted),
+      caption: b(12, FontWeight.w600, height: 1.3, color: c.inkMuted),
+      sectionLabel: b(12, FontWeight.w800, height: 1.2, color: c.inkFaint)
           .copyWith(letterSpacing: 1.4),
       tag: b(10, FontWeight.w800, height: 1.2).copyWith(letterSpacing: 0.6),
       button: h(16, FontWeight.w600, height: 1.2),
