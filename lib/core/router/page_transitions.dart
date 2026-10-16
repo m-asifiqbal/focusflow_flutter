@@ -18,6 +18,7 @@ library;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Theme;
 import 'package:focusflow/core/theme/app_spacing.dart';
 
 /// Theme-level transition for every MaterialPage route: the page slides in
@@ -72,7 +73,9 @@ class FFPageTransitionsBuilder extends PageTransitionsBuilder {
 /// it opens from the card and closes back into it. Any other navigation
 /// (FAB, settings rows, deep links) finds nothing pending and slides.
 abstract final class FFOpenOrigin {
-  static const Duration window = Duration(milliseconds: 700);
+  // Long enough for pushes that wait on something first (e.g. a vault
+  // unlock before the item opens).
+  static const Duration window = Duration(milliseconds: 1200);
 
   static ({Rect rect, double radius, DateTime at})? _pending;
   static final Expando<Object> _claimed = Expando('ff-open-origin');
@@ -113,16 +116,18 @@ class _OpenContainerTransition extends StatelessWidget {
   final Animation<double> animation;
   final Widget child;
 
-  static const _fadeIn = Interval(0.15, 0.6, curve: Curves.easeOut);
+  static const _fadeIn = Interval(0.0, 0.5, curve: Curves.easeOut);
 
   @override
   Widget build(BuildContext context) {
     final curved = CurvedAnimation(
       parent: animation,
-      curve: Curves.fastOutSlowIn,
-      reverseCurve: Curves.fastOutSlowIn.flipped,
+      curve: Curves.easeInOutCubicEmphasized,
+      reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
     );
-    final canvas = CupertinoTheme.of(context).scaffoldBackgroundColor;
+    // The app's own surface (white in light, canvas in dark), not
+    // Cupertino's system background.
+    final canvas = Theme.of(context).colorScheme.surface;
     return AnimatedBuilder(
       animation: curved,
       child: child,

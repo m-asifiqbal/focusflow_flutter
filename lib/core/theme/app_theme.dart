@@ -134,7 +134,9 @@ abstract final class AppTheme {
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: c.primary,
-        selectionColor: c.highlight,
+        // Translucent: flutter_quill paints the selection on top of the
+        // text, so an opaque tint would hide the selected words.
+        selectionColor: c.primary.withValues(alpha: 0.30),
         selectionHandleColor: c.primary,
       ),
       cupertinoOverrideTheme: CupertinoThemeData(primaryColor: c.primary),

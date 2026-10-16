@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/features/notes/presentation/widgets/notes_list_states.dart';
 import 'package:focusflow/features/quick_add/presentation/widgets/quick_add_sheet.dart';
+import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -320,6 +321,44 @@ void main() {
       find.byType(NoteEditorScreen),
     );
     expect(editor.noteId, ids['Shopping List']);
+  });
+
+  testWidgets('opening grows out of the card and closing shrinks back', (
+    tester,
+  ) async {
+    await loadAppFonts();
+    final (h, _) = await harness(tester);
+    await pumpApp(tester, h, AppRoutes.notes);
+    final card = tester.getRect(find.text('Shopping List'));
+    await tester.tap(find.text('Shopping List'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 90));
+    // Mid-flight: a clipped, growing container starts at the card.
+    Rect clip() => tester.getRect(
+      find
+          .ancestor(
+            of: find.byType(NoteEditorScreen),
+            matching: find.byType(ClipRRect),
+          )
+          .first,
+    );
+    final opening = clip();
+    final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+    expect(opening.width, lessThan(screen.width - 1));
+    await captureScreen(tester, 'transition_open_midflight');
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(clip().width, closeTo(screen.width, 1));
+
+    // Back: it must shrink toward the card again, not vanish or slide.
+    h.read(routerProvider).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 90));
+    final closing = clip();
+    expect(closing.width, lessThan(screen.width - 1));
+    await captureScreen(tester, 'transition_close_midflight');
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byType(NoteEditorScreen), findsNothing);
+    expect(card.width, greaterThan(0));
   });
 
   testWidgets('first-run empty state', (tester) async {

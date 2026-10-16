@@ -20,12 +20,13 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_metrics.dart';
 
-/// Body sizes of the editor (design spec: paragraphs 15.5/1.75, H3 18).
+/// Body sizes of the editor (paragraphs 17/1.7 — a notch above the design
+/// spec's 15.5 for comfortable reading; H3 19.5).
 abstract final class NoteBodyMetrics {
-  static const double fontSize = 15.5;
-  static const double lineHeight = 1.75;
-  static const double headingSize = 18;
-  static const double checkbox = 14;
+  static const double fontSize = 17;
+  static const double lineHeight = 1.7;
+  static const double headingSize = 19.5;
+  static const double checkbox = 15;
 
   /// Leading column of list lines (checkbox + gap).
   static const double listIndent = 24;

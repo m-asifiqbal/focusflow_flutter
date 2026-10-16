@@ -16,6 +16,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:focusflow/features/notes/presentation/widgets/note_caret_handle.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -59,6 +60,7 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
   late final TextEditingController _title;
   final _scroll = ScrollController();
   final _bodyFocus = FocusNode();
+  final _editorKey = GlobalKey<QuillEditorState>();
   final _titleFocus = FocusNode();
   StreamSubscription<DocChange>? _changes;
   late final NoteBodyActions _actions;
@@ -295,8 +297,22 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
   }
 
   Widget _body(BuildContext context, NoteImageResolver? resolve) {
+    // Quill shows no handle for a plain caret; NoteCaretHandle adds a
+    // draggable one (Android) so the cursor can be slid, not only tapped.
+    return NoteCaretHandle(
+      controller: _quill,
+      focusNode: _bodyFocus,
+      editorKey: _editorKey,
+      scrollController: _scroll,
+      readOnly: _readOnly,
+      child: _editor(context, resolve),
+    );
+  }
+
+  Widget _editor(BuildContext context, NoteImageResolver? resolve) {
     final ff = context.ff;
     return QuillEditor(
+      key: _editorKey,
       controller: _quill,
       focusNode: _bodyFocus,
       scrollController: _scroll,

@@ -18,7 +18,7 @@ abstract final class HomeDimens {
   // Header
   static const double avatar = 44;
   static const double overline = 11.5;
-  static const double greeting = 18.5;
+  static const double greeting = 17.5;
   static const double headerTop = AppSpacing.sm;
 
   /// Between the Search and Bell buttons.

@@ -41,7 +41,9 @@ class HomeHeader extends ConsumerWidget {
         AppSpacing.screen,
         HomeDimens.headerTop,
         AppSpacing.screen,
-        0,
+        // Breathing room under the fixed toolbar (scrolled content slides
+        // beneath it, so it must not touch the edge).
+        AppSpacing.md,
       ),
       child: Row(
         children: [

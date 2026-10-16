@@ -29,7 +29,7 @@ class FFLargeHeader extends StatelessWidget {
       AppSpacing.screen,
       AppSpacing.lg,
       AppSpacing.screen,
-      AppSpacing.sm,
+      AppSpacing.md,
     ),
     super.key,
   });

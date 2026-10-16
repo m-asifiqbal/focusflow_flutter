@@ -7,6 +7,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:focusflow/features/notes/presentation/widgets/note_quill_styles.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/core/router/app_router.dart';
@@ -130,6 +132,52 @@ void main() {
     final id = (await tester.runAsync(() => seedMockupNote(h)))!;
     await pumpApp(tester, h, AppRoutes.note(id), textScale: 0.85);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('selected text stays visible; cursor handle slides the caret', (
+    tester,
+  ) async {
+    await loadAppFonts();
+    final h = await harness(tester);
+    final id = (await tester.runAsync(() => seedMockupNote(h)))!;
+    await pumpApp(tester, h, AppRoutes.note(id));
+    final editor = tester.widget<QuillEditor>(find.byType(QuillEditor));
+    final quill = editor.controller;
+
+    // 1. The selection tint is translucent (Quill paints it over the text).
+    final selection = Theme.of(
+      tester.element(find.byType(QuillEditor)),
+    ).textSelectionTheme.selectionColor!;
+    expect(selection.a, lessThan(0.5));
+
+    // 2. Body text is a notch larger than the old 15.5.
+    expect(NoteBodyMetrics.fontSize, 17);
+
+    // 3. Tapping the body focuses it and shows the caret handle.
+    await tester.tap(find.textContaining('landscape', findRichText: true));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    final handle = find.byKey(const ValueKey('note-caret-handle'));
+    expect(handle, findsOneWidget);
+    final before = quill.selection.baseOffset;
+    expect(quill.selection.isCollapsed, isTrue);
+
+    // 4. Dragging it moves the caret (here: further down the note).
+    await tester.drag(handle, const Offset(0, 120));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(quill.selection.isCollapsed, isTrue);
+    expect(quill.selection.baseOffset, isNot(before));
+
+    // 5. Typing hides it.
+    quill.replaceText(
+      quill.selection.baseOffset,
+      0,
+      'x',
+      TextSelection.collapsed(offset: quill.selection.baseOffset + 1),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(handle, findsNothing);
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('editing the title auto-saves', (tester) async {

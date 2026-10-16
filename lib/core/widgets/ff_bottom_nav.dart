@@ -1,21 +1,39 @@
 /// ============================================================
-/// FF BOTTOM NAV — floating glass pill: Home · Library · [+] · Insights · Settings
+/// FF BOTTOM NAV — glass tab pill + a separate fixed "+" circle
 /// ============================================================
 ///
-/// A frosted-glass capsule that floats above the content (blurred backdrop,
-/// soft sheen, hairline border). The active tab grows into an inner pill
-/// with icon + label; the others are icon-only and get their label through
-/// Semantics. The Quick Add "+" sits *inside* the capsule as a gradient
-/// circle — there is no canvas-coloured ring or raised area, so nothing
-/// opaque shows around it on any screen (mint, white editor, dark vault).
+/// Layout (from the hand wireframe):
 ///
-/// Use it with `Scaffold(extendBody: true)` (the app shell does) so content
-/// scrolls under the glass; screens keep `AppSpacing.bottomBarClearance`
-/// bottom padding. [currentIndex] is the tab index 0..3 (the + is not a tab).
+/// ```
+///  ╭──────────────────────────────────╮   ╭────╮
+///  │ ╭───────────╮                    │   │ +  │   ← Quick Add, fixed
+///  │ │ ⌂  Home   │   ▤    ◔    ⚙     │   ╰────╯
+///  │ ╰───────────╯                    │
+///  ╰──────────────────────────────────╯
+///        frosted glass pill (4 tabs)
+/// ```
+///
+/// * The pill holds the four tabs; the active one is an inner pill with icon
+///   + label, the others are icon-only (label via Semantics). The inner pill
+///   *slides* to the tapped tab while the slots resize around it.
+/// * The "+" is its own circle on the right, never part of the pill and never
+///   moves; nothing opaque sits around either shape, so screen content
+///   scrolls visibly beneath both.
+///
+/// Performance: ONE AnimationController drives the whole pill (a fractional
+/// tab position `p`); slot widths, the sliding highlight, icon colours and
+/// label reveal are pure functions of `p` computed in a single builder, text
+/// is laid out once (clipped, never re-wrapped), the animated layer sits in a
+/// RepaintBoundary, and only the pill (not the "+") carries a BackdropFilter.
+///
+/// Use with `Scaffold(extendBody: true)` (the app shell does) so content
+/// scrolls under the glass; scroll views pad with `context.barClearance`.
+/// [currentIndex] is the tab index 0..3 (the + is not a tab).
 /// ============================================================
 library;
 
-import 'dart:ui' show ImageFilter;
+import 'dart:math' as math;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -33,7 +51,7 @@ class FFNavItem {
   final String label;
 }
 
-class FFBottomNav extends StatelessWidget {
+class FFBottomNav extends StatefulWidget {
   const FFBottomNav({
     required this.currentIndex,
     required this.onTap,
@@ -47,10 +65,10 @@ class FFBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  /// Centre + (always opens Quick Add).
+  /// The separate "+" (always opens Quick Add).
   final VoidCallback onFab;
 
-  /// Exactly 4 tabs (2 either side of the +).
+  /// Exactly 4 tabs.
   final List<FFNavItem> items;
   final String fabSemanticLabel;
 
@@ -61,10 +79,72 @@ class FFBottomNav extends StatelessWidget {
     FFNavItem(icon: FontAwesomeIcons.gear, label: 'Settings'),
   ];
 
-  /// Capsule height (the + and the active pill sit inside it).
+  /// Height of the glass pill.
   static const double height = 64;
+
+  /// The "+" is 1 dp smaller than the pill on every side (62 vs 64): its
+  /// gradient and glow read larger than the glass, so this makes the two
+  /// look the same height. It stays centred on the pill's centre line.
+  static const double fabSize = height - 2;
+
+  static const double _gap = 10;
   static const double _sideMargin = AppSpacing.lg;
-  static const double _radius = height / 2;
+  static const double _pillPadding = 8;
+
+  /// Content width of an inactive (icon-only) tab.
+  static const double _iconSlot = 38;
+  static const double _iconSize = 19;
+
+  /// Smallest icon-only tab (also keeps a ≥ 44 dp tap cell with its margin).
+  static const double _minSlot = 30;
+
+  /// Space between the active tab's icon and its label.
+  static const double _iconGap = 7;
+
+  /// Padding of the sliding highlight around the icon + label (it hugs the
+  /// content instead of filling the leftover width).
+  static const double _highlightPadding = 14;
+  static const double _highlightHeight = 42;
+
+  /// Tab label: a notch smaller than a button label.
+  static const double _labelSize = 12.5;
+
+  @override
+  State<FFBottomNav> createState() => _FFBottomNavState();
+}
+
+class _FFBottomNavState extends State<FFBottomNav>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 340),
+    value: 1,
+  );
+  late double _from = widget.currentIndex.toDouble();
+  late double _to = widget.currentIndex.toDouble();
+
+  /// Fractional active-tab position (0..3), eased.
+  double get _p =>
+      lerpDouble(_from, _to, Curves.easeOutCubic.transform(_c.value))!;
+
+  @override
+  void didUpdateWidget(FFBottomNav old) {
+    super.didUpdateWidget(old);
+    if (old.currentIndex == widget.currentIndex) return;
+    _from = _p;
+    _to = widget.currentIndex.toDouble();
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _c.value = 1;
+    } else {
+      _c.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,61 +157,86 @@ class FFBottomNav extends StatelessWidget {
 
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.15,
-      child: RepaintBoundary(
-        child: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(
-            _sideMargin,
-            AppSpacing.sm,
-            _sideMargin,
-            bottomGap,
-          ),
-          child: DecoratedBox(
-            // Shadow outside the clip so the capsule lifts off the content.
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(_radius),
-              boxShadow: glass.shadow,
+      child: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(
+          FFBottomNav._sideMargin,
+          AppSpacing.sm,
+          FFBottomNav._sideMargin,
+          bottomGap,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _Pill(glass: glass, state: this),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(_radius),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: glass.fill,
-                    borderRadius: BorderRadius.circular(_radius),
-                    border: Border.all(color: glass.border),
-                  ),
-                  child: SizedBox(
-                    height: height,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
+            const SizedBox(width: FFBottomNav._gap),
+            _Fab(onTap: widget.onFab, semanticLabel: widget.fabSemanticLabel),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The frosted capsule with the sliding highlight and the four tabs.
+class _Pill extends StatelessWidget {
+  const _Pill({required this.glass, required this.state});
+
+  final _GlassColors glass;
+  final _FFBottomNavState state;
+
+  @override
+  Widget build(BuildContext context) {
+    const radius = FFBottomNav.height / 2;
+    return DecoratedBox(
+      // Shadow outside the clip so the capsule lifts off the content.
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: glass.shadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: glass.fill,
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(color: glass.border),
+            ),
+            child: SizedBox(
+              height: FFBottomNav.height,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: FFBottomNav._pillPadding,
+                ),
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    // Width of each tab's highlight = icon + label + padding
+                    // (capped to what the pill can hold). Measured here —
+                    // on rebuild, never per animation frame.
+                    final items = state.widget.items;
+                    final cap =
+                        c.maxWidth - (items.length - 1) * FFBottomNav._minSlot;
+                    final activeWidths = [
+                      for (final item in items)
+                        math.min(
+                          cap,
+                          FFBottomNav._iconSize +
+                              FFBottomNav._iconGap +
+                              _labelWidth(context, item.label) +
+                              2 * FFBottomNav._highlightPadding +
+                              1, // sub-pixel safety
+                        ),
+                    ];
+                    return RepaintBoundary(
+                      child: AnimatedBuilder(
+                        animation: state._c,
+                        builder: (context, _) =>
+                            _tabs(c.maxWidth, state._p, activeWidths),
                       ),
-                      child: LayoutBuilder(
-                        builder: (context, c) {
-                          // Icon-only tabs get a fixed slot; the active pill
-                          // gets whatever is left, so nothing can overflow.
-                          final activeMax =
-                              (c.maxWidth - _Fab._size - 3 * _tabSlot)
-                                  .clamp(AppSizes.minTap, double.infinity)
-                                  .toDouble();
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _tab(0, activeMax),
-                              _tab(1, activeMax),
-                              _Fab(
-                                onTap: onFab,
-                                semanticLabel: fabSemanticLabel,
-                              ),
-                              _tab(2, activeMax),
-                              _tab(3, activeMax),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -141,21 +246,102 @@ class FFBottomNav extends StatelessWidget {
     );
   }
 
-  /// Width reserved for an icon-only tab (≥ 44 pt tap target).
-  static const double _tabSlot = 46;
-
-  /// The active pill may grow up to [activeMax] (its label fades out on a
-  /// narrow phone / large text); the others sit in a fixed slot.
-  Widget _tab(int i, double activeMax) {
-    final active = i == currentIndex;
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: AppSizes.minTap,
-        maxWidth: active ? activeMax : _tabSlot,
-      ),
-      child: _Tab(item: items[i], active: active, onTap: () => onTap(i)),
+  /// Lays the four tabs out for the fractional active position [p].
+  ///
+  /// Every tab has a "cell"; cells tile the pill exactly. A cell = the tab's
+  /// content width + an even margin on both sides ("space-around"), so the
+  /// whole cell is tappable and there are no dead zones. The active tab's
+  /// content grows to its highlight width, the others shrink to the icon
+  /// slot; the margin absorbs the difference, so nothing ever overflows.
+  Widget _tabs(double width, double p, List<double> activeWidths) {
+    final w = state.widget;
+    final n = w.items.length;
+    // Narrow phones: shrink the icon slot before anything gets cramped.
+    final widest = activeWidths.reduce(math.max);
+    final slot = math.min(
+      FFBottomNav._iconSlot,
+      math.max(FFBottomNav._minSlot, (width - widest) / (n - 1)),
     );
+    double margin(double total) => math.max(0.0, (width - total) / (2 * n));
+
+    // Highlight rect of tab [k] at rest (its content slot inside its cell).
+    double highlightLeft(int k) {
+      final m = margin((n - 1) * slot + activeWidths[k]);
+      return m + k * (slot + 2 * m);
+    }
+
+    // The highlight glides between the two tabs [p] sits between.
+    final f = p.floor().clamp(0, n - 1);
+    final c = math.min(f + 1, n - 1);
+    final t = p - f;
+    final hLeft = lerpDouble(highlightLeft(f), highlightLeft(c), t)!;
+    final hWidth = lerpDouble(activeWidths[f], activeWidths[c], t)!;
+    const hTop = (FFBottomNav.height - FFBottomNav._highlightHeight) / 2;
+
+    // Strength 1 on the active tab, 0 two tabs away (they always sum to 1).
+    final strengths = [
+      for (var i = 0; i < n; i++) (1 - (p - i).abs()).clamp(0.0, 1.0),
+    ];
+    final widths = [
+      for (var i = 0; i < n; i++)
+        slot + strengths[i] * (activeWidths[i] - slot),
+    ];
+    final m = margin(widths.fold<double>(0, (a, b) => a + b));
+
+    final children = <Widget>[
+      Positioned(
+        left: hLeft,
+        top: hTop,
+        width: hWidth,
+        height: FFBottomNav._highlightHeight,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: glass.activeFill,
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            border: Border.all(color: glass.activeBorder),
+          ),
+        ),
+      ),
+    ];
+    var left = 0.0;
+    for (var i = 0; i < n; i++) {
+      final cell = widths[i] + 2 * m;
+      children.add(
+        Positioned(
+          left: left,
+          top: 0,
+          bottom: 0,
+          width: cell,
+          child: _Tab(
+            item: w.items[i],
+            strength: strengths[i],
+            selected: i == w.currentIndex,
+            glass: glass,
+            onTap: () => w.onTap(i),
+          ),
+        ),
+      );
+      left += cell;
+    }
+    return Stack(children: children);
   }
+}
+
+/// The tab label style (one place: the tab draws it, the pill measures it).
+TextStyle _labelStyle(BuildContext context) => context.text.buttonSmall
+    .copyWith(fontSize: FFBottomNav._labelSize, fontWeight: FontWeight.w700);
+
+/// Laid-out width of [label] under the nav's (clamped) text scale.
+double _labelWidth(BuildContext context, String label) {
+  final painter = TextPainter(
+    text: TextSpan(text: label, style: _labelStyle(context)),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final width = painter.width;
+  painter.dispose();
+  return width.ceilToDouble();
 }
 
 /// Glass tokens derived from the theme (light: milky white over mint;
@@ -236,88 +422,70 @@ class _GlassColors {
   }
 }
 
+/// One tab slot: the icon (colour eases with [strength]) and, while the tab
+/// is (becoming) active, its label sliding open beside it.
 class _Tab extends StatelessWidget {
-  const _Tab({required this.item, required this.active, required this.onTap});
+  const _Tab({
+    required this.item,
+    required this.strength,
+    required this.selected,
+    required this.glass,
+    required this.onTap,
+  });
 
   final FFNavItem item;
-  final bool active;
+
+  /// 0 = icon only … 1 = fully active (label open).
+  final double strength;
+  final bool selected;
+  final _GlassColors glass;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final glass = _GlassColors.of(context);
-    final duration = context.motion(AppMotion.normal);
-    final color = active ? glass.active : glass.inactive;
+    final color = Color.lerp(glass.inactive, glass.active, strength)!;
     return Semantics(
       button: true,
-      selected: active,
+      selected: selected,
       label: item.label,
       excludeSemantics: true,
-      child: FFPressable(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        scale: 0.92,
-        child: AnimatedContainer(
-          duration: duration,
-          curve: AppMotion.curve,
-          height: 46,
+        // The content keeps its natural size (the label is laid out once and
+        // only revealed) and scales down only if a cramped phone / huge text
+        // leaves less room than it needs — never clipped, never overflowing.
+        // The highlight's side padding fades in with [strength].
+        child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: active ? AppSpacing.lg : AppSpacing.md,
+            horizontal: FFBottomNav._highlightPadding * strength,
           ),
-          decoration: BoxDecoration(
-            color: active
-                ? glass.activeFill
-                : glass.activeFill.withValues(alpha: 0),
-            borderRadius: BorderRadius.circular(AppRadii.pill),
-            border: Border.all(
-              color: active
-                  ? glass.activeBorder
-                  : glass.activeBorder.withValues(alpha: 0),
-            ),
-          ),
-          // Laid out at its natural width and clipped to the pill, so the
-          // label's open/close animation can never overflow the tab slot.
-          child: UnconstrainedBox(
-            clipBehavior: Clip.hardEdge,
-            alignment: AlignmentDirectional.centerStart,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TweenAnimationBuilder<Color?>(
-                  tween: ColorTween(end: color),
-                  duration: duration,
-                  builder: (context, c, _) =>
-                      Icon(item.icon, size: 19, color: c),
-                ),
-                // The label slides open next to the icon on the active tab.
-                TweenAnimationBuilder<double>(
-                  tween: Tween(end: active ? 1 : 0),
-                  duration: duration,
-                  curve: AppMotion.curve,
-                  builder: (context, t, child) => t == 0
-                      ? const SizedBox.shrink()
-                      : ClipRect(
-                          child: Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            widthFactor: t,
-                            child: Opacity(opacity: t, child: child),
-                          ),
+                Icon(item.icon, size: FFBottomNav._iconSize, color: color),
+                if (strength > 0.01)
+                  ClipRect(
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      widthFactor: strength,
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: FFBottomNav._iconGap,
                         ),
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.only(
-                      start: AppSpacing.sm,
-                    ),
-                    child: Text(
-                      item.label,
-                      maxLines: 1,
-                      softWrap: false,
-                      overflow: TextOverflow.fade,
-                      style: context.text.buttonSmall.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w700,
+                        child: Text(
+                          item.label,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: _labelStyle(
+                            context,
+                          ).copyWith(color: color.withValues(alpha: strength)),
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -327,13 +495,12 @@ class _Tab extends StatelessWidget {
   }
 }
 
+/// The standalone Quick Add circle, right of the pill.
 class _Fab extends StatelessWidget {
   const _Fab({required this.onTap, required this.semanticLabel});
 
   final VoidCallback onTap;
   final String semanticLabel;
-
-  static const double _size = 48;
 
   @override
   Widget build(BuildContext context) {
@@ -344,25 +511,25 @@ class _Fab extends StatelessWidget {
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,
-        scale: 0.9,
+        scale: 0.92,
         child: Container(
-          width: _size,
-          height: _size,
+          width: FFBottomNav.fabSize,
+          height: FFBottomNav.fabSize,
           decoration: BoxDecoration(
             gradient: ff.primaryGradient,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
             boxShadow: [
               BoxShadow(
-                offset: const Offset(0, 8),
-                blurRadius: 18,
-                spreadRadius: -6,
+                offset: const Offset(0, 12),
+                blurRadius: 24,
+                spreadRadius: -8,
                 color: ff.primary.withValues(alpha: 0.6),
               ),
             ],
           ),
           child: Center(
-            child: Icon(FontAwesomeIcons.plus, size: 20, color: ff.onGradient),
+            child: Icon(FontAwesomeIcons.plus, size: 22, color: ff.onGradient),
           ),
         ),
       ),
