@@ -14,6 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/home/presentation/home_tokens.dart';
@@ -74,8 +75,10 @@ class _NotesGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final now = ref.watch(minuteClockProvider);
+    final brightness = Theme.of(context).brightness;
     Widget card(Note n) => FFOpenOriginTracker(
       key: ValueKey(n.id),
+      color: NoteColors.background(n.colorHex, brightness),
       child: NoteCard(
         note: n,
         now: now,

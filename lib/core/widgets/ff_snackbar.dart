@@ -168,11 +168,12 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _show(
       backgroundColor: Colors.transparent,
       elevation: 0,
       padding: EdgeInsets.zero,
+      // Sits close above the nav pill (which already adds 8 dp of its own).
       margin: const EdgeInsets.fromLTRB(
         AppSpacing.xl,
         0,
         AppSpacing.xl,
-        AppSpacing.md,
+        AppSpacing.sm,
       ),
       shape: const RoundedRectangleBorder(),
       clipBehavior: Clip.none,

@@ -26,6 +26,7 @@ import 'package:focusflow/features/notes/presentation/widgets/note_list_row.dart
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
+import '../../../helpers/filmstrip.dart';
 import '../../../helpers/screen_harness.dart';
 import '../../../helpers/test_container.dart';
 import '../notes_fixtures.dart';
@@ -359,6 +360,30 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     expect(find.byType(NoteEditorScreen), findsNothing);
     expect(card.width, greaterThan(0));
+  });
+
+  testWidgets('filmstrip: card → editor → back (visual check)', (tester) async {
+    await loadAppFonts();
+    final (h, _) = await harness(tester);
+    await pumpApp(tester, h, AppRoutes.notes);
+    await tester.tap(find.text('Shopping List'));
+    await tester.pump();
+    await captureFilmstrip(
+      tester,
+      'film_open',
+      frames: 12,
+      step: const Duration(milliseconds: 30),
+    );
+    await tester.pump(const Duration(milliseconds: 600));
+    h.read(routerProvider).pop();
+    await tester.pump();
+    await captureFilmstrip(
+      tester,
+      'film_close',
+      frames: 12,
+      step: const Duration(milliseconds: 24),
+    );
+    await tester.pump(const Duration(milliseconds: 600));
   });
 
   testWidgets('first-run empty state', (tester) async {

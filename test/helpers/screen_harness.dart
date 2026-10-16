@@ -54,6 +54,7 @@ Future<void> loadAppFonts() async {
     'NunitoSans': [
       'assets/fonts/NunitoSans-Regular.ttf',
       'assets/fonts/NunitoSans-Italic.ttf',
+      'assets/fonts/NunitoSans-Medium.ttf',
       'assets/fonts/NunitoSans-SemiBold.ttf',
       'assets/fonts/NunitoSans-Bold.ttf',
       'assets/fonts/NunitoSans-ExtraBold.ttf',
@@ -150,6 +151,16 @@ Future<void> settle(WidgetTester tester, {int rounds = 4}) async {
     );
     await tester.pump(const Duration(milliseconds: 300));
   }
+  // Pages now leave with real transitions, so the last screen's providers
+  // are disposed late — one frame per dependency level — and Drift closes
+  // every dropped stream with a zero-length timer. Keep pumping tiny steps
+  // while frames are still being requested, then one more to run the timers
+  // the last frame created; otherwise the test ends with timers pending.
+  var extra = 0;
+  while (tester.binding.hasScheduledFrame && extra++ < 24) {
+    await tester.pump(const Duration(milliseconds: 1));
+  }
+  await tester.pump(const Duration(milliseconds: 1));
 }
 
 /// Writes the current frame to `build/screens/<name>.png`. Returns the file.

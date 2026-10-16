@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/widgets/ff_open_origin.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
@@ -176,6 +177,9 @@ class _NoteItem extends ConsumerWidget {
     // The editor grows out of this card (open-container transition).
     child = FFOpenOriginTracker(
       radius: grid ? AppRadii.card : AppRadii.row,
+      color: grid
+          ? NoteColors.background(note.colorHex, Theme.of(context).brightness)
+          : null,
       child: child,
     );
     if (manual) {

@@ -88,7 +88,7 @@ class FFBottomNav extends StatefulWidget {
   static const double fabSize = height - 2;
 
   static const double _gap = 10;
-  static const double _sideMargin = AppSpacing.lg;
+  static const double _sideMargin = AppSpacing.lg - 1;
   static const double _pillPadding = 8;
 
   /// Content width of an inactive (icon-only) tab.
@@ -149,10 +149,10 @@ class _FFBottomNavState extends State<FFBottomNav>
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
-    // Float just above the home indicator (or 12 pt from the edge).
+    // Float just above the home indicator (or 8 pt from the edge).
     final bottomGap = bottomInset > 0
-        ? bottomInset - AppSpacing.xs
-        : AppSpacing.md;
+        ? bottomInset - AppSpacing.sm
+        : AppSpacing.sm;
     final glass = _GlassColors.of(context);
 
     return MediaQuery.withClampedTextScaling(
