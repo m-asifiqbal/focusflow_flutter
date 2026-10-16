@@ -6,3 +6,9 @@
 // creates ios/Flutter/GoogleSignIn.xcconfig (docs/google_drive_setup.md).
 GOOGLE_REVERSED_CLIENT_ID = com.iqballab.focusflow.google-not-configured
 #include? "GoogleSignIn.xcconfig"
+
+// Xcode 27 + Flutter 3.44: a universal (arm64 + x86_64) simulator build
+// fails in "Prepare Flutter Framework" (`lipo -verify_arch` accepts one arch).
+// Simulators on Apple Silicon only need arm64, so drop the Intel slice.
+ARCHS[sdk=iphonesimulator*] = arm64
+EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64

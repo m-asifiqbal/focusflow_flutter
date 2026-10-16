@@ -14,7 +14,9 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "com.iqballab.focusflow"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android requires compiling against API 37+
+    // (compile SDK only; minSdk / targetSdk are unaffected).
+    compileSdk = maxOf(37, flutter.compileSdkVersion)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

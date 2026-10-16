@@ -2,14 +2,16 @@
 library;
 
 import 'package:focusflow/core/router/navigator_keys.dart';
-import 'package:focusflow/core/router/placeholder_screen.dart';
+import 'package:focusflow/features/habits/presentation/screens/habit_detail_screen.dart';
+import 'package:focusflow/features/habits/presentation/screens/habit_editor_screen.dart';
+import 'package:focusflow/features/habits/presentation/screens/habits_list_screen.dart';
 import 'package:go_router/go_router.dart';
 
 /// `/library/habits`.
 final List<RouteBase> habitsLibraryRoutes = [
   GoRoute(
     path: 'habits',
-    builder: (context, state) => const PlaceholderScreen('Habits'),
+    builder: (context, state) => const HabitsListScreen(),
   ),
 ];
 
@@ -18,19 +20,20 @@ final List<RouteBase> habitsRootRoutes = [
   GoRoute(
     path: '/habits/new',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const PlaceholderScreen('New habit'),
+    builder: (context, state) =>
+        HabitEditorScreen(initialName: state.uri.queryParameters['name']),
   ),
   GoRoute(
     path: '/habits/:id',
     parentNavigatorKey: rootNavigatorKey,
     builder: (context, state) =>
-        PlaceholderScreen('Habit detail', detail: state.pathParameters['id']),
+        HabitDetailScreen(habitId: state.pathParameters['id']!),
     routes: [
       GoRoute(
         path: 'edit',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) =>
-            PlaceholderScreen('Edit habit', detail: state.pathParameters['id']),
+            HabitEditorScreen(habitId: state.pathParameters['id']),
       ),
     ],
   ),

@@ -16,7 +16,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:focusflow/core/theme/fa_icons.dart';
 
 enum AppModule {
   notes,

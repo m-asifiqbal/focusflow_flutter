@@ -15,6 +15,7 @@
 /// ============================================================
 library;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 
@@ -22,6 +23,10 @@ abstract final class AppFonts {
   static const String heading = 'LexendDeca';
   static const String body = 'NunitoSans';
 }
+
+// Settings › Appearance › "Use system font": the bundled families are
+// dropped (fontFamily null), so text falls back to the platform default
+// (San Francisco on iOS, Roboto on Android) via the Material typography.
 
 @immutable
 class FFTextStyles extends ThemeExtension<FFTextStyles> {
@@ -100,10 +105,14 @@ class FFTextStyles extends ThemeExtension<FFTextStyles> {
   /// Monospace for passwords / codes.
   final TextStyle mono;
 
-  factory FFTextStyles.from(FFColors c) {
+  /// [systemFont]: use the platform's default family instead of the
+  /// bundled Lexend Deca / Nunito Sans (monospace is unchanged).
+  factory FFTextStyles.from(FFColors c, {bool systemFont = false}) {
+    final heading = systemFont ? null : AppFonts.heading;
+    final bodyFamily = systemFont ? null : AppFonts.body;
     TextStyle h(double size, FontWeight w, {double? height, Color? color}) =>
         TextStyle(
-          fontFamily: AppFonts.heading,
+          fontFamily: heading,
           fontSize: size,
           fontWeight: w,
           height: height,
@@ -112,7 +121,7 @@ class FFTextStyles extends ThemeExtension<FFTextStyles> {
         );
     TextStyle b(double size, FontWeight w, {double? height, Color? color}) =>
         TextStyle(
-          fontFamily: AppFonts.body,
+          fontFamily: bodyFamily,
           fontSize: size,
           fontWeight: w,
           height: height,
@@ -152,8 +161,8 @@ class FFTextStyles extends ThemeExtension<FFTextStyles> {
   }
 
   /// Material [TextTheme] so stock widgets (dialogs, pickers, Quill) match.
-  static TextTheme materialTextTheme(FFColors c) {
-    final s = FFTextStyles.from(c);
+  static TextTheme materialTextTheme(FFColors c, {bool systemFont = false}) {
+    final s = FFTextStyles.from(c, systemFont: systemFont);
     return TextTheme(
       displayLarge: s.heroNumber,
       displayMedium: s.bigStat,
@@ -175,6 +184,37 @@ class FFTextStyles extends ThemeExtension<FFTextStyles> {
 
   @override
   FFTextStyles copyWith() => this;
+
+  List<TextStyle> get _all => [
+    largeTitle,
+    title,
+    navTitle,
+    sectionTitle,
+    cardTitle,
+    rowTitle,
+    body,
+    bodySmall,
+    meta,
+    caption,
+    sectionLabel,
+    tag,
+    button,
+    buttonSmall,
+    bigStat,
+    stat,
+    heroNumber,
+    mono,
+  ];
+
+  // Value equality so ThemeData == (which compares extensions) holds for
+  // equal themes and MaterialApp's AnimatedTheme doesn't re-animate.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FFTextStyles && listEquals(other._all, _all);
+
+  @override
+  int get hashCode => Object.hashAll(_all);
 
   @override
   FFTextStyles lerp(ThemeExtension<FFTextStyles>? other, double t) {

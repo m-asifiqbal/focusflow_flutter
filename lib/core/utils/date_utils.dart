@@ -23,6 +23,20 @@ abstract final class DateUtilsX {
 
   static DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
+  /// Encodes the calendar day of [day] for a "floating" date column (task
+  /// due dates): UTC midnight of that y/m/d. Unlike local midnight it does
+  /// not move to another day when the device changes time zone. Use it for
+  /// values written to `tasks.due_date` *and* for SQL bounds compared to it.
+  static DateTime toStoredDay(DateTime day) =>
+      DateTime.utc(day.year, day.month, day.day);
+
+  /// Decodes a [toStoredDay] value (Drift returns it as a local DateTime)
+  /// back to the local calendar day at midnight.
+  static DateTime fromStoredDay(DateTime stored) {
+    final u = stored.toUtc();
+    return DateTime(u.year, u.month, u.day);
+  }
+
   static bool isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
@@ -56,9 +70,18 @@ abstract final class DateUtilsX {
   static String minutesToTime(int minutes, {bool use24h = false}) =>
       time(atMinutes(DateTime(2000), minutes), use24h: use24h);
 
+  /// Whole calendar days from [from] to [to] (time of day ignored).
+  /// Computed on UTC dates: local midnights are 23 or 25 h apart across a
+  /// DST change, which would make `Duration.inDays` off by one.
+  static int daysBetween(DateTime from, DateTime to) => DateTime.utc(
+    to.year,
+    to.month,
+    to.day,
+  ).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
+
   /// "Today" / "Tomorrow" / "Yesterday" / "Tue, Jun 13".
   static String relativeDay(DateTime d, DateTime now) {
-    final diff = dateOnly(d).difference(dateOnly(now)).inDays;
+    final diff = daysBetween(now, d);
     if (diff == 0) return 'Today';
     if (diff == 1) return 'Tomorrow';
     if (diff == -1) return 'Yesterday';

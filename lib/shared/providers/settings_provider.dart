@@ -44,6 +44,10 @@ class SettingsController extends Notifier<AppSettings> {
   }
 
   /// Records a search term (dedup, newest first, max 10).
+  ///
+  /// Deprecated: recent searches are moving to the search feature's own
+  /// (secure-storage) store — see `features/search`. Kept working until
+  /// that migration lands; don't add new callers.
   Future<void> addRecentSearch(String term) {
     final t = term.trim();
     if (t.isEmpty) return Future.value();
@@ -53,15 +57,49 @@ class SettingsController extends Notifier<AppSettings> {
     });
   }
 
+  /// Deprecated with [addRecentSearch] (search feature's store).
   Future<void> clearRecentSearches() =>
       update((s) => s.copyWith(recentSearches: const []));
 
-  /// Restores every default but keeps onboarding/account state.
+  /// Settings › General › "Reset settings": restores the default
+  /// *preferences* (general, appearance, notifications, module defaults,
+  /// home & library layout, gestures, sounds).
+  ///
+  /// Deliberately untouched — each needs its own consent or would surprise:
+  /// onboarding/account state; Security & privacy (App lock needs the
+  /// device owner, Vault security needs the vault PIN — a reset must not
+  /// weaken either); Backup & sync (re-enabling Drive upload would be a
+  /// privacy surprise; keep count / schedule are data-retention choices);
+  /// data references (default task list, last sync, time zone, history).
   Future<void> resetToDefaults() => update(
     (s) => const AppSettings().copyWith(
       onboardingSeen: s.onboardingSeen,
       accountMode: s.accountMode,
       displayName: s.displayName,
+      dailyFocusGoal: s.dailyFocusGoal,
+      timeZone: () => s.timeZone,
+      tasksDefaultListId: () => s.tasksDefaultListId,
+      // Security & privacy.
+      appLockEnabled: s.appLockEnabled,
+      hideInAppSwitcher: s.hideInAppSwitcher,
+      clipboardClearSeconds: s.clipboardClearSeconds,
+      vaultBiometrics: s.vaultBiometrics,
+      vaultAutoLockMinutes: s.vaultAutoLockMinutes,
+      vaultLockOnBackground: s.vaultLockOnBackground,
+      vaultBlockScreenshots: s.vaultBlockScreenshots,
+      vaultReauthToReveal: s.vaultReauthToReveal,
+      breachMonitoring: s.breachMonitoring,
+      wipeAfterFailedAttempts: s.wipeAfterFailedAttempts,
+      // Backup & sync.
+      autoBackupDrive: s.autoBackupDrive,
+      backupFrequency: s.backupFrequency,
+      backupMinutes: s.backupMinutes,
+      backupWifiOnly: s.backupWifiOnly,
+      encryptBackups: s.encryptBackups,
+      keepBackups: s.keepBackups,
+      localBackupFrequency: s.localBackupFrequency,
+      lastSyncAt: () => s.lastSyncAt,
+      recentSearches: s.recentSearches,
     ),
   );
 }

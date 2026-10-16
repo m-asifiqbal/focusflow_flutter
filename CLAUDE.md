@@ -61,8 +61,11 @@ vault, archive, insights, calendar, notifications_center, settings, backup.
 - Crypto: `cryptography` (AES-256-GCM, Argon2id), `flutter_secure_storage`, `local_auth`.
 - Notifications: flutter_local_notifications + timezone + flutter_timezone.
 - Drive: google_sign_in 7 + googleapis (Drive v3) + extension_google_sign_in_as_googleapis_auth.
-- Editor: flutter_quill (Delta JSON). Charts: fl_chart. Icons: font_awesome_flutter **10.9.1**
-  (FA 6 — the mockups' icon set; `FontAwesomeIcons.*` are `IconData`).
+- Editor: flutter_quill (Delta JSON). Charts: fl_chart. Icons: **Font Awesome Free 6.7.2, vendored**
+  (the mockups' icon set): fonts in `assets/fonts/fontawesome/`, constants in
+  `lib/core/theme/fa_icons.dart` (`FontAwesomeIcons.*` are plain `IconData`; regenerate with
+  `tool/fa_icons/generate.dart`). Do NOT add `font_awesome_flutter` back: 10.x doesn't compile on
+  Flutter 3.44 (`IconData` is final) and 11.x ships FA 7 glyphs.
 - Fonts are bundled: `LexendDeca` (headings/numbers/buttons), `NunitoSans` (body).
 - Tests: flutter_test, mocktail. DB tests use a temp-file `AppDatabase` keyed with
   `EncryptedDatabase.applyKey` (in-memory DBs can't be keyed — see
@@ -73,12 +76,20 @@ vault, archive, insights, calendar, notifications_center, settings, backup.
 - Strings: English, inline in widgets (no l10n layer yet). Sentence case, as in the mockups.
 - Times: show in local time; store DateTimes via drift (unix seconds); pure days as `yyyy-MM-dd`
   (`DateUtilsX.dayKey`). Week start comes from settings (`AppSettings.weekStartsOn`).
+  Exception: `tasks.due_date` is a *floating day* — write/compare it only via
+  `DateUtilsX.toStoredDay` / `fromStoredDay` (UTC midnight of the date), so tasks never move a day
+  when the time zone changes. Day differences: `DateUtilsX.daysBetween` (never `Duration.inDays`
+  on local midnights — DST).
 - Ids: uuid v4 (`newId(ref)` / `const Uuid().v4()`).
 - Every write sets `updatedAt = clock.now()`, increments `syncVersion`, sets `deviceId`.
 - DAOs write with insert / update / `insertOnConflictUpdate` (UPSERT), never raw REPLACE.
 - Navigation: `context.push(AppRoutes.x)` for drill-ins, `context.go` for tab roots.
 - Widgets: build screens from `lib/core/widgets/` (FF* design system). Feature-specific widgets
   live in `features/<f>/presentation/widgets/`.
+- Repositories: read them via `lib/shared/providers/repository_providers.dart`.
+- Destructive item actions (archive / delete / restore / delete forever) ALWAYS go through
+  `lib/shared/item_actions/item_lifecycle_actions.dart` (confirmation + Undo snackbar), from any
+  screen, sheet or multi-select bar.
 - Comments: a header block per file (what / why), doc comments on public APIs; explain *why*.
 - Keep files < ~400 lines; split widgets into `widgets/`.
 
@@ -90,6 +101,16 @@ flutter analyze
 flutter test
 flutter run -d "iPhone 17 Pro"
 ```
+Xcode 27: `flutter build ios --simulator` (universal arm64+x86_64) fails in `lipo -verify_arch`
+(Flutter 3.44.2 passes two archs, Xcode 27's lipo accepts one). Build for the active arch instead:
+`flutter run -d <simulator>` or xcodebuild of `ios/Runner.xcworkspace` for a specific simulator.
+Android: `compileSdk` is pinned to ≥ 37 (permission_handler_android requires it) and
+android/build.gradle.kts applies the Kotlin Gradle plugin to `screen_protector` (it skips KGP on
+AGP 9, but this project keeps `android.builtInKotlin=false` for workmanager_android).
+Tests: `test/helpers/test_container.dart` gives a fully wired ProviderContainer over a keyed temp
+DB + FakeClock; `test/helpers/screen_harness.dart` pumps the real app / a screen with the bundled
+fonts and `captureScreen` writes `build/screens/<name>.png` at the mockups' exact size (1170×2532)
+for side-by-side comparison with `design/NN_*.png`. (Helpers must not end in `_test.dart`.)
 Google Drive needs OAuth client ids at build time:
 `--dart-define=GOOGLE_SERVER_CLIENT_ID=… --dart-define=GOOGLE_IOS_CLIENT_ID=…`
 (see docs/google_drive_setup.md). Without them, Drive shows "not set up in this build" and local

@@ -1,0 +1,141 @@
+/// ============================================================
+/// EXPORT OPTIONS — what Import & Export (screen 35) exports
+/// ============================================================
+///
+/// What: the format tile, the INCLUDE checklist, the two switches and the
+/// SAVE TO tile, as one immutable value the export service consumes.
+/// Why: the screen state and the pure export code share one shape, so the
+/// "Export N items" label and the file are computed from the same choice.
+/// ============================================================
+library;
+
+import 'package:flutter/foundation.dart';
+
+/// The FORMAT tiles.
+enum ExportFormat {
+  /// Full FocusFlow backup (encrypted when "Encrypt backups" is on).
+  ffbackup('.ffbackup', 'Full · encrypted', 'ffbackup'),
+
+  /// Readable JSON for developers.
+  json('JSON', 'Developers', 'json'),
+
+  /// One CSV per module (zipped when more than one).
+  csv('CSV', 'Spreadsheets', 'csv'),
+
+  /// Notes as Markdown files + one PDF.
+  pdfMd('PDF/MD', 'Notes only', 'zip');
+
+  const ExportFormat(this.label, this.subtitle, this.extension);
+
+  final String label;
+  final String subtitle;
+  final String extension;
+
+  /// Vault items only ever leave the app inside an encrypted .ffbackup.
+  bool get allowsVault => this == ffbackup;
+
+  /// PDF/MD carries notes only.
+  bool allows(ExportModule m) => switch (this) {
+    ffbackup => true,
+    json || csv => m != ExportModule.vault,
+    pdfMd => m == ExportModule.notes,
+  };
+}
+
+/// The INCLUDE checklist rows (snapshot table per module).
+enum ExportModule {
+  notes('Notes', 'notes', 'note'),
+  tasks('Tasks', 'tasks', 'task'),
+  reminders('Reminders', 'reminders', 'reminder'),
+  habits('Habits', 'habits', 'habit'),
+  vault('Vault', 'vault_items', 'vault');
+
+  const ExportModule(this.label, this.table, this.itemType);
+
+  final String label;
+
+  /// Snapshot / SQL table name.
+  final String table;
+
+  /// `item_tags.item_type` / ItemType key.
+  final String itemType;
+}
+
+/// SAVE TO tiles.
+enum ExportTarget { drive, device, share }
+
+@immutable
+class ExportOptions {
+  const ExportOptions({
+    this.format = ExportFormat.ffbackup,
+    this.modules = const {
+      ExportModule.notes,
+      ExportModule.tasks,
+      ExportModule.reminders,
+      ExportModule.habits,
+    },
+    this.includeArchived = true,
+    this.includeAttachments = true,
+    this.target = ExportTarget.drive,
+  });
+
+  final ExportFormat format;
+  final Set<ExportModule> modules;
+  final bool includeArchived;
+  final bool includeAttachments;
+  final ExportTarget target;
+
+  /// The modules that will actually be written for [format].
+  Set<ExportModule> get effectiveModules =>
+      modules.where(format.allows).toSet();
+
+  ExportOptions copyWith({
+    ExportFormat? format,
+    Set<ExportModule>? modules,
+    bool? includeArchived,
+    bool? includeAttachments,
+    ExportTarget? target,
+  }) => ExportOptions(
+    format: format ?? this.format,
+    modules: modules ?? this.modules,
+    includeArchived: includeArchived ?? this.includeArchived,
+    includeAttachments: includeAttachments ?? this.includeAttachments,
+    target: target ?? this.target,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is ExportOptions &&
+      other.format == format &&
+      setEquals(other.modules, modules) &&
+      other.includeArchived == includeArchived &&
+      other.includeAttachments == includeAttachments &&
+      other.target == target;
+
+  @override
+  int get hashCode => Object.hash(
+    format,
+    Object.hashAllUnordered(modules),
+    includeArchived,
+    includeAttachments,
+    target,
+  );
+}
+
+/// Items per module (active / archived) for the INCLUDE counts.
+@immutable
+class ExportCounts {
+  const ExportCounts({this.active = const {}, this.archived = const {}});
+
+  final Map<ExportModule, int> active;
+  final Map<ExportModule, int> archived;
+
+  int of(ExportModule m, {required bool includeArchived}) =>
+      (active[m] ?? 0) + (includeArchived ? (archived[m] ?? 0) : 0);
+
+  /// "Export N items" for [o].
+  int total(ExportOptions o) => o.effectiveModules.fold(
+    0,
+    (sum, m) => sum + of(m, includeArchived: o.includeArchived),
+  );
+}

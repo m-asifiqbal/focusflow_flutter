@@ -18,6 +18,7 @@ library;
 
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 /// Raw swatches (light-mode hex values from the design system).
@@ -500,6 +501,60 @@ class FFColors extends ThemeExtension<FFColors> {
       vaultAccent: c(vaultAccent, other.vaultAccent),
     );
   }
+
+  List<Object> get _props => [
+    brightness,
+    canvas,
+    surface,
+    surfaceBorder,
+    surfaceMuted,
+    sheet,
+    primary,
+    primaryStrong,
+    onPrimary,
+    primarySoft,
+    primaryGradient,
+    ink,
+    inkMuted,
+    inkFaint,
+    divider,
+    danger,
+    dangerSoft,
+    warning,
+    warningSoft,
+    success,
+    highlight,
+    chipBorder,
+    snackbar,
+    onSnackbar,
+    snackbarAction,
+    tabBar,
+    scrim,
+    vaultCanvas,
+    vaultSurface,
+    vaultBorder,
+    vaultTabBar,
+    vaultInk,
+    vaultInkMuted,
+    vaultAccent,
+  ];
+
+  // Value equality so ThemeData == (which compares extensions) holds for
+  // equal themes and MaterialApp's AnimatedTheme doesn't re-animate.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FFColors &&
+          listEquals(other._props, _props) &&
+          listEquals(other.cardShadow, cardShadow) &&
+          listEquals(other.heroShadow, heroShadow);
+
+  @override
+  int get hashCode => Object.hash(
+    Object.hashAll(_props),
+    Object.hashAll(cardShadow),
+    Object.hashAll(heroShadow),
+  );
 }
 
 /// A module's colour trio (+ dark-mode soft variant). See [ModuleStyle.of].
@@ -534,6 +589,24 @@ abstract final class PriorityColors {
   static const high = AppPalette.red500;
   static const medium = AppPalette.amber500;
   static const low = AppPalette.emerald500;
+}
+
+/// Icon-tile tints of the item actions sheet rows (screen 09) that are not
+/// a module or tag colour.
+abstract final class ActionTints {
+  /// "Share / export" — teal.
+  static const share = ModuleColors(
+    solid: Color(0xFF14B8A6),
+    soft: Color(0xFFCCFBF1),
+    ink: Color(0xFF0F766E),
+  );
+
+  /// "Lock with Vault PIN" — slate.
+  static const lock = ModuleColors(
+    solid: AppPalette.slate500,
+    soft: AppPalette.slate100,
+    ink: AppPalette.slate600,
+  );
 }
 
 /// Tag / folder palette (bg/fg pairs from the design system). Unknown names

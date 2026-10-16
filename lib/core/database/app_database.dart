@@ -24,6 +24,7 @@
 library;
 
 import 'package:drift/drift.dart';
+import 'package:focusflow/core/database/sync_tombstones.dart';
 import 'package:focusflow/core/database/tables.dart';
 
 part 'app_database.g.dart';
@@ -46,6 +47,7 @@ part 'app_database.g.dart';
     InboxEntries,
     FocusSessions,
     BackupRecords,
+    Tombstones,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -54,8 +56,9 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   /// v1 — initial schema (all modules + FTS5 search + indexes).
+  /// v2 — `tombstones` + delete/insert triggers (sync merge, core/sync).
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   /// Item tables that carry the shared lifecycle columns, by `ItemType.key`.
   static const Map<String, String> itemTables = {
@@ -72,9 +75,13 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
       await _createSearchIndex();
       await _createIndexes();
+      await _createTombstoneTriggers();
     },
     onUpgrade: (m, from, to) async {
-      // Add `if (from < 2) { … }` steps here when bumping [schemaVersion].
+      if (from < 2) {
+        await m.createTable(tombstones);
+        await _createTombstoneTriggers();
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -122,6 +129,13 @@ class AppDatabase extends _$AppDatabase {
   Future<void> rebuildSearchIndex() async {
     for (final (_, fts, _) in searchTables) {
       await customStatement("INSERT INTO $fts($fts) VALUES ('rebuild')");
+    }
+  }
+
+  /// Hard deletes → `tombstones` (see sync_tombstones.dart).
+  Future<void> _createTombstoneTriggers() async {
+    for (final statement in tombstoneTriggerStatements()) {
+      await customStatement(statement);
     }
   }
 

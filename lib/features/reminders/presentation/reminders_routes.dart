@@ -2,14 +2,17 @@
 library;
 
 import 'package:focusflow/core/router/navigator_keys.dart';
-import 'package:focusflow/core/router/placeholder_screen.dart';
+import 'package:flutter/foundation.dart';
+import 'package:focusflow/features/reminders/presentation/screens/reminder_editor_screen.dart';
+import 'package:focusflow/features/reminders/presentation/screens/reminders_list_screen.dart';
+import 'package:focusflow/features/reminders/presentation/state/reminder_editor_state.dart';
 import 'package:go_router/go_router.dart';
 
 /// `/library/reminders`.
 final List<RouteBase> remindersLibraryRoutes = [
   GoRoute(
     path: 'reminders',
-    builder: (context, state) => const PlaceholderScreen('Reminders'),
+    builder: (context, state) => const RemindersListScreen(),
   ),
 ];
 
@@ -18,9 +21,12 @@ final List<RouteBase> remindersRootRoutes = [
   GoRoute(
     path: '/reminders/:id',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => PlaceholderScreen(
-      'Reminder editor',
-      detail: state.pathParameters['id'],
-    ),
+    builder: (context, state) {
+      final args = ReminderEditorArgs.fromRoute(
+        state.pathParameters['id'] ?? 'new',
+        state.uri.queryParameters,
+      );
+      return ReminderEditorScreen(key: ValueKey(args), args: args);
+    },
   ),
 ];

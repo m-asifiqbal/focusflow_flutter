@@ -28,6 +28,7 @@ import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/router/app_shell.dart';
 import 'package:focusflow/core/router/navigator_keys.dart';
+import 'package:focusflow/core/router/page_transitions.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/features/archive/presentation/archive_routes.dart';
 import 'package:focusflow/features/auth/presentation/auth_routes.dart';
@@ -94,8 +95,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       onboardingSeen: ref.read(settingsProvider).onboardingSeen,
     ),
     routes: [
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         builder: (context, state, shell) => AppShell(shell: shell),
+        // Cross-fade between tabs, every tab's state kept alive.
+        navigatorContainerBuilder: (context, shell, children) =>
+            FFAnimatedBranchContainer(
+              currentIndex: shell.currentIndex,
+              children: children,
+            ),
         branches: [
           StatefulShellBranch(routes: [homeTabRoute]),
           StatefulShellBranch(
@@ -114,6 +121,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               settingsTabRoute([
+                ...accountSettingsRoutes,
                 ...backupSettingsRoutes,
                 ...vaultSettingsRoutes,
               ]),

@@ -73,7 +73,6 @@ dependencies:
 
   # ── UI ──
   fl_chart: ^1.1.0
-  font_awesome_flutter: 10.9.1 # FA 6.7 = the mockups; 11.x (FA 7) drops IconData
   flutter_animate: ^4.5.2
 
   # ── Utilities ──
@@ -129,6 +128,22 @@ flutter:
           weight: 600
         - asset: assets/fonts/LexendDeca-Bold.ttf
           weight: 700
+    # Font Awesome Free 6.7.2 — the mockups' icon set, vendored because
+    # font_awesome_flutter 10.x no longer compiles (IconData is final since
+    # Flutter 3.44) and 11.x ships FA 7 glyphs. Constants:
+    # lib/core/theme/fa_icons.dart (tool/fa_icons/generate.dart).
+    - family: FontAwesomeSolid
+      fonts:
+        - asset: assets/fonts/fontawesome/fa-solid-900.ttf
+          weight: 900
+    - family: FontAwesomeRegular
+      fonts:
+        - asset: assets/fonts/fontawesome/fa-regular-400.ttf
+          weight: 400
+    - family: FontAwesomeBrands
+      fonts:
+        - asset: assets/fonts/fontawesome/fa-brands-400.ttf
+          weight: 400
     - family: NunitoSans
       fonts:
         - asset: assets/fonts/NunitoSans-Regular.ttf

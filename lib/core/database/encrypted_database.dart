@@ -26,13 +26,19 @@ import 'package:sqlite3/sqlite3.dart';
 abstract final class EncryptedDatabase {
   /// Opens (creating if needed) the encrypted database with [cipherKey]
   /// (64 hex chars from DatabaseKeyStore).
+  ///
+  /// [quarantine]: move an unreadable file aside first (the app's own
+  /// start-up). A secondary opener — the background notification-action
+  /// isolate, which may run while the app holds the database — passes
+  /// false: it must never move the user's live database.
   static QueryExecutor open({
     required String cipherKey,
     String fileName = AppInfo.databaseFileName,
+    bool quarantine = true,
   }) {
     return LazyDatabase(() async {
       final file = await databaseFile(fileName);
-      await _quarantineIfUnreadable(file, cipherKey);
+      if (quarantine) await _quarantineIfUnreadable(file, cipherKey);
       return NativeDatabase.createInBackground(
         file,
         setup: (rawDb) => applyKey(rawDb, cipherKey),
@@ -48,19 +54,35 @@ abstract final class EncryptedDatabase {
     return File(p.join(dir.path, fileName));
   }
 
+  /// How long a connection waits for another one's lock.
+  static const int busyTimeoutMs = 5000;
+
+  /// SQLITE_NOTADB: the file is not a database under this key.
+  static const int _notADatabase = 26;
+
   /// Keys the connection and asserts SQLite3MultipleCiphers is active.
   /// Throwing is intentional: a missing cipher must fail loudly.
   static void applyKey(Database rawDb, String cipherKey) {
+    // Probe the cipher build on a throw-away in-memory connection: on an
+    // existing encrypted file any statement before `PRAGMA key` fails with
+    // "file is not a database", which must not be mistaken for a missing
+    // cipher (that made every re-open of the DB fail).
+    final probe = sqlite3.openInMemory();
     try {
-      rawDb.select('SELECT sqlite3mc_version()');
+      probe.select('SELECT sqlite3mc_version()');
     } catch (_) {
       throw StateError(
         'SQLite3MultipleCiphers is not active — refusing to open the '
         'database unencrypted. Check `hooks: user_defines: sqlite3: source: '
         'sqlite3mc` in pubspec.yaml.',
       );
+    } finally {
+      probe.close();
     }
     rawDb.execute("PRAGMA key = '$cipherKey';");
+    // Another connection (the other isolate) may hold a lock: wait for it
+    // instead of failing with SQLITE_BUSY.
+    rawDb.execute('PRAGMA busy_timeout = $busyTimeoutMs;');
     // Touch the schema so a wrong key fails here, not on the first query.
     rawDb.select('SELECT count(*) FROM sqlite_master');
     rawDb.execute('PRAGMA journal_mode = WAL;');
@@ -70,6 +92,9 @@ abstract final class EncryptedDatabase {
   /// e.g. a device restore that brought the file but not the keystore),
   /// move it aside instead of crashing on every launch. The user can still
   /// restore from a backup; the unreadable file is kept for support.
+  /// Only SQLITE_NOTADB (wrong key) counts: a busy lock or an I/O error is
+  /// transient and rethrown — moving a live database aside would make the
+  /// app come back empty.
   static Future<void> _quarantineIfUnreadable(File file, String key) async {
     if (!await file.exists()) return;
     Database? db;
@@ -79,7 +104,8 @@ abstract final class EncryptedDatabase {
       return;
     } on StateError {
       rethrow; // cipher build missing — never "recover" from that
-    } catch (e) {
+    } on SqliteException catch (e) {
+      if (e.resultCode != _notADatabase) rethrow;
       final stamp = DateTime.now().millisecondsSinceEpoch;
       AppLogger.e('Database unreadable with stored key — quarantining ($e)');
       db?.close();

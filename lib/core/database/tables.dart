@@ -1,5 +1,5 @@
 /// ============================================================
-/// DRIFT TABLES — the single on-device database (schema v1)
+/// DRIFT TABLES — the single on-device database (schema v2)
 /// ============================================================
 ///
 /// Every module table (`notes`, `tasks`, `reminders`, `habits`,
@@ -19,6 +19,9 @@
 ///   see core/sync).
 /// - Search: an FTS5 table `search_index` is kept in sync by SQL triggers
 ///   (created in app_database.dart), so DAOs never touch it.
+/// - Sync: hard deletes leave a row in [Tombstones] (also written by SQL
+///   triggers — see core/database/sync_tombstones.dart) so a merge with an
+///   older backup never resurrects them.
 ///
 /// **IMPORTANT:** after editing this file run
 ///   `dart run build_runner build --delete-conflicting-outputs`
@@ -413,4 +416,33 @@ class BackupRecords extends Table {
 
   @override
   Set<Column<Object>> get primaryKey => {id};
+}
+
+// ─────────────────────────────────────────────────────────────
+// Sync bookkeeping (schema v2)
+// ─────────────────────────────────────────────────────────────
+
+/// One row per *hard* delete that a backup merge must replay on other
+/// devices (permanent delete, the 30-day purge, a cleared habit log, a
+/// deleted tag …). Written only by SQL triggers (sync_tombstones.dart):
+/// an AFTER DELETE trigger records the key, an AFTER INSERT trigger removes
+/// it again when the same key comes back (undo, re-log, restore).
+/// Child rows that always travel with their parent (subtasks, item tags,
+/// attachments, vault history) need no tombstones.
+@DataClassName('TombstoneRow')
+class Tombstones extends Table {
+  /// What was deleted: an `ItemType.key` (`note`, `task`, `reminder`,
+  /// `habit`, `vault`) or `tag`, `folder`, `habit_log`, `focus_session`.
+  TextColumn get entity => text()();
+
+  /// The deleted row's id — for habit logs the natural key
+  /// `habitId|yyyy-MM-dd` (log ids differ between devices).
+  TextColumn get entityId => text()();
+  DateTimeColumn get deletedAt => dateTime()();
+
+  /// Device that deleted it; '' until the next backup stamps it.
+  TextColumn get deviceId => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {entity, entityId};
 }

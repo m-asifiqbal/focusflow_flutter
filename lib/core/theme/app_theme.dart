@@ -3,7 +3,9 @@
 /// ============================================================
 ///
 /// `AppTheme.light(accent)` / `AppTheme.dark(accent)` attach the
-/// [FFColors] and [FFTextStyles] extensions. Widgets read them through the
+/// [FFColors] and [FFTextStyles] extensions. Themes are cached per
+/// (accent, brightness, system font), so asking again is free and returns
+/// the identical instance. Widgets read them through the
 /// [BuildContext] shortcuts at the bottom of this file:
 ///
 /// ```dart
@@ -18,29 +20,57 @@ library;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:focusflow/core/router/page_transitions.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_typography.dart';
 
 abstract final class AppTheme {
-  static ThemeData light(AccentColor accent) =>
-      _build(FFColors.light(accent), Brightness.light);
+  /// Built themes, keyed by (accent, brightness, system font, vault).
+  /// ThemeData is immutable, so returning the *same* instance for the same
+  /// inputs lets MaterialApp skip its theme animation and lets
+  /// `Theme.of` dependents skip rebuilds when an unrelated setting changes.
+  static final Map<(AccentColor, Brightness, bool, bool), ThemeData> _cache =
+      {};
 
-  static ThemeData dark(AccentColor accent) =>
-      _build(FFColors.dark(accent), Brightness.dark);
+  /// Light theme. [systemFont]: Settings › Appearance › "Use system font".
+  static ThemeData light(AccentColor accent, {bool systemFont = false}) =>
+      _cache.putIfAbsent(
+        (accent, Brightness.light, systemFont, false),
+        () => _build(
+          FFColors.light(accent),
+          Brightness.light,
+          systemFont: systemFont,
+        ),
+      );
+
+  static ThemeData dark(AccentColor accent, {bool systemFont = false}) =>
+      _cache.putIfAbsent(
+        (accent, Brightness.dark, systemFont, false),
+        () => _build(
+          FFColors.dark(accent),
+          Brightness.dark,
+          systemFont: systemFont,
+        ),
+      );
 
   /// Theme for the always-dark vault screens.
-  static ThemeData vault(AccentColor accent) {
-    final base = FFColors.dark(accent);
-    final c = base.copyWith(
-      canvas: AppPalette.vaultCanvas,
-      surface: Colors.white.withValues(alpha: 0.05),
-    );
-    return _build(c, Brightness.dark);
-  }
+  static ThemeData vault(AccentColor accent, {bool systemFont = false}) =>
+      _cache.putIfAbsent((accent, Brightness.dark, systemFont, true), () {
+        final base = FFColors.dark(accent);
+        final c = base.copyWith(
+          canvas: AppPalette.vaultCanvas,
+          surface: Colors.white.withValues(alpha: 0.05),
+        );
+        return _build(c, Brightness.dark, systemFont: systemFont);
+      });
 
-  static ThemeData _build(FFColors c, Brightness brightness) {
-    final text = FFTextStyles.from(c);
+  static ThemeData _build(
+    FFColors c,
+    Brightness brightness, {
+    required bool systemFont,
+  }) {
+    final text = FFTextStyles.from(c, systemFont: systemFont);
     final scheme = ColorScheme(
       brightness: brightness,
       primary: c.primary,
@@ -69,8 +99,9 @@ abstract final class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: c.canvas,
       canvasColor: c.canvas,
-      fontFamily: AppFonts.body,
-      textTheme: FFTextStyles.materialTextTheme(c),
+      // Null = the platform family from Material's typography.
+      fontFamily: systemFont ? null : AppFonts.body,
+      textTheme: FFTextStyles.materialTextTheme(c, systemFont: systemFont),
       extensions: [c, text],
       splashFactory: InkSparkle.splashFactory,
       highlightColor: Colors.transparent,
@@ -177,10 +208,11 @@ abstract final class AppTheme {
         ),
         textStyle: text.rowTitle,
       ),
+      // One motion language for every push (core/router/page_transitions.dart).
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.android: FFPageTransitionsBuilder(),
+          TargetPlatform.iOS: FFPageTransitionsBuilder(),
         },
       ),
     );
@@ -195,9 +227,12 @@ class VaultTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Secure mode is always the emerald family, whatever the app accent.
+    // Secure mode is always the emerald family, whatever the app accent;
+    // "Use system font" carries over (the app theme drops the families).
+    final systemFont =
+        Theme.of(context).extension<FFTextStyles>()?.body.fontFamily == null;
     return Theme(
-      data: AppTheme.vault(AccentColor.emerald),
+      data: AppTheme.vault(AccentColor.emerald, systemFont: systemFont),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: child,

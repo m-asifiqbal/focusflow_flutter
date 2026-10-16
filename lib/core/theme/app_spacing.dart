@@ -36,6 +36,15 @@ abstract final class AppSpacing {
 
   /// Bottom padding so content clears the tab bar + raised FAB.
   static const double bottomBarClearance = 120;
+
+  /// Gap between a list row's leading tile and its title.
+  static const double rowLeadingGap = 14;
+
+  /// Vertical padding of a list row (and a time pill's outer margin).
+  static const double rowVertical = 10;
+
+  /// Vertical padding inside a small pill (time pills).
+  static const double pillVertical = 7;
 }
 
 abstract final class AppRadii {
@@ -69,6 +78,19 @@ abstract final class AppSizes {
   static const double sheetHandleHeight = 6;
   static const double iconTile = 38;
   static const double iconTileLg = 46;
+
+  /// Small icon tile of settings rows (32) and its glyph (14).
+  static const double iconTileSm = 32;
+  static const double tileGlyph = 14;
+
+  /// Glyph in a hero / gradient card circle.
+  static const double heroGlyph = 18;
+
+  /// Height of a time-wheel (CupertinoPicker) sheet body.
+  static const double wheelPicker = 180;
+
+  /// Hairline separators / thin strokes.
+  static const double hairline = 1.5;
 }
 
 abstract final class AppMotion {

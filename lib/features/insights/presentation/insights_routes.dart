@@ -2,11 +2,11 @@
 library;
 
 import 'package:focusflow/core/router/app_routes.dart';
-import 'package:focusflow/core/router/placeholder_screen.dart';
+import 'package:focusflow/features/insights/presentation/screens/insights_screen.dart';
 import 'package:go_router/go_router.dart';
 
 /// Root of the Insights tab branch.
 final GoRoute insightsTabRoute = GoRoute(
   path: AppRoutes.insights,
-  builder: (context, state) => const PlaceholderScreen('Insights'),
+  builder: (context, state) => const InsightsScreen(),
 );

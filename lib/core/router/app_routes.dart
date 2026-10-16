@@ -15,6 +15,7 @@
 library;
 
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 
 abstract final class AppRoutes {
   // ── Launch ──
@@ -49,6 +50,11 @@ abstract final class AppRoutes {
   // ── Full-screen ──
   static const search = '/search';
   static const calendar = '/calendar';
+
+  /// `/calendar?date=yyyy-MM-dd` — the calendar opened on [day].
+  static String calendarOn(DateTime day) =>
+      _withQuery(calendar, {'date': DateUtilsX.dayKey(day)});
+
   static const notificationCenter = '/notifications';
 
   static const newNote = '/notes/new';

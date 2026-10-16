@@ -29,14 +29,16 @@
         <!-- allowBackup=false: the encrypted DB is useless without its
              Keystore key, which Android backup never restores. Users back
              up with FocusFlow's own Drive / local backups instead. -->
+        <!-- No showWhenLocked / turnScreenOn here: that would let any
+             notification tap open the app over the keyguard. MainActivity
+             enables them at runtime only for an alarm-style full-screen
+             launch and turns them off again. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">

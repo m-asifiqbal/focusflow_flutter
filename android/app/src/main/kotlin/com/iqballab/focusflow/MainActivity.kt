@@ -1,6 +1,15 @@
 package com.iqballab.focusflow
 
+import android.app.KeyguardManager
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.view.WindowManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -8,6 +17,7 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import org.json.JSONObject
 
 /**
  * FlutterFragmentActivity (not FlutterActivity) because local_auth's
@@ -16,10 +26,114 @@ import java.io.File
  * Hosts the `focusflow/text_scanner` channel: on-device OCR for Quick Scan
  * with ML Kit (Play-services model). iOS implements the same channel with
  * Apple Vision — see ios/Runner/TextScannerPlugin.swift.
+ *
+ * Alarm-style reminders (full-screen intent): the manifest deliberately does
+ * NOT declare showWhenLocked / turnScreenOn (that would let any notification
+ * tap open the app over the keyguard). They are switched on here only when
+ * the activity is launched by an alarm-style notification
+ * (flutter_local_notifications' SELECT_NOTIFICATION intent whose payload
+ * category is "alarm"), and switched off again when the screen turns off,
+ * the user unlocks, or the activity is opened any other way.
+ *
+ * Also hosts `focusflow/notifications` (canUseFullScreenIntent, Android 14+).
  */
 class MainActivity : FlutterFragmentActivity() {
+    private var overLockScreen = false
+    private var lockReceiver: BroadcastReceiver? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        applyLockScreenPolicy(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        applyLockScreenPolicy(intent)
+    }
+
+    override fun onDestroy() {
+        setOverLockScreen(false)
+        super.onDestroy()
+    }
+
+    /** True for the launch intent of an alarm-style notification. */
+    private fun isAlarmLaunch(intent: Intent?): Boolean {
+        if (intent?.action != "SELECT_NOTIFICATION") return false
+        val payload = intent.getStringExtra("payload") ?: return false
+        return try {
+            JSONObject(payload).optString("c") == "alarm"
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun applyLockScreenPolicy(intent: Intent?) {
+        setOverLockScreen(isAlarmLaunch(intent))
+    }
+
+    private fun setOverLockScreen(on: Boolean) {
+        if (on == overLockScreen) return
+        overLockScreen = on
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(on)
+            setTurnScreenOn(on)
+        } else {
+            @Suppress("DEPRECATION")
+            val flags = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            if (on) window.addFlags(flags) else window.clearFlags(flags)
+        }
+        if (on) {
+            // Off again as soon as the screen goes off (next wake shows the
+            // keyguard) or the user unlocks (normal app from then on).
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    setOverLockScreen(false)
+                }
+            }
+            val filter = IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_USER_PRESENT)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                registerReceiver(receiver, filter)
+            }
+            lockReceiver = receiver
+            val keyguard = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            if (!keyguard.isKeyguardLocked) {
+                // Already unlocked: nothing to show over.
+                setOverLockScreen(false)
+            }
+        } else {
+            lockReceiver?.let {
+                try {
+                    unregisterReceiver(it)
+                } catch (e: IllegalArgumentException) {
+                    // Already unregistered.
+                }
+            }
+            lockReceiver = null
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focusflow/notifications")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "canUseFullScreenIntent" -> {
+                        if (Build.VERSION.SDK_INT >= 34) {
+                            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                            result.success(nm.canUseFullScreenIntent())
+                        } else {
+                            result.success(true)
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focusflow/text_scanner")
             .setMethodCallHandler { call, result ->
                 when (call.method) {

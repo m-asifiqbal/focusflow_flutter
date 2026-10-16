@@ -1,0 +1,25 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'habits_dao.dart';
+
+// ignore_for_file: type=lint
+mixin _$HabitsDaoMixin on DatabaseAccessor<AppDatabase> {
+  $HabitsTable get habits => attachedDatabase.habits;
+  $HabitLogsTable get habitLogs => attachedDatabase.habitLogs;
+  $ItemTagsTable get itemTags => attachedDatabase.itemTags;
+  $TagsTable get tags => attachedDatabase.tags;
+  HabitsDaoManager get managers => HabitsDaoManager(this);
+}
+
+class HabitsDaoManager {
+  final _$HabitsDaoMixin _db;
+  HabitsDaoManager(this._db);
+  $$HabitsTableTableManager get habits =>
+      $$HabitsTableTableManager(_db.attachedDatabase, _db.habits);
+  $$HabitLogsTableTableManager get habitLogs =>
+      $$HabitLogsTableTableManager(_db.attachedDatabase, _db.habitLogs);
+  $$ItemTagsTableTableManager get itemTags =>
+      $$ItemTagsTableTableManager(_db.attachedDatabase, _db.itemTags);
+  $$TagsTableTableManager get tags =>
+      $$TagsTableTableManager(_db.attachedDatabase, _db.tags);
+}

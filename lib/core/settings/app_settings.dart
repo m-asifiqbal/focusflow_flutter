@@ -9,7 +9,8 @@
 /// immediately" — screen 30 acceptance).
 ///
 /// Adding a setting: add the field (with a default), copyWith, toJson,
-/// fromJson. Unknown/missing keys fall back to defaults, so old blobs load.
+/// fromJson. Unknown/missing keys and unknown enum names fall back to
+/// defaults, so old blobs load; numbers are clamped to their valid range.
 /// ============================================================
 library;
 
@@ -43,6 +44,12 @@ enum AccountMode { none, google, apple, offline }
 
 @immutable
 class AppSettings {
+  /// Bounds enforced when a stored blob is read ([AppSettings.fromJson]).
+  static const int minutesPerDay = 24 * 60;
+  static const int maxDailyFocusGoal = 50;
+  static const int maxClipboardClearSeconds = 60 * 60;
+  static const int maxKeepBackups = 100;
+
   const AppSettings({
     // ── Onboarding / account ──
     this.onboardingSeen = false,
@@ -98,6 +105,7 @@ class AppSettings {
     this.hiddenHomeSections = const {},
     this.libraryShowCounts = true,
     this.hiddenLibraryModules = const {},
+    this.libraryModuleOrder = const [],
     // ── Gestures, sounds ──
     this.swipeLeft = SwipeAction.archive,
     this.swipeRight = SwipeAction.complete,
@@ -193,6 +201,10 @@ class AppSettings {
   /// `ItemType.key`s hidden from the Library grid.
   final Set<String> hiddenLibraryModules;
 
+  /// `ItemType.key`s in the user's Library card order (empty = default
+  /// order; keys missing from it follow in default order).
+  final List<String> libraryModuleOrder;
+
   final SwipeAction swipeLeft;
   final SwipeAction swipeRight;
   final bool soundsEnabled;
@@ -280,6 +292,7 @@ class AppSettings {
     Set<HomeSection>? hiddenHomeSections,
     bool? libraryShowCounts,
     Set<String>? hiddenLibraryModules,
+    List<String>? libraryModuleOrder,
     SwipeAction? swipeLeft,
     SwipeAction? swipeRight,
     bool? soundsEnabled,
@@ -359,6 +372,7 @@ class AppSettings {
       hiddenHomeSections: hiddenHomeSections ?? this.hiddenHomeSections,
       libraryShowCounts: libraryShowCounts ?? this.libraryShowCounts,
       hiddenLibraryModules: hiddenLibraryModules ?? this.hiddenLibraryModules,
+      libraryModuleOrder: libraryModuleOrder ?? this.libraryModuleOrder,
       swipeLeft: swipeLeft ?? this.swipeLeft,
       swipeRight: swipeRight ?? this.swipeRight,
       soundsEnabled: soundsEnabled ?? this.soundsEnabled,
@@ -438,6 +452,7 @@ class AppSettings {
     'hiddenHomeSections': hiddenHomeSections.map((s) => s.name).toList(),
     'libraryShowCounts': libraryShowCounts,
     'hiddenLibraryModules': hiddenLibraryModules.toList(),
+    'libraryModuleOrder': libraryModuleOrder,
     'swipeLeft': swipeLeft.name,
     'swipeRight': swipeRight.name,
     'soundsEnabled': soundsEnabled,
@@ -468,7 +483,15 @@ class AppSettings {
     T e<T extends Enum>(List<T> values, Object? v, T fallback) =>
         values.firstWhere((x) => x.name == v, orElse: () => fallback);
     bool b(String k, bool f) => j[k] is bool ? j[k]! as bool : f;
-    int i(String k, int f) => j[k] is num ? (j[k]! as num).toInt() : f;
+    int i(String k, int f) {
+      final v = j[k];
+      return v is num && v.isFinite ? v.toInt() : f;
+    }
+
+    // Range-checked ints: a hand-edited or corrupted blob can't put an
+    // impossible value (weekday 9, minute 2000, keep 0 backups) in effect.
+    int r(String k, int f, int min, int max) => i(k, f).clamp(min, max);
+    int minute(String k, int f) => r(k, f, 0, minutesPerDay - 1);
     String s(String k, String f) => j[k] is String ? j[k]! as String : f;
     String? sn(String k) => j[k] is String ? j[k]! as String : null;
     List<String> ls(String k) =>
@@ -487,16 +510,16 @@ class AppSettings {
       onboardingSeen: b('onboardingSeen', d.onboardingSeen),
       accountMode: e(AccountMode.values, j['accountMode'], d.accountMode),
       displayName: s('displayName', d.displayName),
-      dailyFocusGoal: i('dailyFocusGoal', d.dailyFocusGoal),
+      dailyFocusGoal: r('dailyFocusGoal', d.dailyFocusGoal, 1, maxDailyFocusGoal),
       timeZone: sn('timeZone'),
       languageCode: s('languageCode', d.languageCode),
       startScreen: e(StartScreen.values, j['startScreen'], d.startScreen),
-      weekStartsOn: i('weekStartsOn', d.weekStartsOn).clamp(1, 7),
+      weekStartsOn: r('weekStartsOn', d.weekStartsOn, 1, 7),
       use24HourTime: b('use24HourTime', d.use24HourTime),
       dateFormat: s('dateFormat', d.dateFormat),
       themeMode: e(ThemeMode.values, j['themeMode'], d.themeMode),
       accent: AccentColor.fromName(sn('accent')),
-      textScale: j['textScale'] is num
+      textScale: j['textScale'] is num && (j['textScale']! as num).isFinite
           ? (j['textScale']! as num).toDouble().clamp(0.85, 1.3)
           : d.textScale,
       appIcon: s('appIcon', d.appIcon),
@@ -505,14 +528,22 @@ class AppSettings {
       useSystemFont: b('useSystemFont', d.useSystemFont),
       notificationsEnabled: b('notificationsEnabled', d.notificationsEnabled),
       morningBriefing: b('morningBriefing', d.morningBriefing),
-      morningBriefingMinutes: i(
+      morningBriefingMinutes: minute(
         'morningBriefingMinutes',
         d.morningBriefingMinutes,
       ),
       eveningReview: b('eveningReview', d.eveningReview),
-      eveningReviewMinutes: i('eveningReviewMinutes', d.eveningReviewMinutes),
+      eveningReviewMinutes: minute(
+        'eveningReviewMinutes',
+        d.eveningReviewMinutes,
+      ),
       weeklyReport: b('weeklyReport', d.weeklyReport),
-      weeklyReportWeekday: i('weeklyReportWeekday', d.weeklyReportWeekday),
+      weeklyReportWeekday: r(
+        'weeklyReportWeekday',
+        d.weeklyReportWeekday,
+        1,
+        7,
+      ),
       notifyReminders: b('notifyReminders', d.notifyReminders),
       notifyTasks: b('notifyTasks', d.notifyTasks),
       notifyHabits: b('notifyHabits', d.notifyHabits),
@@ -520,9 +551,14 @@ class AppSettings {
       notifyVault: b('notifyVault', d.notifyVault),
       notifySync: b('notifySync', d.notifySync),
       quietHours: b('quietHours', d.quietHours),
-      quietStartMinutes: i('quietStartMinutes', d.quietStartMinutes),
-      quietEndMinutes: i('quietEndMinutes', d.quietEndMinutes),
-      defaultSnoozeMinutes: i('defaultSnoozeMinutes', d.defaultSnoozeMinutes),
+      quietStartMinutes: minute('quietStartMinutes', d.quietStartMinutes),
+      quietEndMinutes: minute('quietEndMinutes', d.quietEndMinutes),
+      defaultSnoozeMinutes: r(
+        'defaultSnoozeMinutes',
+        d.defaultSnoozeMinutes,
+        1,
+        minutesPerDay,
+      ),
       lockScreenVisibility: e(
         LockScreenVisibility.values,
         j['lockScreenVisibility'],
@@ -539,7 +575,7 @@ class AppSettings {
         'remindersDefaultSound',
         d.remindersDefaultSound,
       ),
-      habitResetMinutes: i('habitResetMinutes', d.habitResetMinutes),
+      habitResetMinutes: minute('habitResetMinutes', d.habitResetMinutes),
       homeSections: sections,
       hiddenHomeSections: ls('hiddenHomeSections')
           .map((n) => HomeSection.values.where((s) => s.name == n).firstOrNull)
@@ -547,18 +583,26 @@ class AppSettings {
           .toSet(),
       libraryShowCounts: b('libraryShowCounts', d.libraryShowCounts),
       hiddenLibraryModules: ls('hiddenLibraryModules').toSet(),
+      libraryModuleOrder: ls('libraryModuleOrder'),
       swipeLeft: e(SwipeAction.values, j['swipeLeft'], d.swipeLeft),
       swipeRight: e(SwipeAction.values, j['swipeRight'], d.swipeRight),
       soundsEnabled: b('soundsEnabled', d.soundsEnabled),
       hapticsEnabled: b('hapticsEnabled', d.hapticsEnabled),
       appLockEnabled: b('appLockEnabled', d.appLockEnabled),
       hideInAppSwitcher: b('hideInAppSwitcher', d.hideInAppSwitcher),
-      clipboardClearSeconds: i(
+      clipboardClearSeconds: r(
         'clipboardClearSeconds',
         d.clipboardClearSeconds,
+        0,
+        maxClipboardClearSeconds,
       ),
       vaultBiometrics: b('vaultBiometrics', d.vaultBiometrics),
-      vaultAutoLockMinutes: i('vaultAutoLockMinutes', d.vaultAutoLockMinutes),
+      vaultAutoLockMinutes: r(
+        'vaultAutoLockMinutes',
+        d.vaultAutoLockMinutes,
+        0,
+        minutesPerDay,
+      ),
       vaultLockOnBackground: b(
         'vaultLockOnBackground',
         d.vaultLockOnBackground,
@@ -579,10 +623,10 @@ class AppSettings {
         j['backupFrequency'],
         d.backupFrequency,
       ),
-      backupMinutes: i('backupMinutes', d.backupMinutes),
+      backupMinutes: minute('backupMinutes', d.backupMinutes),
       backupWifiOnly: b('backupWifiOnly', d.backupWifiOnly),
       encryptBackups: b('encryptBackups', d.encryptBackups),
-      keepBackups: i('keepBackups', d.keepBackups),
+      keepBackups: r('keepBackups', d.keepBackups, 1, maxKeepBackups),
       localBackupFrequency: e(
         LocalBackupFrequency.values,
         j['localBackupFrequency'],
