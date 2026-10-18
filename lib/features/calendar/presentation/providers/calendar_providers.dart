@@ -172,11 +172,12 @@ typedef CalendarRange = ({DateTime from, DateTime to});
 CalendarRange calendarRangeOf(List<DateTime> days) =>
     (from: days.first, to: DateUtilsX.addDays(days.last, 1));
 
-/// Active notes (created-at drives their calendar day).
+/// Active notes (created-at drives their calendar day). A light query: the
+/// calendar needs each note's title and date, not every note's full text.
 final calendarNotesProvider = StreamProvider.autoDispose<List<Note>>(
   (ref) => ref
       .watch(notesRepositoryProvider)
-      .watchNotes(const NotesQuery(sort: NotesSort.created)),
+      .watchNotes(const NotesQuery(sort: NotesSort.created, light: true)),
 );
 
 final _tasksInRangeProvider = StreamProvider.autoDispose

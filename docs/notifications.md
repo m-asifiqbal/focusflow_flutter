@@ -16,6 +16,37 @@ closed (code: `lib/core/notifications/`).
   (background isolate) and by the 12 h maintenance task
   (`core/sync/background_runner.dart` → `engine/background_reconcile.dart`).
 
+## When the app is killed
+What survives, and what the engine does about the rest:
+* **Swiped away on stock Android / Samsung with default settings:** nothing
+  is lost. The alarms belong to the OS and fire with no app process.
+* **Force-stopped, or swiped away on Xiaomi / Oppo / Vivo / Huawei / some
+  Samsung modes:** Android drops *every* alarm of the app. The plugin's own
+  list of pending requests is stored data and keeps naming them, so the
+  engine cannot tell. Therefore:
+  * the **first pass of every process** (app launch, the 12 h background
+    task) passes `rearm: true` to `NotificationReconciler.reconcile`:
+    every planned request is handed to the OS again (same id = replaced, so
+    a healthy alarm is just renewed);
+  * a request that is past its time yet still listed was *lost*, not late
+    (a delivered one-shot request leaves the plugin's list at once). A lost
+    reminder / task alert is recorded in the inbox and shown now as
+    **"Missed · was due at 9:00 AM"** (within 24 h; silent in quiet hours;
+    an alarm-style one comes back as a plain heads-up). Habit nudges and
+    digests only go to the inbox.
+  * Until the user opens the app (or the background task runs), nothing can
+    fire — that is Android's rule for a stopped app. The only prevention is
+    the user's: Settings › Notifications offers **"allow auto-start"** on
+    the makers that need it (`aggressiveBackgroundMakers`), which opens the
+    maker's own screen (`MainActivity.openAutostartSettings`), plus the
+    battery-optimisation switch.
+* **Reach.** Reminders, alarms and task alerts ("vital") get their slots
+  first; habit nudges and digests fill the rest. On Android the next
+  occurrence of a reminder is planned up to 120 days ahead and up to 240
+  requests are held (AlarmManager allows 500); iOS keeps 60 (limit 64), so
+  there a reminder further than 45 days waits for the next refill.
+  (`PlannerLimits`, `NotificationPlanner.plan`.)
+
 ## Android
 * **Exact alarms.** `USE_EXACT_ALARM` (API 33+) is granted at install for apps
   whose core function is reminders/alarms; `SCHEDULE_EXACT_ALARM` is declared

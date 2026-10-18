@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/notifications/background_delivery.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -137,3 +138,9 @@ Future<bool> allowFullScreenAlarms(WidgetRef ref) =>
 /// optimisation; opt-in, asked once from the editor).
 Future<bool?> allowRemindersInBackground(WidgetRef ref) =>
     ref.read(backgroundDeliveryRequestProvider)();
+
+/// "On [brand] phones, allow auto-start — Open": the maker's auto-start /
+/// background screen (or the app's info page when the phone has none we
+/// know).
+Future<bool> allowAutostart(WidgetRef ref) =>
+    ref.read(autostartRequestProvider)();

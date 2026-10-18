@@ -139,6 +139,8 @@ PlannerInput input({
   List<TaskItem> tasks = const [],
   List<HabitDayStatus> habits = const [],
   int horizonDays = 14,
+  int vitalHorizonDays = 14,
+  int maxScheduled = PlannerInput.defaultMaxScheduled,
 }) => PlannerInput(
   now: now,
   calendar: calendar ?? zone('UTC'),
@@ -147,4 +149,6 @@ PlannerInput input({
   tasks: tasks,
   habits: habits,
   horizonDays: horizonDays,
+  vitalHorizonDays: vitalHorizonDays,
+  maxScheduled: maxScheduled,
 );

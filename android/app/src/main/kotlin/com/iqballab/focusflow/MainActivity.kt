@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -137,6 +138,7 @@ class MainActivity : FlutterFragmentActivity() {
                             result.success(true)
                         }
                     }
+                    "openAutostartSettings" -> result.success(openAutostartSettings())
                     else -> result.notImplemented()
                 }
             }
@@ -162,6 +164,58 @@ class MainActivity : FlutterFragmentActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    /**
+     * Opens the phone maker's "auto-start / background activity" page, the
+     * switch that decides whether Android's alarms survive swiping the app
+     * away on Xiaomi, Oppo, Vivo, Huawei, Samsung and friends (they treat
+     * the swipe like a force-stop, which drops every scheduled alarm).
+     * There is no public API for it, so each maker's own screen is tried
+     * in turn (each package is declared in the manifest's `<queries>`).
+     * Returns false when none exists; Dart then opens the app's info page.
+     */
+    private fun openAutostartSettings(): Boolean {
+        for ((pkg, cls) in OEM_AUTOSTART_SCREENS) {
+            try {
+                startActivity(
+                    Intent().setComponent(ComponentName(pkg, cls))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                return true
+            } catch (e: Exception) {
+                // Not this phone (not installed / not exported): try the next.
+            }
+        }
+        return false
+    }
+
+    private companion object {
+        val OEM_AUTOSTART_SCREENS = listOf(
+            // Xiaomi / Redmi / POCO (MIUI, HyperOS)
+            "com.miui.securitycenter" to "com.miui.permcenter.autostart.AutoStartManagementActivity",
+            // Oppo / Realme / OnePlus (ColorOS, Realme UI)
+            "com.coloros.safecenter" to "com.coloros.safecenter.permission.startup.StartupAppListActivity",
+            "com.coloros.safecenter" to "com.coloros.safecenter.startupapp.StartupAppListActivity",
+            "com.oppo.safe" to "com.oppo.safe.permission.startup.StartupAppListActivity",
+            "com.oneplus.security" to "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity",
+            // Vivo / iQOO (Funtouch, OriginOS)
+            "com.vivo.permissionmanager" to "com.vivo.permissionmanager.activity.BgStartUpManagerActivity",
+            "com.iqoo.secure" to "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity",
+            "com.iqoo.secure" to "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager",
+            // Huawei / Honor
+            "com.huawei.systemmanager" to "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity",
+            "com.huawei.systemmanager" to "com.huawei.systemmanager.optimize.process.ProtectActivity",
+            "com.hihonor.systemmanager" to "com.hihonor.systemmanager.startupmgr.ui.StartupNormalAppListActivity",
+            // Samsung (Device care › Battery › Background usage limits)
+            "com.samsung.android.lool" to "com.samsung.android.sm.ui.battery.BatteryActivity",
+            "com.samsung.android.sm_cn" to "com.samsung.android.sm.ui.battery.BatteryActivity",
+            // Asus, Letv, Nokia, Transsion (Tecno / Infinix / itel)
+            "com.asus.mobilemanager" to "com.asus.mobilemanager.autostart.AutoStartActivity",
+            "com.letv.android.letvsafe" to "com.letv.android.letvsafe.AutobootManageActivity",
+            "com.evenwell.powersaving.g3" to "com.evenwell.powersaving.g3.exception.PowerSaverExceptionActivity",
+            "com.transsion.phonemaster" to "com.itel.autobootmanager.activity.AutoBootMgrActivity",
+        )
     }
 
     /**

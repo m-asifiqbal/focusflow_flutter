@@ -109,6 +109,7 @@ class NotesRepositoryImpl extends RepositoryBase implements NotesRepository {
               pinnedOnly: query.pinnedOnly,
               orderBy: _orderFor(query.sort),
               limit: query.limit,
+              light: query.light,
             )
             .get();
         return _withTags(rows);

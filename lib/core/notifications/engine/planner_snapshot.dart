@@ -10,6 +10,8 @@
 /// reconcile reads a fresh, consistent snapshot here. The background
 /// action isolate uses the same loader, so both plan identically.
 ///
+/// The planning window comes from [PlannerLimits] (platform dependent).
+///
 /// Also resolves the planning time zone: `AppSettings.timeZone` when set
 /// and known, else the device zone, else UTC.
 /// ============================================================
@@ -31,12 +33,16 @@ class PlannerSnapshotLoader {
     required this.tasks,
     required this.habits,
     required this.clock,
+    this.limits = PlannerLimits.conservative,
   });
 
   final RemindersRepository reminders;
   final TasksRepository tasks;
   final HabitsRepository habits;
   final Clock clock;
+
+  /// How far ahead / how much the platform's OS can be asked to hold.
+  final PlannerLimits limits;
 
   Future<PlannerInput> load(AppSettings settings, tz.Location location) async {
     final now = clock.now();
@@ -54,6 +60,9 @@ class PlannerSnapshotLoader {
       reminders: rs,
       tasks: ts,
       habits: hs,
+      horizonDays: limits.horizonDays,
+      vitalHorizonDays: limits.vitalHorizonDays,
+      maxScheduled: limits.maxScheduled,
     );
   }
 }

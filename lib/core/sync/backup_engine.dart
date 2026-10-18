@@ -23,6 +23,8 @@
 /// ============================================================
 library;
 
+import 'dart:isolate';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/database/app_database.dart';
@@ -131,9 +133,7 @@ class BackupEngine {
     for (final path in carried) {
       final bytes = await files.read(path);
       if (bytes == null) continue;
-      payloads[path] = key == null
-          ? bytes
-          : await BackupCipher.seal(bytes, key);
+      payloads[path] = bytes;
     }
     final profile = await _profile();
     final createdAt = clock.now();
@@ -161,12 +161,31 @@ class BackupEngine {
           : await vault.exportKeyEnvelope(),
       isAuto: isAuto,
     );
-    final archive = BackupArchive(
+    return BuiltBackup(
+      bytes: await Isolate.run(() => _pack(manifest, plain, payloads, key)),
+      manifest: manifest,
+    );
+  }
+
+  /// Seals (when [key] is set) and zips the archive. The only CPU-heavy part
+  /// of [build]: AES-GCM runs in pure Dart and a backup with a few photos is
+  /// tens of megabytes, so it runs on its own isolate (every argument is
+  /// plain data) instead of freezing the UI.
+  static Future<Uint8List> _pack(
+    BackupManifest manifest,
+    Uint8List plain,
+    Map<String, Uint8List> files,
+    BackupKey? key,
+  ) async {
+    final sealed = <String, Uint8List>{
+      for (final e in files.entries)
+        e.key: key == null ? e.value : await BackupCipher.seal(e.value, key),
+    };
+    return BackupArchive(
       manifest: manifest,
       dbJson: key == null ? plain : await BackupCipher.seal(plain, key),
-      files: payloads,
-    );
-    return BuiltBackup(bytes: archive.encode(), manifest: manifest);
+      files: sealed,
+    ).encode();
   }
 
   /// Folders (relative to app documents) that backups may carry files

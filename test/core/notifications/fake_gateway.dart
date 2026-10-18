@@ -128,3 +128,21 @@ class FakeBackgroundDelivery implements BackgroundDelivery {
     return unrestricted;
   }
 }
+
+/// In-memory OEM auto-start guidance ([OemBackgroundGuide]).
+class FakeOemBackgroundGuide implements OemBackgroundGuide {
+  FakeOemBackgroundGuide({this.brand, this.opens = true});
+
+  String? brand;
+  bool opens;
+  int opened = 0;
+
+  @override
+  Future<String?> aggressiveBrand() async => brand;
+
+  @override
+  Future<bool> openSettings() async {
+    opened++;
+    return opens;
+  }
+}

@@ -8,10 +8,13 @@
 ///     alarms" → opens Android's "Alarms & reminders" page;
 ///   • battery optimisation on → "Allow reminders in the background" →
 ///     Android's battery-optimisation dialog (opt-in, see
-///     core/notifications/background_delivery.dart).
-/// The reminder editor shows at most one (exact alarms first) and stops
-/// suggesting the battery one once asked; Settings › Notifications can
-/// show both with [showAll].
+///     core/notifications/background_delivery.dart);
+///   • a phone maker known to stop alarms of swiped-away apps (Xiaomi,
+///     Oppo, Vivo, Huawei, Samsung …) → "allow auto-start" → that maker's
+///     own auto-start / background screen.
+/// The reminder editor shows at most one (exact alarms first, then
+/// battery, then auto-start) and stops suggesting the last two once asked;
+/// Settings › Notifications can show all with [showAll].
 /// ============================================================
 library;
 
@@ -36,6 +39,12 @@ class ReminderReliabilityBanners extends ConsumerWidget {
       'Allow reminders in the background — some phones stop them when the '
       'app is closed.';
 
+  /// [brand] phones stop alarms of an app that is swiped away unless it is
+  /// on the maker's auto-start list.
+  static String autostartText(String brand) =>
+      'On $brand phones, allow auto-start / background activity for the '
+      'app, or reminders can stop after you swipe it away.';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final permission = ref.watch(notificationPermissionProvider).valueOrNull;
@@ -49,6 +58,8 @@ class ReminderReliabilityBanners extends ConsumerWidget {
     final restricted = showAll
         ? ref.watch(unrestrictedBackgroundProvider).valueOrNull == false
         : ref.watch(suggestUnrestrictedBackgroundProvider);
+    final brand = ref.watch(aggressiveBrandProvider).valueOrNull;
+    final autostartWanted = showAll || ref.watch(suggestAutostartProvider);
     final colors = ModuleStyle.reminders.colors;
     final banners = <Widget>[
       if (inexact)
@@ -66,6 +77,17 @@ class ReminderReliabilityBanners extends ConsumerWidget {
           text: backgroundText,
           actionLabel: 'Allow',
           onAction: () => allowRemindersInBackground(ref),
+        ),
+      // Last, and only when nothing else is pending (the editor shows one).
+      if (brand != null &&
+          autostartWanted &&
+          (showAll || (!inexact && !restricted)))
+        FFInfoBanner(
+          icon: FontAwesomeIcons.powerOff,
+          colors: colors,
+          text: autostartText(brand),
+          actionLabel: 'Open',
+          onAction: () => allowAutostart(ref),
         ),
     ];
     if (banners.isEmpty) return const SizedBox.shrink();

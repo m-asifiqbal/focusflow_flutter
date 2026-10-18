@@ -123,6 +123,49 @@ them the app builds and runs; Drive says "not set up in this build".
   & Drive data** deletes every file in appDataFolder and revokes the grant
   (`disconnect`).
 
+## Go-live checklist
+
+The code is finished; what is missing is configuration that only the
+account owner can create. In order:
+
+1. **`config/google.json` does not exist yet**, so every build so far says
+   "not set up in this build". Create the Google Cloud project, the Drive API,
+   the consent screen and the three OAuth clients (sections 1–2 above), then
+   `cp config/google.example.json config/google.json` and paste the Web and
+   iOS client ids.
+2. **Register the SHA-1 of every key that signs a build** on the *Android*
+   OAuth client (package `com.iqballab.focusflow`). Google matches the app by
+   package + SHA-1; a mismatch fails sign-in with a generic error (code 10 /
+   "developer error"), only on that build:
+   * debug builds — Windows:
+     `keytool -list -v -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.keystore -storepass android -keypass android`
+     (`keytool` is in `<Android Studio>\jbr\bin`), or `cd android` then
+     `gradlew signingReport`;
+   * release builds — **until `android/key.properties` exists, release builds
+     are signed with the debug key** (see `android/app/build.gradle.kts`), so
+     the debug SHA-1 is the one that matters for a locally built release APK;
+   * Play Store — add the *upload* key SHA-1 and, after the first upload, the
+     *app signing* key SHA-1 from Play Console › App integrity.
+3. **Build with the ids.** A plain `flutter build apk` / Android Studio "Run"
+   does not pass them. Use
+   `flutter build apk --release --dart-define-from-file=config/google.json`,
+   or in Android Studio: Run › Edit configurations › *Additional run args*
+   `--dart-define-from-file=config/google.json` (the repo also ships the
+   "FocusFlow (Google Drive)" VS Code configuration).
+4. **Consent screen status.** While it is *Testing*, only the listed test
+   users can sign in and Google expires their grant after 7 days. Set it to
+   **In production** when you ship: `drive.appdata` is a non-sensitive scope,
+   so no verification review is needed. The consent screen needs working
+   privacy-policy and terms URLs — `AppInfo.privacyUrl` / `termsUrl` are
+   placeholders (`https://focusflow.app/…`) that must exist before then.
+5. **iOS only:** run `dart run tool/google/apply_google_config.dart` on the Mac
+   (it writes `ios/Flutter/GoogleSignIn.xcconfig`), then build with the same
+   `--dart-define-from-file`.
+6. **Smoke test on a real device**, two accounts or two devices: sign in →
+   *Sync now* → the history row appears → on the second device sign in with
+   the same account → *Restore*. With "Encrypt backups" on, both devices need
+   the same backup PIN.
+
 ## Testing without Google
 
 The sync tests (`test/core/sync/`) use an in-memory `FakeDriveStore` and

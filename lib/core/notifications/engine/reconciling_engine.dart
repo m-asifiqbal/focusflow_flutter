@@ -40,6 +40,8 @@ library;
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:drift/drift.dart'
+    show ResultSetImplementation, TableUpdateQuery;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/notifications/background_delivery.dart';
@@ -57,7 +59,6 @@ import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
 import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
-import 'package:focusflow/features/tasks/domain/repository/tasks_repository.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
@@ -72,19 +73,26 @@ class ReconcilingNotificationEngine implements NotificationEngine {
   final Duration debounce;
   static const Duration _debounce = Duration(milliseconds: 400);
 
+  /// Quiet period for [scheduleLazily].
+  static const Duration lazyDebounce = Duration(seconds: 3);
+
   /// Longest sleep between passes while the app runs.
   static const Duration maxSleep = Duration(hours: 6);
 
   bool _started = false;
+
+  /// The first pass of this process has run (it renews every alarm — see
+  /// [NotificationReconciler.reconcile]).
+  bool _rearmed = false;
   bool _supported = false;
   bool _disposed = false;
   String? _deviceZone;
   tz.Location _location = tz.UTC;
-  DateTime? _watchedDay;
 
   final List<StreamSubscription<Object?>> _subs = [];
   final List<ProviderSubscription<dynamic>> _listeners = [];
   Timer? _debounceTimer;
+  Timer? _lazyTimer;
   ReceivePort? _refreshPort;
   Timer? _wakeTimer;
   Future<void>? _pass;
@@ -117,13 +125,12 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     _refreshPort = NotificationRefreshPort.listen(
       () => unawaited(_refreshFromOtherIsolate()),
     );
-    _watchRepositories();
+    _watchChanges();
     _observeLifecycle();
     _listeners
       ..add(
         _ref.listen<AppSettings>(settingsProvider, (prev, next) {
           if (prev?.timeZone != next.timeZone) unawaited(_resolveZone());
-          if (prev?.weekStartsOn != next.weekStartsOn) _watchRepositories();
           schedule();
         }),
       )
@@ -141,23 +148,29 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       ..invalidate(exactAlarmPermissionProvider)
       ..invalidate(fullScreenAlarmsAllowedProvider)
       ..invalidate(unrestrictedBackgroundProvider);
-    await _refreshFromOtherIsolate();
+    // No table refresh here: a background isolate that wrote pinged the
+    // refresh port (delivered, at the latest, as the app resumes), and
+    // marking five tables updated makes every live query of the app
+    // re-run for nothing.
+    await _refreshFromOtherIsolate(markTables: false);
   }
 
   /// A background isolate may have written to the DB: let every live
   /// query re-read, re-check permissions and the zone, then re-plan.
   /// (The exact-alarm state is part of each pass: a grant / revoke made in
   /// system settings re-schedules every notification.)
-  Future<void> _refreshFromOtherIsolate() async {
+  Future<void> _refreshFromOtherIsolate({bool markTables = true}) async {
     if (!_started || !_supported || _disposed) return;
-    final db = _ref.read(databaseProvider);
-    db.markTablesUpdated([
-      db.reminders,
-      db.tasks,
-      db.habits,
-      db.habitLogs,
-      db.inboxEntries,
-    ]);
+    if (markTables) {
+      final db = _ref.read(databaseProvider);
+      db.markTablesUpdated([
+        db.reminders,
+        db.tasks,
+        db.habits,
+        db.habitLogs,
+        db.inboxEntries,
+      ]);
+    }
     _deviceZone = await _gateway.deviceTimeZone();
     await _resolveZone();
     _ref.invalidate(notificationPermissionProvider);
@@ -200,10 +213,19 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     _debounceTimer = Timer(debounce, () => unawaited(reconcileNow()));
   }
 
+  /// Like [schedule], for changes that rarely matter and come in long
+  /// bursts (a note being typed saves every few hundred milliseconds).
+  void scheduleLazily() {
+    if (!_supported || _disposed) return;
+    _lazyTimer?.cancel();
+    _lazyTimer = Timer(lazyDebounce, () => unawaited(reconcileNow()));
+  }
+
   /// Runs a pass now (or right after the running one).
   Future<void> reconcileNow() async {
     if (!_supported || _disposed) return;
     _debounceTimer?.cancel();
+    _lazyTimer?.cancel();
     if (_pass != null) {
       _again = true;
       return _pass;
@@ -226,7 +248,6 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       final settings = _ref.read(settingsProvider);
       // Days follow the planner's zone (AppSettings.timeZone override).
       final today = _today();
-      if (_watchedDay != today) _watchRepositories();
       final permission = await _ref.read(notificationPermissionProvider.future);
       // Task reminders follow their floating due time into this zone.
       await TaskReminderZones.align(
@@ -244,7 +265,11 @@ class ReconcilingNotificationEngine implements NotificationEngine {
             input,
             allowed: permission == NotificationPermission.granted,
             location: _location,
+            // First pass of this process: the app may have been killed
+            // (and its alarms with it) since the last one.
+            rearm: !_rearmed,
           );
+      _rearmed = true;
       lastResult = result;
       if (!_legacyRetired) {
         // Every pending request now uses the current channels.
@@ -292,36 +317,40 @@ class ReconcilingNotificationEngine implements NotificationEngine {
   /// Zones planned in earlier this session (task reminder re-sync).
   final Set<tz.Location> _zones = {};
 
-  /// (Re)subscribes to the repository streams; today's habits are
-  /// re-watched when the day changes.
-  void _watchRepositories() {
+  /// Subscribes to *table writes* — a trigger needs no data: the pass
+  /// reads a fresh snapshot itself. (Watching the repository streams
+  /// instead kept full reminder / task / habit queries, with subtasks and
+  /// tags, alive for the whole session and re-ran them on every write,
+  /// then ran them once more in the pass.)
+  ///
+  /// The planner reads reminders, tasks and habits (with their logs). Notes
+  /// and vault items matter only through their lifecycle — a reminder
+  /// linked to an archived note must stop — so their writes, which are
+  /// mostly autosaves, are acted on lazily.
+  void _watchChanges() {
     for (final s in _subs) {
       unawaited(s.cancel());
     }
     _subs.clear();
-    final settings = _ref.read(settingsProvider);
-    final day = _today();
-    _watchedDay = day;
-    void trigger(Object? _) => schedule();
+    final db = _ref.read(databaseProvider);
     void error(Object e) => AppLogger.w('Notification source failed: $e');
+    Stream<Object?> writes(
+      Iterable<ResultSetImplementation<dynamic, dynamic>> tables,
+    ) => db.tableUpdates(TableUpdateQuery.onAllTables(tables));
     _subs
       ..add(
-        _ref
-            .read(remindersRepositoryProvider)
-            .watchSchedulable()
-            .listen(trigger, onError: error),
+        writes([
+          db.reminders,
+          db.tasks,
+          db.habits,
+          db.habitLogs,
+        ]).listen((_) => schedule(), onError: error),
       )
       ..add(
-        _ref
-            .read(tasksRepositoryProvider)
-            .watchTasks(const TasksQuery())
-            .listen(trigger, onError: error),
-      )
-      ..add(
-        _ref
-            .read(habitsRepositoryProvider)
-            .watchTodayHabits(day, weekStartsOn: settings.weekStartsOn)
-            .listen(trigger, onError: error),
+        writes([
+          db.notes,
+          db.vaultItems,
+        ]).listen((_) => scheduleLazily(), onError: error),
       );
   }
 
@@ -361,6 +390,7 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     final port = _refreshPort;
     if (port != null) NotificationRefreshPort.close(port);
     _debounceTimer?.cancel();
+    _lazyTimer?.cancel();
     _wakeTimer?.cancel();
     for (final s in _subs) {
       unawaited(s.cancel());

@@ -14,8 +14,10 @@
 library;
 
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:drift/native.dart';
 import 'package:focusflow/core/constants/app_info.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
@@ -38,7 +40,7 @@ abstract final class EncryptedDatabase {
   }) {
     return LazyDatabase(() async {
       final file = await databaseFile(fileName);
-      if (quarantine) await _quarantineIfUnreadable(file, cipherKey);
+      if (quarantine) await quarantineIfUnreadable(file, cipherKey);
       return NativeDatabase.createInBackground(
         file,
         setup: (rawDb) => applyKey(rawDb, cipherKey),
@@ -59,6 +61,9 @@ abstract final class EncryptedDatabase {
 
   /// SQLITE_NOTADB: the file is not a database under this key.
   static const int _notADatabase = 26;
+
+  /// [_probe] result: the cipher build is missing (not a SQLite code).
+  static const int _cipherMissing = -1;
 
   /// Keys the connection and asserts SQLite3MultipleCiphers is active.
   /// Throwing is intentional: a missing cipher must fail loudly.
@@ -95,25 +100,45 @@ abstract final class EncryptedDatabase {
   /// Only SQLITE_NOTADB (wrong key) counts: a busy lock or an I/O error is
   /// transient and rethrown — moving a live database aside would make the
   /// app come back empty.
-  static Future<void> _quarantineIfUnreadable(File file, String key) async {
+  ///
+  /// The probe opens the file and derives the key (sqlite3mc stretches it
+  /// with PBKDF2 — tens of milliseconds on a phone), so it runs on its own
+  /// isolate: this is the first thing every launch waits for, and it must
+  /// not take frames from the first screen.
+  @visibleForTesting
+  static Future<void> quarantineIfUnreadable(File file, String key) async {
     if (!await file.exists()) return;
+    final path = file.path;
+    final (code, message) = await Isolate.run(() => _probe(path, key));
+    if (code == null) return;
+    // Cipher build missing — never "recover" from that.
+    if (code == _cipherMissing) throw StateError(message);
+    // A busy lock or an I/O error is transient: moving a live database
+    // aside would make the app come back empty.
+    if (code != _notADatabase) throw StateError('Database probe: $message');
+    final stamp = DateTime.now().millisecondsSinceEpoch;
+    AppLogger.e(
+      'Database unreadable with stored key — quarantining ($message)',
+    );
+    for (final suffix in ['', '-wal', '-shm']) {
+      final f = File('$path$suffix');
+      if (await f.exists()) await f.rename('${f.path}.unreadable-$stamp');
+    }
+  }
+
+  /// Opens [path] with [key] and closes it again: `(null, '')` when it
+  /// works, else the SQLite result code and message (a record, so it
+  /// crosses the isolate boundary).
+  static (int?, String) _probe(String path, String key) {
     Database? db;
     try {
-      db = sqlite3.open(file.path);
+      db = sqlite3.open(path);
       applyKey(db, key);
-      return;
-    } on StateError {
-      rethrow; // cipher build missing — never "recover" from that
+      return (null, '');
+    } on StateError catch (e) {
+      return (_cipherMissing, e.message);
     } on SqliteException catch (e) {
-      if (e.resultCode != _notADatabase) rethrow;
-      final stamp = DateTime.now().millisecondsSinceEpoch;
-      AppLogger.e('Database unreadable with stored key — quarantining ($e)');
-      db?.close();
-      db = null;
-      for (final suffix in ['', '-wal', '-shm']) {
-        final f = File('${file.path}$suffix');
-        if (await f.exists()) await f.rename('${f.path}.unreadable-$stamp');
-      }
+      return (e.resultCode, e.toString());
     } finally {
       db?.close();
     }

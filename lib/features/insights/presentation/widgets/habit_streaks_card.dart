@@ -133,73 +133,76 @@ class _StreakTile extends StatelessWidget {
       label: '${row.name}, ${InsightsFormat.streakLong(row.streak)} streak',
       button: true,
       excludeSemantics: true,
-      child: FFPressable(
-        onTap: () => context.push(AppRoutes.habit(row.habitId)),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.symmetric(
-            vertical: AppSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              FFIconTile.soft(
-                icon: HabitIcons.of(row.iconKey),
-                colors: colors,
-                size: InsightsDimens.streakTile,
-              ),
-              const SizedBox(width: AppSpacing.rowLeadingGap),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  row.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.text.rowTitle.copyWith(
-                    fontWeight: FontWeight.w400,
+      child: FFOpenOriginTracker(
+        radius: AppRadii.tile,
+        child: FFPressable(
+          onTap: () => context.push(AppRoutes.habit(row.habitId)),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                FFIconTile.soft(
+                  icon: HabitIcons.of(row.iconKey),
+                  colors: colors,
+                  size: InsightsDimens.streakTile,
+                ),
+                const SizedBox(width: AppSpacing.rowLeadingGap),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    row.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.text.rowTitle.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              // The bar gives way to the name on narrow / large-text
-              // layouts (never wider than in the mockup).
-              Expanded(
-                flex: 2,
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: InsightsDimens.streakBarWidth,
-                    ),
-                    child: SizedBox(
-                      height: InsightsDimens.streakBar,
-                      width: double.infinity,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(AppRadii.pill),
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: ColoredBox(color: ff.divider),
-                            ),
-                            FractionallySizedBox(
-                              widthFactor: row.progress.clamp(0.0, 1.0),
-                              heightFactor: 1,
-                              child: ColoredBox(color: colors.solid),
-                            ),
-                          ],
+                const SizedBox(width: AppSpacing.md),
+                // The bar gives way to the name on narrow / large-text
+                // layouts (never wider than in the mockup).
+                Expanded(
+                  flex: 2,
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: InsightsDimens.streakBarWidth,
+                      ),
+                      child: SizedBox(
+                        height: InsightsDimens.streakBar,
+                        width: double.infinity,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadii.pill),
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ColoredBox(color: ff.divider),
+                              ),
+                              FractionallySizedBox(
+                                widthFactor: row.progress.clamp(0.0, 1.0),
+                                heightFactor: 1,
+                                child: ColoredBox(color: colors.solid),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                InsightsFormat.streakShort(row.streak),
-                style: context.text.stat.copyWith(
-                  fontSize: InsightsDimens.streakValue,
-                  color: colors.inkFor(ff.brightness),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  InsightsFormat.streakShort(row.streak),
+                  style: context.text.stat.copyWith(
+                    fontSize: InsightsDimens.streakValue,
+                    color: colors.inkFor(ff.brightness),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

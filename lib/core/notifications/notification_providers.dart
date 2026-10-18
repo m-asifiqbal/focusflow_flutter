@@ -16,6 +16,7 @@ import 'package:focusflow/core/notifications/engine/notification_gateway.dart';
 import 'package:focusflow/core/notifications/engine/notification_ledger.dart';
 import 'package:focusflow/core/notifications/engine/notification_reconciler.dart';
 import 'package:focusflow/core/notifications/engine/planner_snapshot.dart';
+import 'package:focusflow/core/notifications/planning/planner_input.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
@@ -39,6 +40,7 @@ final plannerSnapshotLoaderProvider = Provider<PlannerSnapshotLoader>(
     tasks: ref.watch(tasksRepositoryProvider),
     habits: ref.watch(habitsRepositoryProvider),
     clock: ref.watch(clockProvider),
+    limits: PlannerLimits.current,
   ),
 );
 

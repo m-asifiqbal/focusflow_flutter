@@ -35,14 +35,25 @@ import 'package:intl/intl.dart';
 abstract final class ReminderPlanner {
   /// Planned notifications for every reminder occurrence in
   /// `(input.now, until)`, before quiet hours and the rolling-window cap.
-  static List<PlannedNotification> plan(PlannerInput input, DateTime until) {
+  /// A reminder's *next* occurrence is planned up to [pendingUntil]
+  /// (default [until]) — see [PlannerInput.vitalHorizonDays].
+  static List<PlannedNotification> plan(
+    PlannerInput input,
+    DateTime until, {
+    DateTime? pendingUntil,
+  }) {
     final tasksById = {for (final t in input.tasks) t.id: t};
     final result = <PlannedNotification>[];
     for (final r in input.reminders) {
       if (!_fires(input, r, tasksById)) continue;
       final taskLinked = r.linkedRef?.type == ItemType.task;
       final linkedTask = taskLinked ? tasksById[r.linkedRef!.id] : null;
-      for (final (occurrence, fireAt) in slots(r, input.now, until)) {
+      for (final (occurrence, fireAt) in slots(
+        r,
+        input.now,
+        until,
+        pendingUntil: pendingUntil,
+      )) {
         result.add(
           _describe(input, r, occurrence, fireAt, taskLinked, linkedTask),
         );
@@ -80,19 +91,26 @@ abstract final class ReminderPlanner {
 
   /// `(occurrence, fireAt)` pairs of [r] with `now < fireAt < until`.
   /// `occurrence` is the rule time (stable identity); `fireAt` applies the
-  /// snooze to the pending occurrence.
+  /// snooze to the pending occurrence. The pending occurrence (the one
+  /// that fires next) may lie up to [pendingUntil] ahead (default
+  /// [until]): later occurrences of a repeating rule stay inside [until].
   static List<(DateTime, DateTime)> slots(
     Reminder r,
     DateTime now,
-    DateTime until,
-  ) {
+    DateTime until, {
+    DateTime? pendingUntil,
+  }) {
     if (!r.isEnabled || r.isCompleted) return const [];
     bool inWindow(DateTime t) => t.isAfter(now) && t.isBefore(until);
     final snooze = r.snoozedUntil;
     final snoozed = snooze != null && snooze.isAfter(now);
     final pendingFire = snoozed ? snooze : r.triggerAt;
+    final pendingEnd = pendingUntil != null && pendingUntil.isAfter(until)
+        ? pendingUntil
+        : until;
     final result = <(DateTime, DateTime)>[
-      if (inWindow(pendingFire)) (r.triggerAt, pendingFire),
+      if (pendingFire.isAfter(now) && pendingFire.isBefore(pendingEnd))
+        (r.triggerAt, pendingFire),
     ];
     final rule = r.recurrence;
     if (rule != null && until.isAfter(now)) {
@@ -102,6 +120,50 @@ abstract final class ReminderPlanner {
       }
     }
     return result;
+  }
+
+  /// The "missed" copy of the reminder occurrence behind plan [key]
+  /// (`rem:<id>:<epoch seconds>`), to show right now ([at]) when the OS
+  /// never delivered it (its alarm was wiped by a force-stop / an OEM
+  /// task killer). Rebuilt from current data, so nothing but the plan key
+  /// has to be remembered. Null when [key] is not a reminder's or the
+  /// reminder no longer fires.
+  ///
+  /// An alarm-style reminder comes back as a plain heads-up: a full-screen,
+  /// insistent alarm hours late would only startle.
+  static PlannedNotification? missed(
+    PlannerInput input,
+    String key, {
+    required DateTime at,
+  }) {
+    final parts = key.split(':');
+    if (parts.length < 3 || parts[0] != 'rem') return null;
+    final seconds = int.tryParse(parts[2]);
+    final r = input.reminders.firstWhereOrNull((r) => r.id == parts[1]);
+    if (seconds == null || r == null) return null;
+    final tasksById = {for (final t in input.tasks) t.id: t};
+    if (!_fires(input, r, tasksById)) return null;
+    final occurrence = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+    final taskLinked = r.linkedRef?.type == ItemType.task;
+    final base = _describe(
+      input,
+      r,
+      occurrence,
+      at,
+      taskLinked,
+      taskLinked ? tasksById[r.linkedRef!.id] : null,
+    );
+    final note = _noteLine(r);
+    return base.copyWith(
+      category: base.category == NotificationCategory.alarm
+          ? (taskLinked
+                ? NotificationCategory.task
+                : NotificationCategory.reminder)
+          : null,
+      body:
+          'Missed · was due at ${input.formatTime(occurrence)}'
+          '${note == null ? '' : ' · $note'}',
+    );
   }
 
   /// The plan key of one occurrence.
@@ -160,19 +222,25 @@ abstract final class ReminderPlanner {
     );
   }
 
+  /// First non-empty line of the reminder's note, clipped for a
+  /// notification (null = no note).
+  static String? _noteLine(Reminder r) {
+    final note = r.note
+        .split('\n')
+        .map((l) => l.trim())
+        .firstWhereOrNull((l) => l.isNotEmpty);
+    if (note == null) return null;
+    return note.length > 140 ? '${note.substring(0, 139)}…' : note;
+  }
+
   static String _body(
     PlannerInput input,
     Reminder r,
     DateTime occurrence,
     TaskItem? task,
   ) {
-    final note = r.note
-        .split('\n')
-        .map((l) => l.trim())
-        .firstWhereOrNull((l) => l.isNotEmpty);
-    if (note != null) {
-      return note.length > 140 ? '${note.substring(0, 139)}…' : note;
-    }
+    final note = _noteLine(r);
+    if (note != null) return note;
     final dueDay = task?.dueDate;
     if (task != null && dueDay != null) {
       final diff = DateUtilsX.daysBetween(

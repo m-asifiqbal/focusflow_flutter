@@ -9,6 +9,8 @@
 /// ============================================================
 library;
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/notifications/planning/quiet_hours.dart';
 import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
@@ -28,7 +30,13 @@ class PlannerInput {
     this.tasks = const [],
     this.habits = const [],
     this.horizonDays = 14,
+    this.vitalHorizonDays = 14,
+    this.maxScheduled = defaultMaxScheduled,
   });
+
+  /// iOS keeps at most 64 pending requests; Android's AlarmManager allows
+  /// 500 alarms per app. The default is the conservative (iOS) number.
+  static const int defaultMaxScheduled = 60;
 
   /// Plan notifications strictly after this instant.
   final DateTime now;
@@ -51,6 +59,18 @@ class PlannerInput {
   /// How many calendar days ahead to plan (the rolling window).
   final int horizonDays;
 
+  /// How far ahead the *next* occurrence of a reminder (and so a task's
+  /// due alert) is handed to the OS. Longer than [horizonDays]: with the
+  /// app closed nothing rolls the window forward, so a reminder that is
+  /// weeks away must already be with the OS. Never shorter than
+  /// [horizonDays].
+  final int vitalHorizonDays;
+
+  /// Cap on notifications handed to the OS at once (see
+  /// [NotificationPlanner.plan]: reminders, alarms and task alerts take
+  /// their slots first, habit nudges and digests fill what is left).
+  final int maxScheduled;
+
   /// Today in [calendar]'s zone.
   DateTime get today => calendar.dayOf(now);
 
@@ -69,6 +89,44 @@ class PlannerInput {
       settings.use24HourTime ? 'HH:mm' : 'h:mm a',
     ).format(local);
   }
+}
+
+/// How much the OS can be asked to hold, per platform.
+///
+/// iOS keeps at most 64 pending requests, so its window is tight and a
+/// reminder further than [vitalHorizonDays] waits for the next refill.
+/// Android's AlarmManager takes 500 alarms per app: a long reach costs
+/// nothing there and is what keeps reminders firing while the app stays
+/// closed for weeks.
+@immutable
+class PlannerLimits {
+  const PlannerLimits({
+    required this.horizonDays,
+    required this.vitalHorizonDays,
+    required this.maxScheduled,
+  });
+
+  final int horizonDays;
+  final int vitalHorizonDays;
+  final int maxScheduled;
+
+  /// What [PlannerInput] defaults to (and what iOS gets).
+  static const PlannerLimits conservative = PlannerLimits(
+    horizonDays: 14,
+    vitalHorizonDays: 45,
+    maxScheduled: PlannerInput.defaultMaxScheduled,
+  );
+
+  static const PlannerLimits android = PlannerLimits(
+    horizonDays: 14,
+    vitalHorizonDays: 120,
+    maxScheduled: 240,
+  );
+
+  /// Limits of the platform the app runs on (conservative elsewhere, also
+  /// in unit tests).
+  static PlannerLimits get current =>
+      !kIsWeb && Platform.isAndroid ? android : conservative;
 }
 
 /// Fixed wall times of notifications that have no setting of their own.

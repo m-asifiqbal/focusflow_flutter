@@ -40,7 +40,7 @@ Future<bool> runNotificationMaintenance(
 ) async {
   try {
     await initialize();
-    await reconcileInBackground(read);
+    await reconcileInBackground(read, rearm: true);
     return true;
   } catch (e, st) {
     AppLogger.e(

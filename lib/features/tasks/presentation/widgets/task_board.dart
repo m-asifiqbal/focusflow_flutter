@@ -129,23 +129,28 @@ class _BoardColumn extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TaskRow(
-                    task: task,
-                    now: now,
-                    use24h: use24h,
-                    pendingDone: pending.contains(task.id),
-                    dragHandle: const SizedBox.shrink(),
-                    onTap: () => context.push(AppRoutes.task(task.id)),
-                    onLongPress: () => showItemActions(context, ref, task.ref),
-                    onCheck: (_) => task.isCompleted
-                        ? reopenTask(ref, task.id)
-                        : completeTask(
-                            context,
-                            ref,
-                            task.id,
-                            title: task.title,
-                            delayed: true,
-                          ),
+                  // The editor grows out of this card, as from the list.
+                  FFOpenOriginTracker(
+                    radius: AppRadii.row,
+                    child: TaskRow(
+                      task: task,
+                      now: now,
+                      use24h: use24h,
+                      pendingDone: pending.contains(task.id),
+                      dragHandle: const SizedBox.shrink(),
+                      onTap: () => context.push(AppRoutes.task(task.id)),
+                      onLongPress: () =>
+                          showItemActions(context, ref, task.ref),
+                      onCheck: (_) => task.isCompleted
+                          ? reopenTask(ref, task.id)
+                          : completeTask(
+                              context,
+                              ref,
+                              task.id,
+                              title: task.title,
+                              delayed: true,
+                            ),
+                    ),
                   ),
                   if (move != null)
                     FFTextButton(

@@ -6,6 +6,7 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/startup/maintenance.dart';
+import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
@@ -23,6 +24,7 @@ void main() {
     h.read(itemsRepositoryProvider),
     h.read(sharedPreferencesProvider),
     h.clock,
+    inbox: h.read(inboxRepositoryProvider),
   );
 
   test('purges expired trash, throttled to once per ~day', () async {
@@ -79,5 +81,24 @@ void main() {
     // Next launch sweeps it.
     await fresh().runIfDue();
     expect(await notes.getNote(open), isNull);
+  });
+
+  test('drops notifications older than the retention, keeps recent', () async {
+    final inbox = h.read(inboxRepositoryProvider);
+    await inbox.add(
+      kind: InboxKind.reminder,
+      title: 'Old',
+      at: _now.subtract(Maintenance.inboxRetention + const Duration(days: 1)),
+    );
+    await inbox.add(
+      kind: InboxKind.reminder,
+      title: 'Recent',
+      at: _now.subtract(const Duration(days: 10)),
+    );
+
+    await fresh().runIfDue();
+
+    final left = await inbox.watch().first;
+    expect(left.map((e) => e.title), ['Recent']);
   });
 }

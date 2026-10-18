@@ -68,6 +68,13 @@ class _MinuteTickerState extends ConsumerState<MinuteTicker>
     with WidgetsBindingObserver {
   Timer? _timer;
 
+  /// The tab / route this ticker lives in is on screen. The app keeps the
+  /// other tabs alive behind `Offstage` + `TickerMode(enabled: false)`:
+  /// tickers pause there but a [Timer] does not, so without this check
+  /// three hidden tabs would wake every 30 s and rebuild their clock
+  /// watchers for nobody to see.
+  bool _active = true;
+
   @override
   void initState() {
     super.initState();
@@ -78,12 +85,23 @@ class _MinuteTickerState extends ConsumerState<MinuteTicker>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final wasActive = _active;
+    _active = TickerMode.valuesOf(context).enabled;
+    // Back on screen: catch up at once instead of at the next timer beat.
+    if (_active && !wasActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _tick());
+    }
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) _tick();
   }
 
   void _tick() {
-    if (mounted) ref.read(minuteClockProvider.notifier).tick();
+    if (mounted && _active) ref.read(minuteClockProvider.notifier).tick();
   }
 
   @override

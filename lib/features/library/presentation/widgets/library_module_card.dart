@@ -70,7 +70,7 @@ class LibraryModuleCard extends StatelessWidget {
             l.highlight,
             l.meta,
           ].join('. ');
-    return FFCard(
+    final card = FFCard(
       padding: EdgeInsetsDirectional.zero,
       onTap: onTap,
       semanticLabel: semantic,
@@ -140,6 +140,10 @@ class LibraryModuleCard extends StatelessWidget {
         ],
       ),
     );
+    // The module's list grows out of its card, as an item's page does out
+    // of its row. Not the vault: that page is always dark and would grow
+    // out of a light card.
+    return type == ItemType.vault ? card : FFOpenOriginTracker(child: card);
   }
 
   Widget _line(BuildContext context, String text, TextStyle style) => Text(

@@ -3,11 +3,18 @@
 /// ============================================================
 ///
 /// - Notification engine start / resume reconcile (core/notifications)
-/// - Background job scheduling (core/sync/background_tasks.dart)
+/// - Background job scheduling (core/sync/background_tasks.dart), which also
+///   runs an overdue backup
 /// - Maintenance: purge Recently Deleted items older than 30 days
 ///
 /// Every job is fire-and-forget and isolated: one failing never blocks the UI
 /// or the others.
+///
+/// Only the notification engine starts at once (a notification tap that
+/// launched the app must open its page now). Scheduling, the overdue backup
+/// and the purge wait [settleDelay]: they are not needed to show anything,
+/// and running them while the first screen loads its data and animates in
+/// costs frames. Opening the app is the moment the user watches it most.
 /// ============================================================
 library;
 
@@ -31,6 +38,11 @@ class AppStartupHost extends ConsumerStatefulWidget {
 
 class _AppStartupHostState extends ConsumerState<AppStartupHost>
     with WidgetsBindingObserver {
+  /// How long after launch the non-urgent jobs wait.
+  static const Duration settleDelay = Duration(seconds: 4);
+
+  Timer? _settleTimer;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +52,7 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
 
   @override
   void dispose() {
+    _settleTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -54,11 +67,14 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
       'notifications.start',
       () => ref.read(notificationEngineProvider).start(),
     );
-    _run(
-      'background.schedule',
-      () => ref.read(backgroundTasksProvider).ensureScheduled(),
-    );
-    _run('maintenance', () => ref.read(maintenanceProvider).runIfDue());
+    _settleTimer = Timer(settleDelay, () {
+      if (!mounted) return;
+      _run(
+        'background.schedule',
+        () => ref.read(backgroundTasksProvider).ensureScheduled(),
+      );
+      _run('maintenance', () => ref.read(maintenanceProvider).runIfDue());
+    });
   }
 
   void _onResume() {

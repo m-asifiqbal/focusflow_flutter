@@ -17,8 +17,7 @@ import 'package:focusflow/core/database/encrypted_database.dart';
 import 'package:focusflow/core/database/sync_tombstones.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-const _key =
-    'b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1';
+const _key = 'b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1';
 
 AppDatabase _open(File file) => AppDatabase(
   NativeDatabase(file, setup: (raw) => EncryptedDatabase.applyKey(raw, _key)),
@@ -72,17 +71,26 @@ void main() {
     final now = DateTime(2026, 3, 1, 9);
     // 1. Create a database and put data in it, then turn it into v1.
     var db = _open(file);
-    await db.into(db.notes).insert(
-      NotesCompanion.insert(
-        id: 'n1',
-        createdAt: now,
-        updatedAt: now,
-        title: const Value('Kept across the upgrade'),
-      ),
-    );
-    await db.into(db.tags).insert(
-      TagsCompanion.insert(id: 't1', name: 'work', createdAt: now, updatedAt: now),
-    );
+    await db
+        .into(db.notes)
+        .insert(
+          NotesCompanion.insert(
+            id: 'n1',
+            createdAt: now,
+            updatedAt: now,
+            title: const Value('Kept across the upgrade'),
+          ),
+        );
+    await db
+        .into(db.tags)
+        .insert(
+          TagsCompanion.insert(
+            id: 't1',
+            name: 'work',
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
     await db.close();
     _downgradeToV1(file);
 
@@ -91,9 +99,7 @@ void main() {
     EncryptedDatabase.applyKey(check, _key);
     expect(check.select('PRAGMA user_version').first.values.first, 1);
     expect(
-      check.select(
-        "SELECT name FROM sqlite_master WHERE name = 'tombstones'",
-      ),
+      check.select("SELECT name FROM sqlite_master WHERE name = 'tombstones'"),
       isEmpty,
     );
     check.close();
@@ -126,13 +132,15 @@ void main() {
     await (db.delete(db.notes)..where((n) => n.id.equals('n1'))).go();
     await (db.delete(db.tags)..where((t) => t.id.equals('t1'))).go();
     var tombs = await db.select(db.tombstones).get();
-    expect(
-      tombs.map((t) => '${t.entity}:${t.entityId}').toSet(),
-      {'note:n1', 'tag:t1'},
-    );
-    await db.into(db.notes).insert(
-      NotesCompanion.insert(id: 'n1', createdAt: now, updatedAt: now),
-    );
+    expect(tombs.map((t) => '${t.entity}:${t.entityId}').toSet(), {
+      'note:n1',
+      'tag:t1',
+    });
+    await db
+        .into(db.notes)
+        .insert(
+          NotesCompanion.insert(id: 'n1', createdAt: now, updatedAt: now),
+        );
     tombs = await db.select(db.tombstones).get();
     expect(tombs.map((t) => t.entity), ['tag']);
   });
@@ -142,15 +150,17 @@ void main() {
     addTearDown(db.close);
     expect(await _names(db, 'table'), contains('tombstones'));
     final now = DateTime(2026, 3, 1);
-    await db.into(db.habitLogs).insert(
-      HabitLogsCompanion.insert(
-        id: 'l1',
-        habitId: 'h1',
-        date: '2026-03-01',
-        createdAt: now,
-        updatedAt: now,
-      ),
-    );
+    await db
+        .into(db.habitLogs)
+        .insert(
+          HabitLogsCompanion.insert(
+            id: 'l1',
+            habitId: 'h1',
+            date: '2026-03-01',
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
     await db.delete(db.habitLogs).go();
     final tomb = await db.select(db.tombstones).getSingle();
     expect(tomb.entity, 'habit_log');

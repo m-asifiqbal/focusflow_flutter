@@ -34,7 +34,16 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 typedef NotificationReader = T Function<T>(ProviderListenable<T> provider);
 
 /// Runs one reconcile pass with [read]'s graph. Returns its result.
-Future<ReconcileResult> reconcileInBackground(NotificationReader read) async {
+///
+/// [rearm]: the isolate was started fresh by the OS (maintenance task), so
+/// alarms the system dropped meanwhile are renewed and lost reminders shown
+/// as "Missed" — see `NotificationReconciler.reconcile`. A notification
+/// action (Done / Snooze) leaves it off: it changes one item, and the
+/// alarms are as healthy as they were a moment ago.
+Future<ReconcileResult> reconcileInBackground(
+  NotificationReader read, {
+  bool rearm = false,
+}) async {
   NotificationZones.ensureLoaded();
   final gateway = read(notificationGatewayProvider);
   final settings = read(settingsProvider);
@@ -55,6 +64,7 @@ Future<ReconcileResult> reconcileInBackground(NotificationReader read) async {
     input,
     allowed: permission == NotificationPermission.granted,
     location: location,
+    rearm: rearm,
   );
   NotificationRefreshPort.ping();
   return result;

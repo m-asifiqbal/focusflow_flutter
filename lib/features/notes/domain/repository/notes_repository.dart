@@ -33,6 +33,7 @@ class NotesQuery {
     this.sort = NotesSort.lastEdited,
     this.pinnedOnly = false,
     this.limit,
+    this.light = false,
   });
 
   /// Folder chip filter (null = all).
@@ -48,6 +49,13 @@ class NotesQuery {
   /// e.g. Home "Recent notes" → 4.
   final int? limit;
 
+  /// Rows without the body: [Note.contentDelta] stays `[]`, the checklist
+  /// empty and [Note.plainText] only its first ~160 characters (enough for
+  /// [Note.displayTitle]). For views that need titles and dates of many
+  /// notes (the calendar) and must not pull every note's full text — and
+  /// must never be saved back.
+  final bool light;
+
   NotesQuery copyWith({
     String? folderId,
     bool clearFolder = false,
@@ -57,6 +65,7 @@ class NotesQuery {
     NotesSort? sort,
     bool? pinnedOnly,
     int? limit,
+    bool? light,
   }) => NotesQuery(
     folderId: clearFolder ? null : (folderId ?? this.folderId),
     tagId: clearTag ? null : (tagId ?? this.tagId),
@@ -64,6 +73,7 @@ class NotesQuery {
     sort: sort ?? this.sort,
     pinnedOnly: pinnedOnly ?? this.pinnedOnly,
     limit: limit ?? this.limit,
+    light: light ?? this.light,
   );
 
   @override
@@ -74,11 +84,12 @@ class NotesQuery {
       other.text == text &&
       other.sort == sort &&
       other.pinnedOnly == pinnedOnly &&
-      other.limit == limit;
+      other.limit == limit &&
+      other.light == light;
 
   @override
   int get hashCode =>
-      Object.hash(folderId, tagId, text, sort, pinnedOnly, limit);
+      Object.hash(folderId, tagId, text, sort, pinnedOnly, limit, light);
 }
 
 /// Header numbers ("48 notes · 3 pinned") and folder chip counts.

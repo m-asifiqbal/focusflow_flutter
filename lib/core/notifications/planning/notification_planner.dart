@@ -11,9 +11,14 @@
 ///      tasks and digests in the window `(now, today + horizonDays)`.
 ///   3. Quiet hours delay every non-alarm notification to the window's end.
 ///   4. Each notification gets the predicted app-icon badge of its day.
-///   5. Rolling window: the soonest [maxCount] survive (iOS keeps at most
-///      64 pending requests) — the engine re-plans on resume and whenever
-///      one fires, so later ones move in as earlier ones are delivered.
+///   5. Rolling window: at most [maxCount] survive (iOS keeps at most 64
+///      pending requests, Android 500 alarms). Reminders, alarms and task
+///      alerts ([isVital]) take their slots first, soonest first; habit
+///      nudges and digests fill what is left. The engine re-plans on resume
+///      and whenever one fires, so later ones move in as earlier ones are
+///      delivered. A reminder's next occurrence is planned up to
+///      `vitalHorizonDays` ahead, further than the routine `horizonDays`,
+///      because with the app closed nothing rolls the window forward.
 ///   6. Ids are made unique (a derived id never collides with another).
 ///
 /// No I/O, no plugins, no `DateTime.now()` — deterministic for tests.
@@ -40,14 +45,12 @@ abstract final class NotificationPlanner {
     int? maxCount = defaultMaxCount,
   }) {
     if (!input.settings.notificationsEnabled) return const [];
-    final end =
-        until ??
-        input.calendar.at(
-          ZoneCalendar.addDays(input.today, input.horizonDays),
-          0,
-        );
+    DateTime windowEnd(int days) =>
+        input.calendar.at(ZoneCalendar.addDays(input.today, days), 0);
+    final end = until ?? windowEnd(input.horizonDays);
+    final vitalEnd = until ?? windowEnd(input.vitalHorizonDays);
     final raw = [
-      ...ReminderPlanner.plan(input, end),
+      ...ReminderPlanner.plan(input, end, pendingUntil: vitalEnd),
       ...HabitPlanner.plan(input, end),
       ...DigestPlanner.plan(input, end),
     ];
@@ -71,10 +74,42 @@ abstract final class NotificationPlanner {
         }(),
     ]..sort(_order);
 
-    final capped = maxCount == null || shaped.length <= maxCount
-        ? shaped
-        : shaped.sublist(0, maxCount);
-    return _uniqueIds(capped);
+    return _uniqueIds(_cap(shaped, maxCount));
+  }
+
+  /// Reminders, alarms and task alerts — what the user explicitly set up
+  /// and cannot afford to lose. Habit nudges, streak warnings and digests
+  /// are routine.
+  static bool isVital(PlannedNotification n) => switch (n.category) {
+    NotificationCategory.reminder ||
+    NotificationCategory.alarm ||
+    NotificationCategory.task => true,
+    _ => false,
+  };
+
+  /// Keeps at most [maxCount] of [sorted] (soonest first). Vital ones take
+  /// their slots first, the routine ones fill what is left — a daily
+  /// digest plus a few habit nudges would otherwise use up the whole cap
+  /// within days and push a reminder set for next week out of the plan,
+  /// which with the app closed nothing would ever bring back.
+  static List<PlannedNotification> _cap(
+    List<PlannedNotification> sorted,
+    int? maxCount,
+  ) {
+    if (maxCount == null || sorted.length <= maxCount) return sorted;
+    final vital = <PlannedNotification>[];
+    final routine = <PlannedNotification>[];
+    for (final n in sorted) {
+      (isVital(n) ? vital : routine).add(n);
+    }
+    if (vital.length >= maxCount) return vital.sublist(0, maxCount);
+    final room = maxCount - vital.length;
+    // Merge the two (each sorted) back into one soonest-first list.
+    final keep = {...vital, ...routine.take(room)};
+    return [
+      for (final n in sorted)
+        if (keep.contains(n)) n,
+    ];
   }
 
   /// Whether the source of plan [key] may still fire. For a request whose
@@ -89,6 +124,21 @@ abstract final class NotificationPlanner {
       return HabitPlanner.stillWanted(input, key);
     }
     return true;
+  }
+
+  /// The "Missed" copy of the request behind plan [key], to show at [at]
+  /// when the OS never delivered it. Only reminders and task alerts have
+  /// one (a habit nudge or digest hours late is noise); null when the
+  /// source no longer wants to fire.
+  static PlannedNotification? missed(
+    PlannerInput input,
+    String key, {
+    required DateTime at,
+  }) {
+    if (!input.settings.notificationsEnabled || !key.startsWith('rem:')) {
+      return null;
+    }
+    return ReminderPlanner.missed(input, key, at: at);
   }
 
   /// Soonest first; ties by category importance, then key (stable).

@@ -258,9 +258,7 @@ class TasksRepositoryImpl extends RepositoryBase implements TasksRepository {
 
   static bool _sameSchedule(TaskRow row, TasksCompanion next) {
     final a = row.dueDate, b = next.dueDate.value;
-    final sameDay = a == null || b == null
-        ? a == b
-        : a.isAtSameMomentAs(b);
+    final sameDay = a == null || b == null ? a == b : a.isAtSameMomentAs(b);
     return sameDay &&
         row.dueTimeMinutes == next.dueTimeMinutes.value &&
         row.remindOffsetMinutes == next.remindOffsetMinutes.value;

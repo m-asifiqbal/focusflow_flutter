@@ -42,4 +42,5 @@ List<Override> isolatedNotifications({
   backgroundDeliveryProvider.overrideWithValue(
     background ?? FakeBackgroundDelivery(),
   ),
+  oemBackgroundGuideProvider.overrideWithValue(FakeOemBackgroundGuide()),
 ];

@@ -36,14 +36,27 @@ abstract final class NotesOrder {
 class NotesDao extends DatabaseAccessor<AppDatabase> with _$NotesDaoMixin {
   NotesDao(super.attachedDatabase);
 
-  static const _select =
-      'SELECT n.*, f.name AS folder_name, '
+  static const _joins =
+      'f.name AS folder_name, '
       'CASE WHEN r.id IS NULL THEN NULL '
       'ELSE COALESCE(r.snoozed_until, r.trigger_at) END AS reminder_at '
       'FROM notes n '
       'LEFT JOIN folders f ON f.id = n.folder_id AND f.deleted_at IS NULL '
       'LEFT JOIN reminders r ON r.id = n.reminder_id AND r.deleted_at IS NULL '
       'AND r.archived_at IS NULL';
+
+  static const _select = 'SELECT n.*, $_joins';
+
+  /// Every column of `notes` except the heavy ones: the Delta and the
+  /// checklist cache are `[]`, the plain text is cut to its first 160
+  /// characters. Must list every column (the row mapper reads them all).
+  static const _selectLight =
+      'SELECT n.id, n.created_at, n.updated_at, n.archived_at, n.deleted_at, '
+      'n.is_pinned, n.is_favorite, n.color_hex, n.folder_id, n.sort_order, '
+      'n.sync_version, n.last_synced_at, n.device_id, n.title, '
+      "'[]' AS content_delta, substr(n.plain_text, 1, 160) AS plain_text, "
+      "'[]' AS checklist_json, n.cover_image_path, n.is_locked, "
+      'n.word_count, n.reminder_id, $_joins';
 
   NoteListRow _map(QueryRow r) => (
     row: notes.map(r.data),
@@ -64,6 +77,7 @@ class NotesDao extends DatabaseAccessor<AppDatabase> with _$NotesDaoMixin {
     bool pinnedOnly = false,
     String orderBy = NotesOrder.lastEdited,
     int? limit,
+    bool light = false,
   }) {
     final where = <String>[activeSql('n')];
     final vars = <Variable>[];
@@ -90,7 +104,7 @@ class NotesDao extends DatabaseAccessor<AppDatabase> with _$NotesDaoMixin {
         ..add(Variable.withString(ftsTitleMatch));
     }
     return customSelect(
-      '$_select WHERE ${where.join(' AND ')} '
+      '${light ? _selectLight : _select} WHERE ${where.join(' AND ')} '
       'ORDER BY n.is_pinned DESC, $orderBy'
       '${limit == null ? '' : ' LIMIT $limit'}',
       variables: vars,

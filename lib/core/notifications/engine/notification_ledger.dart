@@ -238,15 +238,26 @@ class SecureLedgerStore extends LedgerStore {
   final SecureStore _store;
   final String? owner;
 
-  @override
-  Future<LedgerState> loadState() async =>
-      decodeState(await _store.read(storageKey), owner: owner);
+  /// What the keychain held when this store last read or wrote it. Every
+  /// save follows a load (see [LedgerStore.commit] / `claimDeliveries`), so
+  /// an unchanged ledger — the common case on a quiet pass — is not
+  /// written (and encrypted by the keystore) again.
+  String? _lastRaw;
 
   @override
-  Future<void> saveState(LedgerState state) => _store.write(
-    storageKey,
-    encode(state.entries, owner: owner, delivered: state.delivered),
-  );
+  Future<LedgerState> loadState() async {
+    final raw = await _store.read(storageKey);
+    _lastRaw = raw;
+    return decodeState(raw, owner: owner);
+  }
+
+  @override
+  Future<void> saveState(LedgerState state) async {
+    final raw = encode(state.entries, owner: owner, delivered: state.delivered);
+    if (raw == _lastRaw) return;
+    await _store.write(storageKey, raw);
+    _lastRaw = raw;
+  }
 
   /// `{"o": owner, "e": [entries], "d": [delivery keys]}`.
   static String encode(

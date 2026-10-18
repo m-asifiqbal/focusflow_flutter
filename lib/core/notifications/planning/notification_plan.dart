@@ -233,6 +233,17 @@ class NotificationPayload {
   /// Habit day for [NotificationButton.checkIn] (`yyyy-MM-dd`).
   final String? day;
 
+  NotificationPayload withCategory(NotificationCategory category) =>
+      NotificationPayload(
+        key: key,
+        category: category,
+        target: target,
+        open: open,
+        route: route,
+        snoozeMinutes: snoozeMinutes,
+        day: day,
+      );
+
   String encode() => jsonEncode({
     'k': key,
     'c': category.name,
@@ -364,22 +375,31 @@ class PlannedNotification {
     return fnv1a32(s).toRadixString(16);
   }
 
-  PlannedNotification copyWith({int? id, DateTime? fireAt, int? badge}) =>
-      PlannedNotification(
-        id: id ?? this.id,
-        key: key,
-        fireAt: fireAt ?? this.fireAt,
-        category: category,
-        title: title,
-        body: body,
-        payload: payload,
-        buttons: buttons,
-        inboxActions: inboxActions,
-        inboxRef: inboxRef,
-        badge: badge ?? this.badge,
-        reminderId: reminderId,
-        sound: sound,
-      );
+  /// A copy with other timing / text. A new [category] also rewrites the
+  /// payload's, so a tap treats it as that kind (an alarm turned into a
+  /// plain reminder must not open over the lock screen).
+  PlannedNotification copyWith({
+    int? id,
+    DateTime? fireAt,
+    int? badge,
+    NotificationCategory? category,
+    String? body,
+    String? sound,
+  }) => PlannedNotification(
+    id: id ?? this.id,
+    key: key,
+    fireAt: fireAt ?? this.fireAt,
+    category: category ?? this.category,
+    title: title,
+    body: body ?? this.body,
+    payload: category == null ? payload : payload.withCategory(category),
+    buttons: buttons,
+    inboxActions: inboxActions,
+    inboxRef: inboxRef,
+    badge: badge ?? this.badge,
+    reminderId: reminderId,
+    sound: sound ?? this.sound,
+  );
 
   @override
   String toString() => 'Planned($key @ $fireAt #$id)';

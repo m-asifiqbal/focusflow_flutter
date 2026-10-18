@@ -28,21 +28,25 @@ void main() {
 
   test('cipher build is active and FTS5 triggers index notes', () async {
     final now = DateTime(2026, 1, 1);
-    await db.into(db.notes).insert(
-      NotesCompanion.insert(
-        id: 'n1',
-        createdAt: now,
-        updatedAt: now,
-        title: const Value('Mobile App Design Trends'),
-        plainText: const Value('Minimalism and organic shapes'),
-      ),
-    );
+    await db
+        .into(db.notes)
+        .insert(
+          NotesCompanion.insert(
+            id: 'n1',
+            createdAt: now,
+            updatedAt: now,
+            title: const Value('Mobile App Design Trends'),
+            plainText: const Value('Minimalism and organic shapes'),
+          ),
+        );
     Future<List<String>> search(String q) async {
-      final rows = await db.customSelect(
-        'SELECT n.id FROM notes_fts f JOIN notes n ON n.rowid = f.rowid '
-        'WHERE notes_fts MATCH ? ORDER BY bm25(notes_fts)',
-        variables: [Variable.withString(q)],
-      ).get();
+      final rows = await db
+          .customSelect(
+            'SELECT n.id FROM notes_fts f JOIN notes n ON n.rowid = f.rowid '
+            'WHERE notes_fts MATCH ? ORDER BY bm25(notes_fts)',
+            variables: [Variable.withString(q)],
+          )
+          .get();
       return rows.map((r) => r.read<String>('id')).toList();
     }
 

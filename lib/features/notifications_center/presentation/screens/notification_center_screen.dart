@@ -119,14 +119,18 @@ class _NotificationCenterScreenState
     final now = ref.watch(minuteClockProvider);
     final use24h = ref.watch(settingsProvider.select((x) => x.use24HourTime));
     final snooze = ref.watch(inboxSnoozeMinutesProvider);
-    Widget row(InboxEntry e) => InboxRow(
-      entry: e,
-      timeLabel: InboxTimeLabel.of(e.createdAt, now, use24h: use24h),
-      timeSemantic: InboxTimeLabel.semantic(e.createdAt, now, use24h: use24h),
-      actionLabel: (a) => inboxActionLabel(a, snooze),
-      onTap: () => openInboxEntry(context, ref, e),
-      onAction: (a) =>
-          runInboxAction(context, ref, e, a, snoozeMinutes: snooze),
+    // The opened item grows out of its row (open-container transition).
+    Widget row(InboxEntry e) => FFOpenOriginTracker(
+      radius: 0,
+      child: InboxRow(
+        entry: e,
+        timeLabel: InboxTimeLabel.of(e.createdAt, now, use24h: use24h),
+        timeSemantic: InboxTimeLabel.semantic(e.createdAt, now, use24h: use24h),
+        actionLabel: (a) => inboxActionLabel(a, snooze),
+        onTap: () => openInboxEntry(context, ref, e),
+        onAction: (a) =>
+            runInboxAction(context, ref, e, a, snoozeMinutes: snooze),
+      ),
     );
     return ListView(
       padding: const EdgeInsetsDirectional.fromSTEB(

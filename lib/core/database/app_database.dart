@@ -86,6 +86,7 @@ class AppDatabase extends _$AppDatabase {
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
       await customStatement('PRAGMA recursive_triggers = ON');
+      await _ensureQueryIndexes();
     },
   );
 
@@ -136,6 +137,25 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _createTombstoneTriggers() async {
     for (final statement in tombstoneTriggerStatements()) {
       await customStatement(statement);
+    }
+  }
+
+  /// Indexes added after v2 shipped. `IF NOT EXISTS` on every open (a no-op
+  /// once they exist) instead of a schema bump: a new schema version would
+  /// make backups of this app unreadable to its older installs.
+  ///   • `habit_logs(date)`: Calendar / Insights read logs by date range,
+  ///     which the `(habit_id, date)` unique index cannot serve;
+  ///   • `folder_id` of notes / tasks / vault items: the folder lists count
+  ///     the items of every folder with one correlated query each.
+  Future<void> _ensureQueryIndexes() async {
+    const statements = [
+      'CREATE INDEX IF NOT EXISTS idx_habit_logs_date ON habit_logs(date)',
+      'CREATE INDEX IF NOT EXISTS idx_notes_folder ON notes(folder_id)',
+      'CREATE INDEX IF NOT EXISTS idx_tasks_folder ON tasks(folder_id)',
+      'CREATE INDEX IF NOT EXISTS idx_vault_folder ON vault_items(folder_id)',
+    ];
+    for (final s in statements) {
+      await customStatement(s);
     }
   }
 
