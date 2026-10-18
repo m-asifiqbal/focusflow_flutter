@@ -52,6 +52,7 @@
 /// ============================================================
 library;
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -60,6 +61,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/notifications/engine/alarm_driver.dart';
 import 'package:focusflow/core/notifications/engine/background_handler.dart';
 import 'package:focusflow/core/notifications/engine/notification_gateway.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
@@ -70,10 +72,22 @@ import 'package:path_provider/path_provider.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationsGateway implements NotificationGateway {
-  LocalNotificationsGateway([FlutterLocalNotificationsPlugin? plugin])
-    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  /// [alarms]: the driver for alarm-style reminders (Android). Defaults to
+  /// the native alarm service on Android and to none elsewhere, where an
+  /// alarm is a time-sensitive notification.
+  LocalNotificationsGateway([
+    FlutterLocalNotificationsPlugin? plugin,
+    AlarmDriver? alarms,
+  ]) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
+       _alarms = alarms ?? (_isAndroid ? PackageAlarmDriver() : null);
 
   final FlutterLocalNotificationsPlugin _plugin;
+  final AlarmDriver? _alarms;
+
+  /// Ids currently armed as alarms (so a cancel of a notification id does
+  /// not poke the alarm service).
+  final Set<int> _alarmIds = {};
+  StreamSubscription<AlarmSnooze>? _snoozes;
   bool _ready = false;
   bool? _exactAllowed;
   int? _lastBadge;
@@ -174,7 +188,29 @@ class LocalNotificationsGateway implements NotificationGateway {
     if (_isIOS) await _installIosSounds();
     _ready = ok ?? false;
     _exactAllowed = null;
+    await _startAlarms(onTap);
     return _ready;
+  }
+
+  /// Starts the alarm service and routes a Snooze taken on a ringing alarm
+  /// to the same handler as a notification's Snooze button.
+  Future<void> _startAlarms(void Function(NotificationTap) onTap) async {
+    final alarms = _alarms;
+    if (alarms == null) return;
+    try {
+      await alarms.init();
+    } catch (_) {
+      return; // logged by the driver; alarms fall back to notifications
+    }
+    await _snoozes?.cancel();
+    _snoozes = alarms.snoozes.listen(
+      (s) => onTap(
+        NotificationTap(
+          payload: s.payload,
+          actionId: NotificationButton.snooze.id,
+        ),
+      ),
+    );
   }
 
   /// Initialization for the background isolate (no tap callback). Also
@@ -184,6 +220,11 @@ class LocalNotificationsGateway implements NotificationGateway {
     await _plugin.initialize(settings: initializationSettings);
     await _createChannels();
     _ready = true;
+    try {
+      await _alarms?.init();
+    } catch (_) {
+      // Logged by the driver.
+    }
   }
 
   Future<void> _createChannels() async {
@@ -269,7 +310,19 @@ class LocalNotificationsGateway implements NotificationGateway {
   Future<Set<int>> pendingIds() async {
     if (!_ready) return {};
     final list = await _plugin.pendingNotificationRequests();
-    return {for (final p in list) p.id}..remove(_badgeId);
+    final ids = {for (final p in list) p.id}..remove(_badgeId);
+    final alarms = _alarms;
+    if (alarms != null) {
+      // The alarm service keeps its own list of armed alarms.
+      final armed = await alarms.scheduledIds(DateTime.now());
+      _alarmIds
+        ..clear()
+        ..addAll(armed);
+      ids
+        ..addAll(armed)
+        ..addAll(alarms.dropped);
+    }
+    return ids;
   }
 
   @override
@@ -279,8 +332,26 @@ class LocalNotificationsGateway implements NotificationGateway {
     DeliveryOptions options,
   ) async {
     if (!_ready) return;
-    final when = tz.TZDateTime.from(n.fireAt, location);
     final (title, body) = _text(n, options);
+    // An alarm rings (loops, vibrates, lights the lock screen) from a native
+    // service — it needs no notification channel and survives the app being
+    // killed. Refused (no exact-alarm grant …) → the notification below.
+    if (n.category == NotificationCategory.alarm) {
+      final alarms = _alarms;
+      if (alarms != null &&
+          await alarms.set(
+            AlarmRequest(
+              notification: n,
+              title: title,
+              body: body ?? '',
+              fullScreen: await canUseFullScreenIntent(),
+            ),
+          )) {
+        _alarmIds.add(n.id);
+        return;
+      }
+    }
+    final when = tz.TZDateTime.from(n.fireAt, location);
     await _plugin.zonedSchedule(
       id: n.id,
       scheduledDate: when,
@@ -405,6 +476,8 @@ class LocalNotificationsGateway implements NotificationGateway {
 
   @override
   Future<void> cancel(int id) async {
+    _alarms?.forget(id);
+    if (_alarmIds.remove(id)) await _alarms?.stop(id);
     if (_ready) await _plugin.cancel(id: id);
   }
 

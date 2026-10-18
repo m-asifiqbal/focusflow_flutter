@@ -96,6 +96,7 @@ class TaskCompletion {
     required this.taskId,
     required this.completed,
     this.nextOccurrenceId,
+    this.completedSubtaskIds = const [],
   });
 
   final String taskId;
@@ -106,6 +107,12 @@ class TaskCompletion {
   /// Id of the next occurrence spawned by completing a repeating task
   /// (pass it to `uncomplete(..., discardNextOccurrenceId:)` for Undo).
   final String? nextOccurrenceId;
+
+  /// Subtasks this completion ticked (those that were still open):
+  /// completing a task completes its subtasks. Pass them to
+  /// `uncomplete(..., reopenSubtaskIds:)` for Undo, so a subtask the user
+  /// had finished before stays finished.
+  final List<String> completedSubtaskIds;
 }
 
 abstract interface class TasksRepository {
@@ -139,9 +146,14 @@ abstract interface class TasksRepository {
   /// result has `completed: false` — "this call did not complete it".
   Future<TaskCompletion> complete(String id);
 
-  /// Reopens a task. [discardNextOccurrenceId] (from [TaskCompletion])
+  /// Reopens a task. [reopenSubtaskIds] (from [TaskCompletion]) are
+  /// un-ticked again. [discardNextOccurrenceId] (from [TaskCompletion])
   /// permanently removes the spawned next occurrence — Undo of a repeat.
-  Future<void> uncomplete(String id, {String? discardNextOccurrenceId});
+  Future<void> uncomplete(
+    String id, {
+    String? discardNextOccurrenceId,
+    List<String> reopenSubtaskIds = const [],
+  });
 
   /// Moves tasks to [date] (local day; time of day kept). Null clears the
   /// due date. Linked reminders follow.

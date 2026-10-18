@@ -68,6 +68,7 @@ class CompleteReminder {
       await tasks.uncomplete(
         task.taskId,
         discardNextOccurrenceId: task.nextOccurrenceId,
+        reopenSubtaskIds: task.completedSubtaskIds,
       );
     }
     await reminders.save(done.before);

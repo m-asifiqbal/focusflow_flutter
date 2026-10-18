@@ -410,12 +410,23 @@ class TasksRepositoryImpl extends RepositoryBase implements TasksRepository {
       return TaskCompletion(taskId: id, completed: false);
     }
     await _dao.updateTask(id, TasksCompanion(completedAt: Value(s.now)), s);
+    // A finished task has no open subtasks.
+    final ticked = <String>[];
+    for (final sub in task.subtasks) {
+      if (sub.done) continue;
+      await _dao.updateSubtask(
+        sub.id,
+        SubtasksCompanion(done: const Value(true), updatedAt: Value(s.now)),
+      );
+      ticked.add(sub.id);
+    }
     final nextId = await _spawnNextOccurrence(task, s);
     if (nextId == null) await _syncReminder(id, s);
     return TaskCompletion(
       taskId: id,
       completed: true,
       nextOccurrenceId: nextId,
+      completedSubtaskIds: ticked,
     );
   });
 
@@ -493,11 +504,20 @@ class TasksRepositoryImpl extends RepositoryBase implements TasksRepository {
   }
 
   @override
-  Future<void> uncomplete(String id, {String? discardNextOccurrenceId}) =>
-      db.transaction(() async {
+  Future<void> uncomplete(
+    String id, {
+    String? discardNextOccurrenceId,
+    List<String> reopenSubtaskIds = const [],
+  }) => db.transaction(() async {
         final s = stamp();
         final row = await _dao.rowById(id);
         if (row == null) return;
+        for (final subId in reopenSubtaskIds) {
+          await _dao.updateSubtask(
+            subId,
+            SubtasksCompanion(done: const Value(false), updatedAt: Value(s.now)),
+          );
+        }
         final spawnedId = discardNextOccurrenceId;
         if (spawnedId != null) {
           final spawned = await _dao.rowById(spawnedId);

@@ -16,6 +16,30 @@ closed (code: `lib/core/notifications/`).
   (background isolate) and by the 12 h maintenance task
   (`core/sync/background_runner.dart` → `engine/background_reconcile.dart`).
 
+## Alarms (Android): real ones
+An alarm-style reminder used to be a "max priority, insistent" notification:
+it played its channel sound once and stayed silent in Do-not-disturb, so it
+did not *ring*. On Android it is now a real alarm, built the way alarm-clock
+apps are (`core/notifications/engine/alarm_driver.dart`, the `alarm` package):
+* `AlarmManager.setAlarmClock` — exempt from Doze and battery savers, listed
+  by the system as the next alarm;
+* a **foreground service** loops the sound on the alarm stream (fade-in
+  3 s) and vibrates, so it needs no Dart and keeps going when the app is
+  swiped away (`androidStopAlarmOnTermination: false`);
+* a **full-screen intent** lights the lock screen; notification buttons
+  **Stop** and **Snooze** (the reminder's snooze length; a swipe cannot
+  silence it); a boot receiver re-arms the alarms after a restart;
+* the sound is the reminder's tone (`assets/sounds/<tone>.wav`), else the
+  system alarm sound.
+`LocalNotificationsGateway` sends planned *alarm* notifications there and
+everything else to flutter_local_notifications; `pendingIds()` / `cancel()`
+cover both, so planning, the ledger, the inbox and "Missed" catch-up are
+unchanged. A snooze taken on the ringing alarm is applied to the reminder
+(only while it is still in the future). An alarm the service dropped without
+ringing (phone off) comes back as "Missed". If the system refuses the alarm
+(no exact-alarm grant) it falls back to a notification. iOS has no alarm API:
+alarm-style stays a time-sensitive notification there.
+
 ## When the app is killed
 What survives, and what the engine does about the rest:
 * **Swiped away on stock Android / Samsung with default settings:** nothing

@@ -92,6 +92,7 @@ class TaskCompletionController extends Notifier<Set<String>> {
     await _repo.uncomplete(
       id,
       discardNextOccurrenceId: result?.nextOccurrenceId,
+      reopenSubtaskIds: result?.completedSubtaskIds ?? const [],
     );
   }
 
@@ -117,7 +118,11 @@ class TaskCompletionController extends Notifier<Set<String>> {
         discard = spawnedId;
       }
     }
-    await _repo.uncomplete(id, discardNextOccurrenceId: discard);
+    await _repo.uncomplete(
+      id,
+      discardNextOccurrenceId: discard,
+      reopenSubtaskIds: result?.completedSubtaskIds ?? const [],
+    );
   }
 }
 
@@ -155,6 +160,10 @@ class TaskActions {
 
   Future<void> setPriority(String id, TaskPriority priority) =>
       _repo.setPriority(id, priority);
+
+  /// Ticks / un-ticks one subtask from a task row.
+  Future<void> toggleSubtask(String subtaskId) =>
+      _repo.toggleSubtask(subtaskId);
 
   /// Persists a drag inside one section. [section] is the order the user
   /// saw; [oldIndex] / [newIndex] follow ReorderableList semantics (the new

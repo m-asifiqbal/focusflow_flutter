@@ -87,6 +87,9 @@ abstract final class TaskSizes {
   /// Subtask check circle in the editor (23 pt).
   static const double subtaskCheck = 23;
 
+  /// Subtask check circle on a task row (19 pt; its hit area is 44 pt).
+  static const double subtaskRowCheck = 19;
+
   /// Subtask progress bar on a task row (80 × 6 pt).
   static const double progressWidth = 80;
   static const double progressHeight = 6;

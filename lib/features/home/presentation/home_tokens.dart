@@ -26,7 +26,11 @@ abstract final class HomeDimens {
 
   // Hero
   static const double heroPadding = 20;
-  static const double heroPaddingTop = 22;
+
+  /// The card is 5 pt shorter than the mockup (22 / 20 → 20 / 17); the
+  /// width is unchanged.
+  static const double heroPaddingTop = 20;
+  static const double heroPaddingBottom = 17;
   static const double heroTitle = 20;
   static const double heroSubtitle = 13;
   static const double heroBar = 7;
@@ -77,7 +81,7 @@ abstract final class HomeDimens {
   static const double ringCellMin = 72;
 
   // Skeleton
-  static const double heroSkeleton = 192;
+  static const double heroSkeleton = 187;
 }
 
 /// Colours specific to Home.

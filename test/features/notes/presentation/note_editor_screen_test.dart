@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/features/vault/presentation/notifiers/vault_session_controller.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
 import 'package:focusflow/features/notes/domain/repository/notes_repository.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
@@ -360,6 +361,9 @@ void main() {
     await pumpApp(tester, h, AppRoutes.note(id));
     expect(find.text('This note is locked'), findsOneWidget);
     expect(find.text('Mobile App Design Trends 2024'), findsNothing);
+    // The vault's first key-store read never answers in a test; its wait is
+    // bounded (VaultSessionController.ready), so let that bound pass.
+    await tester.pump(VaultSessionController.loadTimeout);
   });
 
   testWidgets('archived notes open read-only', (tester) async {

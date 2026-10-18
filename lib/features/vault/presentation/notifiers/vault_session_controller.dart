@@ -94,13 +94,13 @@ class VaultSessionController extends Notifier<VaultSessionState> {
       settingsProvider.select((s) => s.vaultBiometrics),
       (_, enabled) => unawaited(_onBiometricSetting(enabled)),
     );
-    _loading = Future.microtask(() async {
+    _loading = Future<void>.microtask(() async {
       // Cold start: a copied secret whose clear was due while the app was
       // not running is removed now; stale Recovery Kit PDFs too.
       try {
         await ref.read(secureClipboardProvider).restorePending();
       } on Object {
-        // Clipboard / keychain unavailable (tests, previews).
+        // Clipboard / keychain unavailable or slow (tests, previews).
       }
       unawaited(RecoveryKitShare.cleanUpStale());
       await refresh();
@@ -126,8 +126,28 @@ class VaultSessionController extends Notifier<VaultSessionState> {
     }
   }
 
-  /// Completes once the initial load (vault set up? attempts?) is done.
-  Future<void> get ready => _loading ?? Future.value();
+  /// Longest the initial key-store reads may take (see [ready]).
+  static const Duration loadTimeout = Duration(seconds: 6);
+
+  void _giveUpLoading() {
+    if (!_disposed && state.phase == VaultPhase.loading) {
+      state = state.copyWith(phase: VaultPhase.locked);
+    }
+  }
+
+  /// Completes once the initial load (vault set up? attempts?) is done —
+  /// at the latest after [loadTimeout].
+  ///
+  /// Bounded because the first read of the key store after the phone sat
+  /// idle (or an OEM task killer froze the app) can stall, and everything
+  /// that waits here — Quick Add › Password, a locked note, opening a vault
+  /// item — would then show its progress indicator for ever and end in an
+  /// ANR. After the wait the vault is treated as locked: the PIN pad then
+  /// does its own, visible work, and a late answer still updates the state.
+  Future<void> get ready => (_loading ?? Future<void>.value()).timeout(
+    loadTimeout,
+    onTimeout: _giveUpLoading,
+  );
 
   /// Re-reads set-up status, the attempt counter and biometric readiness.
   /// Never throws (secure storage may be missing in tests / previews).

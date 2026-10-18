@@ -31,7 +31,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Maintenance {
   Maintenance(this._items, this._prefs, this._clock, {InboxRepository? inbox})
-    : _inbox = inbox;
+    : _inbox = inbox; // ignore: prefer_initializing_formals
 
   final InboxRepository? _inbox;
   final ItemsRepository _items;

@@ -67,7 +67,7 @@ class HomeFocusCard extends StatelessWidget {
                 HomeDimens.heroPadding,
                 HomeDimens.heroPaddingTop,
                 HomeDimens.heroPadding,
-                HomeDimens.heroPadding,
+                HomeDimens.heroPaddingBottom,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

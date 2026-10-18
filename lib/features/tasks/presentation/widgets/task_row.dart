@@ -4,8 +4,9 @@
 ///
 /// What: radius-20 card with the 4 pt priority bar on the start edge, the
 /// blue check circle, title, meta line (due label · list/tag pill · repeat
-/// icon · reminder bell), optional "n/m subtasks" progress and the drag
-/// handle. Completed (or pending-complete) rows are struck through and
+/// icon · reminder bell), optional "n/m subtasks" progress, the subtasks
+/// themselves (each with its own check circle: tick one without opening the
+/// task; completing the task ticks them all) and the drag handle. Completed (or pending-complete) rows are struck through and
 /// muted. In multi-select mode the check becomes a selection toggle.
 /// Why: the row is pure presentation — callbacks come from the screen,
 /// which talks to the controllers (no repository calls here).
@@ -36,6 +37,7 @@ class TaskRow extends StatelessWidget {
     this.selected = false,
     this.hideListName,
     this.dragHandle,
+    this.onSubtaskToggle,
     super.key,
   });
 
@@ -55,6 +57,13 @@ class TaskRow extends StatelessWidget {
 
   /// List id whose pill is redundant (the list chip is selected).
   final String? hideListName;
+
+  /// A subtask's check circle tapped. Null (selection mode, previews) makes
+  /// the subtasks read-only.
+  final ValueChanged<Subtask>? onSubtaskToggle;
+
+  /// Subtasks drawn on the card; the rest is "+ n more" (opens the task).
+  static const int maxSubtasksShown = 5;
 
   /// The handle, already wrapped in a drag listener by the list (null =
   /// not reorderable here; a static handle is drawn instead).
@@ -187,9 +196,18 @@ class TaskRow extends StatelessWidget {
             ),
           ),
           ..._meta(context),
-          if (task.subtasks.isNotEmpty && !_done) ...[
-            const SizedBox(height: AppSpacing.sm),
-            _SubtaskProgress(task: task),
+          if (task.subtasks.isNotEmpty) ...[
+            if (!_done) ...[
+              const SizedBox(height: AppSpacing.sm),
+              _SubtaskProgress(task: task),
+            ],
+            const SizedBox(height: AppSpacing.xs),
+            _SubtaskList(
+              subtasks: task.subtasks,
+              parentDone: _done,
+              onToggle: selectionMode ? null : onSubtaskToggle,
+              onMore: onTap,
+            ),
           ],
         ],
       ),
@@ -313,6 +331,114 @@ class TaskDragHandle extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The task's subtasks, one tappable row each (44 pt, the check circle's
+/// hit area). While the task itself is done — or about to be (the 1.2 s
+/// pending completion) — every subtask shows ticked: completing a task
+/// completes its subtasks.
+class _SubtaskList extends StatelessWidget {
+  const _SubtaskList({
+    required this.subtasks,
+    required this.parentDone,
+    required this.onToggle,
+    required this.onMore,
+  });
+
+  final List<Subtask> subtasks;
+  final bool parentDone;
+  final ValueChanged<Subtask>? onToggle;
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final ff = context.ff;
+    final shown = subtasks.take(TaskRow.maxSubtasksShown).toList();
+    final more = subtasks.length - shown.length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final sub in shown)
+          _SubtaskTile(
+            subtask: sub,
+            done: parentDone || sub.done,
+            onToggle: onToggle,
+          ),
+        if (more > 0)
+          Semantics(
+            button: true,
+            label: 'Show $more more subtasks',
+            excludeSemantics: true,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onMore,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: AppSizes.minTap),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: AppSpacing.sm,
+                    ),
+                    child: Text(
+                      '+ $more more',
+                      style: context.text.meta.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: ff.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SubtaskTile extends StatelessWidget {
+  const _SubtaskTile({
+    required this.subtask,
+    required this.done,
+    required this.onToggle,
+  });
+
+  final Subtask subtask;
+  final bool done;
+  final ValueChanged<Subtask>? onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final ff = context.ff;
+    final title = subtask.title.trim().isEmpty ? 'Subtask' : subtask.title;
+    return Row(
+      children: [
+        FFCheckCircle(
+          checked: done,
+          color: TaskStyle.module.solid,
+          size: TaskSizes.subtaskRowCheck,
+          semanticLabel: done
+              ? 'Mark subtask $title as not done'
+              : 'Complete subtask $title',
+          onChanged: onToggle == null ? null : (_) => onToggle!(subtask),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(
+          child: AnimatedDefaultTextStyle(
+            duration: context.motion(AppMotion.fast),
+            style: context.text.taskRowMeta.copyWith(
+              color: done ? ff.inkFaint : ff.ink,
+              decoration: done ? TextDecoration.lineThrough : null,
+              decorationColor: ff.inkFaint,
+            ),
+            child: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
+          ),
+        ),
+      ],
     );
   }
 }

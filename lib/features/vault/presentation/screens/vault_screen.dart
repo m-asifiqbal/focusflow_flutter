@@ -81,7 +81,11 @@ class _VaultShell extends ConsumerWidget {
           ),
           child: body,
         ),
-        bottomBar: const VaultTabBar(),
+        // The inner tabs belong to an open vault: with nothing unlocked
+        // (PIN pad, set-up, unreadable key) they must not be reachable.
+        bottomBar: phase == VaultPhase.unlocked && !pinReset
+            ? const VaultTabBar()
+            : null,
       ),
     );
   }

@@ -2,9 +2,11 @@
 /// TASK EDITOR BODY — the scrolling form of screen 11
 /// ============================================================
 ///
-/// What: title card → SCHEDULE → PRIORITY → ORGANISE → SUBTASKS →
+/// What: title card → SUBTASKS → SCHEDULE → PRIORITY → ORGANISE →
 /// Archive / Delete (existing tasks), spaced like the mockup (20 pt
-/// gutters, 26 pt between sections).
+/// gutters, 26 pt between sections). The subtasks sit right under the title
+/// and notes — they are part of what the task *is*, so they are in view
+/// without scrolling past the schedule and organise cards.
 /// Why: keeps the screen file to navigation and lifecycle flows; this
 /// widget only lays out the sections over the current form state.
 /// ============================================================
@@ -74,6 +76,9 @@ class TaskEditorBody extends ConsumerWidget {
           onTitleChanged: form.setTitle,
           onNotesChanged: form.setNotes,
         ),
+        // The subtasks header is a 44 pt row (its "+ Add" tap target).
+        const SizedBox(height: AppSpacing.sm),
+        TaskSubtasksSection(args: args, subtasks: state.subtasks),
         gap,
         const FFSectionLabel('Schedule', padding: labelPadding),
         TaskScheduleCard(args: args, task: task),
@@ -83,9 +88,6 @@ class TaskEditorBody extends ConsumerWidget {
         gap,
         const FFSectionLabel('Organise', padding: labelPadding),
         TaskOrganiseCard(args: args, task: task),
-        // The subtasks header is a 44 pt row (its "+ Add" tap target).
-        const SizedBox(height: AppSpacing.sm),
-        TaskSubtasksSection(args: args, subtasks: state.subtasks),
         if (!state.isNew) ...[
           const SizedBox(height: AppSpacing.xxl),
           TaskEditorFooter(onArchive: onArchive, onDelete: onDelete),
