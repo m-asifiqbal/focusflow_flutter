@@ -14,6 +14,7 @@ import 'package:focusflow/core/sync/backup_files.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
 import 'package:focusflow/core/sync/google_account.dart';
 import 'package:focusflow/core/sync/network_info.dart';
+import 'package:focusflow/core/sync/settings_bridge.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
@@ -198,6 +199,7 @@ List<Override> driveOverrides({
       files: files,
       deviceId: TestHarness.deviceId,
       vault: const FakeVaultBridge(),
+      settings: ref.watch(settingsBackupBridgeProvider),
       clock: ref.watch(clockProvider),
     ),
   ),

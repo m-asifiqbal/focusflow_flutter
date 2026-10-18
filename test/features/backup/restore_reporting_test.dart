@@ -88,6 +88,51 @@ void main() {
     );
   });
 
+  test('the summary says whether the settings came back', () {
+    expect(
+      restoreSummary(
+        const RestoreResult(
+          mode: RestoreMode.replace,
+          report: MergeReport(added: 1),
+          settingsRestored: true,
+        ),
+      ),
+      'Restored 1 item · Settings restored',
+    );
+    expect(
+      restoreSummary(
+        const RestoreResult(
+          mode: RestoreMode.merge,
+          report: MergeReport(added: 2, updated: 1),
+          settingsRestored: true,
+          filesMissing: 1,
+        ),
+      ),
+      'Restore done · 2 added · 1 updated · Settings restored · '
+      '1 attachment is missing',
+    );
+    expect(
+      restoreSummary(
+        const RestoreResult(
+          mode: RestoreMode.replace,
+          report: MergeReport(added: 3),
+          settingsFailed: true,
+        ),
+      ),
+      "Restored 3 items · Settings couldn't be restored",
+    );
+    // A backup without settings says nothing about them.
+    expect(
+      restoreSummary(
+        const RestoreResult(
+          mode: RestoreMode.replace,
+          report: MergeReport(added: 3),
+        ),
+      ),
+      'Restored 3 items',
+    );
+  });
+
   test('a failed write rolls back and reports the swapped vault key', () async {
     final h = await TestHarness.create(now: syncNow);
     addTearDown(h.dispose);

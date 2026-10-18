@@ -19,6 +19,7 @@ library;
 
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/notifications/planning/planner_input.dart';
+import 'package:focusflow/core/notifications/planning/task_day_index.dart';
 import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
@@ -29,13 +30,22 @@ import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 
 abstract final class DigestPlanner {
-  static List<PlannedNotification> plan(PlannerInput input, DateTime until) {
+  /// Digests, the overdue summary and the weekly report in
+  /// `(now, until)`. [tasks] is the planner's shared [TaskDayIndex] (built
+  /// here when omitted).
+  static List<PlannedNotification> plan(
+    PlannerInput input,
+    DateTime until, {
+    TaskDayIndex? tasks,
+  }) {
     final s = input.settings;
     final cal = input.calendar;
+    final index = tasks ?? TaskDayIndex(input.tasks);
     final result = <PlannedNotification>[];
     for (var day = input.today; ; day = ZoneCalendar.addDays(day, 1)) {
       if (!cal.at(day, 0).isBefore(until)) break;
       final dayKey = ZoneCalendar.dayKey(day);
+      final dayNo = DateUtilsX.dayNumber(day);
       PlannedNotification? at(
         int minutes,
         String prefix,
@@ -47,7 +57,7 @@ abstract final class DigestPlanner {
       }
 
       if (s.notifyTasks) {
-        final overdue = overdueOn(input.tasks, day);
+        final overdue = index.overdueOn(dayNo);
         if (overdue.isNotEmpty) {
           final n = at(
             s.morningBriefingMinutes,
@@ -65,7 +75,7 @@ abstract final class DigestPlanner {
             key,
             fireAt,
             title: 'Good morning',
-            body: _morningBody(input, day),
+            body: _morningBody(input, day, index),
             route: AppRoutes.home,
           ),
         );
@@ -80,7 +90,7 @@ abstract final class DigestPlanner {
             fireAt,
             title: 'Evening review',
             body: day == input.today
-                ? _eveningBody(input, day)
+                ? _eveningBody(input, day, index)
                 : 'Look back on your day and plan tomorrow.',
             route: AppRoutes.home,
           ),
@@ -106,35 +116,21 @@ abstract final class DigestPlanner {
   }
 
   // ───────────────────────── Tasks maths ─────────────────────────
-
-  static bool _open(TaskItem t) => t.isActive && !t.isCompleted;
+  // The planner works on a shared [TaskDayIndex]; these wrappers serve
+  // callers with a single question (they index the list first, so use the
+  // index directly when asking more than once).
 
   /// Open tasks due before [day] (overdue on that day), oldest first.
-  static List<TaskItem> overdueOn(List<TaskItem> tasks, DateTime day) => [
-    for (final t in tasks)
-      if (_open(t) &&
-          t.dueDate != null &&
-          DateUtilsX.daysBetween(t.dueDate!, day) > 0)
-        t,
-  ]..sort((a, b) => a.dueAt!.compareTo(b.dueAt!));
+  static List<TaskItem> overdueOn(List<TaskItem> tasks, DateTime day) =>
+      TaskDayIndex(tasks).overdueOn(DateUtilsX.dayNumber(day));
 
   /// Open tasks due on [day].
-  static List<TaskItem> dueOn(List<TaskItem> tasks, DateTime day) => [
-    for (final t in tasks)
-      if (_open(t) &&
-          t.dueDate != null &&
-          DateUtilsX.daysBetween(t.dueDate!, day) == 0)
-        t,
-  ];
+  static List<TaskItem> dueOn(List<TaskItem> tasks, DateTime day) =>
+      TaskDayIndex(tasks).dueOn(DateUtilsX.dayNumber(day));
 
   /// App icon badge on [day] for [mode] (null = no badge).
   static int? badgeOn(List<TaskItem> tasks, DateTime day, BadgeMode mode) =>
-      switch (mode) {
-        BadgeMode.none => null,
-        BadgeMode.overdue => overdueOn(tasks, day).length,
-        BadgeMode.today =>
-          overdueOn(tasks, day).length + dueOn(tasks, day).length,
-      };
+      TaskDayIndex(tasks).badgeOn(DateUtilsX.dayNumber(day), mode);
 
   // ───────────────────────── Content ─────────────────────────
 
@@ -184,9 +180,13 @@ abstract final class DigestPlanner {
     inboxActions: const [InboxActions.open],
   );
 
-  static String _morningBody(PlannerInput input, DateTime day) {
+  static String _morningBody(
+    PlannerInput input,
+    DateTime day,
+    TaskDayIndex index,
+  ) {
     final cal = input.calendar;
-    final tasks = dueOn(input.tasks, day).length;
+    final tasks = index.dueCount(DateUtilsX.dayNumber(day));
     final from = cal.at(day, 0);
     final to = cal.at(ZoneCalendar.addDays(day, 1), 0);
     var reminders = 0;
@@ -209,7 +209,11 @@ abstract final class DigestPlanner {
     return '${_join(parts)} today.';
   }
 
-  static String _eveningBody(PlannerInput input, DateTime day) {
+  static String _eveningBody(
+    PlannerInput input,
+    DateTime day,
+    TaskDayIndex index,
+  ) {
     final cal = input.calendar;
     final done = input.tasks
         .where(
@@ -219,7 +223,7 @@ abstract final class DigestPlanner {
               cal.dayOf(t.completedAt!) == day,
         )
         .length;
-    final open = dueOn(input.tasks, day).length;
+    final open = index.dueCount(DateUtilsX.dayNumber(day));
     final scheduled = input.habits.where((s) => s.isScheduled).toList();
     final habitsDone = scheduled.where((s) => s.isDone).length;
     final parts = [

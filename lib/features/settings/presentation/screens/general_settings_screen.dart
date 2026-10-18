@@ -14,6 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/settings/domain/entities/settings_entry.dart';
 import 'package:focusflow/features/settings/presentation/notifiers/settings_editor.dart';
@@ -24,7 +25,6 @@ import 'package:focusflow/features/settings/presentation/widgets/settings_option
 import 'package:focusflow/features/settings/presentation/widgets/settings_page.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
-import 'package:intl/intl.dart';
 
 class GeneralSettingsScreen extends ConsumerWidget {
   const GeneralSettingsScreen({super.key});
@@ -43,7 +43,7 @@ class GeneralSettingsScreen extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final now = ref.watch(clockProvider).now();
     void run(SettingsRootAction a) => runRootAction(context, ref, a);
-    String sample(String pattern) => DateFormat(pattern, 'en').format(now);
+    String sample(String pattern) => DateFormats.of(pattern, 'en').format(now);
 
     return SettingsPage(
       title: 'General',

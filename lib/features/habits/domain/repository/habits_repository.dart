@@ -151,6 +151,15 @@ abstract interface class HabitsRepository {
     int weekStartsOn = DateTime.monday,
   });
 
+  /// [watchTodayHabits] once, computed from the database right now — never
+  /// from a shared live stream's last value, which can be a moment behind a
+  /// write that just committed. For readers that must include every write
+  /// made so far (the notification planner).
+  Future<List<HabitDayStatus>> todayHabitsNow(
+    DateTime day, {
+    int weekStartsOn = DateTime.monday,
+  });
+
   /// One card model per habit of [query] for [day] — the habits list's
   /// cards for every chip (Today, All habits incl. paused, Morning,
   /// Evening, Archived). Same ordering and rules as [watchTodayHabits].

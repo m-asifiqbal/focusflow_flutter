@@ -25,6 +25,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- "Alarm-style (full screen)" reminders. -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- "Display over other apps": lets the alarm screen open in front of
+         whatever you are doing the moment an alarm rings (a full-screen intent
+         only works on the lock screen). Opt-in, asked from the reminder
+         editor / Settings › Notifications. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- Vault + app lock biometrics. -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <!-- Quick Scan (OCR), note images, 2FA QR codes. -->
@@ -36,7 +41,7 @@
 
     <application
         android:label="FocusFlow"
-        android:name="${applicationName}"
+        android:name=".FocusFlowApplication"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:fullBackupContent="false">
@@ -70,6 +75,27 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="focusflow" />
+            </intent-filter>
+        </activity>
+
+        <!-- The alarm screen (Stop / Snooze). The `alarm` package opens whichever
+             activity handles its RING action — for the full-screen intent on the
+             lock screen and for a tap on the ringing notification. Native, so it
+             shows even though that start has no Flutter engine. Its own task
+             (taskAffinity) so closing it returns to whatever the alarm
+             interrupted, not into the app. -->
+        <activity
+            android:name=".AlarmActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:taskAffinity="com.iqballab.focusflow.alarm"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+            <intent-filter>
+                <action android:name="com.gdelataillade.alarm.action.RING" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 

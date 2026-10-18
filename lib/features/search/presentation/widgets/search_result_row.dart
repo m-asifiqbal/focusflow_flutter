@@ -24,7 +24,6 @@ import 'package:focusflow/features/search/presentation/providers/search_provider
 import 'package:focusflow/features/vault/presentation/vault_gate.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
-import 'package:intl/intl.dart';
 
 /// Meta line of [hit] (module first). Pure — unit tested.
 String searchHitMeta(
@@ -34,14 +33,15 @@ String searchHitMeta(
   bool vaultUnlocked = false,
   int? habitStreak,
 }) {
-  String time(DateTime t) => DateFormat(use24h ? 'HH:mm' : 'h:mm a').format(t);
+  String time(DateTime t) =>
+      DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(t);
   String day(DateTime d) {
     final diff = DateUtilsX.daysBetween(now, d);
     if (diff == 0) return 'Today';
     if (diff == 1) return 'Tomorrow';
     if (diff == -1) return 'Yesterday';
-    if (diff > 1 && diff < 7) return DateFormat('EEE').format(d);
-    return DateFormat(d.year == now.year ? 'MMM d' : 'MMM d, y').format(d);
+    if (diff > 1 && diff < 7) return DateFormats.of('EEE').format(d);
+    return DateFormats.of(d.year == now.year ? 'MMM d' : 'MMM d, y').format(d);
   }
 
   final parts = <String>[hit.type.plural];

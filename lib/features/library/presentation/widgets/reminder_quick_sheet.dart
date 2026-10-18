@@ -18,7 +18,6 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
-import 'package:intl/intl.dart';
 
 /// What the user picked in [ReminderQuickSheet].
 sealed class ReminderQuickChoice {
@@ -82,10 +81,10 @@ String reminderWhenLabel(DateTime at, DateTime now, {bool use24h = false}) {
   final day = switch (diff) {
     0 => 'Today',
     1 => 'Tomorrow',
-    _ when diff > 1 && diff < 7 => DateFormat('EEE').format(at),
-    _ => DateFormat('MMM d').format(at),
+    _ when diff > 1 && diff < 7 => DateFormats.of('EEE').format(at),
+    _ => DateFormats.of('MMM d').format(at),
   };
-  final time = DateFormat(use24h ? 'HH:mm' : 'h:mm a').format(at);
+  final time = DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(at);
   return '$day, $time';
 }
 

@@ -96,7 +96,10 @@ them the app builds and runs; Drive says "not set up in this build".
 - **Sign in with Apple** (iOS only) gives a profile only, with no Drive.
 - **Sync now** works in these steps:
   1. Build a `.ffbackup`. It's encrypted with the stored backup key when
-     "Encrypt backups" is on.
+     "Encrypt backups" is on. It carries the app's settings too
+     (`settings.json`), so a manual **Restore** on a new phone brings back
+     the configuration as well as the data. The automatic merge in step 5
+     never applies another device's settings.
   2. Upload it.
   3. Keep this device's last *N* backups and delete the older ones.
   4. Update the devices manifest.

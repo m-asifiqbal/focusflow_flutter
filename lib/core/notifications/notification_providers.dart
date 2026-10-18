@@ -26,6 +26,15 @@ final notificationGatewayProvider = Provider<NotificationGateway>(
   (ref) => LocalNotificationsGateway(),
 );
 
+/// How long the engine waits after launch before its first reconcile pass
+/// (see ReconcilingNotificationEngine.start): the first screen is loading
+/// its own data and animating in, and nothing the pass does is due within
+/// seconds. A tap on a notification that launched the app skips the wait.
+/// Tests that start the real engine override it with [Duration.zero].
+final notificationSettleProvider = Provider<Duration>(
+  (ref) => const Duration(milliseconds: 1500),
+);
+
 /// What is scheduled with the OS (Keychain / Keystore).
 final notificationLedgerStoreProvider = Provider<LedgerStore>(
   (ref) => SecureLedgerStore(

@@ -87,7 +87,7 @@ Enable **SQLite FTS5** over notes/tasks/reminders/habits text for Global Search.
 ## 5. Sync & Backup (Google Drive + local)
 
 - Google Sign-In (optional — app fully works offline). Request only `https://www.googleapis.com/auth/drive.appdata`.
-- Backup format **`.ffbackup`** = zip { `manifest.json` (schemaVersion, appVersion, createdAt, deviceId, counts, checksum), `db.json` (all tables), `attachments/` } and optionally encrypted with the master-PIN key.
+- Backup format **`.ffbackup`** = zip { `manifest.json` (schemaVersion, appVersion, createdAt, deviceId, counts, checksum), `db.json` (all tables), `settings.json` (the app's settings and view preferences — optional, `hasSettings` in the manifest), `attachments/` } and optionally encrypted with the master-PIN key. Restoring brings the settings back too (Replace: the backup's; Merge: only what is still default here; never the account / device-bound fields, never turns App lock off).
 - Sync strategy v1: snapshot backup + **last-write-wins by `updatedAt` per item** on restore/merge, keeping `syncVersion`. Show conflicts count in Backup & Sync screen. Keep last N backups (default 10) in appDataFolder.
 - Auto backup via `workmanager` (daily at chosen time, Wi-Fi only option). Manual “Sync now” / “Restore”.
 - Local backup to app documents dir + “Save to device” via `file_picker` (SAF on Android). Import: `.ffbackup`, JSON, CSV (tasks/notes), Google Keep (Takeout), Bitwarden CSV (vault), Loop Habit CSV.

@@ -211,6 +211,7 @@ void main() {
         },
         overrides: [
           notificationGatewayProvider.overrideWithValue(os),
+          notificationSettleProvider.overrideWithValue(Duration.zero),
           notificationLedgerStoreProvider.overrideWithValue(
             MemoryLedgerStore(),
           ),

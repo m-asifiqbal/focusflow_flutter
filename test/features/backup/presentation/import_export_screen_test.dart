@@ -15,6 +15,7 @@ import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/features/backup/data/export_service.dart';
 import 'package:focusflow/features/backup/data/import_file_source.dart';
 import 'package:focusflow/features/backup/domain/entities/export_options.dart';
+import 'package:focusflow/features/backup/presentation/notifiers/import_export_controllers.dart';
 import 'package:focusflow/features/backup/presentation/providers/backup_providers.dart';
 import 'package:focusflow/features/backup/presentation/screens/import_export_screen.dart';
 import 'package:focusflow/features/tasks/domain/repository/tasks_repository.dart';
@@ -137,6 +138,45 @@ void main() {
     });
     expect(json.containsKey('vault'), isFalse);
     expect(fakes.drive.backupNames, isEmpty);
+  });
+
+  testWidgets('"Include app settings" is on for .ffbackup, off elsewhere', (
+    tester,
+  ) async {
+    final (h, _) = await backupHarness(
+      tester,
+      overrides: [
+        exportCountsProvider.overrideWith((ref) => Stream.value(_counts)),
+      ],
+    );
+    await pumpApp(tester, h, AppRoutes.settingsImportExport);
+    bool included() =>
+        h.container.read(exportControllerProvider).options.includeSettings;
+
+    final row = find.text('Include app settings');
+    await tester.ensureVisible(row);
+    await settle(tester);
+    expect(included(), isTrue);
+    expect(find.text('Theme, notifications and layout'), findsOneWidget);
+
+    await tester.tap(row);
+    await settle(tester);
+    expect(included(), isFalse);
+    await tester.tap(row);
+    await settle(tester);
+    expect(included(), isTrue);
+
+    // Settings only live in a .ffbackup: the row says so and stops reacting.
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 900));
+    await settle(tester);
+    await tester.tap(find.text('JSON'));
+    await settle(tester);
+    await tester.ensureVisible(row);
+    await settle(tester);
+    expect(find.text('Only in .ffbackup files'), findsNWidgets(2));
+    await tester.tap(row, warnIfMissed: false);
+    await settle(tester);
+    expect(included(), isTrue);
   });
 
   testWidgets('Todoist CSV import: preview, import, dedupe', (tester) async {

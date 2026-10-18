@@ -79,8 +79,7 @@ class TaskListItem extends ConsumerWidget {
       hideListName: hideListId,
       dragHandle: dragHandle,
       onCheck: onCheck,
-      onSubtaskToggle: (s) =>
-          ref.read(taskActionsProvider).toggleSubtask(s.id),
+      onSubtaskToggle: (s) => toggleTaskSubtask(context, ref, task, s),
       onTap: () => selecting
           ? selector.toggle(task.ref)
           : context.push(AppRoutes.task(task.id)),

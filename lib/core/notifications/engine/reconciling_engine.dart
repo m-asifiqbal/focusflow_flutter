@@ -52,6 +52,7 @@ import 'package:focusflow/core/notifications/engine/planner_snapshot.dart';
 import 'package:focusflow/core/notifications/engine/refresh_port.dart';
 import 'package:focusflow/core/notifications/engine/task_reminder_zones.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
+import 'package:focusflow/core/notifications/alarm_overlay.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/notifications/notification_providers.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
@@ -65,9 +66,17 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class ReconcilingNotificationEngine implements NotificationEngine {
-  ReconcilingNotificationEngine(this._ref, {this.debounce = _debounce});
+  ReconcilingNotificationEngine(
+    this._ref, {
+    this.debounce = _debounce,
+    this.settle = Duration.zero,
+  });
 
   final Ref _ref;
+
+  /// How long [start] waits before the first pass when no notification tap
+  /// launched the app (see `notificationSettleProvider`).
+  final Duration settle;
 
   /// Quiet period after a change before reconciling (edits come in bursts).
   final Duration debounce;
@@ -110,7 +119,6 @@ class ReconcilingNotificationEngine implements NotificationEngine {
   Future<void> start() async {
     if (_started || _disposed) return;
     _started = true;
-    NotificationZones.ensureLoaded();
     try {
       _supported = await _gateway.initialize(onTap: _onTap);
     } catch (e) {
@@ -119,6 +127,16 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       _supported = false;
     }
     if (!_supported) return;
+    // A tap that launched the app is served at once — it opens its page.
+    // Otherwise the first pass waits for the first screen to finish loading
+    // and animating in: planning (with the habits' histories behind it) is
+    // real work, and nothing it schedules is due within seconds.
+    final tap = await _gateway.launchTap();
+    if (tap == null && settle > Duration.zero) {
+      await Future<void>.delayed(settle);
+      if (_disposed) return;
+    }
+    NotificationZones.ensureLoaded();
     _deviceZone = await _gateway.deviceTimeZone();
     await _resolveZone();
     _ref.invalidate(notificationPermissionProvider);
@@ -131,14 +149,98 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       ..add(
         _ref.listen<AppSettings>(settingsProvider, (prev, next) {
           if (prev?.timeZone != next.timeZone) unawaited(_resolveZone());
-          schedule();
+          // A theme, layout or backup setting changes nothing that is
+          // planned: it must not cost a full re-plan.
+          if (prev == null || _changesPlan(prev, next)) schedule();
         }),
       )
-      ..add(_ref.listen(notificationPermissionProvider, (_, _) => schedule()))
-      ..add(_ref.listen(exactAlarmPermissionProvider, (_, _) => schedule()));
-    await reconcileNow();
-    final tap = await _gateway.launchTap();
-    if (tap != null) await _onTap(tap);
+      ..add(
+        _ref.listen(notificationPermissionProvider, (prev, next) {
+          // The first answer was read by the pass that asked for it; only a
+          // *change* of the permission needs a new plan.
+          if (_changed(prev, next)) schedule();
+        }),
+      )
+      ..add(
+        _ref.listen(exactAlarmPermissionProvider, (prev, next) {
+          if (_changed(prev, next)) schedule();
+        }),
+      );
+    if (tap != null) {
+      // Serves the tap: runs the pass first (it records the delivery in the
+      // inbox), then opens the page.
+      await _onTap(tap);
+    } else {
+      await reconcileNow();
+    }
+  }
+
+  /// [next] is a new answer that differs from a previous one.
+  static bool _changed<T>(AsyncValue<T>? prev, AsyncValue<T> next) =>
+      prev != null && prev.hasValue && prev.valueOrNull != next.valueOrNull;
+
+  /// Settings that never change what is planned: appearance, layout,
+  /// gestures, security, backup, account and search history. Everything else
+  /// (also any setting added later) is assumed to matter.
+  static const Set<String> _notPlanned = {
+    'onboardingSeen',
+    'accountMode',
+    'displayName',
+    'dailyFocusGoal',
+    'languageCode',
+    'startScreen',
+    'dateFormat',
+    'themeMode',
+    'accent',
+    'textScale',
+    'appIcon',
+    'listDensity',
+    'reduceMotion',
+    'useSystemFont',
+    'notesView',
+    'notesSort',
+    'notesDefaultColor',
+    'tasksDefaultListId',
+    'tasksShowCompleted',
+    'tasksSmartLists',
+    'homeSections',
+    'hiddenHomeSections',
+    'libraryShowCounts',
+    'hiddenLibraryModules',
+    'libraryModuleOrder',
+    'swipeLeft',
+    'swipeRight',
+    'soundsEnabled',
+    'hapticsEnabled',
+    'appLockEnabled',
+    'hideInAppSwitcher',
+    'clipboardClearSeconds',
+    'vaultBiometrics',
+    'vaultAutoLockMinutes',
+    'vaultLockOnBackground',
+    'vaultBlockScreenshots',
+    'vaultReauthToReveal',
+    'breachMonitoring',
+    'wipeAfterFailedAttempts',
+    'autoBackupDrive',
+    'backupFrequency',
+    'backupMinutes',
+    'backupWifiOnly',
+    'encryptBackups',
+    'keepBackups',
+    'localBackupFrequency',
+    'lastSyncAt',
+    'recentSearches',
+  };
+
+  static bool _changesPlan(AppSettings a, AppSettings b) {
+    final before = a.toJson();
+    final after = b.toJson();
+    for (final e in before.entries) {
+      if (_notPlanned.contains(e.key)) continue;
+      if (e.value != after[e.key]) return true;
+    }
+    return false;
   }
 
   @override
@@ -147,6 +249,7 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     _ref
       ..invalidate(exactAlarmPermissionProvider)
       ..invalidate(fullScreenAlarmsAllowedProvider)
+      ..invalidate(alarmOverAppsAllowedProvider)
       ..invalidate(unrestrictedBackgroundProvider);
     // No table refresh here: a background isolate that wrote pinged the
     // refresh port (delivered, at the latest, as the app resumes), and

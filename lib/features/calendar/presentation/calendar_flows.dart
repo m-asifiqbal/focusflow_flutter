@@ -14,12 +14,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/calendar/domain/entities/calendar_entry.dart';
 import 'package:focusflow/features/calendar/presentation/providers/calendar_providers.dart';
 import 'package:focusflow/features/quick_add/presentation/quick_add.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 /// Quick Add prefilled with [day].
 Future<void> addOnCalendarDay(BuildContext context, DateTime day) =>
@@ -42,7 +42,7 @@ Future<void> moveCalendarEntry(
   if (previous == null || !context.mounted) return;
   showUndoSnackbar(
     context,
-    message: 'Moved to ${DateFormat('EEE, MMM d').format(day)}',
+    message: 'Moved to ${DateFormats.of('EEE, MMM d').format(day)}',
     icon: FontAwesomeIcons.calendarDay,
     onUndo: () => rescheduler.restore(entry, previous),
   );

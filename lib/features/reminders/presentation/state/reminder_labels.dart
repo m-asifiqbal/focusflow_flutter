@@ -15,7 +15,6 @@ import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
-import 'package:intl/intl.dart';
 
 abstract final class ReminderLabels {
   /// Header subtitle: "3 today · next in 25 min" / "Nothing scheduled".
@@ -38,11 +37,11 @@ abstract final class ReminderLabels {
 
   /// "07:00" / "19:00" (24 h) for the time column.
   static String time(DateTime t, {bool use24h = false}) =>
-      DateFormat(use24h ? 'HH:mm' : 'hh:mm').format(t);
+      DateFormats.of(use24h ? 'HH:mm' : 'hh:mm').format(t);
 
   /// "AM" / "PM" under the time; null in 24 h mode.
   static String? meridiem(DateTime t, {bool use24h = false}) =>
-      use24h ? null : DateFormat('a').format(t).toUpperCase();
+      use24h ? null : DateFormats.of('a').format(t).toUpperCase();
 
   /// The meta line under the title.
   static String meta(ReminderOccurrence o, DateTime now) {

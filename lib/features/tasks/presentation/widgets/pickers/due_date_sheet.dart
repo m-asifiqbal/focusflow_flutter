@@ -18,7 +18,6 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/picker_common.dart';
-import 'package:intl/intl.dart';
 
 /// The quick choices relative to [today] (local midnight).
 abstract final class DueDateChoices {
@@ -92,7 +91,7 @@ class _DueDateSheetState extends State<_DueDateSheet> {
         current != null && DateUtilsX.isSameDay(current, d);
     final quick = {today, tomorrow, nextWeek};
     final pickedOther = current != null && !quick.any(isCurrent);
-    final dayFmt = DateFormat('EEE, MMM d');
+    final dayFmt = DateFormats.of('EEE, MMM d');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

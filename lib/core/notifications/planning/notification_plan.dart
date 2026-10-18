@@ -308,7 +308,12 @@ class PlannedNotification {
     this.badge,
     this.reminderId,
     this.sound,
+    this.inbox = true,
   });
+
+  /// Whether delivering it adds a Notification-centre entry. A "repeat until
+  /// done" copy does not: one reminder, one inbox row.
+  final bool inbox;
 
   /// The reminder's sound name (`Reminder.sound`: chime, bell, gentle,
   /// pulse — bundled tones — or silent; anything else / null = the system
@@ -380,14 +385,16 @@ class PlannedNotification {
   /// plain reminder must not open over the lock screen).
   PlannedNotification copyWith({
     int? id,
+    String? key,
     DateTime? fireAt,
     int? badge,
     NotificationCategory? category,
     String? body,
     String? sound,
+    bool? inbox,
   }) => PlannedNotification(
     id: id ?? this.id,
-    key: key,
+    key: key ?? this.key,
     fireAt: fireAt ?? this.fireAt,
     category: category ?? this.category,
     title: title,
@@ -399,6 +406,7 @@ class PlannedNotification {
     badge: badge ?? this.badge,
     reminderId: reminderId,
     sound: sound ?? this.sound,
+    inbox: inbox ?? this.inbox,
   );
 
   @override

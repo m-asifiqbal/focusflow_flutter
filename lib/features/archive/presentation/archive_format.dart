@@ -13,7 +13,6 @@ import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/services/streak_calculator.dart';
-import 'package:intl/intl.dart';
 
 abstract final class ArchiveFormat {
   /// Module name on a row: "Note", "Task", "Reminder", "Habit", "Vault".
@@ -24,8 +23,8 @@ abstract final class ArchiveFormat {
     final ago = DateUtilsX.daysBetween(t, now);
     if (ago == 0) return 'today';
     if (ago == 1) return 'yesterday';
-    if (t.year == now.year) return DateFormat('MMM d').format(t);
-    return DateFormat('MMM d, y').format(t);
+    if (t.year == now.year) return DateFormats.of('MMM d').format(t);
+    return DateFormats.of('MMM d, y').format(t);
   }
 
   /// "34-day streak saved" / "5-week streak saved"; null without a streak.

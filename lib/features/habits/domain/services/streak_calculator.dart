@@ -97,14 +97,23 @@ class StreakCalculator {
   /// Same as [calculate] for logs already indexed with
   /// [HabitSchedule.indexByDay] (lets callers that need several stats index
   /// the history once).
+  ///
+  /// The walk over the history is pure integer work: logs are placed in a
+  /// list by their day offset from the start date once, and every rule
+  /// ([HabitSchedule.isDueByNumber], weeks, slips) reads that list. The
+  /// first version built a local `DateTime` and a `yyyy-MM-dd` string for
+  /// every day since the start date — per habit, on every refresh of every
+  /// screen that shows a habit — which is what made a long-lived habit list
+  /// slow on every launch. Results are identical (see the reference
+  /// implementation in test/features/habits/domain).
   HabitStreak calculateIndexed(
     Habit habit,
     Map<String, HabitLog> logsByDay,
     DateTime today,
   ) {
     final start = DateUtilsX.dateOnly(habit.startDate);
-    final end = DateUtilsX.dateOnly(today);
-    final span = HabitSchedule.daysBetween(start, end);
+    final startNo = DateUtilsX.dayNumber(start);
+    final span = DateUtilsX.dayNumber(today) - startNo;
     final frequency = habit.frequency;
     final weekly = !habit.isQuit && frequency is TimesPerWeekFrequency;
     if (span < 0) {
@@ -112,31 +121,48 @@ class StreakCalculator {
           ? const HabitStreak(current: 0, best: 0, unit: StreakUnit.weeks)
           : HabitStreak.zero;
     }
-    if (habit.isQuit) return _quit(habit, logsByDay, start, span);
+    final days = _byOffset(logsByDay, startNo, span);
+    if (habit.isQuit) return _quit(habit, days, start, span);
     if (frequency is TimesPerWeekFrequency) {
-      return _weekly(habit, logsByDay, start, span, frequency.times);
+      return _weekly(habit, days, startNo, span, frequency.times);
     }
-    return _daily(habit, logsByDay, start, end);
+    return _daily(habit, days, startNo, span);
+  }
+
+  /// [logsByDay] as a list indexed by days since the start date (0…[span]);
+  /// logs outside that range (before the start, after today) are dropped.
+  static List<HabitLog?> _byOffset(
+    Map<String, HabitLog> logsByDay,
+    int startNo,
+    int span,
+  ) {
+    final days = List<HabitLog?>.filled(span + 1, null);
+    for (final e in logsByDay.entries) {
+      final int offset;
+      try {
+        offset = DateUtilsX.dayNumberOfKey(e.key) - startNo;
+      } on FormatException {
+        continue; // not a day key: nothing can look it up
+      }
+      if (offset >= 0 && offset <= span) days[offset] = e.value;
+    }
+    return days;
   }
 
   /// Day-based build habits: one forward pass over the scheduled days. The
   /// run left at the end is the current streak (today never breaks it).
-  HabitStreak _daily(
-    Habit habit,
-    Map<String, HabitLog> logsByDay,
-    DateTime start,
-    DateTime end,
-  ) {
-    final days = HabitSchedule.scheduledDaysBetween(habit, start, end);
+  HabitStreak _daily(Habit habit, List<HabitLog?> days, int startNo, int span) {
     var run = 0;
     var best = 0;
-    for (final day in days) {
-      final log = logsByDay[DateUtilsX.dayKey(day)];
+    for (var i = 0; i <= span; i++) {
+      if (!HabitSchedule.isDueByNumber(habit, startNo + i, i)) continue;
+      final log = days[i];
       if (HabitSchedule.isDone(habit, log)) {
         run++;
         if (run > best) best = run;
-      } else if ((log?.skipped ?? false) || DateUtilsX.isSameDay(day, end)) {
-        // Skipped days and the in-progress day neither add nor break.
+      } else if ((log?.skipped ?? false) || i == span) {
+        // Skipped days and the in-progress day (the last) neither add nor
+        // break.
       } else {
         run = 0;
       }
@@ -148,14 +174,15 @@ class StreakCalculator {
   /// offsets from the start date, so no DateTime comparisons are needed.
   HabitStreak _weekly(
     Habit habit,
-    Map<String, HabitLog> logsByDay,
-    DateTime start,
+    List<HabitLog?> days,
+    int startNo,
     int span,
     int times,
   ) {
     final perWeek = times.clamp(1, 7);
     // Days between the first week's start and the habit's start date.
-    final lead = (start.weekday - weekStartsOn + 7) % 7;
+    final lead =
+        (HabitSchedule.weekdayOfNumber(startNo) - weekStartsOn + 7) % 7;
     final lastWeek = (span + lead) ~/ 7;
     var run = 0;
     var best = 0;
@@ -165,8 +192,7 @@ class StreakCalculator {
       final to = weekFirst + 6 > span ? span : weekFirst + 6;
       var credited = 0;
       for (var i = from; i <= to; i++) {
-        final day = DateTime(start.year, start.month, start.day + i);
-        final log = logsByDay[DateUtilsX.dayKey(day)];
+        final log = days[i];
         if (HabitSchedule.isDone(habit, log) || (log?.skipped ?? false)) {
           credited++;
         }
@@ -188,23 +214,28 @@ class StreakCalculator {
   /// Quit habits: clean runs between slips, today included.
   HabitStreak _quit(
     Habit habit,
-    Map<String, HabitLog> logsByDay,
+    List<HabitLog?> days,
     DateTime start,
     int span,
   ) {
     var run = 0;
     var best = 0;
-    DateTime? lastSlip;
+    int? lastSlip; // offset from the start date
     for (var i = 0; i <= span; i++) {
-      final day = DateTime(start.year, start.month, start.day + i);
-      if (HabitSchedule.isSlip(habit, logsByDay[DateUtilsX.dayKey(day)])) {
+      if (HabitSchedule.isSlip(habit, days[i])) {
         run = 0;
-        lastSlip = day;
+        lastSlip = i;
       } else {
         run++;
         if (run > best) best = run;
       }
     }
-    return HabitStreak(current: run, best: best, lastSlip: lastSlip);
+    return HabitStreak(
+      current: run,
+      best: best,
+      lastSlip: lastSlip == null
+          ? null
+          : DateTime(start.year, start.month, start.day + lastSlip),
+    );
   }
 }

@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/notifications/engine/reconciling_engine.dart';
+import 'package:focusflow/core/notifications/notification_providers.dart';
 
 abstract class NotificationEngine {
   /// Called once after the first frame: init plugin, time zones, start
@@ -26,7 +27,10 @@ abstract class NotificationEngine {
 
 /// The app's engine (a [ReconcilingNotificationEngine]).
 final notificationEngineProvider = Provider<NotificationEngine>((ref) {
-  final engine = ReconcilingNotificationEngine(ref);
+  final engine = ReconcilingNotificationEngine(
+    ref,
+    settle: ref.watch(notificationSettleProvider),
+  );
   ref.onDispose(engine.dispose);
   return engine;
 });

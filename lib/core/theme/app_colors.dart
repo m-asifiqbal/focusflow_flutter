@@ -110,7 +110,11 @@ enum AccentColor {
     primary: AppPalette.emerald600,
     primaryDark: AppPalette.emerald400,
     soft: AppPalette.emerald100,
-    gradient: [AppPalette.emerald500, AppPalette.emerald600, AppPalette.teal700],
+    gradient: [
+      AppPalette.emerald500,
+      AppPalette.emerald600,
+      AppPalette.teal700,
+    ],
     strong: AppPalette.emerald700,
   ),
   blue(
@@ -126,7 +130,11 @@ enum AccentColor {
     primary: AppPalette.indigo600,
     primaryDark: AppPalette.indigo400,
     soft: AppPalette.indigo100,
-    gradient: [AppPalette.indigo500, AppPalette.indigo600, AppPalette.indigo700],
+    gradient: [
+      AppPalette.indigo500,
+      AppPalette.indigo600,
+      AppPalette.indigo700,
+    ],
     strong: AppPalette.indigo700,
   ),
   pink(
@@ -142,7 +150,11 @@ enum AccentColor {
     primary: AppPalette.orange600,
     primaryDark: AppPalette.orange400,
     soft: AppPalette.orange100,
-    gradient: [AppPalette.orange500, AppPalette.orange600, AppPalette.orange700],
+    gradient: [
+      AppPalette.orange500,
+      AppPalette.orange600,
+      AppPalette.orange700,
+    ],
     strong: AppPalette.orange700,
   ),
   slate(
@@ -401,9 +413,9 @@ class FFColors extends ThemeExtension<FFColors> {
       tabBar: AppPalette.darkTabBar.withValues(alpha: 0.95),
       scrim: Colors.black.withValues(alpha: 0.55),
       cardShadow: const [],
-      heroShadow: heroShadowFor(accent.primary).map((s) => s.copyWith(
-        color: s.color.withValues(alpha: 0.35),
-      )).toList(),
+      heroShadow: heroShadowFor(
+        accent.primary,
+      ).map((s) => s.copyWith(color: s.color.withValues(alpha: 0.35))).toList(),
       vaultCanvas: AppPalette.vaultCanvas,
       vaultSurface: white.withValues(alpha: 0.05),
       vaultBorder: white.withValues(alpha: 0.08),

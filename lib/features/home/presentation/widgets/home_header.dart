@@ -17,6 +17,7 @@ import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/auth/presentation/widgets/profile_avatar.dart';
 import 'package:focusflow/features/home/domain/services/home_focus.dart';
@@ -24,7 +25,6 @@ import 'package:focusflow/features/home/presentation/home_tokens.dart';
 import 'package:focusflow/features/home/presentation/providers/home_providers.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 class HomeHeader extends ConsumerWidget {
   const HomeHeader({super.key});
@@ -61,7 +61,7 @@ class HomeHeader extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  DateFormat('EEEE, MMMM d').format(now).toUpperCase(),
+                  DateFormats.of('EEEE, MMMM d').format(now).toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.text.sectionLabel.copyWith(

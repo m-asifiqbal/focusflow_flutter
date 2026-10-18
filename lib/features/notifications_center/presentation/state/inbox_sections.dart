@@ -12,7 +12,6 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
-import 'package:intl/intl.dart';
 
 /// The inbox split into the two groups the screen shows.
 @immutable
@@ -52,12 +51,12 @@ abstract final class InboxTimeLabel {
     if (diff.inMinutes < 1) return 'now';
     if (DateUtilsX.isSameDay(t, now)) {
       if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-      return DateFormat(use24h ? 'H:mm' : 'h:mm').format(t);
+      return DateFormats.of(use24h ? 'H:mm' : 'h:mm').format(t);
     }
     final days = DateUtilsX.daysBetween(t, now);
     if (days == 1) return 'Yesterday';
-    if (days > 1 && days < 7) return DateFormat('EEE').format(t);
-    return DateFormat('MMM d').format(t);
+    if (days > 1 && days < 7) return DateFormats.of('EEE').format(t);
+    return DateFormats.of('MMM d').format(t);
   }
 
   /// Spoken form for screen readers ("8:00 AM", "Yesterday 6:30 PM").

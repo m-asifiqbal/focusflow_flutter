@@ -107,6 +107,34 @@ class NotificationSettingsController {
   Future<void> setLockScreen(LockScreenVisibility v) =>
       _update((s) => s.copyWith(lockScreenVisibility: v));
 
+  /// The on / off switch: off hides notifications on the lock screen
+  /// ([LockScreenVisibility.hidden]); on shows them with the title only —
+  /// the safe default — until "Lock screen details" says otherwise.
+  Future<void> setShowOnLockScreen(bool on) => _update(
+    (s) => s.copyWith(
+      lockScreenVisibility: on
+          ? (s.showOnLockScreen
+                ? s.lockScreenVisibility
+                : LockScreenVisibility.titleOnly)
+          : LockScreenVisibility.hidden,
+    ),
+  );
+
+  /// "Repeat until done" interval in minutes; 0 turns it off.
+  Future<void> setRepeatInterval(int minutes) => _update(
+    (s) => s.copyWith(
+      repeatIntervalMinutes: minutes.clamp(
+        0,
+        AppSettings.maxRepeatIntervalMinutes,
+      ),
+    ),
+  );
+
+  /// How many times a notification repeats.
+  Future<void> setRepeatCount(int count) => _update(
+    (s) => s.copyWith(repeatCount: count.clamp(1, AppSettings.maxRepeatCount)),
+  );
+
   Future<void> setBadge(BadgeMode m) =>
       _update((s) => s.copyWith(badgeMode: m));
 }

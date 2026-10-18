@@ -28,7 +28,9 @@ library;
 import 'dart:async';
 
 import 'package:alarm/alarm.dart';
-import 'package:flutter/foundation.dart';
+import 'package:alarm/utils/alarm_set.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
 
@@ -60,7 +62,10 @@ class AlarmRequest {
   final String title;
   final String body;
 
-  /// Light up the lock screen (Android 14+ lets the user refuse this).
+  /// Ask for the full-screen intent. Always on in the app: it is also what
+  /// makes the alarm service announce the ring (which brings the alarm
+  /// screen forward); where the user refused the permission (Android 14+) the
+  /// system just shows a heads-up instead.
   final bool fullScreen;
 }
 
@@ -106,7 +111,12 @@ class PackageAlarmDriver implements AlarmDriver {
   /// room.
   static const Duration fadeIn = Duration(seconds: 3);
 
+  /// Native helpers of MainActivity (the same channel the gateway uses).
+  static const MethodChannel _native = MethodChannel('focusflow/notifications');
+
   Future<void>? _init;
+  StreamSubscription<AlarmSet>? _rings;
+  Set<int> _ringingIds = {};
   final Set<int> _dropped = {};
   final _snoozes = StreamController<AlarmSnooze>.broadcast();
   StreamSubscription<AlarmEvent>? _events;
@@ -127,12 +137,46 @@ class PackageAlarmDriver implements AlarmDriver {
     try {
       await Alarm.init();
       _events ??= Alarm.events.listen(_onEvent);
+      _rings ??= Alarm.ringing.listen(_onRinging);
     } catch (e) {
       // No native side (tests, an unsupported device): alarms degrade to
       // notifications instead of failing the whole engine.
       AppLogger.w('Alarm service unavailable: $e');
       _init = null;
       rethrow;
+    }
+  }
+
+  /// An alarm starts ringing. With the app closed or the phone locked the
+  /// system opens the alarm screen itself (full-screen intent); with the app
+  /// in front it only shows a heads-up that is gone in seconds — so open the
+  /// screen from here, the one place that knows the app is in front.
+  void _onRinging(AlarmSet now) {
+    final ids = {for (final a in now.alarms) a.id};
+    for (final a in now.alarms) {
+      if (!_ringingIds.contains(a.id)) unawaited(_onRing(a));
+    }
+    _ringingIds = ids;
+  }
+
+  Future<void> _onRing(AlarmSettings alarm) async {
+    final state = WidgetsBinding.instance.lifecycleState;
+    if (state != AppLifecycleState.resumed) return;
+    final n = alarm.notificationSettings;
+    try {
+      await _native.invokeMethod<void>('showAlarmScreen', {
+        'id': alarm.id,
+        'title': n.title,
+        'body': n.body,
+        'stopLabel': n.stopButton,
+        'snoozeLabel': alarm.androidSnoozeDuration == null
+            ? null
+            : n.androidSnoozeButton,
+      });
+    } on MissingPluginException {
+      // Not the app's main engine (tests).
+    } on PlatformException catch (e) {
+      AppLogger.w('Alarm screen unavailable: ${e.code}');
     }
   }
 

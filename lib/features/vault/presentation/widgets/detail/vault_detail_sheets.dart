@@ -18,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
@@ -26,7 +27,6 @@ import 'package:focusflow/features/vault/presentation/vault_style.dart';
 import 'package:focusflow/features/vault/presentation/widgets/detail/vault_detail_fields.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_fields.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_reauth_sheet.dart';
-import 'package:intl/intl.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 import 'package:pdf/widgets.dart' as pw show Barcode, BarcodeBar;
 
@@ -222,7 +222,7 @@ class _HistorySheetState extends ConsumerState<_HistorySheet> {
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
-    final fmt = DateFormat('MMM d, y');
+    final fmt = DateFormats.of('MMM d, y');
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.screen - 4,

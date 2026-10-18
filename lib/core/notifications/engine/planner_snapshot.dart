@@ -51,7 +51,9 @@ class PlannerSnapshotLoader {
     final (rs, ts, hs) = await (
       reminders.watchSchedulable().first,
       tasks.watchTasks(const TasksQuery()).first,
-      habits.watchTodayHabits(today, weekStartsOn: settings.weekStartsOn).first,
+      // Computed now, not read from a shared live stream: the pass must
+      // include every write made before it (editors flush right after saving).
+      habits.todayHabitsNow(today, weekStartsOn: settings.weekStartsOn),
     ).wait;
     return PlannerInput(
       now: now,

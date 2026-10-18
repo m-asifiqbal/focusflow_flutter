@@ -52,6 +52,7 @@ void main() {
       prefs: {SettingsController.prefsKey: jsonEncode(settings.toJson())},
       overrides: [
         notificationGatewayProvider.overrideWithValue(os),
+        notificationSettleProvider.overrideWithValue(Duration.zero),
         notificationLedgerStoreProvider.overrideWithValue(ledger),
       ],
     );

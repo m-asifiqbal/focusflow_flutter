@@ -14,6 +14,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.provider.Settings
 import android.view.WindowManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
@@ -138,7 +139,33 @@ class MainActivity : FlutterFragmentActivity() {
                             result.success(true)
                         }
                     }
+                    "canShowAlarmOverApps" ->
+                        result.success(AlarmActivity.canShowOverApps(this))
+                    "requestAlarmOverApps" -> {
+                        // "Display over other apps" for this app, so the alarm
+                        // screen can open the moment an alarm rings.
+                        startActivity(
+                            Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:$packageName")
+                            )
+                        )
+                        result.success(null)
+                    }
                     "openAutostartSettings" -> result.success(openAutostartSettings())
+                    "showAlarmScreen" -> {
+                        // An alarm rings while the app is open: show the alarm
+                        // screen too (a heads-up alone is easy to miss).
+                        AlarmActivity.show(
+                            this,
+                            call.argument<Int>("id") ?: 0,
+                            call.argument<String>("title"),
+                            call.argument<String>("body"),
+                            call.argument<String>("stopLabel"),
+                            call.argument<String>("snoozeLabel"),
+                        )
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }

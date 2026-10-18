@@ -129,9 +129,11 @@ class FFTextStyles extends ThemeExtension<FFTextStyles> {
           leadingDistribution: TextLeadingDistribution.even,
         );
     return FFTextStyles(
-      largeTitle: h(26, FontWeight.w700, height: 1.15).copyWith(
-        letterSpacing: -0.5,
-      ),
+      largeTitle: h(
+        26,
+        FontWeight.w700,
+        height: 1.15,
+      ).copyWith(letterSpacing: -0.5),
       title: h(23, FontWeight.w700, height: 1.2).copyWith(letterSpacing: -0.3),
       navTitle: h(16, FontWeight.w600, height: 1.25),
       sectionTitle: h(19, FontWeight.w600, height: 1.25),
@@ -141,8 +143,12 @@ class FFTextStyles extends ThemeExtension<FFTextStyles> {
       bodySmall: b(14.5, FontWeight.w500, height: 1.45, color: c.inkMuted),
       meta: b(13.5, FontWeight.w600, height: 1.35, color: c.inkMuted),
       caption: b(12, FontWeight.w600, height: 1.3, color: c.inkMuted),
-      sectionLabel: b(12, FontWeight.w800, height: 1.2, color: c.inkFaint)
-          .copyWith(letterSpacing: 1.4),
+      sectionLabel: b(
+        12,
+        FontWeight.w800,
+        height: 1.2,
+        color: c.inkFaint,
+      ).copyWith(letterSpacing: 1.4),
       tag: b(10, FontWeight.w800, height: 1.2).copyWith(letterSpacing: 0.6),
       button: h(16, FontWeight.w600, height: 1.2),
       buttonSmall: h(13.5, FontWeight.w600, height: 1.2),

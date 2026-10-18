@@ -17,10 +17,10 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/utils/recurrence.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/repeat_draft.dart';
-import 'package:intl/intl.dart';
 import 'package:focusflow/features/tasks/presentation/task_tokens.dart';
 
 /// Seven round toggles, ordered from [weekStartsOn] (1 = Monday).
@@ -42,7 +42,7 @@ class WeekdayToggleRow extends StatelessWidget {
     final days = [for (var i = 0; i < 7; i++) (weekStartsOn - 1 + i) % 7 + 1];
     // 2024-01-01 was a Monday: weekday w → Jan w.
     String name(int w, String pattern) =>
-        DateFormat(pattern).format(DateTime(2024, 1, w));
+        DateFormats.of(pattern).format(DateTime(2024, 1, w));
     return Row(
       children: [
         for (final w in days)
@@ -223,7 +223,7 @@ class _RepeatCustomPanelState extends State<RepeatCustomPanel> {
             children: [
               FFListRow(
                 title: 'End date',
-                value: DateFormat('EEE, MMM d, y').format(d.until),
+                value: DateFormats.of('EEE, MMM d, y').format(d.until),
                 valueColor: context.ff.primaryStrong,
                 onTap: () => setState(() => _calendar = !_calendar),
               ),

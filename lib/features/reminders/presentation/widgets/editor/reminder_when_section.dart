@@ -19,6 +19,7 @@ import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/module_style.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
 import 'package:focusflow/features/reminders/presentation/notifiers/reminder_editor_controller.dart';
@@ -28,7 +29,6 @@ import 'package:focusflow/features/tasks/presentation/widgets/pickers/due_date_s
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/repeat_sheet.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/uniform_label_scale.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
-import 'package:intl/intl.dart';
 import 'package:focusflow/features/reminders/presentation/reminder_tokens.dart';
 
 class ReminderDayChips extends ConsumerWidget {
@@ -68,7 +68,7 @@ class ReminderDayChips extends ConsumerWidget {
     }
 
     final pickLabel = selected == WhenChoice.other
-        ? DateFormat('EEE d MMM').format(day)
+        ? DateFormats.of('EEE d MMM').format(day)
         : 'Pick date';
     const labels = ['Today', 'Tomorrow', 'Next week'];
 

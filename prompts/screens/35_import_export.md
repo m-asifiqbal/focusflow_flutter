@@ -11,7 +11,7 @@ Export selected data in multiple formats and import from other apps.
 ## Layout (top → bottom)
 1. Segmented Export / Import.
 2. FORMAT tiles: .ffbackup (Full · encrypted, selected), JSON, CSV, PDF/MD (notes only).
-3. INCLUDE checklist per module with counts (Vault unchecked by default), switches Include archived, Include attachments.
+3. INCLUDE checklist per module with counts (Vault unchecked by default), switches Include archived, Include attachments, Include app settings (.ffbackup only, on by default).
 4. Amber warning: vault only exported encrypted.
 5. SAVE TO tiles: Google Drive, This device, Share….
 6. Primary 'Export 89 items'.

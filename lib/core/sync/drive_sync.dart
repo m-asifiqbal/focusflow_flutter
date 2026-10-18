@@ -270,6 +270,9 @@ class DriveSync {
           archive,
           mode: RestoreMode.merge,
           key: archive.manifest.isEncrypted ? key : null,
+          // Another device's backup brings its items, never its settings:
+          // each phone keeps its own configuration.
+          applySettings: false,
         );
         total = total + result.report;
         count++;

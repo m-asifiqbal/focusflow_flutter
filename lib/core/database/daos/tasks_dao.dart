@@ -154,6 +154,16 @@ class TasksDao extends DatabaseAccessor<AppDatabase> with _$TasksDaoMixin {
   Future<int> deleteSubtasksOf(Iterable<String> taskIds) =>
       (delete(subtasks)..where((s) => s.taskId.isIn(taskIds))).go();
 
+  /// How many subtasks of [taskId] are still open (a COUNT, not the rows).
+  Future<int> openSubtaskCount(String taskId) {
+    final count = subtasks.id.count();
+    return (selectOnly(subtasks)
+          ..addColumns([count])
+          ..where(subtasks.taskId.equals(taskId) & subtasks.done.equals(false)))
+        .map((r) => r.read(count) ?? 0)
+        .getSingle();
+  }
+
   Future<double?> maxSubtaskSortOrder(String taskId) {
     final max = subtasks.sortOrder.max();
     return (selectOnly(subtasks)

@@ -124,8 +124,9 @@ void main() {
       (_, _) => writes++,
     );
     addTearDown(sub.close);
-    double previewScale() =>
-        MediaQuery.textScalerOf(tester.element(find.text(previewText))).scale(10);
+    double previewScale() => MediaQuery.textScalerOf(
+      tester.element(find.text(previewText)),
+    ).scale(10);
     expect(previewScale(), closeTo(10, 1e-9));
 
     final rect = tester.getRect(slider);
@@ -139,8 +140,9 @@ void main() {
     expect(settings().textScale, 1.0);
     expect(previewScale(), greaterThan(10));
     expect(
-      MediaQuery.textScalerOf(tester.element(find.text('Appearance').first))
-          .scale(10),
+      MediaQuery.textScalerOf(
+        tester.element(find.text('Appearance').first),
+      ).scale(10),
       closeTo(10, 1e-9),
     );
 

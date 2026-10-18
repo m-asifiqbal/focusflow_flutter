@@ -18,19 +18,40 @@ class HabitLog {
   const HabitLog({
     required this.id,
     required this.habitId,
-    required this.date,
+    required DateTime date,
     this.count = 0,
     this.skipped = false,
     this.note,
     required this.createdAt,
     required this.updatedAt,
-  });
+  }) : _date = date, // ignore: prefer_initializing_formals (named + private)
+       _key = null;
+
+  /// A log read from storage, where the day is the `yyyy-MM-dd` text of the
+  /// row. Nothing is parsed until [date] is asked for: a habit with years of
+  /// history is loaded often (Home, the planner, the library counts) and
+  /// every consumer of the history works with [dayKey] only.
+  const HabitLog.keyed({
+    required this.id,
+    required this.habitId,
+    required String dayKey,
+    this.count = 0,
+    this.skipped = false,
+    this.note,
+    required this.createdAt,
+    required this.updatedAt,
+  }) : _date = null,
+       _key = dayKey; // ignore: prefer_initializing_formals (named + private)
 
   final String id;
   final String habitId;
 
+  // Exactly one of the two is set; the other is derived on demand.
+  final DateTime? _date;
+  final String? _key;
+
   /// Local calendar day (midnight).
-  final DateTime date;
+  DateTime get date => _date ?? DateUtilsX.parseDayKey(_key!);
 
   /// Build: check-ins; quit: slips.
   final int count;
@@ -40,7 +61,7 @@ class HabitLog {
   final DateTime updatedAt;
 
   /// `yyyy-MM-dd` key of [date].
-  String get dayKey => DateUtilsX.dayKey(date);
+  String get dayKey => _key ?? DateUtilsX.dayKey(_date!);
 
   HabitLog copyWith({
     int? count,
@@ -48,15 +69,28 @@ class HabitLog {
     String? note,
     bool clearNote = false,
     DateTime? updatedAt,
-  }) => HabitLog(
-    id: id,
-    habitId: habitId,
-    date: date,
-    count: count ?? this.count,
-    skipped: skipped ?? this.skipped,
-    note: clearNote ? null : (note ?? this.note),
-    createdAt: createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
+  }) => HabitLog._(
+    id,
+    habitId,
+    _date,
+    _key,
+    count ?? this.count,
+    skipped ?? this.skipped,
+    clearNote ? null : (note ?? this.note),
+    createdAt,
+    updatedAt ?? this.updatedAt,
+  );
+
+  const HabitLog._(
+    this.id,
+    this.habitId,
+    this._date,
+    this._key,
+    this.count,
+    this.skipped,
+    this.note,
+    this.createdAt,
+    this.updatedAt,
   );
 
   @override
@@ -64,7 +98,7 @@ class HabitLog {
       other is HabitLog &&
       other.id == id &&
       other.habitId == habitId &&
-      other.date == date &&
+      other.dayKey == dayKey &&
       other.count == count &&
       other.skipped == skipped &&
       other.note == note &&
@@ -75,7 +109,7 @@ class HabitLog {
   int get hashCode => Object.hash(
     id,
     habitId,
-    date,
+    dayKey,
     count,
     skipped,
     note,

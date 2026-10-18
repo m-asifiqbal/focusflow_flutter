@@ -6,8 +6,13 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/settings/app_settings.dart';
+import 'package:focusflow/core/settings/backup_settings.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
+import 'package:focusflow/core/sync/backup_format.dart';
+import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
+import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/features/backup/data/export_service.dart';
 import 'package:focusflow/features/backup/data/import_writer.dart';
 import 'package:focusflow/features/backup/domain/entities/export_options.dart';
@@ -145,4 +150,41 @@ void main() {
       throwsA(isA<VaultExportNeedsKey>()),
     );
   });
+
+  test(
+    '.ffbackup carries the app settings unless they are switched off',
+    () async {
+      final bridge = FakeSettingsBridge(
+        exported: BackupSettings.of(
+          const AppSettings().copyWith(accent: AccentColor.blue),
+        ),
+      );
+      final service = ExportService(
+        engine: BackupEngine(
+          db: h.db,
+          items: h.read(itemsRepositoryProvider),
+          files: h.read(appFilesProvider),
+          deviceId: TestHarness.deviceId,
+          vault: const FakeVaultBridge(),
+          settings: bridge,
+          clock: h.clock,
+        ),
+        keys: h.read(backupKeyPolicyProvider),
+        encryptBackups: () => false,
+        drive: h.read(driveSyncProvider),
+        local: h.read(localBackupsProvider),
+        clock: h.clock,
+      );
+
+      final withSettings = await service.build(const ExportOptions());
+      expect(withSettings.backup!.manifest.hasSettings, isTrue);
+      expect(BackupArchive.decode(withSettings.bytes).settings, isNotNull);
+
+      final without = await service.build(
+        const ExportOptions(includeSettings: false),
+      );
+      expect(without.backup!.manifest.hasSettings, isFalse);
+      expect(BackupArchive.decode(without.bytes).settings, isNull);
+    },
+  );
 }

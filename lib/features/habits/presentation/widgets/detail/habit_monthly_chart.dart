@@ -12,12 +12,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/services/habit_stats_calculator.dart';
 import 'package:focusflow/features/habits/presentation/habit_format.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 class HabitMonthlyChart extends StatelessWidget {
   const HabitMonthlyChart({
@@ -43,7 +43,7 @@ class HabitMonthlyChart extends StatelessWidget {
     final label = months
         .map(
           (m) =>
-              '${DateFormat('MMMM').format(m.month)} '
+              '${DateFormats.of('MMMM').format(m.month)} '
               '${HabitFormat.percent(m.rate)}',
         )
         .join(', ');
@@ -112,7 +112,7 @@ class HabitMonthlyChart extends StatelessWidget {
                                 meta: meta,
                                 space: AppSpacing.sm,
                                 child: Text(
-                                  DateFormat('MMM').format(months[i].month),
+                                  DateFormats.of('MMM').format(months[i].month),
                                   style: labelStyle,
                                 ),
                               );

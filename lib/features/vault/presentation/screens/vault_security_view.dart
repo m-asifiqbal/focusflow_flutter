@@ -30,7 +30,6 @@ import 'package:focusflow/features/vault/presentation/widgets/security/vault_sec
 import 'package:focusflow/features/vault/presentation/widgets/vault_tab_title.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
-import 'package:intl/intl.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 
 class VaultSecurityView extends ConsumerStatefulWidget {
@@ -57,7 +56,7 @@ class _VaultSecurityViewState extends ConsumerState<VaultSecurityView> {
     final dayText = DateUtilsX.daysBetween(at, now).abs() <= 1
         ? day.toLowerCase()
         : day;
-    final time = DateFormat(use24h ? 'HH:mm' : 'h:mm a').format(at);
+    final time = DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(at);
     return 'Last scan: $dayText, $time';
   }
 

@@ -6,11 +6,15 @@
 /// manifest.json      always plaintext: versions, device, counts, checksum,
 ///                    encryption params, linked devices, vault key envelope
 /// db.json            DbSnapshot JSON (sealed with AES-GCM when encrypted)
+/// settings.json      optional: the app's settings (BackupSettings JSON,
+///                    sealed too); the manifest's `hasSettings` says so
 /// attachments/<path> files referenced by attachment rows / note covers
 ///                    (paths relative to app documents; sealed too)
 /// ```
 /// `checksum` is SHA-256 of the *plaintext* db.json, so corruption and a
 /// wrong key are both detected before anything touches the database.
+/// settings.json is additive (same `formatVersion`): an app that predates it
+/// ignores the entry and restores the data alone.
 /// ============================================================
 library;
 
@@ -123,12 +127,14 @@ class BackupManifest {
     this.devices = const [],
     this.vaultKey,
     this.isAuto = false,
+    this.hasSettings = false,
     this.formatVersion = currentFormat,
   });
 
   static const int currentFormat = 1;
   static const String fileName = 'manifest.json';
   static const String dbFileName = 'db.json';
+  static const String settingsFileName = 'settings.json';
   static const String attachmentsDir = 'attachments/';
 
   final int formatVersion;
@@ -164,6 +170,9 @@ class BackupManifest {
   final Map<String, Object?>? vaultKey;
   final bool isAuto;
 
+  /// The archive carries `settings.json` (the app's configuration).
+  final bool hasSettings;
+
   bool get isEncrypted => encryption != null;
 
   /// Notes/tasks/… per `ItemType.key` from [counts].
@@ -194,6 +203,7 @@ class BackupManifest {
     'devices': [for (final d in devices) d.toJson()],
     'vaultKey': vaultKey,
     'isAuto': isAuto,
+    'hasSettings': hasSettings,
   };
 
   static BackupManifest fromJson(Map<String, Object?> j) {
@@ -252,6 +262,7 @@ class BackupManifest {
           ? (j['vaultKey'] as Map).cast<String, Object?>()
           : null,
       isAuto: j['isAuto'] == true,
+      hasSettings: j['hasSettings'] == true,
     );
   }
 }
@@ -262,6 +273,7 @@ class BackupArchive {
   const BackupArchive({
     required this.manifest,
     required this.dbJson,
+    this.settings,
     this.files = const {},
   });
 
@@ -269,6 +281,10 @@ class BackupArchive {
 
   /// db.json bytes — sealed when [BackupManifest.isEncrypted].
   final Uint8List dbJson;
+
+  /// settings.json bytes (sealed when encrypted); null = the backup carries
+  /// no settings.
+  final Uint8List? settings;
 
   /// Relative path → bytes (sealed when encrypted).
   final Map<String, Uint8List> files;
@@ -286,6 +302,9 @@ class BackupArchive {
         ),
       )
       ..addFile(ArchiveFile.bytes(BackupManifest.dbFileName, dbJson));
+    if (settings case final bytes?) {
+      zip.addFile(ArchiveFile.bytes(BackupManifest.settingsFileName, bytes));
+    }
     for (final e in files.entries) {
       zip.addFile(
         ArchiveFile.bytes('${BackupManifest.attachmentsDir}${e.key}', e.value),
@@ -330,6 +349,7 @@ class BackupArchive {
       return BackupArchive(
         manifest: manifest,
         dbJson: dbFile.content,
+        settings: zip.findFile(BackupManifest.settingsFileName)?.content,
         files: files,
       );
     } on Object {

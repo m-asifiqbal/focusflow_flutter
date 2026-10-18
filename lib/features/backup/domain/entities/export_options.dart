@@ -77,6 +77,7 @@ class ExportOptions {
     },
     this.includeArchived = true,
     this.includeAttachments = true,
+    this.includeSettings = true,
     this.target = ExportTarget.drive,
   });
 
@@ -84,6 +85,10 @@ class ExportOptions {
   final Set<ExportModule> modules;
   final bool includeArchived;
   final bool includeAttachments;
+
+  /// Carry the app's settings in the file (.ffbackup only), so importing it
+  /// on another phone — or after a reinstall — restores the configuration.
+  final bool includeSettings;
   final ExportTarget target;
 
   /// The modules that will actually be written for [format].
@@ -95,12 +100,14 @@ class ExportOptions {
     Set<ExportModule>? modules,
     bool? includeArchived,
     bool? includeAttachments,
+    bool? includeSettings,
     ExportTarget? target,
   }) => ExportOptions(
     format: format ?? this.format,
     modules: modules ?? this.modules,
     includeArchived: includeArchived ?? this.includeArchived,
     includeAttachments: includeAttachments ?? this.includeAttachments,
+    includeSettings: includeSettings ?? this.includeSettings,
     target: target ?? this.target,
   );
 
@@ -111,6 +118,7 @@ class ExportOptions {
       setEquals(other.modules, modules) &&
       other.includeArchived == includeArchived &&
       other.includeAttachments == includeAttachments &&
+      other.includeSettings == includeSettings &&
       other.target == target;
 
   @override
@@ -119,6 +127,7 @@ class ExportOptions {
     Object.hashAllUnordered(modules),
     includeArchived,
     includeAttachments,
+    includeSettings,
     target,
   );
 }

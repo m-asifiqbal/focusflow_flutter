@@ -9,7 +9,8 @@
 /// Why: CLAUDE.md rule 5 — UI → providers → repositories; every list is a
 /// stream so edits from the editor, Quick Add or sync appear instantly.
 /// Sort and view persist per device in SharedPreferences (they are view
-/// preferences, not synced settings).
+/// preferences, not synced settings); backups carry them with the settings
+/// (BackedUpPreferences).
 /// ============================================================
 library;
 
@@ -17,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/folder.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/settings/backup_settings.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_sections.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
@@ -87,7 +89,7 @@ abstract class _EnumPref<T extends Enum> extends Notifier<T> {
 /// Smart (due date · priority) or manual (drag-to-reorder) order.
 class TaskSortController extends _EnumPref<TaskSort> {
   @override
-  String get key => 'tasks.sort';
+  String get key => BackedUpPreferences.tasksSort;
   @override
   List<TaskSort> get values => TaskSort.values;
   @override
@@ -101,7 +103,7 @@ final taskSortProvider = NotifierProvider<TaskSortController, TaskSort>(
 /// List (sections) or board (To do / Doing / Done).
 class TaskViewController extends _EnumPref<TaskView> {
   @override
-  String get key => 'tasks.view';
+  String get key => BackedUpPreferences.tasksView;
   @override
   List<TaskView> get values => TaskView.values;
   @override

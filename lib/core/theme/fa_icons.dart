@@ -47,9 +47,18 @@ abstract final class FontAwesomeIcons {
   static const IconData amazonPay = IconData(0xf42c, fontFamily: _brands);
   static const IconData amilia = IconData(0xf36d, fontFamily: _brands);
   static const IconData anchor = IconData(0xf13d, fontFamily: _solid);
-  static const IconData anchorCircleCheck = IconData(0xe4aa, fontFamily: _solid);
-  static const IconData anchorCircleExclamation = IconData(0xe4ab, fontFamily: _solid);
-  static const IconData anchorCircleXmark = IconData(0xe4ac, fontFamily: _solid);
+  static const IconData anchorCircleCheck = IconData(
+    0xe4aa,
+    fontFamily: _solid,
+  );
+  static const IconData anchorCircleExclamation = IconData(
+    0xe4ab,
+    fontFamily: _solid,
+  );
+  static const IconData anchorCircleXmark = IconData(
+    0xe4ac,
+    fontFamily: _solid,
+  );
   static const IconData anchorLock = IconData(0xe4ad, fontFamily: _solid);
   static const IconData android = IconData(0xf17b, fontFamily: _brands);
   static const IconData angellist = IconData(0xf209, fontFamily: _brands);
@@ -76,19 +85,37 @@ abstract final class FontAwesomeIcons {
   static const IconData arrowDown91 = IconData(0xf886, fontFamily: _solid);
   static const IconData arrowDownAZ = IconData(0xf15d, fontFamily: _solid);
   static const IconData arrowDownLong = IconData(0xf175, fontFamily: _solid);
-  static const IconData arrowDownShortWide = IconData(0xf884, fontFamily: _solid);
-  static const IconData arrowDownUpAcrossLine = IconData(0xe4af, fontFamily: _solid);
+  static const IconData arrowDownShortWide = IconData(
+    0xf884,
+    fontFamily: _solid,
+  );
+  static const IconData arrowDownUpAcrossLine = IconData(
+    0xe4af,
+    fontFamily: _solid,
+  );
   static const IconData arrowDownUpLock = IconData(0xe4b0, fontFamily: _solid);
-  static const IconData arrowDownWideShort = IconData(0xf160, fontFamily: _solid);
+  static const IconData arrowDownWideShort = IconData(
+    0xf160,
+    fontFamily: _solid,
+  );
   static const IconData arrowDownZA = IconData(0xf881, fontFamily: _solid);
   static const IconData arrowLeft = IconData(0xf060, fontFamily: _solid);
   static const IconData arrowLeftLong = IconData(0xf177, fontFamily: _solid);
   static const IconData arrowPointer = IconData(0xf245, fontFamily: _solid);
   static const IconData arrowRight = IconData(0xf061, fontFamily: _solid);
-  static const IconData arrowRightArrowLeft = IconData(0xf0ec, fontFamily: _solid);
-  static const IconData arrowRightFromBracket = IconData(0xf08b, fontFamily: _solid);
+  static const IconData arrowRightArrowLeft = IconData(
+    0xf0ec,
+    fontFamily: _solid,
+  );
+  static const IconData arrowRightFromBracket = IconData(
+    0xf08b,
+    fontFamily: _solid,
+  );
   static const IconData arrowRightLong = IconData(0xf178, fontFamily: _solid);
-  static const IconData arrowRightToBracket = IconData(0xf090, fontFamily: _solid);
+  static const IconData arrowRightToBracket = IconData(
+    0xf090,
+    fontFamily: _solid,
+  );
   static const IconData arrowRightToCity = IconData(0xe4b3, fontFamily: _solid);
   static const IconData arrowRotateLeft = IconData(0xf0e2, fontFamily: _solid);
   static const IconData arrowRotateRight = IconData(0xf01e, fontFamily: _solid);
@@ -100,29 +127,53 @@ abstract final class FontAwesomeIcons {
   static const IconData arrowUp19 = IconData(0xf163, fontFamily: _solid);
   static const IconData arrowUp91 = IconData(0xf887, fontFamily: _solid);
   static const IconData arrowUpAZ = IconData(0xf15e, fontFamily: _solid);
-  static const IconData arrowUpFromBracket = IconData(0xe09a, fontFamily: _solid);
-  static const IconData arrowUpFromGroundWater = IconData(0xe4b5, fontFamily: _solid);
-  static const IconData arrowUpFromWaterPump = IconData(0xe4b6, fontFamily: _solid);
+  static const IconData arrowUpFromBracket = IconData(
+    0xe09a,
+    fontFamily: _solid,
+  );
+  static const IconData arrowUpFromGroundWater = IconData(
+    0xe4b5,
+    fontFamily: _solid,
+  );
+  static const IconData arrowUpFromWaterPump = IconData(
+    0xe4b6,
+    fontFamily: _solid,
+  );
   static const IconData arrowUpLong = IconData(0xf176, fontFamily: _solid);
   static const IconData arrowUpRightDots = IconData(0xe4b7, fontFamily: _solid);
-  static const IconData arrowUpRightFromSquare = IconData(0xf08e, fontFamily: _solid);
+  static const IconData arrowUpRightFromSquare = IconData(
+    0xf08e,
+    fontFamily: _solid,
+  );
   static const IconData arrowUpShortWide = IconData(0xf885, fontFamily: _solid);
   static const IconData arrowUpWideShort = IconData(0xf161, fontFamily: _solid);
   static const IconData arrowUpZA = IconData(0xf882, fontFamily: _solid);
   static const IconData arrowsDownToLine = IconData(0xe4b8, fontFamily: _solid);
-  static const IconData arrowsDownToPeople = IconData(0xe4b9, fontFamily: _solid);
+  static const IconData arrowsDownToPeople = IconData(
+    0xe4b9,
+    fontFamily: _solid,
+  );
   static const IconData arrowsLeftRight = IconData(0xf07e, fontFamily: _solid);
-  static const IconData arrowsLeftRightToLine = IconData(0xe4ba, fontFamily: _solid);
+  static const IconData arrowsLeftRightToLine = IconData(
+    0xe4ba,
+    fontFamily: _solid,
+  );
   static const IconData arrowsRotate = IconData(0xf021, fontFamily: _solid);
   static const IconData arrowsSpin = IconData(0xe4bb, fontFamily: _solid);
-  static const IconData arrowsSplitUpAndLeft = IconData(0xe4bc, fontFamily: _solid);
+  static const IconData arrowsSplitUpAndLeft = IconData(
+    0xe4bc,
+    fontFamily: _solid,
+  );
   static const IconData arrowsToCircle = IconData(0xe4bd, fontFamily: _solid);
   static const IconData arrowsToDot = IconData(0xe4be, fontFamily: _solid);
   static const IconData arrowsToEye = IconData(0xe4bf, fontFamily: _solid);
   static const IconData arrowsTurnRight = IconData(0xe4c0, fontFamily: _solid);
   static const IconData arrowsTurnToDots = IconData(0xe4c1, fontFamily: _solid);
   static const IconData arrowsUpDown = IconData(0xf07d, fontFamily: _solid);
-  static const IconData arrowsUpDownLeftRight = IconData(0xf047, fontFamily: _solid);
+  static const IconData arrowsUpDownLeftRight = IconData(
+    0xf047,
+    fontFamily: _solid,
+  );
   static const IconData arrowsUpToLine = IconData(0xe4c2, fontFamily: _solid);
   static const IconData artstation = IconData(0xf77a, fontFamily: _brands);
   static const IconData asterisk = IconData(0x2a, fontFamily: _solid);
@@ -154,7 +205,10 @@ abstract final class FontAwesomeIcons {
   static const IconData banSmoking = IconData(0xf54d, fontFamily: _solid);
   static const IconData bandage = IconData(0xf462, fontFamily: _solid);
   static const IconData bandcamp = IconData(0xf2d5, fontFamily: _brands);
-  static const IconData bangladeshiTakaSign = IconData(0xe2e6, fontFamily: _solid);
+  static const IconData bangladeshiTakaSign = IconData(
+    0xe2e6,
+    fontFamily: _solid,
+  );
   static const IconData barcode = IconData(0xf02a, fontFamily: _solid);
   static const IconData bars = IconData(0xf0c9, fontFamily: _solid);
   static const IconData barsProgress = IconData(0xf828, fontFamily: _solid);
@@ -168,7 +222,10 @@ abstract final class FontAwesomeIcons {
   static const IconData batteryFull = IconData(0xf240, fontFamily: _solid);
   static const IconData batteryHalf = IconData(0xf242, fontFamily: _solid);
   static const IconData batteryQuarter = IconData(0xf243, fontFamily: _solid);
-  static const IconData batteryThreeQuarters = IconData(0xf241, fontFamily: _solid);
+  static const IconData batteryThreeQuarters = IconData(
+    0xf241,
+    fontFamily: _solid,
+  );
   static const IconData battleNet = IconData(0xf835, fontFamily: _brands);
   static const IconData bed = IconData(0xf236, fontFamily: _solid);
   static const IconData bedPulse = IconData(0xf487, fontFamily: _solid);
@@ -209,7 +266,10 @@ abstract final class FontAwesomeIcons {
   static const IconData bookAtlas = IconData(0xf558, fontFamily: _solid);
   static const IconData bookBible = IconData(0xf647, fontFamily: _solid);
   static const IconData bookBookmark = IconData(0xe0bb, fontFamily: _solid);
-  static const IconData bookJournalWhills = IconData(0xf66a, fontFamily: _solid);
+  static const IconData bookJournalWhills = IconData(
+    0xf66a,
+    fontFamily: _solid,
+  );
   static const IconData bookMedical = IconData(0xf7e6, fontFamily: _solid);
   static const IconData bookOpen = IconData(0xf518, fontFamily: _solid);
   static const IconData bookOpenReader = IconData(0xf5da, fontFamily: _solid);
@@ -239,12 +299,24 @@ abstract final class FontAwesomeIcons {
   static const IconData brain = IconData(0xf5dc, fontFamily: _solid);
   static const IconData brave = IconData(0xe63c, fontFamily: _brands);
   static const IconData braveReverse = IconData(0xe63d, fontFamily: _brands);
-  static const IconData brazilianRealSign = IconData(0xe46c, fontFamily: _solid);
+  static const IconData brazilianRealSign = IconData(
+    0xe46c,
+    fontFamily: _solid,
+  );
   static const IconData breadSlice = IconData(0xf7ec, fontFamily: _solid);
   static const IconData bridge = IconData(0xe4c8, fontFamily: _solid);
-  static const IconData bridgeCircleCheck = IconData(0xe4c9, fontFamily: _solid);
-  static const IconData bridgeCircleExclamation = IconData(0xe4ca, fontFamily: _solid);
-  static const IconData bridgeCircleXmark = IconData(0xe4cb, fontFamily: _solid);
+  static const IconData bridgeCircleCheck = IconData(
+    0xe4c9,
+    fontFamily: _solid,
+  );
+  static const IconData bridgeCircleExclamation = IconData(
+    0xe4ca,
+    fontFamily: _solid,
+  );
+  static const IconData bridgeCircleXmark = IconData(
+    0xe4cb,
+    fontFamily: _solid,
+  );
   static const IconData bridgeLock = IconData(0xe4cc, fontFamily: _solid);
   static const IconData bridgeWater = IconData(0xe4ce, fontFamily: _solid);
   static const IconData briefcase = IconData(0xf0b1, fontFamily: _solid);
@@ -260,10 +332,22 @@ abstract final class FontAwesomeIcons {
   static const IconData bugs = IconData(0xe4d0, fontFamily: _solid);
   static const IconData solidBuilding = IconData(0xf1ad, fontFamily: _solid);
   static const IconData building = IconData(0xf1ad, fontFamily: _regular);
-  static const IconData buildingCircleArrowRight = IconData(0xe4d1, fontFamily: _solid);
-  static const IconData buildingCircleCheck = IconData(0xe4d2, fontFamily: _solid);
-  static const IconData buildingCircleExclamation = IconData(0xe4d3, fontFamily: _solid);
-  static const IconData buildingCircleXmark = IconData(0xe4d4, fontFamily: _solid);
+  static const IconData buildingCircleArrowRight = IconData(
+    0xe4d1,
+    fontFamily: _solid,
+  );
+  static const IconData buildingCircleCheck = IconData(
+    0xe4d2,
+    fontFamily: _solid,
+  );
+  static const IconData buildingCircleExclamation = IconData(
+    0xe4d3,
+    fontFamily: _solid,
+  );
+  static const IconData buildingCircleXmark = IconData(
+    0xe4d4,
+    fontFamily: _solid,
+  );
   static const IconData buildingColumns = IconData(0xf19c, fontFamily: _solid);
   static const IconData buildingFlag = IconData(0xe4d5, fontFamily: _solid);
   static const IconData buildingLock = IconData(0xe4d6, fontFamily: _solid);
@@ -275,7 +359,10 @@ abstract final class FontAwesomeIcons {
   static const IconData bullhorn = IconData(0xf0a1, fontFamily: _solid);
   static const IconData bullseye = IconData(0xf140, fontFamily: _solid);
   static const IconData burger = IconData(0xf805, fontFamily: _solid);
-  static const IconData buromobelexperte = IconData(0xf37f, fontFamily: _brands);
+  static const IconData buromobelexperte = IconData(
+    0xf37f,
+    fontFamily: _brands,
+  );
   static const IconData burst = IconData(0xe4dc, fontFamily: _solid);
   static const IconData bus = IconData(0xf207, fontFamily: _solid);
   static const IconData busSimple = IconData(0xf55e, fontFamily: _solid);
@@ -288,23 +375,41 @@ abstract final class FontAwesomeIcons {
   static const IconData calculator = IconData(0xf1ec, fontFamily: _solid);
   static const IconData solidCalendar = IconData(0xf133, fontFamily: _solid);
   static const IconData calendar = IconData(0xf133, fontFamily: _regular);
-  static const IconData solidCalendarCheck = IconData(0xf274, fontFamily: _solid);
+  static const IconData solidCalendarCheck = IconData(
+    0xf274,
+    fontFamily: _solid,
+  );
   static const IconData calendarCheck = IconData(0xf274, fontFamily: _regular);
   static const IconData calendarDay = IconData(0xf783, fontFamily: _solid);
-  static const IconData solidCalendarDays = IconData(0xf073, fontFamily: _solid);
+  static const IconData solidCalendarDays = IconData(
+    0xf073,
+    fontFamily: _solid,
+  );
   static const IconData calendarDays = IconData(0xf073, fontFamily: _regular);
-  static const IconData solidCalendarMinus = IconData(0xf272, fontFamily: _solid);
+  static const IconData solidCalendarMinus = IconData(
+    0xf272,
+    fontFamily: _solid,
+  );
   static const IconData calendarMinus = IconData(0xf272, fontFamily: _regular);
-  static const IconData solidCalendarPlus = IconData(0xf271, fontFamily: _solid);
+  static const IconData solidCalendarPlus = IconData(
+    0xf271,
+    fontFamily: _solid,
+  );
   static const IconData calendarPlus = IconData(0xf271, fontFamily: _regular);
   static const IconData calendarWeek = IconData(0xf784, fontFamily: _solid);
-  static const IconData solidCalendarXmark = IconData(0xf273, fontFamily: _solid);
+  static const IconData solidCalendarXmark = IconData(
+    0xf273,
+    fontFamily: _solid,
+  );
   static const IconData calendarXmark = IconData(0xf273, fontFamily: _regular);
   static const IconData camera = IconData(0xf030, fontFamily: _solid);
   static const IconData cameraRetro = IconData(0xf083, fontFamily: _solid);
   static const IconData cameraRotate = IconData(0xe0d8, fontFamily: _solid);
   static const IconData campground = IconData(0xf6bb, fontFamily: _solid);
-  static const IconData canadianMapleLeaf = IconData(0xf785, fontFamily: _brands);
+  static const IconData canadianMapleLeaf = IconData(
+    0xf785,
+    fontFamily: _brands,
+  );
   static const IconData candyCane = IconData(0xf786, fontFamily: _solid);
   static const IconData cannabis = IconData(0xf55f, fontFamily: _solid);
   static const IconData capsules = IconData(0xf46b, fontFamily: _solid);
@@ -323,7 +428,10 @@ abstract final class FontAwesomeIcons {
   static const IconData carrot = IconData(0xf787, fontFamily: _solid);
   static const IconData cartArrowDown = IconData(0xf218, fontFamily: _solid);
   static const IconData cartFlatbed = IconData(0xf474, fontFamily: _solid);
-  static const IconData cartFlatbedSuitcase = IconData(0xf59d, fontFamily: _solid);
+  static const IconData cartFlatbedSuitcase = IconData(
+    0xf59d,
+    fontFamily: _solid,
+  );
   static const IconData cartPlus = IconData(0xf217, fontFamily: _solid);
   static const IconData cartShopping = IconData(0xf07a, fontFamily: _solid);
   static const IconData cashRegister = IconData(0xf788, fontFamily: _solid);
@@ -395,16 +503,31 @@ abstract final class FontAwesomeIcons {
   static const IconData circleArrowUp = IconData(0xf0aa, fontFamily: _solid);
   static const IconData solidCircleCheck = IconData(0xf058, fontFamily: _solid);
   static const IconData circleCheck = IconData(0xf058, fontFamily: _regular);
-  static const IconData circleChevronDown = IconData(0xf13a, fontFamily: _solid);
-  static const IconData circleChevronLeft = IconData(0xf137, fontFamily: _solid);
-  static const IconData circleChevronRight = IconData(0xf138, fontFamily: _solid);
+  static const IconData circleChevronDown = IconData(
+    0xf13a,
+    fontFamily: _solid,
+  );
+  static const IconData circleChevronLeft = IconData(
+    0xf137,
+    fontFamily: _solid,
+  );
+  static const IconData circleChevronRight = IconData(
+    0xf138,
+    fontFamily: _solid,
+  );
   static const IconData circleChevronUp = IconData(0xf139, fontFamily: _solid);
-  static const IconData circleDollarToSlot = IconData(0xf4b9, fontFamily: _solid);
+  static const IconData circleDollarToSlot = IconData(
+    0xf4b9,
+    fontFamily: _solid,
+  );
   static const IconData solidCircleDot = IconData(0xf192, fontFamily: _solid);
   static const IconData circleDot = IconData(0xf192, fontFamily: _regular);
   static const IconData solidCircleDown = IconData(0xf358, fontFamily: _solid);
   static const IconData circleDown = IconData(0xf358, fontFamily: _regular);
-  static const IconData circleExclamation = IconData(0xf06a, fontFamily: _solid);
+  static const IconData circleExclamation = IconData(
+    0xf06a,
+    fontFamily: _solid,
+  );
   static const IconData circleH = IconData(0xf47e, fontFamily: _solid);
   static const IconData circleHalfStroke = IconData(0xf042, fontFamily: _solid);
   static const IconData circleInfo = IconData(0xf05a, fontFamily: _solid);
@@ -418,7 +541,10 @@ abstract final class FontAwesomeIcons {
   static const IconData solidCirclePlay = IconData(0xf144, fontFamily: _solid);
   static const IconData circlePlay = IconData(0xf144, fontFamily: _regular);
   static const IconData circlePlus = IconData(0xf055, fontFamily: _solid);
-  static const IconData solidCircleQuestion = IconData(0xf059, fontFamily: _solid);
+  static const IconData solidCircleQuestion = IconData(
+    0xf059,
+    fontFamily: _solid,
+  );
   static const IconData circleQuestion = IconData(0xf059, fontFamily: _regular);
   static const IconData circleRadiation = IconData(0xf7ba, fontFamily: _solid);
   static const IconData solidCircleRight = IconData(0xf35a, fontFamily: _solid);
@@ -437,15 +563,24 @@ abstract final class FontAwesomeIcons {
   static const IconData clipboard = IconData(0xf328, fontFamily: _regular);
   static const IconData clipboardCheck = IconData(0xf46c, fontFamily: _solid);
   static const IconData clipboardList = IconData(0xf46d, fontFamily: _solid);
-  static const IconData clipboardQuestion = IconData(0xe4e3, fontFamily: _solid);
+  static const IconData clipboardQuestion = IconData(
+    0xe4e3,
+    fontFamily: _solid,
+  );
   static const IconData clipboardUser = IconData(0xf7f3, fontFamily: _solid);
   static const IconData solidClock = IconData(0xf017, fontFamily: _solid);
   static const IconData clock = IconData(0xf017, fontFamily: _regular);
   static const IconData clockRotateLeft = IconData(0xf1da, fontFamily: _solid);
   static const IconData solidClone = IconData(0xf24d, fontFamily: _solid);
   static const IconData clone = IconData(0xf24d, fontFamily: _regular);
-  static const IconData solidClosedCaptioning = IconData(0xf20a, fontFamily: _solid);
-  static const IconData closedCaptioning = IconData(0xf20a, fontFamily: _regular);
+  static const IconData solidClosedCaptioning = IconData(
+    0xf20a,
+    fontFamily: _solid,
+  );
+  static const IconData closedCaptioning = IconData(
+    0xf20a,
+    fontFamily: _regular,
+  );
   static const IconData cloud = IconData(0xf0c2, fontFamily: _solid);
   static const IconData cloudArrowDown = IconData(0xf0ed, fontFamily: _solid);
   static const IconData cloudArrowUp = IconData(0xf0ee, fontFamily: _solid);
@@ -454,8 +589,14 @@ abstract final class FontAwesomeIcons {
   static const IconData cloudMoon = IconData(0xf6c3, fontFamily: _solid);
   static const IconData cloudMoonRain = IconData(0xf73c, fontFamily: _solid);
   static const IconData cloudRain = IconData(0xf73d, fontFamily: _solid);
-  static const IconData cloudShowersHeavy = IconData(0xf740, fontFamily: _solid);
-  static const IconData cloudShowersWater = IconData(0xe4e4, fontFamily: _solid);
+  static const IconData cloudShowersHeavy = IconData(
+    0xf740,
+    fontFamily: _solid,
+  );
+  static const IconData cloudShowersWater = IconData(
+    0xe4e4,
+    fontFamily: _solid,
+  );
   static const IconData cloudSun = IconData(0xf6c4, fontFamily: _solid);
   static const IconData cloudSunRain = IconData(0xf743, fontFamily: _solid);
   static const IconData cloudflare = IconData(0xe07d, fontFamily: _brands);
@@ -508,19 +649,58 @@ abstract final class FontAwesomeIcons {
   static const IconData cow = IconData(0xf6c8, fontFamily: _solid);
   static const IconData cpanel = IconData(0xf388, fontFamily: _brands);
   static const IconData creativeCommons = IconData(0xf25e, fontFamily: _brands);
-  static const IconData creativeCommonsBy = IconData(0xf4e7, fontFamily: _brands);
-  static const IconData creativeCommonsNc = IconData(0xf4e8, fontFamily: _brands);
-  static const IconData creativeCommonsNcEu = IconData(0xf4e9, fontFamily: _brands);
-  static const IconData creativeCommonsNcJp = IconData(0xf4ea, fontFamily: _brands);
-  static const IconData creativeCommonsNd = IconData(0xf4eb, fontFamily: _brands);
-  static const IconData creativeCommonsPd = IconData(0xf4ec, fontFamily: _brands);
-  static const IconData creativeCommonsPdAlt = IconData(0xf4ed, fontFamily: _brands);
-  static const IconData creativeCommonsRemix = IconData(0xf4ee, fontFamily: _brands);
-  static const IconData creativeCommonsSa = IconData(0xf4ef, fontFamily: _brands);
-  static const IconData creativeCommonsSampling = IconData(0xf4f0, fontFamily: _brands);
-  static const IconData creativeCommonsSamplingPlus = IconData(0xf4f1, fontFamily: _brands);
-  static const IconData creativeCommonsShare = IconData(0xf4f2, fontFamily: _brands);
-  static const IconData creativeCommonsZero = IconData(0xf4f3, fontFamily: _brands);
+  static const IconData creativeCommonsBy = IconData(
+    0xf4e7,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsNc = IconData(
+    0xf4e8,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsNcEu = IconData(
+    0xf4e9,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsNcJp = IconData(
+    0xf4ea,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsNd = IconData(
+    0xf4eb,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsPd = IconData(
+    0xf4ec,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsPdAlt = IconData(
+    0xf4ed,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsRemix = IconData(
+    0xf4ee,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsSa = IconData(
+    0xf4ef,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsSampling = IconData(
+    0xf4f0,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsSamplingPlus = IconData(
+    0xf4f1,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsShare = IconData(
+    0xf4f2,
+    fontFamily: _brands,
+  );
+  static const IconData creativeCommonsZero = IconData(
+    0xf4f3,
+    fontFamily: _brands,
+  );
   static const IconData solidCreditCard = IconData(0xf09d, fontFamily: _solid);
   static const IconData creditCard = IconData(0xf09d, fontFamily: _regular);
   static const IconData criticalRole = IconData(0xf6c9, fontFamily: _brands);
@@ -559,7 +739,10 @@ abstract final class FontAwesomeIcons {
   static const IconData dharmachakra = IconData(0xf655, fontFamily: _solid);
   static const IconData dhl = IconData(0xf790, fontFamily: _brands);
   static const IconData diagramNext = IconData(0xe476, fontFamily: _solid);
-  static const IconData diagramPredecessor = IconData(0xe477, fontFamily: _solid);
+  static const IconData diagramPredecessor = IconData(
+    0xe477,
+    fontFamily: _solid,
+  );
   static const IconData diagramProject = IconData(0xf542, fontFamily: _solid);
   static const IconData diagramSuccessor = IconData(0xe47a, fontFamily: _solid);
   static const IconData diamond = IconData(0xf219, fontFamily: _solid);
@@ -591,7 +774,10 @@ abstract final class FontAwesomeIcons {
   static const IconData doorClosed = IconData(0xf52a, fontFamily: _solid);
   static const IconData doorOpen = IconData(0xf52b, fontFamily: _solid);
   static const IconData dove = IconData(0xf4ba, fontFamily: _solid);
-  static const IconData downLeftAndUpRightToCenter = IconData(0xf422, fontFamily: _solid);
+  static const IconData downLeftAndUpRightToCenter = IconData(
+    0xf422,
+    fontFamily: _solid,
+  );
   static const IconData downLong = IconData(0xf309, fontFamily: _solid);
   static const IconData download = IconData(0xf019, fontFamily: _solid);
   static const IconData draft2digital = IconData(0xf396, fontFamily: _brands);
@@ -633,8 +819,14 @@ abstract final class FontAwesomeIcons {
   static const IconData empire = IconData(0xf1d1, fontFamily: _brands);
   static const IconData solidEnvelope = IconData(0xf0e0, fontFamily: _solid);
   static const IconData envelope = IconData(0xf0e0, fontFamily: _regular);
-  static const IconData envelopeCircleCheck = IconData(0xe4e8, fontFamily: _solid);
-  static const IconData solidEnvelopeOpen = IconData(0xf2b6, fontFamily: _solid);
+  static const IconData envelopeCircleCheck = IconData(
+    0xe4e8,
+    fontFamily: _solid,
+  );
+  static const IconData solidEnvelopeOpen = IconData(
+    0xf2b6,
+    fontFamily: _solid,
+  );
   static const IconData envelopeOpen = IconData(0xf2b6, fontFamily: _regular);
   static const IconData envelopeOpenText = IconData(0xf658, fontFamily: _solid);
   static const IconData envelopesBulk = IconData(0xf674, fontFamily: _solid);
@@ -666,75 +858,171 @@ abstract final class FontAwesomeIcons {
   static const IconData faceFlushed = IconData(0xf579, fontFamily: _regular);
   static const IconData solidFaceFrown = IconData(0xf119, fontFamily: _solid);
   static const IconData faceFrown = IconData(0xf119, fontFamily: _regular);
-  static const IconData solidFaceFrownOpen = IconData(0xf57a, fontFamily: _solid);
+  static const IconData solidFaceFrownOpen = IconData(
+    0xf57a,
+    fontFamily: _solid,
+  );
   static const IconData faceFrownOpen = IconData(0xf57a, fontFamily: _regular);
   static const IconData solidFaceGrimace = IconData(0xf57f, fontFamily: _solid);
   static const IconData faceGrimace = IconData(0xf57f, fontFamily: _regular);
   static const IconData solidFaceGrin = IconData(0xf580, fontFamily: _solid);
   static const IconData faceGrin = IconData(0xf580, fontFamily: _regular);
-  static const IconData solidFaceGrinBeam = IconData(0xf582, fontFamily: _solid);
+  static const IconData solidFaceGrinBeam = IconData(
+    0xf582,
+    fontFamily: _solid,
+  );
   static const IconData faceGrinBeam = IconData(0xf582, fontFamily: _regular);
-  static const IconData solidFaceGrinBeamSweat = IconData(0xf583, fontFamily: _solid);
-  static const IconData faceGrinBeamSweat = IconData(0xf583, fontFamily: _regular);
-  static const IconData solidFaceGrinHearts = IconData(0xf584, fontFamily: _solid);
+  static const IconData solidFaceGrinBeamSweat = IconData(
+    0xf583,
+    fontFamily: _solid,
+  );
+  static const IconData faceGrinBeamSweat = IconData(
+    0xf583,
+    fontFamily: _regular,
+  );
+  static const IconData solidFaceGrinHearts = IconData(
+    0xf584,
+    fontFamily: _solid,
+  );
   static const IconData faceGrinHearts = IconData(0xf584, fontFamily: _regular);
-  static const IconData solidFaceGrinSquint = IconData(0xf585, fontFamily: _solid);
+  static const IconData solidFaceGrinSquint = IconData(
+    0xf585,
+    fontFamily: _solid,
+  );
   static const IconData faceGrinSquint = IconData(0xf585, fontFamily: _regular);
-  static const IconData solidFaceGrinSquintTears = IconData(0xf586, fontFamily: _solid);
-  static const IconData faceGrinSquintTears = IconData(0xf586, fontFamily: _regular);
-  static const IconData solidFaceGrinStars = IconData(0xf587, fontFamily: _solid);
+  static const IconData solidFaceGrinSquintTears = IconData(
+    0xf586,
+    fontFamily: _solid,
+  );
+  static const IconData faceGrinSquintTears = IconData(
+    0xf586,
+    fontFamily: _regular,
+  );
+  static const IconData solidFaceGrinStars = IconData(
+    0xf587,
+    fontFamily: _solid,
+  );
   static const IconData faceGrinStars = IconData(0xf587, fontFamily: _regular);
-  static const IconData solidFaceGrinTears = IconData(0xf588, fontFamily: _solid);
+  static const IconData solidFaceGrinTears = IconData(
+    0xf588,
+    fontFamily: _solid,
+  );
   static const IconData faceGrinTears = IconData(0xf588, fontFamily: _regular);
-  static const IconData solidFaceGrinTongue = IconData(0xf589, fontFamily: _solid);
+  static const IconData solidFaceGrinTongue = IconData(
+    0xf589,
+    fontFamily: _solid,
+  );
   static const IconData faceGrinTongue = IconData(0xf589, fontFamily: _regular);
-  static const IconData solidFaceGrinTongueSquint = IconData(0xf58a, fontFamily: _solid);
-  static const IconData faceGrinTongueSquint = IconData(0xf58a, fontFamily: _regular);
-  static const IconData solidFaceGrinTongueWink = IconData(0xf58b, fontFamily: _solid);
-  static const IconData faceGrinTongueWink = IconData(0xf58b, fontFamily: _regular);
-  static const IconData solidFaceGrinWide = IconData(0xf581, fontFamily: _solid);
+  static const IconData solidFaceGrinTongueSquint = IconData(
+    0xf58a,
+    fontFamily: _solid,
+  );
+  static const IconData faceGrinTongueSquint = IconData(
+    0xf58a,
+    fontFamily: _regular,
+  );
+  static const IconData solidFaceGrinTongueWink = IconData(
+    0xf58b,
+    fontFamily: _solid,
+  );
+  static const IconData faceGrinTongueWink = IconData(
+    0xf58b,
+    fontFamily: _regular,
+  );
+  static const IconData solidFaceGrinWide = IconData(
+    0xf581,
+    fontFamily: _solid,
+  );
   static const IconData faceGrinWide = IconData(0xf581, fontFamily: _regular);
-  static const IconData solidFaceGrinWink = IconData(0xf58c, fontFamily: _solid);
+  static const IconData solidFaceGrinWink = IconData(
+    0xf58c,
+    fontFamily: _solid,
+  );
   static const IconData faceGrinWink = IconData(0xf58c, fontFamily: _regular);
   static const IconData solidFaceKiss = IconData(0xf596, fontFamily: _solid);
   static const IconData faceKiss = IconData(0xf596, fontFamily: _regular);
-  static const IconData solidFaceKissBeam = IconData(0xf597, fontFamily: _solid);
+  static const IconData solidFaceKissBeam = IconData(
+    0xf597,
+    fontFamily: _solid,
+  );
   static const IconData faceKissBeam = IconData(0xf597, fontFamily: _regular);
-  static const IconData solidFaceKissWinkHeart = IconData(0xf598, fontFamily: _solid);
-  static const IconData faceKissWinkHeart = IconData(0xf598, fontFamily: _regular);
+  static const IconData solidFaceKissWinkHeart = IconData(
+    0xf598,
+    fontFamily: _solid,
+  );
+  static const IconData faceKissWinkHeart = IconData(
+    0xf598,
+    fontFamily: _regular,
+  );
   static const IconData solidFaceLaugh = IconData(0xf599, fontFamily: _solid);
   static const IconData faceLaugh = IconData(0xf599, fontFamily: _regular);
-  static const IconData solidFaceLaughBeam = IconData(0xf59a, fontFamily: _solid);
+  static const IconData solidFaceLaughBeam = IconData(
+    0xf59a,
+    fontFamily: _solid,
+  );
   static const IconData faceLaughBeam = IconData(0xf59a, fontFamily: _regular);
-  static const IconData solidFaceLaughSquint = IconData(0xf59b, fontFamily: _solid);
-  static const IconData faceLaughSquint = IconData(0xf59b, fontFamily: _regular);
-  static const IconData solidFaceLaughWink = IconData(0xf59c, fontFamily: _solid);
+  static const IconData solidFaceLaughSquint = IconData(
+    0xf59b,
+    fontFamily: _solid,
+  );
+  static const IconData faceLaughSquint = IconData(
+    0xf59b,
+    fontFamily: _regular,
+  );
+  static const IconData solidFaceLaughWink = IconData(
+    0xf59c,
+    fontFamily: _solid,
+  );
   static const IconData faceLaughWink = IconData(0xf59c, fontFamily: _regular);
   static const IconData solidFaceMeh = IconData(0xf11a, fontFamily: _solid);
   static const IconData faceMeh = IconData(0xf11a, fontFamily: _regular);
-  static const IconData solidFaceMehBlank = IconData(0xf5a4, fontFamily: _solid);
+  static const IconData solidFaceMehBlank = IconData(
+    0xf5a4,
+    fontFamily: _solid,
+  );
   static const IconData faceMehBlank = IconData(0xf5a4, fontFamily: _regular);
-  static const IconData solidFaceRollingEyes = IconData(0xf5a5, fontFamily: _solid);
-  static const IconData faceRollingEyes = IconData(0xf5a5, fontFamily: _regular);
+  static const IconData solidFaceRollingEyes = IconData(
+    0xf5a5,
+    fontFamily: _solid,
+  );
+  static const IconData faceRollingEyes = IconData(
+    0xf5a5,
+    fontFamily: _regular,
+  );
   static const IconData solidFaceSadCry = IconData(0xf5b3, fontFamily: _solid);
   static const IconData faceSadCry = IconData(0xf5b3, fontFamily: _regular);
   static const IconData solidFaceSadTear = IconData(0xf5b4, fontFamily: _solid);
   static const IconData faceSadTear = IconData(0xf5b4, fontFamily: _regular);
   static const IconData solidFaceSmile = IconData(0xf118, fontFamily: _solid);
   static const IconData faceSmile = IconData(0xf118, fontFamily: _regular);
-  static const IconData solidFaceSmileBeam = IconData(0xf5b8, fontFamily: _solid);
+  static const IconData solidFaceSmileBeam = IconData(
+    0xf5b8,
+    fontFamily: _solid,
+  );
   static const IconData faceSmileBeam = IconData(0xf5b8, fontFamily: _regular);
-  static const IconData solidFaceSmileWink = IconData(0xf4da, fontFamily: _solid);
+  static const IconData solidFaceSmileWink = IconData(
+    0xf4da,
+    fontFamily: _solid,
+  );
   static const IconData faceSmileWink = IconData(0xf4da, fontFamily: _regular);
-  static const IconData solidFaceSurprise = IconData(0xf5c2, fontFamily: _solid);
+  static const IconData solidFaceSurprise = IconData(
+    0xf5c2,
+    fontFamily: _solid,
+  );
   static const IconData faceSurprise = IconData(0xf5c2, fontFamily: _regular);
   static const IconData solidFaceTired = IconData(0xf5c8, fontFamily: _solid);
   static const IconData faceTired = IconData(0xf5c8, fontFamily: _regular);
   static const IconData facebook = IconData(0xf09a, fontFamily: _brands);
   static const IconData facebookF = IconData(0xf39e, fontFamily: _brands);
-  static const IconData facebookMessenger = IconData(0xf39f, fontFamily: _brands);
+  static const IconData facebookMessenger = IconData(
+    0xf39f,
+    fontFamily: _brands,
+  );
   static const IconData fan = IconData(0xf863, fontFamily: _solid);
-  static const IconData fantasyFlightGames = IconData(0xf6dc, fontFamily: _brands);
+  static const IconData fantasyFlightGames = IconData(
+    0xf6dc,
+    fontFamily: _brands,
+  );
   static const IconData faucet = IconData(0xe005, fontFamily: _solid);
   static const IconData faucetDrip = IconData(0xe006, fontFamily: _solid);
   static const IconData fax = IconData(0xf1ac, fontFamily: _solid);
@@ -751,10 +1039,16 @@ abstract final class FontAwesomeIcons {
   static const IconData solidFileAudio = IconData(0xf1c7, fontFamily: _solid);
   static const IconData fileAudio = IconData(0xf1c7, fontFamily: _regular);
   static const IconData fileCircleCheck = IconData(0xe5a0, fontFamily: _solid);
-  static const IconData fileCircleExclamation = IconData(0xe4eb, fontFamily: _solid);
+  static const IconData fileCircleExclamation = IconData(
+    0xe4eb,
+    fontFamily: _solid,
+  );
   static const IconData fileCircleMinus = IconData(0xe4ed, fontFamily: _solid);
   static const IconData fileCirclePlus = IconData(0xe494, fontFamily: _solid);
-  static const IconData fileCircleQuestion = IconData(0xe4ef, fontFamily: _solid);
+  static const IconData fileCircleQuestion = IconData(
+    0xe4ef,
+    fontFamily: _solid,
+  );
   static const IconData fileCircleXmark = IconData(0xe5a1, fontFamily: _solid);
   static const IconData solidFileCode = IconData(0xf1c9, fontFamily: _solid);
   static const IconData fileCode = IconData(0xf1c9, fontFamily: _regular);
@@ -769,14 +1063,20 @@ abstract final class FontAwesomeIcons {
   static const IconData fileImage = IconData(0xf1c5, fontFamily: _regular);
   static const IconData fileImport = IconData(0xf56f, fontFamily: _solid);
   static const IconData fileInvoice = IconData(0xf570, fontFamily: _solid);
-  static const IconData fileInvoiceDollar = IconData(0xf571, fontFamily: _solid);
+  static const IconData fileInvoiceDollar = IconData(
+    0xf571,
+    fontFamily: _solid,
+  );
   static const IconData solidFileLines = IconData(0xf15c, fontFamily: _solid);
   static const IconData fileLines = IconData(0xf15c, fontFamily: _regular);
   static const IconData fileMedical = IconData(0xf477, fontFamily: _solid);
   static const IconData solidFilePdf = IconData(0xf1c1, fontFamily: _solid);
   static const IconData filePdf = IconData(0xf1c1, fontFamily: _regular);
   static const IconData filePen = IconData(0xf31c, fontFamily: _solid);
-  static const IconData solidFilePowerpoint = IconData(0xf1c4, fontFamily: _solid);
+  static const IconData solidFilePowerpoint = IconData(
+    0xf1c4,
+    fontFamily: _solid,
+  );
   static const IconData filePowerpoint = IconData(0xf1c4, fontFamily: _regular);
   static const IconData filePrescription = IconData(0xf572, fontFamily: _solid);
   static const IconData fileShield = IconData(0xe4f0, fontFamily: _solid);
@@ -793,8 +1093,14 @@ abstract final class FontAwesomeIcons {
   static const IconData fillDrip = IconData(0xf576, fontFamily: _solid);
   static const IconData film = IconData(0xf008, fontFamily: _solid);
   static const IconData filter = IconData(0xf0b0, fontFamily: _solid);
-  static const IconData filterCircleDollar = IconData(0xf662, fontFamily: _solid);
-  static const IconData filterCircleXmark = IconData(0xe17b, fontFamily: _solid);
+  static const IconData filterCircleDollar = IconData(
+    0xf662,
+    fontFamily: _solid,
+  );
+  static const IconData filterCircleXmark = IconData(
+    0xe17b,
+    fontFamily: _solid,
+  );
   static const IconData fingerprint = IconData(0xf577, fontFamily: _solid);
   static const IconData fire = IconData(0xf06d, fontFamily: _solid);
   static const IconData fireBurner = IconData(0xe4f1, fontFamily: _solid);
@@ -823,7 +1129,10 @@ abstract final class FontAwesomeIcons {
   static const IconData fly = IconData(0xf417, fontFamily: _brands);
   static const IconData solidFolder = IconData(0xf07b, fontFamily: _solid);
   static const IconData folder = IconData(0xf07b, fontFamily: _regular);
-  static const IconData solidFolderClosed = IconData(0xe185, fontFamily: _solid);
+  static const IconData solidFolderClosed = IconData(
+    0xe185,
+    fontFamily: _solid,
+  );
   static const IconData folderClosed = IconData(0xe185, fontFamily: _regular);
   static const IconData folderMinus = IconData(0xf65d, fontFamily: _solid);
   static const IconData solidFolderOpen = IconData(0xf07c, fontFamily: _solid);
@@ -833,7 +1142,10 @@ abstract final class FontAwesomeIcons {
   static const IconData font = IconData(0xf031, fontFamily: _solid);
   static const IconData solidFontAwesome = IconData(0xf2b4, fontFamily: _solid);
   static const IconData fontAwesome = IconData(0xf2b4, fontFamily: _regular);
-  static const IconData brandsFontAwesome = IconData(0xf2b4, fontFamily: _brands);
+  static const IconData brandsFontAwesome = IconData(
+    0xf2b4,
+    fontFamily: _brands,
+  );
   static const IconData fonticons = IconData(0xf280, fontFamily: _brands);
   static const IconData fonticonsFi = IconData(0xf3a2, fontFamily: _brands);
   static const IconData football = IconData(0xf44e, fontFamily: _solid);
@@ -852,7 +1164,10 @@ abstract final class FontAwesomeIcons {
   static const IconData solidFutbol = IconData(0xf1e3, fontFamily: _solid);
   static const IconData futbol = IconData(0xf1e3, fontFamily: _regular);
   static const IconData g = IconData(0x47, fontFamily: _solid);
-  static const IconData galacticRepublic = IconData(0xf50c, fontFamily: _brands);
+  static const IconData galacticRepublic = IconData(
+    0xf50c,
+    fontFamily: _brands,
+  );
   static const IconData galacticSenate = IconData(0xf50d, fontFamily: _brands);
   static const IconData gamepad = IconData(0xf11b, fontFamily: _solid);
   static const IconData gasPump = IconData(0xf52f, fontFamily: _solid);
@@ -880,7 +1195,10 @@ abstract final class FontAwesomeIcons {
   static const IconData gitlab = IconData(0xf296, fontFamily: _brands);
   static const IconData gitter = IconData(0xf426, fontFamily: _brands);
   static const IconData glassWater = IconData(0xe4f4, fontFamily: _solid);
-  static const IconData glassWaterDroplet = IconData(0xe4f5, fontFamily: _solid);
+  static const IconData glassWaterDroplet = IconData(
+    0xe4f5,
+    fontFamily: _solid,
+  );
   static const IconData glasses = IconData(0xf530, fontFamily: _solid);
   static const IconData glide = IconData(0xf2a5, fontFamily: _brands);
   static const IconData glideG = IconData(0xf2a6, fontFamily: _brands);
@@ -906,10 +1224,16 @@ abstract final class FontAwesomeIcons {
   static const IconData greaterThanEqual = IconData(0xf532, fontFamily: _solid);
   static const IconData grip = IconData(0xf58d, fontFamily: _solid);
   static const IconData gripLines = IconData(0xf7a4, fontFamily: _solid);
-  static const IconData gripLinesVertical = IconData(0xf7a5, fontFamily: _solid);
+  static const IconData gripLinesVertical = IconData(
+    0xf7a5,
+    fontFamily: _solid,
+  );
   static const IconData gripVertical = IconData(0xf58e, fontFamily: _solid);
   static const IconData gripfire = IconData(0xf3ac, fontFamily: _brands);
-  static const IconData groupArrowsRotate = IconData(0xe4f6, fontFamily: _solid);
+  static const IconData groupArrowsRotate = IconData(
+    0xe4f6,
+    fontFamily: _solid,
+  );
   static const IconData grunt = IconData(0xf3ad, fontFamily: _brands);
   static const IconData guaraniSign = IconData(0xe19a, fontFamily: _solid);
   static const IconData guilded = IconData(0xe07e, fontFamily: _brands);
@@ -923,51 +1247,87 @@ abstract final class FontAwesomeIcons {
   static const IconData hamsa = IconData(0xf665, fontFamily: _solid);
   static const IconData solidHand = IconData(0xf256, fontFamily: _solid);
   static const IconData hand = IconData(0xf256, fontFamily: _regular);
-  static const IconData solidHandBackFist = IconData(0xf255, fontFamily: _solid);
+  static const IconData solidHandBackFist = IconData(
+    0xf255,
+    fontFamily: _solid,
+  );
   static const IconData handBackFist = IconData(0xf255, fontFamily: _regular);
   static const IconData handDots = IconData(0xf461, fontFamily: _solid);
   static const IconData handFist = IconData(0xf6de, fontFamily: _solid);
   static const IconData handHolding = IconData(0xf4bd, fontFamily: _solid);
-  static const IconData handHoldingDollar = IconData(0xf4c0, fontFamily: _solid);
-  static const IconData handHoldingDroplet = IconData(0xf4c1, fontFamily: _solid);
+  static const IconData handHoldingDollar = IconData(
+    0xf4c0,
+    fontFamily: _solid,
+  );
+  static const IconData handHoldingDroplet = IconData(
+    0xf4c1,
+    fontFamily: _solid,
+  );
   static const IconData handHoldingHand = IconData(0xe4f7, fontFamily: _solid);
   static const IconData handHoldingHeart = IconData(0xf4be, fontFamily: _solid);
-  static const IconData handHoldingMedical = IconData(0xe05c, fontFamily: _solid);
+  static const IconData handHoldingMedical = IconData(
+    0xe05c,
+    fontFamily: _solid,
+  );
   static const IconData solidHandLizard = IconData(0xf258, fontFamily: _solid);
   static const IconData handLizard = IconData(0xf258, fontFamily: _regular);
   static const IconData handMiddleFinger = IconData(0xf806, fontFamily: _solid);
   static const IconData solidHandPeace = IconData(0xf25b, fontFamily: _solid);
   static const IconData handPeace = IconData(0xf25b, fontFamily: _regular);
-  static const IconData solidHandPointDown = IconData(0xf0a7, fontFamily: _solid);
+  static const IconData solidHandPointDown = IconData(
+    0xf0a7,
+    fontFamily: _solid,
+  );
   static const IconData handPointDown = IconData(0xf0a7, fontFamily: _regular);
-  static const IconData solidHandPointLeft = IconData(0xf0a5, fontFamily: _solid);
+  static const IconData solidHandPointLeft = IconData(
+    0xf0a5,
+    fontFamily: _solid,
+  );
   static const IconData handPointLeft = IconData(0xf0a5, fontFamily: _regular);
-  static const IconData solidHandPointRight = IconData(0xf0a4, fontFamily: _solid);
+  static const IconData solidHandPointRight = IconData(
+    0xf0a4,
+    fontFamily: _solid,
+  );
   static const IconData handPointRight = IconData(0xf0a4, fontFamily: _regular);
   static const IconData solidHandPointUp = IconData(0xf0a6, fontFamily: _solid);
   static const IconData handPointUp = IconData(0xf0a6, fontFamily: _regular);
   static const IconData solidHandPointer = IconData(0xf25a, fontFamily: _solid);
   static const IconData handPointer = IconData(0xf25a, fontFamily: _regular);
-  static const IconData solidHandScissors = IconData(0xf257, fontFamily: _solid);
+  static const IconData solidHandScissors = IconData(
+    0xf257,
+    fontFamily: _solid,
+  );
   static const IconData handScissors = IconData(0xf257, fontFamily: _regular);
   static const IconData handSparkles = IconData(0xe05d, fontFamily: _solid);
   static const IconData solidHandSpock = IconData(0xf259, fontFamily: _solid);
   static const IconData handSpock = IconData(0xf259, fontFamily: _regular);
   static const IconData handcuffs = IconData(0xe4f8, fontFamily: _solid);
   static const IconData hands = IconData(0xf2a7, fontFamily: _solid);
-  static const IconData handsAslInterpreting = IconData(0xf2a3, fontFamily: _solid);
+  static const IconData handsAslInterpreting = IconData(
+    0xf2a3,
+    fontFamily: _solid,
+  );
   static const IconData handsBound = IconData(0xe4f9, fontFamily: _solid);
   static const IconData handsBubbles = IconData(0xe05e, fontFamily: _solid);
   static const IconData handsClapping = IconData(0xe1a8, fontFamily: _solid);
   static const IconData handsHolding = IconData(0xf4c2, fontFamily: _solid);
-  static const IconData handsHoldingChild = IconData(0xe4fa, fontFamily: _solid);
-  static const IconData handsHoldingCircle = IconData(0xe4fb, fontFamily: _solid);
+  static const IconData handsHoldingChild = IconData(
+    0xe4fa,
+    fontFamily: _solid,
+  );
+  static const IconData handsHoldingCircle = IconData(
+    0xe4fb,
+    fontFamily: _solid,
+  );
   static const IconData handsPraying = IconData(0xf684, fontFamily: _solid);
   static const IconData solidHandshake = IconData(0xf2b5, fontFamily: _solid);
   static const IconData handshake = IconData(0xf2b5, fontFamily: _regular);
   static const IconData handshakeAngle = IconData(0xf4c4, fontFamily: _solid);
   static const IconData handshakeSimple = IconData(0xf4c6, fontFamily: _solid);
-  static const IconData handshakeSimpleSlash = IconData(0xe05f, fontFamily: _solid);
+  static const IconData handshakeSimpleSlash = IconData(
+    0xe05f,
+    fontFamily: _solid,
+  );
   static const IconData handshakeSlash = IconData(0xe060, fontFamily: _solid);
   static const IconData hanukiah = IconData(0xf6e6, fontFamily: _solid);
   static const IconData solidHardDrive = IconData(0xf0a0, fontFamily: _solid);
@@ -978,7 +1338,10 @@ abstract final class FontAwesomeIcons {
   static const IconData hatCowboySide = IconData(0xf8c1, fontFamily: _solid);
   static const IconData hatWizard = IconData(0xf6e8, fontFamily: _solid);
   static const IconData headSideCough = IconData(0xe061, fontFamily: _solid);
-  static const IconData headSideCoughSlash = IconData(0xe062, fontFamily: _solid);
+  static const IconData headSideCoughSlash = IconData(
+    0xe062,
+    fontFamily: _solid,
+  );
   static const IconData headSideMask = IconData(0xe063, fontFamily: _solid);
   static const IconData headSideVirus = IconData(0xe064, fontFamily: _solid);
   static const IconData heading = IconData(0xf1dc, fontFamily: _solid);
@@ -989,7 +1352,10 @@ abstract final class FontAwesomeIcons {
   static const IconData heart = IconData(0xf004, fontFamily: _regular);
   static const IconData heartCircleBolt = IconData(0xe4fc, fontFamily: _solid);
   static const IconData heartCircleCheck = IconData(0xe4fd, fontFamily: _solid);
-  static const IconData heartCircleExclamation = IconData(0xe4fe, fontFamily: _solid);
+  static const IconData heartCircleExclamation = IconData(
+    0xe4fe,
+    fontFamily: _solid,
+  );
   static const IconData heartCircleMinus = IconData(0xe4ff, fontFamily: _solid);
   static const IconData heartCirclePlus = IconData(0xe500, fontFamily: _solid);
   static const IconData heartCircleXmark = IconData(0xe501, fontFamily: _solid);
@@ -1024,29 +1390,56 @@ abstract final class FontAwesomeIcons {
   static const IconData solidHourglass = IconData(0xf254, fontFamily: _solid);
   static const IconData hourglass = IconData(0xf254, fontFamily: _regular);
   static const IconData hourglassEnd = IconData(0xf253, fontFamily: _solid);
-  static const IconData solidHourglassHalf = IconData(0xf252, fontFamily: _solid);
+  static const IconData solidHourglassHalf = IconData(
+    0xf252,
+    fontFamily: _solid,
+  );
   static const IconData hourglassHalf = IconData(0xf252, fontFamily: _regular);
   static const IconData hourglassStart = IconData(0xf251, fontFamily: _solid);
   static const IconData house = IconData(0xf015, fontFamily: _solid);
   static const IconData houseChimney = IconData(0xe3af, fontFamily: _solid);
-  static const IconData houseChimneyCrack = IconData(0xf6f1, fontFamily: _solid);
-  static const IconData houseChimneyMedical = IconData(0xf7f2, fontFamily: _solid);
+  static const IconData houseChimneyCrack = IconData(
+    0xf6f1,
+    fontFamily: _solid,
+  );
+  static const IconData houseChimneyMedical = IconData(
+    0xf7f2,
+    fontFamily: _solid,
+  );
   static const IconData houseChimneyUser = IconData(0xe065, fontFamily: _solid);
-  static const IconData houseChimneyWindow = IconData(0xe00d, fontFamily: _solid);
+  static const IconData houseChimneyWindow = IconData(
+    0xe00d,
+    fontFamily: _solid,
+  );
   static const IconData houseCircleCheck = IconData(0xe509, fontFamily: _solid);
-  static const IconData houseCircleExclamation = IconData(0xe50a, fontFamily: _solid);
+  static const IconData houseCircleExclamation = IconData(
+    0xe50a,
+    fontFamily: _solid,
+  );
   static const IconData houseCircleXmark = IconData(0xe50b, fontFamily: _solid);
   static const IconData houseCrack = IconData(0xe3b1, fontFamily: _solid);
   static const IconData houseFire = IconData(0xe50c, fontFamily: _solid);
   static const IconData houseFlag = IconData(0xe50d, fontFamily: _solid);
   static const IconData houseFloodWater = IconData(0xe50e, fontFamily: _solid);
-  static const IconData houseFloodWaterCircleArrowRight = IconData(0xe50f, fontFamily: _solid);
+  static const IconData houseFloodWaterCircleArrowRight = IconData(
+    0xe50f,
+    fontFamily: _solid,
+  );
   static const IconData houseLaptop = IconData(0xe066, fontFamily: _solid);
   static const IconData houseLock = IconData(0xe510, fontFamily: _solid);
   static const IconData houseMedical = IconData(0xe3b2, fontFamily: _solid);
-  static const IconData houseMedicalCircleCheck = IconData(0xe511, fontFamily: _solid);
-  static const IconData houseMedicalCircleExclamation = IconData(0xe512, fontFamily: _solid);
-  static const IconData houseMedicalCircleXmark = IconData(0xe513, fontFamily: _solid);
+  static const IconData houseMedicalCircleCheck = IconData(
+    0xe511,
+    fontFamily: _solid,
+  );
+  static const IconData houseMedicalCircleExclamation = IconData(
+    0xe512,
+    fontFamily: _solid,
+  );
+  static const IconData houseMedicalCircleXmark = IconData(
+    0xe513,
+    fontFamily: _solid,
+  );
   static const IconData houseMedicalFlag = IconData(0xe514, fontFamily: _solid);
   static const IconData houseSignal = IconData(0xe012, fontFamily: _solid);
   static const IconData houseTsunami = IconData(0xe515, fontFamily: _solid);
@@ -1083,7 +1476,10 @@ abstract final class FontAwesomeIcons {
   static const IconData instagram = IconData(0xf16d, fontFamily: _brands);
   static const IconData instalod = IconData(0xe081, fontFamily: _brands);
   static const IconData intercom = IconData(0xf7af, fontFamily: _brands);
-  static const IconData internetExplorer = IconData(0xf26b, fontFamily: _brands);
+  static const IconData internetExplorer = IconData(
+    0xf26b,
+    fontFamily: _brands,
+  );
   static const IconData invision = IconData(0xf7b0, fontFamily: _brands);
   static const IconData ioxhost = IconData(0xf208, fontFamily: _brands);
   static const IconData italic = IconData(0xf033, fontFamily: _solid);
@@ -1166,7 +1562,10 @@ abstract final class FontAwesomeIcons {
   static const IconData listUl = IconData(0xf0ca, fontFamily: _solid);
   static const IconData litecoinSign = IconData(0xe1d3, fontFamily: _solid);
   static const IconData locationArrow = IconData(0xf124, fontFamily: _solid);
-  static const IconData locationCrosshairs = IconData(0xf601, fontFamily: _solid);
+  static const IconData locationCrosshairs = IconData(
+    0xf601,
+    fontFamily: _solid,
+  );
   static const IconData locationDot = IconData(0xf3c5, fontFamily: _solid);
   static const IconData locationPin = IconData(0xf041, fontFamily: _solid);
   static const IconData locationPinLock = IconData(0xe51f, fontFamily: _solid);
@@ -1180,12 +1579,30 @@ abstract final class FontAwesomeIcons {
   static const IconData magento = IconData(0xf3c4, fontFamily: _brands);
   static const IconData magnet = IconData(0xf076, fontFamily: _solid);
   static const IconData magnifyingGlass = IconData(0xf002, fontFamily: _solid);
-  static const IconData magnifyingGlassArrowRight = IconData(0xe521, fontFamily: _solid);
-  static const IconData magnifyingGlassChart = IconData(0xe522, fontFamily: _solid);
-  static const IconData magnifyingGlassDollar = IconData(0xf688, fontFamily: _solid);
-  static const IconData magnifyingGlassLocation = IconData(0xf689, fontFamily: _solid);
-  static const IconData magnifyingGlassMinus = IconData(0xf010, fontFamily: _solid);
-  static const IconData magnifyingGlassPlus = IconData(0xf00e, fontFamily: _solid);
+  static const IconData magnifyingGlassArrowRight = IconData(
+    0xe521,
+    fontFamily: _solid,
+  );
+  static const IconData magnifyingGlassChart = IconData(
+    0xe522,
+    fontFamily: _solid,
+  );
+  static const IconData magnifyingGlassDollar = IconData(
+    0xf688,
+    fontFamily: _solid,
+  );
+  static const IconData magnifyingGlassLocation = IconData(
+    0xf689,
+    fontFamily: _solid,
+  );
+  static const IconData magnifyingGlassMinus = IconData(
+    0xf010,
+    fontFamily: _solid,
+  );
+  static const IconData magnifyingGlassPlus = IconData(
+    0xf00e,
+    fontFamily: _solid,
+  );
   static const IconData mailchimp = IconData(0xf59e, fontFamily: _brands);
   static const IconData manatSign = IconData(0xe1d5, fontFamily: _solid);
   static const IconData mandalorian = IconData(0xf50f, fontFamily: _brands);
@@ -1198,14 +1615,23 @@ abstract final class FontAwesomeIcons {
   static const IconData marker = IconData(0xf5a1, fontFamily: _solid);
   static const IconData mars = IconData(0xf222, fontFamily: _solid);
   static const IconData marsAndVenus = IconData(0xf224, fontFamily: _solid);
-  static const IconData marsAndVenusBurst = IconData(0xe523, fontFamily: _solid);
+  static const IconData marsAndVenusBurst = IconData(
+    0xe523,
+    fontFamily: _solid,
+  );
   static const IconData marsDouble = IconData(0xf227, fontFamily: _solid);
   static const IconData marsStroke = IconData(0xf229, fontFamily: _solid);
   static const IconData marsStrokeRight = IconData(0xf22b, fontFamily: _solid);
   static const IconData marsStrokeUp = IconData(0xf22a, fontFamily: _solid);
   static const IconData martiniGlass = IconData(0xf57b, fontFamily: _solid);
-  static const IconData martiniGlassCitrus = IconData(0xf561, fontFamily: _solid);
-  static const IconData martiniGlassEmpty = IconData(0xf000, fontFamily: _solid);
+  static const IconData martiniGlassCitrus = IconData(
+    0xf561,
+    fontFamily: _solid,
+  );
+  static const IconData martiniGlassEmpty = IconData(
+    0xf000,
+    fontFamily: _solid,
+  );
   static const IconData mask = IconData(0xf6fa, fontFamily: _solid);
   static const IconData maskFace = IconData(0xe1d7, fontFamily: _solid);
   static const IconData maskVentilator = IconData(0xe524, fontFamily: _solid);
@@ -1233,7 +1659,10 @@ abstract final class FontAwesomeIcons {
   static const IconData microchip = IconData(0xf2db, fontFamily: _solid);
   static const IconData microphone = IconData(0xf130, fontFamily: _solid);
   static const IconData microphoneLines = IconData(0xf3c9, fontFamily: _solid);
-  static const IconData microphoneLinesSlash = IconData(0xf539, fontFamily: _solid);
+  static const IconData microphoneLinesSlash = IconData(
+    0xf539,
+    fontFamily: _solid,
+  );
   static const IconData microphoneSlash = IconData(0xf131, fontFamily: _solid);
   static const IconData microscope = IconData(0xf610, fontFamily: _solid);
   static const IconData microsoft = IconData(0xf3ca, fontFamily: _brands);
@@ -1250,14 +1679,20 @@ abstract final class FontAwesomeIcons {
   static const IconData mobileButton = IconData(0xf10b, fontFamily: _solid);
   static const IconData mobileRetro = IconData(0xe527, fontFamily: _solid);
   static const IconData mobileScreen = IconData(0xf3cf, fontFamily: _solid);
-  static const IconData mobileScreenButton = IconData(0xf3cd, fontFamily: _solid);
+  static const IconData mobileScreenButton = IconData(
+    0xf3cd,
+    fontFamily: _solid,
+  );
   static const IconData modx = IconData(0xf285, fontFamily: _brands);
   static const IconData monero = IconData(0xf3d0, fontFamily: _brands);
   static const IconData moneyBill = IconData(0xf0d6, fontFamily: _solid);
   static const IconData solidMoneyBill1 = IconData(0xf3d1, fontFamily: _solid);
   static const IconData moneyBill1 = IconData(0xf3d1, fontFamily: _regular);
   static const IconData moneyBill1Wave = IconData(0xf53b, fontFamily: _solid);
-  static const IconData moneyBillTransfer = IconData(0xe528, fontFamily: _solid);
+  static const IconData moneyBillTransfer = IconData(
+    0xe528,
+    fontFamily: _solid,
+  );
   static const IconData moneyBillTrendUp = IconData(0xe529, fontFamily: _solid);
   static const IconData moneyBillWave = IconData(0xf53a, fontFamily: _solid);
   static const IconData moneyBillWheat = IconData(0xe52a, fontFamily: _solid);
@@ -1303,7 +1738,10 @@ abstract final class FontAwesomeIcons {
   static const IconData o = IconData(0x4f, fontFamily: _solid);
   static const IconData solidObjectGroup = IconData(0xf247, fontFamily: _solid);
   static const IconData objectGroup = IconData(0xf247, fontFamily: _regular);
-  static const IconData solidObjectUngroup = IconData(0xf248, fontFamily: _solid);
+  static const IconData solidObjectUngroup = IconData(
+    0xf248,
+    fontFamily: _solid,
+  );
   static const IconData objectUngroup = IconData(0xf248, fontFamily: _regular);
   static const IconData octopusDeploy = IconData(0xe082, fontFamily: _brands);
   static const IconData odnoklassniki = IconData(0xf263, fontFamily: _brands);
@@ -1365,33 +1803,72 @@ abstract final class FontAwesomeIcons {
   static const IconData percent = IconData(0x25, fontFamily: _solid);
   static const IconData periscope = IconData(0xf3da, fontFamily: _brands);
   static const IconData person = IconData(0xf183, fontFamily: _solid);
-  static const IconData personArrowDownToLine = IconData(0xe538, fontFamily: _solid);
-  static const IconData personArrowUpFromLine = IconData(0xe539, fontFamily: _solid);
+  static const IconData personArrowDownToLine = IconData(
+    0xe538,
+    fontFamily: _solid,
+  );
+  static const IconData personArrowUpFromLine = IconData(
+    0xe539,
+    fontFamily: _solid,
+  );
   static const IconData personBiking = IconData(0xf84a, fontFamily: _solid);
   static const IconData personBooth = IconData(0xf756, fontFamily: _solid);
-  static const IconData personBreastfeeding = IconData(0xe53a, fontFamily: _solid);
+  static const IconData personBreastfeeding = IconData(
+    0xe53a,
+    fontFamily: _solid,
+  );
   static const IconData personBurst = IconData(0xe53b, fontFamily: _solid);
   static const IconData personCane = IconData(0xe53c, fontFamily: _solid);
   static const IconData personChalkboard = IconData(0xe53d, fontFamily: _solid);
-  static const IconData personCircleCheck = IconData(0xe53e, fontFamily: _solid);
-  static const IconData personCircleExclamation = IconData(0xe53f, fontFamily: _solid);
-  static const IconData personCircleMinus = IconData(0xe540, fontFamily: _solid);
+  static const IconData personCircleCheck = IconData(
+    0xe53e,
+    fontFamily: _solid,
+  );
+  static const IconData personCircleExclamation = IconData(
+    0xe53f,
+    fontFamily: _solid,
+  );
+  static const IconData personCircleMinus = IconData(
+    0xe540,
+    fontFamily: _solid,
+  );
   static const IconData personCirclePlus = IconData(0xe541, fontFamily: _solid);
-  static const IconData personCircleQuestion = IconData(0xe542, fontFamily: _solid);
-  static const IconData personCircleXmark = IconData(0xe543, fontFamily: _solid);
+  static const IconData personCircleQuestion = IconData(
+    0xe542,
+    fontFamily: _solid,
+  );
+  static const IconData personCircleXmark = IconData(
+    0xe543,
+    fontFamily: _solid,
+  );
   static const IconData personDigging = IconData(0xf85e, fontFamily: _solid);
-  static const IconData personDotsFromLine = IconData(0xf470, fontFamily: _solid);
+  static const IconData personDotsFromLine = IconData(
+    0xf470,
+    fontFamily: _solid,
+  );
   static const IconData personDress = IconData(0xf182, fontFamily: _solid);
   static const IconData personDressBurst = IconData(0xe544, fontFamily: _solid);
   static const IconData personDrowning = IconData(0xe545, fontFamily: _solid);
   static const IconData personFalling = IconData(0xe546, fontFamily: _solid);
-  static const IconData personFallingBurst = IconData(0xe547, fontFamily: _solid);
+  static const IconData personFallingBurst = IconData(
+    0xe547,
+    fontFamily: _solid,
+  );
   static const IconData personHalfDress = IconData(0xe548, fontFamily: _solid);
   static const IconData personHarassing = IconData(0xe549, fontFamily: _solid);
   static const IconData personHiking = IconData(0xf6ec, fontFamily: _solid);
-  static const IconData personMilitaryPointing = IconData(0xe54a, fontFamily: _solid);
-  static const IconData personMilitaryRifle = IconData(0xe54b, fontFamily: _solid);
-  static const IconData personMilitaryToPerson = IconData(0xe54c, fontFamily: _solid);
+  static const IconData personMilitaryPointing = IconData(
+    0xe54a,
+    fontFamily: _solid,
+  );
+  static const IconData personMilitaryRifle = IconData(
+    0xe54b,
+    fontFamily: _solid,
+  );
+  static const IconData personMilitaryToPerson = IconData(
+    0xe54c,
+    fontFamily: _solid,
+  );
   static const IconData personPraying = IconData(0xf683, fontFamily: _solid);
   static const IconData personPregnant = IconData(0xe31e, fontFamily: _solid);
   static const IconData personRays = IconData(0xe54d, fontFamily: _solid);
@@ -1400,20 +1877,47 @@ abstract final class FontAwesomeIcons {
   static const IconData personShelter = IconData(0xe54f, fontFamily: _solid);
   static const IconData personSkating = IconData(0xf7c5, fontFamily: _solid);
   static const IconData personSkiing = IconData(0xf7c9, fontFamily: _solid);
-  static const IconData personSkiingNordic = IconData(0xf7ca, fontFamily: _solid);
-  static const IconData personSnowboarding = IconData(0xf7ce, fontFamily: _solid);
+  static const IconData personSkiingNordic = IconData(
+    0xf7ca,
+    fontFamily: _solid,
+  );
+  static const IconData personSnowboarding = IconData(
+    0xf7ce,
+    fontFamily: _solid,
+  );
   static const IconData personSwimming = IconData(0xf5c4, fontFamily: _solid);
-  static const IconData personThroughWindow = IconData(0xe5a9, fontFamily: _solid);
+  static const IconData personThroughWindow = IconData(
+    0xe5a9,
+    fontFamily: _solid,
+  );
   static const IconData personWalking = IconData(0xf554, fontFamily: _solid);
-  static const IconData personWalkingArrowLoopLeft = IconData(0xe551, fontFamily: _solid);
-  static const IconData personWalkingArrowRight = IconData(0xe552, fontFamily: _solid);
-  static const IconData personWalkingDashedLineArrowRight = IconData(0xe553, fontFamily: _solid);
-  static const IconData personWalkingLuggage = IconData(0xe554, fontFamily: _solid);
-  static const IconData personWalkingWithCane = IconData(0xf29d, fontFamily: _solid);
+  static const IconData personWalkingArrowLoopLeft = IconData(
+    0xe551,
+    fontFamily: _solid,
+  );
+  static const IconData personWalkingArrowRight = IconData(
+    0xe552,
+    fontFamily: _solid,
+  );
+  static const IconData personWalkingDashedLineArrowRight = IconData(
+    0xe553,
+    fontFamily: _solid,
+  );
+  static const IconData personWalkingLuggage = IconData(
+    0xe554,
+    fontFamily: _solid,
+  );
+  static const IconData personWalkingWithCane = IconData(
+    0xf29d,
+    fontFamily: _solid,
+  );
   static const IconData pesetaSign = IconData(0xe221, fontFamily: _solid);
   static const IconData pesoSign = IconData(0xe222, fontFamily: _solid);
   static const IconData phabricator = IconData(0xf3db, fontFamily: _brands);
-  static const IconData phoenixFramework = IconData(0xf3dc, fontFamily: _brands);
+  static const IconData phoenixFramework = IconData(
+    0xf3dc,
+    fontFamily: _brands,
+  );
   static const IconData phoenixSquadron = IconData(0xf511, fontFamily: _brands);
   static const IconData phone = IconData(0xf095, fontFamily: _solid);
   static const IconData phoneFlip = IconData(0xf879, fontFamily: _solid);
@@ -1436,7 +1940,10 @@ abstract final class FontAwesomeIcons {
   static const IconData plane = IconData(0xf072, fontFamily: _solid);
   static const IconData planeArrival = IconData(0xf5af, fontFamily: _solid);
   static const IconData planeCircleCheck = IconData(0xe555, fontFamily: _solid);
-  static const IconData planeCircleExclamation = IconData(0xe556, fontFamily: _solid);
+  static const IconData planeCircleExclamation = IconData(
+    0xe556,
+    fontFamily: _solid,
+  );
   static const IconData planeCircleXmark = IconData(0xe557, fontFamily: _solid);
   static const IconData planeDeparture = IconData(0xf5b0, fontFamily: _solid);
   static const IconData planeLock = IconData(0xe558, fontFamily: _solid);
@@ -1449,7 +1956,10 @@ abstract final class FontAwesomeIcons {
   static const IconData plug = IconData(0xf1e6, fontFamily: _solid);
   static const IconData plugCircleBolt = IconData(0xe55b, fontFamily: _solid);
   static const IconData plugCircleCheck = IconData(0xe55c, fontFamily: _solid);
-  static const IconData plugCircleExclamation = IconData(0xe55d, fontFamily: _solid);
+  static const IconData plugCircleExclamation = IconData(
+    0xe55d,
+    fontFamily: _solid,
+  );
   static const IconData plugCircleMinus = IconData(0xe55e, fontFamily: _solid);
   static const IconData plugCirclePlus = IconData(0xe55f, fontFamily: _solid);
   static const IconData plugCircleXmark = IconData(0xe560, fontFamily: _solid);
@@ -1461,8 +1971,14 @@ abstract final class FontAwesomeIcons {
   static const IconData poop = IconData(0xf619, fontFamily: _solid);
   static const IconData powerOff = IconData(0xf011, fontFamily: _solid);
   static const IconData prescription = IconData(0xf5b1, fontFamily: _solid);
-  static const IconData prescriptionBottle = IconData(0xf485, fontFamily: _solid);
-  static const IconData prescriptionBottleMedical = IconData(0xf486, fontFamily: _solid);
+  static const IconData prescriptionBottle = IconData(
+    0xf485,
+    fontFamily: _solid,
+  );
+  static const IconData prescriptionBottleMedical = IconData(
+    0xf486,
+    fontFamily: _solid,
+  );
   static const IconData print = IconData(0xf02f, fontFamily: _solid);
   static const IconData productHunt = IconData(0xf288, fontFamily: _brands);
   static const IconData pumpMedical = IconData(0xe06a, fontFamily: _solid);
@@ -1493,9 +2009,15 @@ abstract final class FontAwesomeIcons {
   static const IconData receipt = IconData(0xf543, fontFamily: _solid);
   static const IconData recordVinyl = IconData(0xf8d9, fontFamily: _solid);
   static const IconData rectangleAd = IconData(0xf641, fontFamily: _solid);
-  static const IconData solidRectangleList = IconData(0xf022, fontFamily: _solid);
+  static const IconData solidRectangleList = IconData(
+    0xf022,
+    fontFamily: _solid,
+  );
   static const IconData rectangleList = IconData(0xf022, fontFamily: _regular);
-  static const IconData solidRectangleXmark = IconData(0xf410, fontFamily: _solid);
+  static const IconData solidRectangleXmark = IconData(
+    0xf410,
+    fontFamily: _solid,
+  );
   static const IconData rectangleXmark = IconData(0xf410, fontFamily: _regular);
   static const IconData recycle = IconData(0xf1b8, fontFamily: _solid);
   static const IconData redRiver = IconData(0xf3e3, fontFamily: _brands);
@@ -1525,7 +2047,10 @@ abstract final class FontAwesomeIcons {
   static const IconData roadBarrier = IconData(0xe562, fontFamily: _solid);
   static const IconData roadBridge = IconData(0xe563, fontFamily: _solid);
   static const IconData roadCircleCheck = IconData(0xe564, fontFamily: _solid);
-  static const IconData roadCircleExclamation = IconData(0xe565, fontFamily: _solid);
+  static const IconData roadCircleExclamation = IconData(
+    0xe565,
+    fontFamily: _solid,
+  );
   static const IconData roadCircleXmark = IconData(0xe566, fontFamily: _solid);
   static const IconData roadLock = IconData(0xe567, fontFamily: _solid);
   static const IconData roadSpikes = IconData(0xe568, fontFamily: _solid);
@@ -1558,18 +2083,33 @@ abstract final class FontAwesomeIcons {
   static const IconData satelliteDish = IconData(0xf7c0, fontFamily: _solid);
   static const IconData scaleBalanced = IconData(0xf24e, fontFamily: _solid);
   static const IconData scaleUnbalanced = IconData(0xf515, fontFamily: _solid);
-  static const IconData scaleUnbalancedFlip = IconData(0xf516, fontFamily: _solid);
+  static const IconData scaleUnbalancedFlip = IconData(
+    0xf516,
+    fontFamily: _solid,
+  );
   static const IconData schlix = IconData(0xf3ea, fontFamily: _brands);
   static const IconData school = IconData(0xf549, fontFamily: _solid);
-  static const IconData schoolCircleCheck = IconData(0xe56b, fontFamily: _solid);
-  static const IconData schoolCircleExclamation = IconData(0xe56c, fontFamily: _solid);
-  static const IconData schoolCircleXmark = IconData(0xe56d, fontFamily: _solid);
+  static const IconData schoolCircleCheck = IconData(
+    0xe56b,
+    fontFamily: _solid,
+  );
+  static const IconData schoolCircleExclamation = IconData(
+    0xe56c,
+    fontFamily: _solid,
+  );
+  static const IconData schoolCircleXmark = IconData(
+    0xe56d,
+    fontFamily: _solid,
+  );
   static const IconData schoolFlag = IconData(0xe56e, fontFamily: _solid);
   static const IconData schoolLock = IconData(0xe56f, fontFamily: _solid);
   static const IconData scissors = IconData(0xf0c4, fontFamily: _solid);
   static const IconData screenpal = IconData(0xe570, fontFamily: _brands);
   static const IconData screwdriver = IconData(0xf54a, fontFamily: _solid);
-  static const IconData screwdriverWrench = IconData(0xf7d9, fontFamily: _solid);
+  static const IconData screwdriverWrench = IconData(
+    0xf7d9,
+    fontFamily: _solid,
+  );
   static const IconData scribd = IconData(0xf28a, fontFamily: _brands);
   static const IconData scroll = IconData(0xf70e, fontFamily: _solid);
   static const IconData scrollTorah = IconData(0xf6a0, fontFamily: _solid);
@@ -1583,8 +2123,14 @@ abstract final class FontAwesomeIcons {
   static const IconData servicestack = IconData(0xf3ec, fontFamily: _brands);
   static const IconData shapes = IconData(0xf61f, fontFamily: _solid);
   static const IconData share = IconData(0xf064, fontFamily: _solid);
-  static const IconData solidShareFromSquare = IconData(0xf14d, fontFamily: _solid);
-  static const IconData shareFromSquare = IconData(0xf14d, fontFamily: _regular);
+  static const IconData solidShareFromSquare = IconData(
+    0xf14d,
+    fontFamily: _solid,
+  );
+  static const IconData shareFromSquare = IconData(
+    0xf14d,
+    fontFamily: _regular,
+  );
   static const IconData shareNodes = IconData(0xf1e0, fontFamily: _solid);
   static const IconData sheetPlastic = IconData(0xe571, fontFamily: _solid);
   static const IconData shekelSign = IconData(0xf20b, fontFamily: _solid);
@@ -1647,7 +2193,10 @@ abstract final class FontAwesomeIcons {
   static const IconData sourcetree = IconData(0xf7d3, fontFamily: _brands);
   static const IconData spa = IconData(0xf5bb, fontFamily: _solid);
   static const IconData spaceAwesome = IconData(0xe5ac, fontFamily: _brands);
-  static const IconData spaghettiMonsterFlying = IconData(0xf67b, fontFamily: _solid);
+  static const IconData spaghettiMonsterFlying = IconData(
+    0xf67b,
+    fontFamily: _solid,
+  );
   static const IconData speakap = IconData(0xf3f3, fontFamily: _brands);
   static const IconData speakerDeck = IconData(0xf83c, fontFamily: _brands);
   static const IconData spellCheck = IconData(0xf891, fontFamily: _solid);
@@ -1660,54 +2209,108 @@ abstract final class FontAwesomeIcons {
   static const IconData sprayCanSparkles = IconData(0xf5d0, fontFamily: _solid);
   static const IconData solidSquare = IconData(0xf0c8, fontFamily: _solid);
   static const IconData square = IconData(0xf0c8, fontFamily: _regular);
-  static const IconData squareArrowUpRight = IconData(0xf14c, fontFamily: _solid);
+  static const IconData squareArrowUpRight = IconData(
+    0xf14c,
+    fontFamily: _solid,
+  );
   static const IconData squareBehance = IconData(0xf1b5, fontFamily: _brands);
   static const IconData squareBinary = IconData(0xe69b, fontFamily: _solid);
   static const IconData squareBluesky = IconData(0xe6a3, fontFamily: _brands);
-  static const IconData solidSquareCaretDown = IconData(0xf150, fontFamily: _solid);
-  static const IconData squareCaretDown = IconData(0xf150, fontFamily: _regular);
-  static const IconData solidSquareCaretLeft = IconData(0xf191, fontFamily: _solid);
-  static const IconData squareCaretLeft = IconData(0xf191, fontFamily: _regular);
-  static const IconData solidSquareCaretRight = IconData(0xf152, fontFamily: _solid);
-  static const IconData squareCaretRight = IconData(0xf152, fontFamily: _regular);
-  static const IconData solidSquareCaretUp = IconData(0xf151, fontFamily: _solid);
+  static const IconData solidSquareCaretDown = IconData(
+    0xf150,
+    fontFamily: _solid,
+  );
+  static const IconData squareCaretDown = IconData(
+    0xf150,
+    fontFamily: _regular,
+  );
+  static const IconData solidSquareCaretLeft = IconData(
+    0xf191,
+    fontFamily: _solid,
+  );
+  static const IconData squareCaretLeft = IconData(
+    0xf191,
+    fontFamily: _regular,
+  );
+  static const IconData solidSquareCaretRight = IconData(
+    0xf152,
+    fontFamily: _solid,
+  );
+  static const IconData squareCaretRight = IconData(
+    0xf152,
+    fontFamily: _regular,
+  );
+  static const IconData solidSquareCaretUp = IconData(
+    0xf151,
+    fontFamily: _solid,
+  );
   static const IconData squareCaretUp = IconData(0xf151, fontFamily: _regular);
   static const IconData solidSquareCheck = IconData(0xf14a, fontFamily: _solid);
   static const IconData squareCheck = IconData(0xf14a, fontFamily: _regular);
   static const IconData squareDribbble = IconData(0xf397, fontFamily: _brands);
   static const IconData squareEnvelope = IconData(0xf199, fontFamily: _solid);
   static const IconData squareFacebook = IconData(0xf082, fontFamily: _brands);
-  static const IconData squareFontAwesome = IconData(0xe5ad, fontFamily: _brands);
-  static const IconData squareFontAwesomeStroke = IconData(0xf35c, fontFamily: _brands);
+  static const IconData squareFontAwesome = IconData(
+    0xe5ad,
+    fontFamily: _brands,
+  );
+  static const IconData squareFontAwesomeStroke = IconData(
+    0xf35c,
+    fontFamily: _brands,
+  );
   static const IconData solidSquareFull = IconData(0xf45c, fontFamily: _solid);
   static const IconData squareFull = IconData(0xf45c, fontFamily: _regular);
   static const IconData squareGit = IconData(0xf1d2, fontFamily: _brands);
   static const IconData squareGithub = IconData(0xf092, fontFamily: _brands);
   static const IconData squareGitlab = IconData(0xe5ae, fontFamily: _brands);
-  static const IconData squareGooglePlus = IconData(0xf0d4, fontFamily: _brands);
+  static const IconData squareGooglePlus = IconData(
+    0xf0d4,
+    fontFamily: _brands,
+  );
   static const IconData squareH = IconData(0xf0fd, fontFamily: _solid);
-  static const IconData squareHackerNews = IconData(0xf3af, fontFamily: _brands);
+  static const IconData squareHackerNews = IconData(
+    0xf3af,
+    fontFamily: _brands,
+  );
   static const IconData squareInstagram = IconData(0xe055, fontFamily: _brands);
   static const IconData squareJs = IconData(0xf3b9, fontFamily: _brands);
   static const IconData squareLastfm = IconData(0xf203, fontFamily: _brands);
-  static const IconData squareLetterboxd = IconData(0xe62e, fontFamily: _brands);
+  static const IconData squareLetterboxd = IconData(
+    0xe62e,
+    fontFamily: _brands,
+  );
   static const IconData solidSquareMinus = IconData(0xf146, fontFamily: _solid);
   static const IconData squareMinus = IconData(0xf146, fontFamily: _regular);
   static const IconData squareNfi = IconData(0xe576, fontFamily: _solid);
-  static const IconData squareOdnoklassniki = IconData(0xf264, fontFamily: _brands);
+  static const IconData squareOdnoklassniki = IconData(
+    0xf264,
+    fontFamily: _brands,
+  );
   static const IconData squareParking = IconData(0xf540, fontFamily: _solid);
   static const IconData squarePen = IconData(0xf14b, fontFamily: _solid);
-  static const IconData squarePersonConfined = IconData(0xe577, fontFamily: _solid);
+  static const IconData squarePersonConfined = IconData(
+    0xe577,
+    fontFamily: _solid,
+  );
   static const IconData squarePhone = IconData(0xf098, fontFamily: _solid);
   static const IconData squarePhoneFlip = IconData(0xf87b, fontFamily: _solid);
   static const IconData squarePiedPiper = IconData(0xe01e, fontFamily: _brands);
   static const IconData squarePinterest = IconData(0xf0d3, fontFamily: _brands);
   static const IconData solidSquarePlus = IconData(0xf0fe, fontFamily: _solid);
   static const IconData squarePlus = IconData(0xf0fe, fontFamily: _regular);
-  static const IconData squarePollHorizontal = IconData(0xf682, fontFamily: _solid);
-  static const IconData squarePollVertical = IconData(0xf681, fontFamily: _solid);
+  static const IconData squarePollHorizontal = IconData(
+    0xf682,
+    fontFamily: _solid,
+  );
+  static const IconData squarePollVertical = IconData(
+    0xf681,
+    fontFamily: _solid,
+  );
   static const IconData squareReddit = IconData(0xf1a2, fontFamily: _brands);
-  static const IconData squareRootVariable = IconData(0xf698, fontFamily: _solid);
+  static const IconData squareRootVariable = IconData(
+    0xf698,
+    fontFamily: _solid,
+  );
   static const IconData squareRss = IconData(0xf143, fontFamily: _solid);
   static const IconData squareShareNodes = IconData(0xf1e1, fontFamily: _solid);
   static const IconData squareSnapchat = IconData(0xf2ad, fontFamily: _brands);
@@ -1720,8 +2323,14 @@ abstract final class FontAwesomeIcons {
   static const IconData squareViadeo = IconData(0xf2aa, fontFamily: _brands);
   static const IconData squareVimeo = IconData(0xf194, fontFamily: _brands);
   static const IconData squareVirus = IconData(0xe578, fontFamily: _solid);
-  static const IconData squareWebAwesome = IconData(0xe683, fontFamily: _brands);
-  static const IconData squareWebAwesomeStroke = IconData(0xe684, fontFamily: _brands);
+  static const IconData squareWebAwesome = IconData(
+    0xe683,
+    fontFamily: _brands,
+  );
+  static const IconData squareWebAwesomeStroke = IconData(
+    0xe684,
+    fontFamily: _brands,
+  );
   static const IconData squareWhatsapp = IconData(0xf40c, fontFamily: _brands);
   static const IconData squareXTwitter = IconData(0xe61a, fontFamily: _brands);
   static const IconData squareXing = IconData(0xf169, fontFamily: _brands);
@@ -1740,7 +2349,10 @@ abstract final class FontAwesomeIcons {
   static const IconData starAndCrescent = IconData(0xf699, fontFamily: _solid);
   static const IconData solidStarHalf = IconData(0xf089, fontFamily: _solid);
   static const IconData starHalf = IconData(0xf089, fontFamily: _regular);
-  static const IconData solidStarHalfStroke = IconData(0xf5c0, fontFamily: _solid);
+  static const IconData solidStarHalfStroke = IconData(
+    0xf5c0,
+    fontFamily: _solid,
+  );
   static const IconData starHalfStroke = IconData(0xf5c0, fontFamily: _regular);
   static const IconData starOfDavid = IconData(0xf69a, fontFamily: _solid);
   static const IconData starOfLife = IconData(0xf621, fontFamily: _solid);
@@ -1764,7 +2376,10 @@ abstract final class FontAwesomeIcons {
   static const IconData stubber = IconData(0xe5c7, fontFamily: _brands);
   static const IconData studiovinari = IconData(0xf3f8, fontFamily: _brands);
   static const IconData stumbleupon = IconData(0xf1a4, fontFamily: _brands);
-  static const IconData stumbleuponCircle = IconData(0xf1a3, fontFamily: _brands);
+  static const IconData stumbleuponCircle = IconData(
+    0xf1a3,
+    fontFamily: _brands,
+  );
   static const IconData subscript = IconData(0xf12c, fontFamily: _solid);
   static const IconData suitcase = IconData(0xf0f2, fontFamily: _solid);
   static const IconData suitcaseMedical = IconData(0xf0fa, fontFamily: _solid);
@@ -1784,18 +2399,36 @@ abstract final class FontAwesomeIcons {
   static const IconData t = IconData(0x54, fontFamily: _solid);
   static const IconData table = IconData(0xf0ce, fontFamily: _solid);
   static const IconData tableCells = IconData(0xf00a, fontFamily: _solid);
-  static const IconData tableCellsColumnLock = IconData(0xe678, fontFamily: _solid);
+  static const IconData tableCellsColumnLock = IconData(
+    0xe678,
+    fontFamily: _solid,
+  );
   static const IconData tableCellsLarge = IconData(0xf009, fontFamily: _solid);
-  static const IconData tableCellsRowLock = IconData(0xe67a, fontFamily: _solid);
-  static const IconData tableCellsRowUnlock = IconData(0xe691, fontFamily: _solid);
+  static const IconData tableCellsRowLock = IconData(
+    0xe67a,
+    fontFamily: _solid,
+  );
+  static const IconData tableCellsRowUnlock = IconData(
+    0xe691,
+    fontFamily: _solid,
+  );
   static const IconData tableColumns = IconData(0xf0db, fontFamily: _solid);
   static const IconData tableList = IconData(0xf00b, fontFamily: _solid);
-  static const IconData tableTennisPaddleBall = IconData(0xf45d, fontFamily: _solid);
+  static const IconData tableTennisPaddleBall = IconData(
+    0xf45d,
+    fontFamily: _solid,
+  );
   static const IconData tablet = IconData(0xf3fb, fontFamily: _solid);
   static const IconData tabletButton = IconData(0xf10a, fontFamily: _solid);
-  static const IconData tabletScreenButton = IconData(0xf3fa, fontFamily: _solid);
+  static const IconData tabletScreenButton = IconData(
+    0xf3fa,
+    fontFamily: _solid,
+  );
   static const IconData tablets = IconData(0xf490, fontFamily: _solid);
-  static const IconData tachographDigital = IconData(0xf566, fontFamily: _solid);
+  static const IconData tachographDigital = IconData(
+    0xf566,
+    fontFamily: _solid,
+  );
   static const IconData tag = IconData(0xf02b, fontFamily: _solid);
   static const IconData tags = IconData(0xf02c, fontFamily: _solid);
   static const IconData tape = IconData(0xf4db, fontFamily: _solid);
@@ -1806,21 +2439,42 @@ abstract final class FontAwesomeIcons {
   static const IconData teeth = IconData(0xf62e, fontFamily: _solid);
   static const IconData teethOpen = IconData(0xf62f, fontFamily: _solid);
   static const IconData telegram = IconData(0xf2c6, fontFamily: _brands);
-  static const IconData temperatureArrowDown = IconData(0xe03f, fontFamily: _solid);
-  static const IconData temperatureArrowUp = IconData(0xe040, fontFamily: _solid);
+  static const IconData temperatureArrowDown = IconData(
+    0xe03f,
+    fontFamily: _solid,
+  );
+  static const IconData temperatureArrowUp = IconData(
+    0xe040,
+    fontFamily: _solid,
+  );
   static const IconData temperatureEmpty = IconData(0xf2cb, fontFamily: _solid);
   static const IconData temperatureFull = IconData(0xf2c7, fontFamily: _solid);
   static const IconData temperatureHalf = IconData(0xf2c9, fontFamily: _solid);
   static const IconData temperatureHigh = IconData(0xf769, fontFamily: _solid);
   static const IconData temperatureLow = IconData(0xf76b, fontFamily: _solid);
-  static const IconData temperatureQuarter = IconData(0xf2ca, fontFamily: _solid);
-  static const IconData temperatureThreeQuarters = IconData(0xf2c8, fontFamily: _solid);
+  static const IconData temperatureQuarter = IconData(
+    0xf2ca,
+    fontFamily: _solid,
+  );
+  static const IconData temperatureThreeQuarters = IconData(
+    0xf2c8,
+    fontFamily: _solid,
+  );
   static const IconData tencentWeibo = IconData(0xf1d5, fontFamily: _brands);
   static const IconData tengeSign = IconData(0xf7d7, fontFamily: _solid);
   static const IconData tent = IconData(0xe57d, fontFamily: _solid);
-  static const IconData tentArrowDownToLine = IconData(0xe57e, fontFamily: _solid);
-  static const IconData tentArrowLeftRight = IconData(0xe57f, fontFamily: _solid);
-  static const IconData tentArrowTurnLeft = IconData(0xe580, fontFamily: _solid);
+  static const IconData tentArrowDownToLine = IconData(
+    0xe57e,
+    fontFamily: _solid,
+  );
+  static const IconData tentArrowLeftRight = IconData(
+    0xe57f,
+    fontFamily: _solid,
+  );
+  static const IconData tentArrowTurnLeft = IconData(
+    0xe580,
+    fontFamily: _solid,
+  );
   static const IconData tentArrowsDown = IconData(0xe581, fontFamily: _solid);
   static const IconData tents = IconData(0xe582, fontFamily: _solid);
   static const IconData terminal = IconData(0xf120, fontFamily: _solid);
@@ -1874,7 +2528,10 @@ abstract final class FontAwesomeIcons {
   static const IconData tree = IconData(0xf1bb, fontFamily: _solid);
   static const IconData treeCity = IconData(0xe587, fontFamily: _solid);
   static const IconData trello = IconData(0xf181, fontFamily: _brands);
-  static const IconData triangleExclamation = IconData(0xf071, fontFamily: _solid);
+  static const IconData triangleExclamation = IconData(
+    0xf071,
+    fontFamily: _solid,
+  );
   static const IconData trophy = IconData(0xf091, fontFamily: _solid);
   static const IconData trowel = IconData(0xe589, fontFamily: _solid);
   static const IconData trowelBricks = IconData(0xe58a, fontFamily: _solid);
@@ -1919,8 +2576,14 @@ abstract final class FontAwesomeIcons {
   static const IconData upDown = IconData(0xf338, fontFamily: _solid);
   static const IconData upDownLeftRight = IconData(0xf0b2, fontFamily: _solid);
   static const IconData upLong = IconData(0xf30c, fontFamily: _solid);
-  static const IconData upRightAndDownLeftFromCenter = IconData(0xf424, fontFamily: _solid);
-  static const IconData upRightFromSquare = IconData(0xf35d, fontFamily: _solid);
+  static const IconData upRightAndDownLeftFromCenter = IconData(
+    0xf424,
+    fontFamily: _solid,
+  );
+  static const IconData upRightFromSquare = IconData(
+    0xf35d,
+    fontFamily: _solid,
+  );
   static const IconData upload = IconData(0xf093, fontFamily: _solid);
   static const IconData ups = IconData(0xf7e0, fontFamily: _brands);
   static const IconData upwork = IconData(0xe641, fontFamily: _brands);
@@ -1950,7 +2613,10 @@ abstract final class FontAwesomeIcons {
   static const IconData userTie = IconData(0xf508, fontFamily: _solid);
   static const IconData userXmark = IconData(0xf235, fontFamily: _solid);
   static const IconData users = IconData(0xf0c0, fontFamily: _solid);
-  static const IconData usersBetweenLines = IconData(0xe591, fontFamily: _solid);
+  static const IconData usersBetweenLines = IconData(
+    0xe591,
+    fontFamily: _solid,
+  );
   static const IconData usersGear = IconData(0xf509, fontFamily: _solid);
   static const IconData usersLine = IconData(0xe592, fontFamily: _solid);
   static const IconData usersRays = IconData(0xe593, fontFamily: _solid);
@@ -2003,16 +2669,25 @@ abstract final class FontAwesomeIcons {
   static const IconData walkieTalkie = IconData(0xf8ef, fontFamily: _solid);
   static const IconData wallet = IconData(0xf555, fontFamily: _solid);
   static const IconData wandMagic = IconData(0xf0d0, fontFamily: _solid);
-  static const IconData wandMagicSparkles = IconData(0xe2ca, fontFamily: _solid);
+  static const IconData wandMagicSparkles = IconData(
+    0xe2ca,
+    fontFamily: _solid,
+  );
   static const IconData wandSparkles = IconData(0xf72b, fontFamily: _solid);
   static const IconData warehouse = IconData(0xf494, fontFamily: _solid);
-  static const IconData watchmanMonitoring = IconData(0xe087, fontFamily: _brands);
+  static const IconData watchmanMonitoring = IconData(
+    0xe087,
+    fontFamily: _brands,
+  );
   static const IconData water = IconData(0xf773, fontFamily: _solid);
   static const IconData waterLadder = IconData(0xf5c5, fontFamily: _solid);
   static const IconData waveSquare = IconData(0xf83e, fontFamily: _solid);
   static const IconData waze = IconData(0xf83f, fontFamily: _brands);
   static const IconData solidWebAwesome = IconData(0xe682, fontFamily: _solid);
-  static const IconData brandsWebAwesome = IconData(0xe682, fontFamily: _brands);
+  static const IconData brandsWebAwesome = IconData(
+    0xe682,
+    fontFamily: _brands,
+  );
   static const IconData webflow = IconData(0xe65c, fontFamily: _brands);
   static const IconData weebly = IconData(0xf5cc, fontFamily: _brands);
   static const IconData weibo = IconData(0xf18a, fontFamily: _brands);
@@ -2021,7 +2696,10 @@ abstract final class FontAwesomeIcons {
   static const IconData weixin = IconData(0xf1d7, fontFamily: _brands);
   static const IconData whatsapp = IconData(0xf232, fontFamily: _brands);
   static const IconData wheatAwn = IconData(0xe2cd, fontFamily: _solid);
-  static const IconData wheatAwnCircleExclamation = IconData(0xe598, fontFamily: _solid);
+  static const IconData wheatAwnCircleExclamation = IconData(
+    0xe598,
+    fontFamily: _solid,
+  );
   static const IconData wheelchair = IconData(0xf193, fontFamily: _solid);
   static const IconData wheelchairMove = IconData(0xe2ce, fontFamily: _solid);
   static const IconData whiskeyGlass = IconData(0xf7a0, fontFamily: _solid);
@@ -2029,11 +2707,20 @@ abstract final class FontAwesomeIcons {
   static const IconData wifi = IconData(0xf1eb, fontFamily: _solid);
   static const IconData wikipediaW = IconData(0xf266, fontFamily: _brands);
   static const IconData wind = IconData(0xf72e, fontFamily: _solid);
-  static const IconData solidWindowMaximize = IconData(0xf2d0, fontFamily: _solid);
+  static const IconData solidWindowMaximize = IconData(
+    0xf2d0,
+    fontFamily: _solid,
+  );
   static const IconData windowMaximize = IconData(0xf2d0, fontFamily: _regular);
-  static const IconData solidWindowMinimize = IconData(0xf2d1, fontFamily: _solid);
+  static const IconData solidWindowMinimize = IconData(
+    0xf2d1,
+    fontFamily: _solid,
+  );
   static const IconData windowMinimize = IconData(0xf2d1, fontFamily: _regular);
-  static const IconData solidWindowRestore = IconData(0xf2d2, fontFamily: _solid);
+  static const IconData solidWindowRestore = IconData(
+    0xf2d2,
+    fontFamily: _solid,
+  );
   static const IconData windowRestore = IconData(0xf2d2, fontFamily: _regular);
   static const IconData windows = IconData(0xf17a, fontFamily: _brands);
   static const IconData wineBottle = IconData(0xf72f, fontFamily: _solid);
@@ -2041,9 +2728,15 @@ abstract final class FontAwesomeIcons {
   static const IconData wineGlassEmpty = IconData(0xf5ce, fontFamily: _solid);
   static const IconData wirsindhandwerk = IconData(0xe2d0, fontFamily: _brands);
   static const IconData wix = IconData(0xf5cf, fontFamily: _brands);
-  static const IconData wizardsOfTheCoast = IconData(0xf730, fontFamily: _brands);
+  static const IconData wizardsOfTheCoast = IconData(
+    0xf730,
+    fontFamily: _brands,
+  );
   static const IconData wodu = IconData(0xe088, fontFamily: _brands);
-  static const IconData wolfPackBattalion = IconData(0xf514, fontFamily: _brands);
+  static const IconData wolfPackBattalion = IconData(
+    0xf514,
+    fontFamily: _brands,
+  );
   static const IconData wonSign = IconData(0xf159, fontFamily: _solid);
   static const IconData wordpress = IconData(0xf19a, fontFamily: _brands);
   static const IconData wordpressSimple = IconData(0xf411, fontFamily: _brands);
@@ -2065,7 +2758,10 @@ abstract final class FontAwesomeIcons {
   static const IconData yahoo = IconData(0xf19e, fontFamily: _brands);
   static const IconData yammer = IconData(0xf840, fontFamily: _brands);
   static const IconData yandex = IconData(0xf413, fontFamily: _brands);
-  static const IconData yandexInternational = IconData(0xf414, fontFamily: _brands);
+  static const IconData yandexInternational = IconData(
+    0xf414,
+    fontFamily: _brands,
+  );
   static const IconData yarn = IconData(0xf7e3, fontFamily: _brands);
   static const IconData yelp = IconData(0xf1e9, fontFamily: _brands);
   static const IconData yenSign = IconData(0xf157, fontFamily: _solid);

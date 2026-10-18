@@ -16,6 +16,10 @@
 library;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart'
+    show InputBorder, InputDecoration, TextField;
+import 'package:flutter/services.dart' show FilteringTextInputFormatter;
+import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -214,6 +218,138 @@ class _OptionRow<T> extends StatelessWidget {
             color: context.ff.primary,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "Repeat until done": Off and the usual intervals, plus any number of
+/// minutes of the user's own. Resolves to the interval in minutes (0 = off).
+Future<SheetChoice<int>?> showRepeatIntervalSheet(
+  BuildContext context, {
+  required int current,
+}) => showFFBottomSheet<SheetChoice<int>>(
+  context,
+  builder: (sheetContext) => _RepeatIntervalSheet(
+    current: current,
+    onPick: (m) => Navigator.of(sheetContext).pop(SheetChoice(m)),
+  ),
+);
+
+class _RepeatIntervalSheet extends StatefulWidget {
+  const _RepeatIntervalSheet({required this.current, required this.onPick});
+
+  final int current;
+  final ValueChanged<int> onPick;
+
+  /// The ready-made choices (minutes); 0 = off.
+  static const List<int> presets = [0, 5, 10, 15, 30, 60, 120];
+
+  @override
+  State<_RepeatIntervalSheet> createState() => _RepeatIntervalSheetState();
+}
+
+class _RepeatIntervalSheetState extends State<_RepeatIntervalSheet> {
+  late final TextEditingController _custom = TextEditingController(
+    text: _RepeatIntervalSheet.presets.contains(widget.current)
+        ? ''
+        : '${widget.current}',
+  );
+
+  @override
+  void dispose() {
+    _custom.dispose();
+    super.dispose();
+  }
+
+  int? get _minutes {
+    final m = int.tryParse(_custom.text.trim());
+    if (m == null || m < 1 || m > AppSettings.maxRepeatIntervalMinutes) {
+      return null;
+    }
+    return m;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ff = context.ff;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    return Padding(
+      padding: EdgeInsetsDirectional.only(bottom: keyboard),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const _SheetTitle(
+            'Repeat until done',
+            subtitle:
+                'Show a reminder again every… until you mark it done or snooze it',
+          ),
+          FFGroupedList(
+            dividerIndent: AppSpacing.lg,
+            children: [
+              for (final m in _RepeatIntervalSheet.presets)
+                _OptionRow(
+                  option: NotificationOption(
+                    value: m,
+                    label: NotificationLabels.repeat(m),
+                  ),
+                  selected: m == widget.current,
+                  onTap: () => widget.onPick(m),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text('Custom interval', style: context.text.meta),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: ff.surface,
+                    borderRadius: BorderRadius.circular(AppRadii.input),
+                    border: Border.all(color: ff.divider),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
+                    child: TextField(
+                      controller: _custom,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: (_) => setState(() {}),
+                      onSubmitted: (_) {
+                        final m = _minutes;
+                        if (m != null) widget.onPick(m);
+                      },
+                      style: context.text.body.copyWith(color: ff.ink),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText:
+                            'Minutes (1–${AppSettings.maxRepeatIntervalMinutes})',
+                        hintStyle: context.text.body.copyWith(
+                          color: ff.inkFaint,
+                        ),
+                        suffixText: 'min',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              FFPrimaryButton(
+                label: 'Set',
+                expand: false,
+                height: AppSizes.secondaryButton,
+                onPressed: _minutes == null
+                    ? null
+                    : () => widget.onPick(_minutes!),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

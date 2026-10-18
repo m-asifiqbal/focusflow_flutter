@@ -45,6 +45,7 @@ class LocalBackups {
 
   final BackupEngine engine;
   final AppFiles files;
+
   /// Same key rule as Drive sync: never silently plaintext when
   /// "Encrypt backups" is on (throws BackupPinRequired / BackupKeyUnavailable).
   final BackupKeyPolicy keys;

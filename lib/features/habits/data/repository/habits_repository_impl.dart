@@ -183,7 +183,35 @@ class HabitsRepositoryImpl extends RepositoryBase implements HabitsRepository {
     HabitsQuery query,
     DateTime day, {
     int weekStartsOn = DateTime.monday,
-  }) => db.watchComputed(_tables, () async {
+  }) => db.watchComputed(
+    _tables,
+    // Home, the library counts and the calendar read the same cards: one
+    // computation (and one re-run per write) serves them all.
+    shareKey: (
+      'habit-day-statuses',
+      query.scope,
+      query.text.trim(),
+      DateUtilsX.dayKey(day),
+      weekStartsOn,
+    ),
+    () => _dayStatuses(query, day, weekStartsOn),
+  );
+
+  @override
+  Future<List<HabitDayStatus>> todayHabitsNow(
+    DateTime day, {
+    int weekStartsOn = DateTime.monday,
+  }) => _dayStatuses(
+    const HabitsQuery(scope: HabitsScope.today),
+    day,
+    weekStartsOn,
+  );
+
+  Future<List<HabitDayStatus>> _dayStatuses(
+    HabitsQuery query,
+    DateTime day,
+    int weekStartsOn,
+  ) async {
     final (where, vars) = _where(query);
     final habits = await _load(where, vars);
     if (habits.isEmpty) return const <HabitDayStatus>[];
@@ -201,7 +229,7 @@ class HabitsRepositoryImpl extends RepositoryBase implements HabitsRepository {
           weekStartsOn: weekStartsOn,
         ),
     ];
-  });
+  }
 
   @override
   Stream<List<HabitLog>> watchLogsInRange(DateTime from, DateTime to) =>
@@ -363,7 +391,7 @@ class HabitsRepositoryImpl extends RepositoryBase implements HabitsRepository {
     await db.transaction(() async {
       final now = this.now();
       for (final l in logs) {
-        final key = DateUtilsX.dayKey(l.date);
+        final key = l.dayKey;
         final content = HabitLogsCompanion(
           count: Value(l.count < 0 ? 0 : l.count),
           skipped: Value(l.skipped),

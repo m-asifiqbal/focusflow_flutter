@@ -23,7 +23,7 @@ library;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show immutable;
-import 'package:intl/intl.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 
 /// How often a [RecurrenceRule] repeats (RRULE `FREQ`).
 enum RecurrenceFrequency { daily, weekly, monthly, yearly }
@@ -297,7 +297,7 @@ class RecurrenceRule {
     return [
       ..._patternLabel(start?.toLocal()),
       if (total != null) total == 1 ? '1 time' : '$total times',
-      if (end != null) 'until ${DateFormat('MMM d').format(end.toLocal())}',
+      if (end != null) 'until ${DateFormats.of('MMM d').format(end.toLocal())}',
     ].join(' · ');
   }
 
@@ -567,7 +567,7 @@ class RecurrenceRule {
         day != null &&
         day > 0 &&
         day <= _daysInMonth(2000, months.single)) {
-      return DateFormat('MMM d').format(DateTime(2000, months.single, day));
+      return DateFormats.of('MMM d').format(DateTime(2000, months.single, day));
     }
     final dayText = _dayLabel(start);
     final monthText = months.map(_monthName).join(', ');
@@ -593,10 +593,10 @@ class RecurrenceRule {
 
   // Jan 3, 2000 was a Monday; the year 2000 is a leap year (Feb 29 exists).
   static String _weekdayName(int weekday) =>
-      DateFormat('EEE').format(DateTime(2000, 1, 2 + weekday));
+      DateFormats.of('EEE').format(DateTime(2000, 1, 2 + weekday));
 
   static String _monthName(int month) =>
-      DateFormat('MMM').format(DateTime(2000, month));
+      DateFormats.of('MMM').format(DateTime(2000, month));
 
   // ------------------------------------------------------------------ parsing
 

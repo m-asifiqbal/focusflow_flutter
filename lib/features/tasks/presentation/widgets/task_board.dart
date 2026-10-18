@@ -138,7 +138,8 @@ class _BoardColumn extends ConsumerWidget {
                       use24h: use24h,
                       pendingDone: pending.contains(task.id),
                       dragHandle: const SizedBox.shrink(),
-                      onSubtaskToggle: (s) => actions.toggleSubtask(s.id),
+                      onSubtaskToggle: (s) =>
+                          toggleTaskSubtask(context, ref, task, s),
                       onTap: () => context.push(AppRoutes.task(task.id)),
                       onLongPress: () =>
                           showItemActions(context, ref, task.ref),

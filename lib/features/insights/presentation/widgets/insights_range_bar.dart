@@ -15,7 +15,6 @@ import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_range.dart';
 import 'package:focusflow/features/insights/presentation/providers/insights_providers.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 class InsightsRangeBar extends ConsumerWidget {
   const InsightsRangeBar({super.key});
@@ -25,7 +24,7 @@ class InsightsRangeBar extends ConsumerWidget {
 
   static String customLabel(InsightsRange r) {
     if (!r.isCustom) return InsightsPreset.custom.label;
-    final f = DateFormat('MMM d');
+    final f = DateFormats.of('MMM d');
     final a = r.customStart!;
     final b = r.customEnd!;
     return DateUtilsX.isSameDay(a, b)

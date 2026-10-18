@@ -3,9 +3,9 @@
 /// ============================================================
 ///
 /// What: FORMAT tiles, INCLUDE checklist with live counts (Vault only for
-/// .ffbackup and unchecked by default), Include archived / attachments,
-/// the amber vault warning, SAVE TO tiles, "Export N items", and the
-/// IMPORT FROM OTHER APPS pills (they open the Import tab's picker).
+/// .ffbackup and unchecked by default), Include archived / attachments /
+/// app settings, the amber vault warning, SAVE TO tiles, "Export N items",
+/// and the IMPORT FROM OTHER APPS pills (they open the Import tab's picker).
 /// Why: state lives in [exportControllerProvider]; counts are a live
 /// query, so the button label follows edits made anywhere.
 /// ============================================================
@@ -156,6 +156,20 @@ class ExportTab extends ConsumerWidget {
               value: o.includeAttachments,
               enabled: o.format == ExportFormat.ffbackup,
               onChanged: c.setAttachments,
+            ),
+            FFListRow.toggle(
+              leading: FFIconTile(
+                icon: FontAwesomeIcons.sliders,
+                colors: BackupTints.settings,
+                size: AppSizes.iconTileSm,
+              ),
+              title: 'Include app settings',
+              subtitle: o.format == ExportFormat.ffbackup
+                  ? 'Theme, notifications and layout'
+                  : 'Only in .ffbackup files',
+              value: o.includeSettings,
+              enabled: o.format == ExportFormat.ffbackup,
+              onChanged: c.setSettings,
             ),
           ],
         ),

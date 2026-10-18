@@ -10,8 +10,10 @@ import 'dart:typed_data';
 import 'package:drift/drift.dart' show Value, Variable;
 import 'package:focusflow/core/database/app_database.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/settings/backup_settings.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_files.dart';
+import 'package:focusflow/core/sync/settings_bridge.dart';
 import 'package:focusflow/core/sync/snapshot.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
@@ -53,14 +55,37 @@ BackupEngine engineFor(
   TestHarness h,
   AppFiles files, {
   VaultBackupBridge vault = const FakeVaultBridge(),
+  SettingsBackupBridge settings = const NoSettingsBackupBridge(),
 }) => BackupEngine(
   db: h.db,
   items: h.read(itemsRepositoryProvider),
   files: files,
   deviceId: TestHarness.deviceId,
   vault: vault,
+  settings: settings,
   clock: h.clock,
 );
+
+/// An in-memory settings bridge: exports [exported], records every apply.
+class FakeSettingsBridge implements SettingsBackupBridge {
+  FakeSettingsBridge({this.exported, this.applyError});
+
+  BackupSettings? exported;
+
+  /// Thrown by [apply] (a settings store that cannot be written).
+  Object? applyError;
+
+  final applied = <({BackupSettings settings, bool replace})>[];
+
+  @override
+  Future<BackupSettings?> export() async => exported;
+
+  @override
+  Future<void> apply(BackupSettings incoming, {required bool replace}) async {
+    if (applyError != null) throw applyError!;
+    applied.add((settings: incoming, replace: replace));
+  }
+}
 
 /// Ids of the rows [seedSample] created.
 typedef SampleIds = ({String note, String task, String habit, String folder});

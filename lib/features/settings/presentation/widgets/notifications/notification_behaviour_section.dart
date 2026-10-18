@@ -49,13 +49,46 @@ class NotificationBehaviourSection extends ConsumerWidget {
         ),
         FFListRow(
           leading: const NotificationRowTile(
+            FontAwesomeIcons.repeat,
+            NotificationTints.repeat,
+          ),
+          title: 'Repeat until done',
+          subtitle: 'Show a reminder again if you have not acted on it',
+          value: NotificationLabels.repeat(s.repeatIntervalMinutes),
+          onTap: () => _pickRepeat(context, s, c),
+        ),
+        if (s.repeatIntervalMinutes > 0)
+          FFListRow(
+            leading: const NotificationRowTile(
+              FontAwesomeIcons.hashtag,
+              NotificationTints.repeat,
+            ),
+            title: 'Repeat up to',
+            value: NotificationLabels.repeatCount(s.repeatCount),
+            onTap: () => _pickRepeatCount(context, s, c),
+          ),
+        FFListRow.toggle(
+          leading: const NotificationRowTile(
             FontAwesomeIcons.mobileScreenButton,
             NotificationTints.lockScreen,
           ),
           title: 'Show on lock screen',
-          value: NotificationLabels.lockScreen(s.lockScreenVisibility),
-          onTap: () => _pickLockScreen(context, s, c),
+          subtitle: s.showOnLockScreen
+              ? 'Notifications appear while the phone is locked'
+              : 'Nothing is shown while the phone is locked',
+          value: s.showOnLockScreen,
+          onChanged: c.setShowOnLockScreen,
         ),
+        if (s.showOnLockScreen)
+          FFListRow(
+            leading: const NotificationRowTile(
+              FontAwesomeIcons.eye,
+              NotificationTints.lockScreen,
+            ),
+            title: 'Lock screen details',
+            value: NotificationLabels.lockScreen(s.lockScreenVisibility),
+            onTap: () => _pickLockScreen(context, s, c),
+          ),
         FFListRow(
           leading: const NotificationRowTile(
             FontAwesomeIcons.hashtag,
@@ -91,6 +124,41 @@ class NotificationBehaviourSection extends ConsumerWidget {
     if (value != null) await c.setDefaultSnooze(value);
   }
 
+  Future<void> _pickRepeat(
+    BuildContext context,
+    AppSettings s,
+    NotificationSettingsController c,
+  ) async {
+    final choice = await showRepeatIntervalSheet(
+      context,
+      current: s.repeatIntervalMinutes,
+    );
+    final value = choice?.value;
+    if (value != null) await c.setRepeatInterval(value);
+  }
+
+  Future<void> _pickRepeatCount(
+    BuildContext context,
+    AppSettings s,
+    NotificationSettingsController c,
+  ) async {
+    final choice = await showNotificationOptionSheet<int>(
+      context,
+      title: 'Repeat up to',
+      subtitle: 'Most times a notification is shown again',
+      selected: s.repeatCount,
+      options: [
+        for (final n in const [1, 2, 3, 5, 10])
+          NotificationOption(
+            value: n,
+            label: NotificationLabels.repeatCount(n),
+          ),
+      ],
+    );
+    final value = choice?.value;
+    if (value != null) await c.setRepeatCount(value);
+  }
+
   Future<void> _pickLockScreen(
     BuildContext context,
     AppSettings s,
@@ -98,10 +166,13 @@ class NotificationBehaviourSection extends ConsumerWidget {
   ) async {
     final choice = await showNotificationOptionSheet<LockScreenVisibility>(
       context,
-      title: 'Show on lock screen',
+      title: 'Lock screen details',
       selected: s.lockScreenVisibility,
       options: [
-        for (final v in LockScreenVisibility.values)
+        // Hiding is the switch above; this only picks how much is shown.
+        for (final v in LockScreenVisibility.values.where(
+          (v) => v != LockScreenVisibility.hidden,
+        ))
           NotificationOption(
             value: v,
             label: NotificationLabels.lockScreen(v),

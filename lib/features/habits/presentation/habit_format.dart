@@ -13,7 +13,6 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
 import 'package:focusflow/features/habits/domain/services/habit_history.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 abstract final class HabitFormat {
   /// `HH:mm` storage form of a time.
@@ -131,5 +130,5 @@ abstract final class HabitFormat {
 
   /// "4:10 PM", or "16:10" when [use24h] (Settings › 24-hour time).
   static String clock(DateTime t, {bool use24h = false}) =>
-      DateFormat(use24h ? 'HH:mm' : 'h:mm a').format(t);
+      DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(t);
 }

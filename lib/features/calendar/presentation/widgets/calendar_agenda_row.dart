@@ -16,10 +16,10 @@ import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/calendar/domain/entities/calendar_entry.dart';
 import 'package:focusflow/features/calendar/presentation/calendar_tokens.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 class CalendarAgendaRow extends StatelessWidget {
   const CalendarAgendaRow({
@@ -41,7 +41,7 @@ class CalendarAgendaRow extends StatelessWidget {
   static String timeLabel(CalendarEntry e, {required bool use24h}) {
     final t = e.time;
     if (t == null) return 'All day';
-    return DateFormat(use24h ? 'HH:mm' : 'h:mm a').format(t);
+    return DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(t);
   }
 
   @override

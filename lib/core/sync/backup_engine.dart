@@ -20,9 +20,16 @@
 /// Vault rows only travel when the vault bridge accepts the backup's key
 /// envelope (same vault key, or no vault here yet). Otherwise Replace keeps
 /// this device's vault and Merge leaves it alone.
+///
+/// The app's settings travel too (`settings.json`, see BackupSettings): a
+/// restore puts them back — Replace takes the backup's, Merge only fills in
+/// what is still at its default — unless the caller opts out (Drive's
+/// automatic merge of another device's backup never touches this device's
+/// settings). A damaged settings entry only skips the settings.
 /// ============================================================
 library;
 
+import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
@@ -30,11 +37,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/database/app_database.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/items_repository.dart';
+import 'package:focusflow/core/settings/backup_settings.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_files.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
 import 'package:focusflow/core/sync/device_profile.dart';
 import 'package:focusflow/core/sync/merge_report.dart';
+import 'package:focusflow/core/sync/settings_bridge.dart';
 import 'package:focusflow/core/sync/snapshot.dart';
 import 'package:focusflow/core/sync/snapshot_io.dart';
 import 'package:focusflow/core/sync/snapshot_merger.dart';
@@ -70,6 +79,8 @@ class RestoreResult {
     this.vaultRestored = true,
     this.filesRestored = 0,
     this.filesMissing = 0,
+    this.settingsRestored = false,
+    this.settingsFailed = false,
   });
 
   final RestoreMode mode;
@@ -85,6 +96,13 @@ class RestoreResult {
 
   /// Referenced files the backup did not contain (or could not open).
   final int filesMissing;
+
+  /// The backup's settings were put in effect on this device.
+  final bool settingsRestored;
+
+  /// The backup has settings that could not be read or saved (damaged, or
+  /// written by a newer app). The data itself is restored regardless.
+  final bool settingsFailed;
 }
 
 class BackupEngine {
@@ -94,6 +112,7 @@ class BackupEngine {
     required this.files,
     required this.deviceId,
     required this.vault,
+    this.settings = const NoSettingsBackupBridge(),
     Future<DeviceProfile> Function()? profile,
     this.clock = const Clock(),
   }) : _profile = profile ?? (() async => DeviceProfile.fallback);
@@ -103,6 +122,9 @@ class BackupEngine {
   final AppFiles files;
   final String deviceId;
   final VaultBackupBridge vault;
+
+  /// The app's configuration carried next to the data.
+  final SettingsBackupBridge settings;
   final Clock clock;
   final Future<DeviceProfile> Function() _profile;
 
@@ -117,17 +139,18 @@ class BackupEngine {
   /// devices already known for this account (this one is added/updated).
   ///
   /// [filter] narrows the snapshot (Import & Export: chosen modules, no
-  /// trash); [includeFiles] false leaves attachments/covers out.
+  /// trash); [includeFiles] false leaves attachments/covers out;
+  /// [includeSettings] false leaves the app's settings out.
   Future<BuiltBackup> build({
     BackupKey? key,
     bool isAuto = false,
     List<LinkedDevice> devices = const [],
     DbSnapshot Function(DbSnapshot snapshot)? filter,
     bool includeFiles = true,
+    bool includeSettings = true,
   }) async {
     final full = await _io.read();
     final snapshot = filter == null ? full : filter(full);
-    final plain = snapshot.encode();
     final payloads = <String, Uint8List>{};
     final carried = includeFiles ? referencedFiles(snapshot) : <String>{};
     for (final path in carried) {
@@ -135,6 +158,7 @@ class BackupEngine {
       if (bytes == null) continue;
       payloads[path] = bytes;
     }
+    final configuration = includeSettings ? await _exportSettings() : null;
     final profile = await _profile();
     final createdAt = clock.now();
     final self = LinkedDevice(
@@ -143,28 +167,57 @@ class BackupEngine {
       platform: profile.platform,
       lastSyncAt: createdAt,
     );
-    final manifest = BackupManifest(
+    final head = _ManifestHead(
       schemaVersion: db.schemaVersion,
       appVersion: profile.appVersion,
       createdAt: createdAt,
       deviceId: deviceId,
       deviceName: profile.name,
       platform: profile.platform,
-      counts: snapshot.counts,
-      itemCount: snapshot.itemCount,
-      checksum: BackupArchive.sha256Hex(plain),
       encryption: key?.params,
-      attachments: payloads.keys.toList()..sort(),
       devices: LinkedDevice.union([self], devices),
       vaultKey: snapshot.rows('vault_items').isEmpty && filter != null
           ? null
           : await vault.exportKeyEnvelope(),
       isAuto: isAuto,
+      hasSettings: configuration != null,
     );
-    return BuiltBackup(
-      bytes: await Isolate.run(() => _pack(manifest, plain, payloads, key)),
-      manifest: manifest,
+    // Everything that grows with the data — the JSON, its checksum, the
+    // sealing, the zip — runs on its own isolate (every argument is plain
+    // data): an auto backup a few seconds after launch must not freeze the
+    // first screens for as long as the database is big.
+    final (bytes, manifest) = await Isolate.run(
+      () => _assemble(head, snapshot, payloads, configuration, key),
     );
+    return BuiltBackup(bytes: bytes, manifest: manifest);
+  }
+
+  /// The isolate half of [build]: encodes the snapshot, describes it in the
+  /// manifest (counts, checksum of the plaintext) and zips the archive.
+  static Future<(Uint8List, BackupManifest)> _assemble(
+    _ManifestHead head,
+    DbSnapshot snapshot,
+    Map<String, Uint8List> files,
+    Uint8List? configuration,
+    BackupKey? key,
+  ) async {
+    final plain = snapshot.encode();
+    final manifest = head.describe(snapshot, plain, files.keys);
+    final bytes = await _pack(manifest, plain, configuration, files, key);
+    return (bytes, manifest);
+  }
+
+  /// The settings as bytes for `settings.json`; null when there is nothing
+  /// to carry. Never fails a backup: settings are a bonus, the data is the
+  /// point.
+  Future<Uint8List?> _exportSettings() async {
+    try {
+      final carried = await settings.export();
+      if (carried == null) return null;
+      return Uint8List.fromList(utf8.encode(jsonEncode(carried.toJson())));
+    } on Object {
+      return null;
+    }
   }
 
   /// Seals (when [key] is set) and zips the archive. The only CPU-heavy part
@@ -174,6 +227,7 @@ class BackupEngine {
   static Future<Uint8List> _pack(
     BackupManifest manifest,
     Uint8List plain,
+    Uint8List? configuration,
     Map<String, Uint8List> files,
     BackupKey? key,
   ) async {
@@ -184,6 +238,9 @@ class BackupEngine {
     return BackupArchive(
       manifest: manifest,
       dbJson: key == null ? plain : await BackupCipher.seal(plain, key),
+      settings: configuration == null || key == null
+          ? configuration
+          : await BackupCipher.seal(configuration, key),
       files: sealed,
     ).encode();
   }
@@ -244,16 +301,44 @@ class BackupEngine {
 
   // ────────────────────────────── Restore ──────────────────────────────
 
+  /// The backup's settings, decrypted and parsed. `value` is null when the
+  /// backup has none, or when they cannot be read — `failed` tells the two
+  /// apart (damaged file, wrong layout, or written by a newer app).
+  Future<({BackupSettings? value, bool failed})> _openSettings(
+    BackupArchive archive,
+    BackupKey? key,
+  ) async {
+    final sealed = archive.settings;
+    if (sealed == null) return (value: null, failed: false);
+    try {
+      final bytes = archive.manifest.isEncrypted
+          ? await BackupCipher.open(sealed, key!)
+          : sealed;
+      final parsed = BackupSettings.fromJson(jsonDecode(utf8.decode(bytes)));
+      return (value: parsed, failed: parsed == null);
+    } on Object {
+      return (value: null, failed: true);
+    }
+  }
+
   /// Restores [archive] (see the file header). Throws [WrongBackupPin] /
   /// [FormatException] before anything changes, and [RestoreFailed] when
   /// writing failed (the database transaction rolled back; the vault key
   /// may already have been swapped — see [RestoreFailed.vaultKeyChanged]).
+  ///
+  /// [applySettings] false restores the data only (see the file header).
   Future<RestoreResult> restore(
     BackupArchive archive, {
     required RestoreMode mode,
     BackupKey? key,
+    bool applySettings = true,
   }) async {
     final incoming = await openSnapshot(archive, key: key);
+    // Opened up front like the snapshot, but a damaged settings entry only
+    // skips the settings — it must never cost the user their data.
+    final ({BackupSettings? value, bool failed}) backedUp = applySettings
+        ? await _openSettings(archive, key)
+        : (value: null, failed: false);
     final keyBefore = await _vaultKeyId();
     final bool vaultOk;
     final MergeReport report;
@@ -309,12 +394,28 @@ class BackupEngine {
         missing++;
       }
     }
+    var settingsRestored = false;
+    var settingsFailed = backedUp.failed;
+    if (backedUp.value case final configuration?) {
+      try {
+        await settings.apply(
+          configuration,
+          replace: mode == RestoreMode.replace,
+        );
+        settingsRestored = true;
+      } on Object {
+        // The data is back; only the settings are reported as not restored.
+        settingsFailed = true;
+      }
+    }
     return RestoreResult(
       mode: mode,
       report: report,
       vaultRestored: vaultOk,
       filesRestored: restored,
       filesMissing: missing,
+      settingsRestored: settingsRestored,
+      settingsFailed: settingsFailed,
     );
   }
 
@@ -365,6 +466,60 @@ class BackupEngine {
   }
 }
 
+/// The parts of a [BackupManifest] known before the snapshot is encoded
+/// (plain data, so it can cross to the isolate that encodes it).
+@immutable
+class _ManifestHead {
+  const _ManifestHead({
+    required this.schemaVersion,
+    required this.appVersion,
+    required this.createdAt,
+    required this.deviceId,
+    required this.deviceName,
+    required this.platform,
+    required this.encryption,
+    required this.devices,
+    required this.vaultKey,
+    required this.isAuto,
+    required this.hasSettings,
+  });
+
+  final int schemaVersion;
+  final String appVersion;
+  final DateTime createdAt;
+  final String deviceId;
+  final String deviceName;
+  final String platform;
+  final BackupKdfParams? encryption;
+  final List<LinkedDevice> devices;
+  final Map<String, Object?>? vaultKey;
+  final bool isAuto;
+  final bool hasSettings;
+
+  /// The manifest of [snapshot] encoded as [plain], carrying [files].
+  BackupManifest describe(
+    DbSnapshot snapshot,
+    Uint8List plain,
+    Iterable<String> files,
+  ) => BackupManifest(
+    schemaVersion: schemaVersion,
+    appVersion: appVersion,
+    createdAt: createdAt,
+    deviceId: deviceId,
+    deviceName: deviceName,
+    platform: platform,
+    counts: snapshot.counts,
+    itemCount: snapshot.itemCount,
+    checksum: BackupArchive.sha256Hex(plain),
+    encryption: encryption,
+    attachments: files.toList()..sort(),
+    devices: devices,
+    vaultKey: vaultKey,
+    isAuto: isAuto,
+    hasSettings: hasSettings,
+  );
+}
+
 /// Writing a restore failed. The database change was rolled back (Replace
 /// and Merge each run in one transaction), so the items are as they were;
 /// [vaultKeyChanged] says whether the backup's vault key had already been
@@ -393,6 +548,7 @@ final backupEngineProvider = Provider<BackupEngine>(
     files: ref.watch(appFilesProvider),
     deviceId: ref.watch(deviceIdProvider),
     vault: ref.watch(vaultBridgeProvider),
+    settings: ref.watch(settingsBackupBridgeProvider),
     profile: () => ref.read(deviceProfileProvider.future),
     clock: ref.watch(clockProvider),
   ),

@@ -12,7 +12,6 @@ library;
 
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
-import 'package:intl/intl.dart';
 
 abstract final class TaskLabels {
   /// "Remind me" choices in minutes before the task (0 = at the time).
@@ -38,8 +37,8 @@ abstract final class TaskLabels {
   static String editorDate(DateTime? day, DateTime now) {
     if (day == null) return 'No date';
     return day.year == now.year
-        ? DateFormat('EEE, MMM d').format(day)
-        : DateFormat('EEE, MMM d, y').format(day);
+        ? DateFormats.of('EEE, MMM d').format(day)
+        : DateFormats.of('EEE, MMM d, y').format(day);
   }
 
   /// Editor time value: "09:00 AM" or "All day".

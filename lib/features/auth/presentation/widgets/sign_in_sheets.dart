@@ -18,6 +18,7 @@ import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:intl/intl.dart';
 
@@ -98,7 +99,7 @@ class _BackupFoundSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = context.text;
     final local = backup.createdAt.toLocal();
-    final when = DateFormat('d MMM y · h:mm a').format(local);
+    final when = DateFormats.of('d MMM y · h:mm a').format(local);
     final items = NumberFormat.decimalPattern().format(backup.itemCount);
     final device = backup.deviceName.isEmpty
         ? ''

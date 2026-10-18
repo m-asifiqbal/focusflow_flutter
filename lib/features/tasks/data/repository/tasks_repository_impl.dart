@@ -509,51 +509,51 @@ class TasksRepositoryImpl extends RepositoryBase implements TasksRepository {
     String? discardNextOccurrenceId,
     List<String> reopenSubtaskIds = const [],
   }) => db.transaction(() async {
-        final s = stamp();
-        final row = await _dao.rowById(id);
-        if (row == null) return;
-        for (final subId in reopenSubtaskIds) {
-          await _dao.updateSubtask(
-            subId,
-            SubtasksCompanion(done: const Value(false), updatedAt: Value(s.now)),
+    final s = stamp();
+    final row = await _dao.rowById(id);
+    if (row == null) return;
+    for (final subId in reopenSubtaskIds) {
+      await _dao.updateSubtask(
+        subId,
+        SubtasksCompanion(done: const Value(false), updatedAt: Value(s.now)),
+      );
+    }
+    final spawnedId = discardNextOccurrenceId;
+    if (spawnedId != null) {
+      final spawned = await _dao.rowById(spawnedId);
+      final rid = spawned?.reminderId;
+      if (spawned != null) {
+        if (rid != null && row.reminderId == null) {
+          // Hand the reminder back to the reopened task.
+          await _items.updateItems(
+            ItemType.task,
+            [id],
+            {'reminder_id': Variable.withString(rid)},
+            s,
           );
+          await _reminders.updateReminder(
+            rid,
+            RemindersCompanion(
+              linkedItemId: Value(id),
+              linkedItemType: Value(ItemType.task.key),
+            ),
+            s,
+          );
+        } else if (rid != null) {
+          await _linked.deleteRows([rid]);
         }
-        final spawnedId = discardNextOccurrenceId;
-        if (spawnedId != null) {
-          final spawned = await _dao.rowById(spawnedId);
-          final rid = spawned?.reminderId;
-          if (spawned != null) {
-            if (rid != null && row.reminderId == null) {
-              // Hand the reminder back to the reopened task.
-              await _items.updateItems(
-                ItemType.task,
-                [id],
-                {'reminder_id': Variable.withString(rid)},
-                s,
-              );
-              await _reminders.updateReminder(
-                rid,
-                RemindersCompanion(
-                  linkedItemId: Value(id),
-                  linkedItemType: Value(ItemType.task.key),
-                ),
-                s,
-              );
-            } else if (rid != null) {
-              await _linked.deleteRows([rid]);
-            }
-            await _dao.deleteSubtasksOf([spawnedId]);
-            await _org.deleteItemTagsOf(ItemType.task, [spawnedId]);
-            await _dao.deleteTask(spawnedId);
-          }
-        }
-        await _dao.updateTask(
-          id,
-          const TasksCompanion(completedAt: Value(null)),
-          s,
-        );
-        await _syncReminder(id, s);
-      });
+        await _dao.deleteSubtasksOf([spawnedId]);
+        await _org.deleteItemTagsOf(ItemType.task, [spawnedId]);
+        await _dao.deleteTask(spawnedId);
+      }
+    }
+    await _dao.updateTask(
+      id,
+      const TasksCompanion(completedAt: Value(null)),
+      s,
+    );
+    await _syncReminder(id, s);
+  });
 
   @override
   Future<void> reschedule(List<String> ids, DateTime? date) => db.transaction(
@@ -637,10 +637,48 @@ class TasksRepositoryImpl extends RepositoryBase implements TasksRepository {
   });
 
   @override
-  Future<void> toggleSubtask(String subtaskId) => _updateSubtask(
-    subtaskId,
-    (row) => SubtasksCompanion(done: Value(!row.done)),
-  );
+  Future<SubtaskChange?> toggleSubtask(String subtaskId) =>
+      _setDone(subtaskId, null);
+
+  @override
+  Future<SubtaskChange?> setSubtaskDone(String subtaskId, bool done) =>
+      _setDone(subtaskId, done);
+
+  /// Flips ([done] null) or sets one subtask and reports whether that left
+  /// its task with nothing open ([SubtaskChange.finishesTask]). The count
+  /// that decides "last open subtask" runs in the write's transaction, so
+  /// two quick taps on different subtasks can't both decide on the same
+  /// stale picture and leave a task with every subtask done but still open.
+  Future<SubtaskChange?> _setDone(String subtaskId, bool? done) =>
+      db.transaction(() async {
+        final row = await _dao.subtaskById(subtaskId);
+        if (row == null) return null;
+        final value = done ?? !row.done;
+        if (value != row.done) {
+          final s = stamp();
+          await _dao.updateSubtask(
+            subtaskId,
+            SubtasksCompanion(done: Value(value), updatedAt: Value(s.now)),
+          );
+          await _touchTask(row.taskId, s);
+        }
+        var finishes = false;
+        if (value) {
+          final task = await _dao.rowById(row.taskId);
+          finishes =
+              task != null &&
+              task.completedAt == null &&
+              task.archivedAt == null &&
+              task.deletedAt == null &&
+              await _dao.openSubtaskCount(row.taskId) == 0;
+        }
+        return SubtaskChange(
+          taskId: row.taskId,
+          subtaskId: subtaskId,
+          done: value,
+          finishesTask: finishes,
+        );
+      });
 
   @override
   Future<void> renameSubtask(String subtaskId, String title) => _updateSubtask(

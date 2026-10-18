@@ -15,9 +15,9 @@ import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/module_style.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/calendar/domain/entities/calendar_entry.dart';
 import 'package:focusflow/features/calendar/presentation/calendar_tokens.dart';
-import 'package:intl/intl.dart';
 
 class CalendarDayCell extends StatelessWidget {
   const CalendarDayCell({
@@ -80,7 +80,7 @@ class CalendarDayCell extends StatelessWidget {
       color: numberColor,
       height: 1,
     );
-    final label = StringBuffer(DateFormat('EEEE, MMMM d').format(day));
+    final label = StringBuffer(DateFormats.of('EEEE, MMMM d').format(day));
     if (isToday) label.write(', today');
     if (dots.isNotEmpty) {
       label.write(', ${dots.map((t) => t.plural.toLowerCase()).join(', ')}');

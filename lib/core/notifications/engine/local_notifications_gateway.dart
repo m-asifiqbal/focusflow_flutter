@@ -344,7 +344,7 @@ class LocalNotificationsGateway implements NotificationGateway {
               notification: n,
               title: title,
               body: body ?? '',
-              fullScreen: await canUseFullScreenIntent(),
+              fullScreen: true,
             ),
           )) {
         _alarmIds.add(n.id);

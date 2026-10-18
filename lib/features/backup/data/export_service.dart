@@ -110,6 +110,7 @@ class ExportService {
           key: key,
           filter: filter,
           includeFiles: o.includeAttachments,
+          includeSettings: o.includeSettings,
         );
         return ExportFile(
           name: 'FocusFlow-${DateUtilsX.dayKey(now)}.ffbackup',

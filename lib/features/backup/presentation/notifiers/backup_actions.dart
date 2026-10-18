@@ -8,7 +8,8 @@
 /// without it), settle the Restore / Start fresh choice, disconnect.
 /// Why: widgets only call these; every service comes from providers. After
 /// a restore the notification plan is rebuilt (restored reminders/habits
-/// get their alerts back, removed ones lose them).
+/// get their alerts back, removed ones lose them) and restored view
+/// preferences are re-read.
 /// ============================================================
 library;
 
@@ -23,6 +24,7 @@ import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/features/backup/domain/entities/backup_record.dart';
 import 'package:focusflow/features/backup/presentation/providers/backup_providers.dart';
+import 'package:focusflow/features/tasks/presentation/providers/tasks_list_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
@@ -65,6 +67,13 @@ class BackupActions {
       await engine.openSnapshot(archive, key: key);
     }
     final result = await engine.restore(archive, mode: mode, key: key);
+    // Settings written straight to SharedPreferences are read once when
+    // their provider is built: rebuild them so the screens show the restore.
+    if (result.settingsRestored) {
+      ref
+        ..invalidate(taskSortProvider)
+        ..invalidate(taskViewProvider);
+    }
     await _noteRestored(archive.manifest, mode);
     try {
       await ref.read(notificationEngineProvider).onResume();

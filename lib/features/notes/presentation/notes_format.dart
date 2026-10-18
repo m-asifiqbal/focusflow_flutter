@@ -11,7 +11,6 @@ library;
 
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
-import 'package:intl/intl.dart';
 
 abstract final class NotesFormat {
   /// "Today", "Yesterday", "Jun 10" (or "Jun 10, 2025" in another year).
@@ -21,13 +20,13 @@ abstract final class NotesFormat {
     if (diff == -1) return 'Yesterday';
     if (diff == 1) return 'Tomorrow';
     return d.year == now.year
-        ? DateFormat('MMM d').format(d)
-        : DateFormat('MMM d, y').format(d);
+        ? DateFormats.of('MMM d').format(d)
+        : DateFormats.of('MMM d, y').format(d);
   }
 
   /// "9:12 AM" / "09:12".
   static String time(DateTime t, {bool use24h = false}) =>
-      DateFormat(use24h ? 'HH:mm' : 'h:mm a').format(t);
+      DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(t);
 
   /// Card footer label: last edit day + folder (or first tag).
   static String cardFooter(Note note, DateTime now) {
@@ -77,7 +76,9 @@ abstract final class NotesFormat {
     final diff = DateUtilsX.daysBetween(now, at);
     if (diff == 0) return 'Reminder ${time(at, use24h: use24h)}';
     if (diff == 1) return 'Reminder tomorrow';
-    if (diff > 1 && diff < 7) return 'Reminder ${DateFormat('EEE').format(at)}';
+    if (diff > 1 && diff < 7) {
+      return 'Reminder ${DateFormats.of('EEE').format(at)}';
+    }
     return 'Reminder ${day(at, now)}';
   }
 }

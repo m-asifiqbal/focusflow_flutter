@@ -6,8 +6,10 @@
 /// blue check circle, title, meta line (due label · list/tag pill · repeat
 /// icon · reminder bell), optional "n/m subtasks" progress, the subtasks
 /// themselves (each with its own check circle: tick one without opening the
-/// task; completing the task ticks them all) and the drag handle. Completed (or pending-complete) rows are struck through and
-/// muted. In multi-select mode the check becomes a selection toggle.
+/// task; completing the task ticks them all, and ticking the last open one
+/// completes the task) and the drag handle. Completed (or pending-complete)
+/// rows are struck through and muted. In multi-select mode the check becomes
+/// a selection toggle.
 /// Why: the row is pure presentation — callbacks come from the screen,
 /// which talks to the controllers (no repository calls here).
 /// ============================================================

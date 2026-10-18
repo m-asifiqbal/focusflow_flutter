@@ -52,6 +52,7 @@ class LedgerEntry {
     this.actions = const [],
     this.reminderId,
     this.exact = true,
+    this.inbox = true,
   });
 
   /// [variant] = delivery options that change the OS copy or its timing
@@ -74,6 +75,7 @@ class LedgerEntry {
     actions: n.inboxActions,
     reminderId: n.reminderId,
     exact: exact,
+    inbox: n.inbox,
   );
 
   final int id;
@@ -92,6 +94,9 @@ class LedgerEntry {
   /// Scheduled as an exact alarm.
   final bool exact;
 
+  /// Delivery adds an inbox entry (false: a "repeat until done" copy).
+  final bool inbox;
+
   /// Identity of one delivery (a snoozed reminder reuses its key).
   String get deliveryKey => '$key@${fireAt.millisecondsSinceEpoch}';
 
@@ -107,6 +112,7 @@ class LedgerEntry {
     if (actions.isNotEmpty) 'a': actions,
     if (reminderId != null) 'm': reminderId,
     if (!exact) 'x': 0,
+    if (!inbox) 'v': 0,
   };
 
   static LedgerEntry? fromJson(Object? j) {
@@ -135,6 +141,7 @@ class LedgerEntry {
       actions: a is List ? a.whereType<String>().toList() : const [],
       reminderId: j['m'] is String ? j['m'] as String : null,
       exact: j['x'] != 0,
+      inbox: j['v'] != 0,
     );
   }
 }

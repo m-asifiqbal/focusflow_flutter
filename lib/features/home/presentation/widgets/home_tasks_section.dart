@@ -30,7 +30,6 @@ import 'package:focusflow/features/tasks/presentation/task_flows.dart';
 import 'package:focusflow/shared/item_actions/item_actions_sheet.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 class HomeTasksSection extends ConsumerWidget {
   const HomeTasksSection({super.key});
@@ -41,7 +40,7 @@ class HomeTasksSection extends ConsumerWidget {
     if (diff == 0) return "Today's Tasks";
     if (diff == 1) return "Tomorrow's Tasks";
     if (diff == -1) return "Yesterday's Tasks";
-    return 'Tasks · ${DateFormat('EEE, MMM d').format(day)}';
+    return 'Tasks · ${DateFormats.of('EEE, MMM d').format(day)}';
   }
 
   @override

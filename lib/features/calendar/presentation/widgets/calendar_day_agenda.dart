@@ -14,13 +14,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/calendar/presentation/calendar_flows.dart';
 import 'package:focusflow/features/calendar/presentation/calendar_tokens.dart';
 import 'package:focusflow/features/calendar/presentation/providers/calendar_providers.dart';
 import 'package:focusflow/features/calendar/presentation/widgets/calendar_agenda_row.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 class CalendarDayAgenda extends ConsumerWidget {
   const CalendarDayAgenda({
@@ -101,7 +101,7 @@ class _Title extends StatelessWidget {
           child: Semantics(
             header: true,
             child: Text(
-              DateFormat('EEEE, MMMM d').format(day),
+              DateFormats.of('EEEE, MMMM d').format(day),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.text.title.copyWith(
@@ -143,7 +143,7 @@ class CalendarEmptyDay extends StatelessWidget {
       button: true,
       label:
           'Nothing planned. Add something on '
-          '${DateFormat('EEEE, MMMM d').format(day)}',
+          '${DateFormats.of('EEEE, MMMM d').format(day)}',
       excludeSemantics: true,
       child: FFCard(
         onTap: onAdd,

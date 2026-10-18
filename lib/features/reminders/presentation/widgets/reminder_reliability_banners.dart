@@ -20,6 +20,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/notifications/alarm_overlay.dart';
 import 'package:focusflow/core/notifications/background_delivery.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -38,6 +39,10 @@ class ReminderReliabilityBanners extends ConsumerWidget {
   static const String backgroundText =
       'Allow reminders in the background — some phones stop them when the '
       'app is closed.';
+
+  static const String overAppsText =
+      'Let alarms appear over other apps — otherwise the alarm screen opens '
+      'only when you tap the notification.';
 
   /// [brand] phones stop alarms of an app that is swiped away unless it is
   /// on the maker's auto-start list.
@@ -58,6 +63,9 @@ class ReminderReliabilityBanners extends ConsumerWidget {
     final restricted = showAll
         ? ref.watch(unrestrictedBackgroundProvider).valueOrNull == false
         : ref.watch(suggestUnrestrictedBackgroundProvider);
+    // Settings only: the editor shows its own, for alarm-style reminders.
+    final overAppsOff =
+        showAll && ref.watch(alarmOverAppsAllowedProvider).valueOrNull == false;
     final brand = ref.watch(aggressiveBrandProvider).valueOrNull;
     final autostartWanted = showAll || ref.watch(suggestAutostartProvider);
     final colors = ModuleStyle.reminders.colors;
@@ -77,6 +85,14 @@ class ReminderReliabilityBanners extends ConsumerWidget {
           text: backgroundText,
           actionLabel: 'Allow',
           onAction: () => allowRemindersInBackground(ref),
+        ),
+      if (overAppsOff)
+        FFInfoBanner(
+          icon: FontAwesomeIcons.windowRestore,
+          colors: colors,
+          text: overAppsText,
+          actionLabel: 'Allow',
+          onAction: () => allowAlarmOverApps(ref),
         ),
       // Last, and only when nothing else is pending (the editor shows one).
       if (brand != null &&

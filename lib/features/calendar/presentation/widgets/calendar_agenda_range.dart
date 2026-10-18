@@ -17,7 +17,6 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/calendar/presentation/calendar_tokens.dart';
 import 'package:focusflow/features/calendar/presentation/widgets/calendar_day_agenda.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 class CalendarAgendaRange extends StatelessWidget {
   const CalendarAgendaRange({
@@ -38,7 +37,7 @@ class CalendarAgendaRange extends StatelessWidget {
       for (var i = 0; i < CalendarDimens.agendaDays; i++)
         DateUtilsX.addDays(start, i),
     ];
-    final fmt = DateFormat('MMM d');
+    final fmt = DateFormats.of('MMM d');
     final rtl = Directionality.of(context) == TextDirection.rtl;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

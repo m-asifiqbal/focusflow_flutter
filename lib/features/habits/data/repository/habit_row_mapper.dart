@@ -64,10 +64,10 @@ abstract final class HabitRowMapper {
     deletedAt: r.deletedAt,
   );
 
-  static HabitLog log(HabitLogRow r) => HabitLog(
+  static HabitLog log(HabitLogRow r) => HabitLog.keyed(
     id: r.id,
     habitId: r.habitId,
-    date: DateUtilsX.parseDayKey(r.date),
+    dayKey: r.date,
     count: r.count,
     skipped: r.skipped,
     note: r.note,

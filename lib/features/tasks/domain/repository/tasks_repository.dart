@@ -113,6 +113,40 @@ class TaskCompletion {
   /// `uncomplete(..., reopenSubtaskIds:)` for Undo, so a subtask the user
   /// had finished before stays finished.
   final List<String> completedSubtaskIds;
+
+  /// This completion plus subtasks the user's own gesture ticked just before
+  /// it (ticking the last open subtask completes the task): Undo gives back
+  /// all of them.
+  TaskCompletion withSubtasks(List<String> ticked) => TaskCompletion(
+    taskId: taskId,
+    completed: completed,
+    nextOccurrenceId: nextOccurrenceId,
+    completedSubtaskIds: [...ticked, ...completedSubtaskIds],
+  );
+}
+
+/// Result of [TasksRepository.toggleSubtask] / [TasksRepository.setSubtaskDone].
+@immutable
+class SubtaskChange {
+  const SubtaskChange({
+    required this.taskId,
+    required this.subtaskId,
+    required this.done,
+    this.finishesTask = false,
+  });
+
+  final String taskId;
+  final String subtaskId;
+
+  /// The subtask's state now.
+  final bool done;
+
+  /// The change left *every* subtask of an open, active task done: the task
+  /// is due to be completed. Decided inside the write's transaction (never
+  /// from a possibly stale list snapshot); completing has its own delay and
+  /// Undo, so the repository only reports it and the caller completes the
+  /// task (see `TaskCompletionController`).
+  final bool finishesTask;
 }
 
 abstract interface class TasksRepository {
@@ -181,7 +215,12 @@ abstract interface class TasksRepository {
   // ───────────────────────── Subtasks ─────────────────────────
   /// Appends a subtask. Returns its id.
   Future<String> addSubtask(String taskId, String title);
-  Future<void> toggleSubtask(String subtaskId);
+
+  /// Flips one subtask. Null when it no longer exists.
+  Future<SubtaskChange?> toggleSubtask(String subtaskId);
+
+  /// Sets one subtask's state (idempotent). Null when it no longer exists.
+  Future<SubtaskChange?> setSubtaskDone(String subtaskId, bool done);
   Future<void> renameSubtask(String subtaskId, String title);
 
   /// Persists the order of a task's subtasks ([orderedIds] = new order).

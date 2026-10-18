@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
 import 'package:focusflow/core/widgets/src/ff_calendar_day_tile.dart';
 import 'package:focusflow/core/widgets/src/ff_token_gaps.dart';
@@ -98,7 +99,7 @@ class _FFWeekStripState extends State<FFWeekStrip> {
   }
 
   String _semantic(DateTime d, bool items) {
-    final label = DateFormat('EEEE, MMMM d').format(d);
+    final label = DateFormats.of('EEEE, MMMM d').format(d);
     return items ? '$label, has items' : label;
   }
 

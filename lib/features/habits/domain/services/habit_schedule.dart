@@ -42,10 +42,11 @@ abstract final class HabitSchedule {
     DateTime day, {
     bool ignorePause = false,
   }) {
-    final offset = daysBetween(habit.startDate, day);
+    final dayNo = DateUtilsX.dayNumber(day);
+    final offset = dayNo - DateUtilsX.dayNumber(habit.startDate);
     if (offset < 0) return false;
     if (habit.isPaused && !ignorePause) return false;
-    return _isDue(habit, DateUtilsX.dateOnly(day), offset);
+    return isDueByNumber(habit, dayNo, offset);
   }
 
   /// Is [habit] actually due on [day], given its logs ([byDay], from
@@ -99,24 +100,24 @@ abstract final class HabitSchedule {
   }) {
     if (habit.isPaused && !ignorePause) return <DateTime>[];
     final start = DateUtilsX.dateOnly(habit.startDate);
-    final fromOffset = daysBetween(start, from);
+    final startNo = DateUtilsX.dayNumber(start);
+    final fromOffset = DateUtilsX.dayNumber(from) - startNo;
     final firstOffset = fromOffset < 0 ? 0 : fromOffset;
-    final lastOffset = daysBetween(start, to);
+    final lastOffset = DateUtilsX.dayNumber(to) - startNo;
     final result = <DateTime>[];
     for (var i = firstOffset; i <= lastOffset; i++) {
-      final day = DateTime(start.year, start.month, start.day + i);
-      if (_isDue(habit, day, i)) result.add(day);
+      // Decide on integers; a DateTime is only built for the days that count.
+      if (isDueByNumber(habit, startNo + i, i)) {
+        result.add(DateTime(start.year, start.month, start.day + i));
+      }
     }
     return result;
   }
 
   /// Whole calendar days from [from] to [to] (negative when [to] is
   /// earlier). Time of day is ignored; DST-safe.
-  static int daysBetween(DateTime from, DateTime to) => DateTime.utc(
-    to.year,
-    to.month,
-    to.day,
-  ).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
+  static int daysBetween(DateTime from, DateTime to) =>
+      DateUtilsX.dayNumber(to) - DateUtilsX.dayNumber(from);
 
   /// Logs keyed by their `yyyy-MM-dd` day (one log per habit and day; if the
   /// input has duplicates, the last one wins).
@@ -146,12 +147,19 @@ abstract final class HabitSchedule {
     return habit.progressWith(log);
   }
 
-  /// Frequency rule for a day that is [offset] days after the start date.
-  static bool _isDue(Habit habit, DateTime day, int offset) {
+  /// Weekday (`DateTime.monday … sunday`) of a [DateUtilsX.dayNumber]
+  /// (1970-01-01 was a Thursday), by arithmetic — no `DateTime` needed.
+  static int weekdayOfNumber(int dayNo) => (dayNo + 3) % 7 + 1;
+
+  /// Frequency rule for the day numbered [dayNo] ([DateUtilsX.dayNumber]),
+  /// [offset] days after the habit's start date. The integer form of the
+  /// rule: streaks and planners walk years of days with it without building
+  /// a `DateTime` (a time-zone lookup) for each.
+  static bool isDueByNumber(Habit habit, int dayNo, int offset) {
     if (habit.isQuit) return true;
     return switch (habit.frequency) {
       EveryDayFrequency() => true,
-      final SpecificDaysFrequency f => f.includes(day.weekday),
+      final SpecificDaysFrequency f => f.includes(weekdayOfNumber(dayNo)),
       TimesPerWeekFrequency() => true,
       EveryNDaysFrequency(:final days) => days <= 1 || offset % days == 0,
     };

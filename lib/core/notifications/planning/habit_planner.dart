@@ -23,6 +23,7 @@ import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/notifications/planning/planner_input.dart';
 import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
 import 'package:focusflow/features/habits/domain/services/habit_schedule.dart';
 
@@ -42,7 +43,7 @@ abstract final class HabitPlanner {
       if (!input.settings.notifyStreakRisk) return false;
       return parts.length < 2 ||
           parts[1] != todayKey ||
-          _atRisk(input, input.today).isNotEmpty;
+          _atRisk(input).isNotEmpty;
     }
     if (parts.length < 3) return true;
     if (!input.settings.notifyHabits) return false;
@@ -139,48 +140,63 @@ abstract final class HabitPlanner {
     DateTime until,
   ) {
     final cal = input.calendar;
+    final eligible = [
+      for (final s in input.habits)
+        if (_streakEligible(s.habit)) s,
+    ];
+    // The streak a habit would have on the morning of each later day if
+    // today and every scheduled day in between are checked in, kept as a
+    // running total while the days are walked once (the projection used to
+    // be recounted from today for every day: habits × days² schedule
+    // checks).
+    final running = [
+      for (final s in eligible) s.currentStreak + (_pendingToday(s) ? 1 : 0),
+    ];
     final result = <PlannedNotification>[];
-    for (var day = input.today; ; day = ZoneCalendar.addDays(day, 1)) {
+    var index = 0;
+    for (var day = input.today; ; day = ZoneCalendar.addDays(day, 1), index++) {
       final fireAt = cal.at(day, PlannerTimes.streakRiskMinutes);
       if (!fireAt.isBefore(until)) break;
+      final atRisk = <(HabitDayStatus, int)>[];
+      for (var k = 0; k < eligible.length; k++) {
+        final s = eligible[k];
+        final int streak;
+        if (index == 0) {
+          streak = _pendingToday(s) ? s.currentStreak : 0;
+        } else if (HabitSchedule.isScheduledOn(s.habit, day)) {
+          streak = running[k];
+          running[k]++; // this day, checked in, lengthens the later ones
+        } else {
+          streak = 0;
+        }
+        if (streak >= 2) atRisk.add((s, streak));
+      }
       if (!fireAt.isAfter(input.now)) continue;
-      final atRisk = _atRisk(input, day);
-      if (atRisk.isNotEmpty) result.add(_streakNotice(day, fireAt, atRisk));
+      if (atRisk.isEmpty) continue;
+      atRisk.sort((a, b) => b.$2.compareTo(a.$2));
+      result.add(_streakNotice(day, fireAt, atRisk));
     }
     return result;
   }
 
-  /// `(status, projected streak)` of build habits whose streak is at risk
-  /// on [day], longest streak first.
-  static List<(HabitDayStatus, int)> _atRisk(PlannerInput input, DateTime day) {
-    final today = input.today;
+  /// Build habits that can have a streak at risk (active, not paused).
+  static bool _streakEligible(Habit h) =>
+      h.isActive && !h.isPaused && !h.isQuit;
+
+  /// Scheduled today and neither done nor skipped yet.
+  static bool _pendingToday(HabitDayStatus s) =>
+      s.isScheduled && !s.isDone && !s.isSkipped;
+
+  /// `(status, streak)` of build habits whose streak is at risk *today*,
+  /// longest streak first.
+  static List<(HabitDayStatus, int)> _atRisk(PlannerInput input) {
     final result = <(HabitDayStatus, int)>[];
     for (final s in input.habits) {
-      final h = s.habit;
-      if (!h.isActive || h.isPaused || h.isQuit) continue;
-      final streak = day == today
-          ? (s.isScheduled && !s.isDone && !s.isSkipped ? s.currentStreak : 0)
-          : _projectedStreak(s, today, day);
+      if (!_streakEligible(s.habit)) continue;
+      final streak = _pendingToday(s) ? s.currentStreak : 0;
       if (streak >= 2) result.add((s, streak));
     }
     return result..sort((a, b) => b.$2.compareTo(a.$2));
-  }
-
-  /// The streak on the morning of [day] (after today) if today and every
-  /// scheduled day in between are checked in; 0 when not scheduled then.
-  static int _projectedStreak(HabitDayStatus s, DateTime today, DateTime day) {
-    final h = s.habit;
-    if (!HabitSchedule.isScheduledOn(h, day)) return 0;
-    var streak = s.currentStreak;
-    if (s.isScheduled && !s.isDone && !s.isSkipped) streak++;
-    for (
-      var d = ZoneCalendar.addDays(today, 1);
-      d.isBefore(day);
-      d = ZoneCalendar.addDays(d, 1)
-    ) {
-      if (HabitSchedule.isScheduledOn(h, d)) streak++;
-    }
-    return streak;
   }
 
   static PlannedNotification _streakNotice(

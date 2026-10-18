@@ -189,6 +189,16 @@ class _PreviewSheet extends StatelessWidget {
                 title: label,
                 value: '$n',
               ),
+            if (m.hasSettings)
+              FFListRow(
+                leading: FFIconTile(
+                  icon: FontAwesomeIcons.sliders,
+                  colors: BackupTints.settings,
+                  size: AppSizes.iconTileSm,
+                ),
+                title: 'App settings',
+                value: 'Included',
+              ),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -199,7 +209,10 @@ class _PreviewSheet extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Adds what is missing; the newest edit of each item wins.',
+          m.hasSettings
+              ? 'Adds what is missing; the newest edit of each item wins. '
+                    'Settings you changed on this phone stay.'
+              : 'Adds what is missing; the newest edit of each item wins.',
           textAlign: TextAlign.center,
           style: text.meta.copyWith(fontWeight: FontWeight.w400),
         ),
@@ -229,12 +242,15 @@ Future<String?> runRestoreFlow(
   );
   if (mode == null || !context.mounted) return null;
   if (mode == RestoreMode.replace) {
+    final withSettings = archive.manifest.hasSettings
+        ? ' Settings are restored too.'
+        : '';
     final ok = await showFFConfirm(
       context,
       title: 'Replace all data?',
       message:
           "Everything on this phone is replaced by the backup. Items that "
-          "aren't in the backup are removed.",
+          "aren't in the backup are removed.$withSettings",
       confirmLabel: 'Replace',
       destructive: true,
       icon: FontAwesomeIcons.triangleExclamation,
@@ -287,7 +303,8 @@ Future<String?> runRestoreFlow(
 }
 
 /// The toast after a restore: what came back, and what didn't (vault
-/// rows kept because this phone's vault uses another key, files missing).
+/// rows kept because this phone's vault uses another key, files missing,
+/// settings that could not be read).
 @visibleForTesting
 String restoreSummary(RestoreResult r) {
   final rep = r.report;
@@ -296,12 +313,14 @@ String restoreSummary(RestoreResult r) {
       'Restored ${rep.added} ${rep.added == 1 ? 'item' : 'items'}'
     else
       'Restore done · ${rep.added} added · ${rep.updated} updated',
+    if (r.settingsRestored) 'Settings restored',
     if (!r.vaultRestored)
       "Vault items weren't restored — this phone's vault uses a different "
           'PIN',
     if (r.filesMissing > 0)
       '${r.filesMissing} ${r.filesMissing == 1 ? 'attachment is' : 'attachments are'} '
           'missing',
+    if (r.settingsFailed) "Settings couldn't be restored",
   ];
   return parts.join(' · ');
 }

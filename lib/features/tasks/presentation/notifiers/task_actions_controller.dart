@@ -33,6 +33,11 @@ class TaskCompletionController extends Notifier<Set<String>> {
   final Map<String, Future<TaskCompletion>> _inFlight = {};
   final Map<String, TaskCompletion> _results = {};
 
+  /// Subtasks the user ticked just before a completion that is waiting to be
+  /// written (ticking the last open subtask completes the task): they are
+  /// part of the gesture, so Undo gives them back too.
+  final Map<String, List<String>> _tickedBefore = {};
+
   late TasksRepository _repo;
 
   @override
@@ -51,8 +56,15 @@ class TaskCompletionController extends Notifier<Set<String>> {
 
   /// Completes the open task [id]. With a non-zero [after] the row shows as
   /// done first and the write happens later (pass zero under reduce motion).
-  void complete(String id, {Duration after = delay}) {
+  /// [tickedBefore] are subtasks the same gesture has just ticked (the last
+  /// open one): Undo and [reopen] give them back with the completion.
+  void complete(
+    String id, {
+    Duration after = delay,
+    List<String> tickedBefore = const [],
+  }) {
     if (_timers.containsKey(id) || _inFlight.containsKey(id)) return;
+    if (tickedBefore.isNotEmpty) _tickedBefore[id] = tickedBefore;
     state = {...state, id};
     if (after == Duration.zero) {
       _write(id);
@@ -69,9 +81,12 @@ class TaskCompletionController extends Notifier<Set<String>> {
     final future = _repo.complete(id);
     _inFlight[id] = future;
     try {
-      _results[id] = await future;
+      final result = await future;
+      final ticked = _tickedBefore.remove(id);
+      _results[id] = ticked == null ? result : result.withSubtasks(ticked);
     } finally {
       _inFlight.remove(id);
+      _tickedBefore.remove(id);
       state = {...state}..remove(id);
     }
   }
@@ -83,6 +98,11 @@ class TaskCompletionController extends Notifier<Set<String>> {
     if (timer != null) {
       timer.cancel();
       state = {...state}..remove(id);
+      // Nothing was completed yet: only the subtask tick that started the
+      // gesture (if any) is given back.
+      for (final subtaskId in _tickedBefore.remove(id) ?? const <String>[]) {
+        await _repo.setSubtaskDone(subtaskId, false);
+      }
       return;
     }
     final inFlight = _inFlight[id];
@@ -108,7 +128,11 @@ class TaskCompletionController extends Notifier<Set<String>> {
   /// not done", board "Done → To do"). When this session completed a repeating task, the next
   /// occurrence that completion spawned is discarded too — as long as it
   /// is still open and active — so reopening never leaves two open copies.
-  Future<void> reopen(String id) async {
+  ///
+  /// Subtasks the completion ticked are un-ticked again, unless [subtasks]
+  /// names exactly which ones to open (un-ticking one subtask of a done
+  /// task reopens it with only that subtask open).
+  Future<void> reopen(String id, {List<String>? subtasks}) async {
     final result = _results.remove(id);
     final spawnedId = result?.nextOccurrenceId;
     String? discard;
@@ -121,7 +145,7 @@ class TaskCompletionController extends Notifier<Set<String>> {
     await _repo.uncomplete(
       id,
       discardNextOccurrenceId: discard,
-      reopenSubtaskIds: result?.completedSubtaskIds ?? const [],
+      reopenSubtaskIds: subtasks ?? result?.completedSubtaskIds ?? const [],
     );
   }
 }
@@ -133,6 +157,23 @@ final taskCompletionProvider =
 
 /// Previous due dates of rescheduled tasks, for Undo.
 typedef RescheduleUndo = Future<void> Function();
+
+/// What a tap on a subtask's check circle did (see
+/// [TaskActions.toggleSubtask]).
+enum SubtaskOutcome {
+  /// Only that subtask changed.
+  toggled,
+
+  /// It was the last open subtask: the task is being completed (with the
+  /// usual delay), and Undo gives the subtask back too.
+  completedTask,
+
+  /// The task was done: it is open again with only that subtask open.
+  reopenedTask,
+
+  /// The task is settling after its own completion; nothing was done.
+  ignored,
+}
 
 class TaskActions {
   const TaskActions(this._repo, this._completion);
@@ -161,9 +202,34 @@ class TaskActions {
   Future<void> setPriority(String id, TaskPriority priority) =>
       _repo.setPriority(id, priority);
 
-  /// Ticks / un-ticks one subtask from a task row.
-  Future<void> toggleSubtask(String subtaskId) =>
-      _repo.toggleSubtask(subtaskId);
+  /// Ticks / un-ticks [subtask] of [task] from a row or board card. A task
+  /// is done exactly when all its subtasks are, so:
+  ///  * ticking the last open subtask completes the task — after
+  ///    [completeAfter], like a tap on its own check;
+  ///  * un-ticking a subtask of a done task (every subtask shows ticked)
+  ///    reopens it with just that subtask open;
+  ///  * anything else only flips the subtask.
+  /// "Last open" is decided by the repository inside the write, never from
+  /// [task] (a list snapshot can be a moment stale).
+  Future<SubtaskOutcome> toggleSubtask(
+    TaskItem task,
+    Subtask subtask, {
+    Duration completeAfter = TaskCompletionController.delay,
+  }) async {
+    if (_completion.isPending(task.id)) return SubtaskOutcome.ignored;
+    if (task.isCompleted) {
+      await _completion.reopen(task.id, subtasks: [subtask.id]);
+      return SubtaskOutcome.reopenedTask;
+    }
+    final change = await _repo.toggleSubtask(subtask.id);
+    if (change == null || !change.finishesTask) return SubtaskOutcome.toggled;
+    _completion.complete(
+      task.id,
+      after: completeAfter,
+      tickedBefore: [subtask.id],
+    );
+    return SubtaskOutcome.completedTask;
+  }
 
   /// Persists a drag inside one section. [section] is the order the user
   /// saw; [oldIndex] / [newIndex] follow ReorderableList semantics (the new

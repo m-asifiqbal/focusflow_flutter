@@ -323,6 +323,7 @@ class NotificationReconciler {
   }
 
   Future<void> _deliver(LedgerEntry e) async {
+    if (!e.inbox) return; // a repeat of one already recorded
     try {
       await inbox.add(
         kind: e.kind,

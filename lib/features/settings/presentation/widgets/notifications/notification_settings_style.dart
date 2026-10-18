@@ -15,7 +15,8 @@ import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/module_style.dart';
-import 'package:intl/intl.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
+import 'package:focusflow/features/reminders/presentation/state/reminder_alert_options.dart';
 
 /// Icon-tile tints of the rows (solid tile, white glyph).
 abstract final class NotificationTints {
@@ -61,6 +62,9 @@ abstract final class NotificationTints {
   /// Show on lock screen — teal.
   static const lockScreen = ActionTints.share;
 
+  /// Repeat until done — amber.
+  static const repeat = NotificationTints.morning;
+
   /// App icon badge — pink.
   static const badge = TagPalette.personal;
 
@@ -75,21 +79,30 @@ abstract final class NotificationLabels {
   /// "8:00 AM" / "08:00" for minutes after midnight.
   static String time(int minutes, {required bool use24h}) {
     final t = DateTime(2000, 1, 1, minutes ~/ 60, minutes % 60);
-    return DateFormat(use24h ? 'HH:mm' : 'h:mm a').format(t);
+    return DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(t);
   }
 
   /// "Sun" for [DateTime.sunday] (1 = Monday … 7 = Sunday).
-  static String weekdayShort(int weekday) =>
-      DateFormat('EEE').format(DateTime(2024, 1, weekday)); // 2024-01-01 = Mon
+  static String weekdayShort(int weekday) => DateFormats.of(
+    'EEE',
+  ).format(DateTime(2024, 1, weekday)); // 2024-01-01 = Mon
 
   /// "Sunday".
   static String weekdayLong(int weekday) =>
-      DateFormat('EEEE').format(DateTime(2024, 1, weekday));
+      DateFormats.of('EEEE').format(DateTime(2024, 1, weekday));
 
   /// The seven weekdays starting at [weekStartsOn].
   static List<int> orderedWeekdays(int weekStartsOn) => [
     for (var i = 0; i < 7; i++) (weekStartsOn - 1 + i) % 7 + 1,
   ];
+
+  /// "Off", "Every 10 min", "Every 2 hours".
+  static String repeat(int minutes) => minutes <= 0
+      ? 'Never'
+      : 'Every ${ReminderAlertOptions.snoozeLabel(minutes)}';
+
+  /// "3 times".
+  static String repeatCount(int n) => n == 1 ? 'Once' : '$n times';
 
   static String lockScreen(LockScreenVisibility v) => switch (v) {
     LockScreenVisibility.full => 'Full content',

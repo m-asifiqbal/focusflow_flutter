@@ -126,15 +126,83 @@ extension ItemTablesX on AppDatabase {
   };
 }
 
+/// Live shared queries per database ([ReactiveQueries.watchComputed]'s
+/// `shareKey`).
+final Expando<Map<Object, Object>> _sharedQueries =
+    Expando<Map<Object, Object>>('shared queries');
+
+/// One running computation serving many listeners: the latest value is
+/// replayed to a late listener, writes re-run it once for all, and it stops
+/// (and forgets the value) when the last listener leaves.
+class _SharedQuery<T> {
+  _SharedQuery({required this.start, required this.release});
+
+  final Stream<T> Function() start;
+  final void Function() release;
+  final List<MultiStreamController<T>> _listeners = [];
+  StreamSubscription<T>? _upstream;
+  bool _hasValue = false;
+  T? _value;
+
+  Stream<T> get stream => Stream<T>.multi((controller) {
+    _listeners.add(controller);
+    if (_hasValue) controller.add(_value as T);
+    _upstream ??= start().listen(
+      (value) {
+        _hasValue = true;
+        _value = value;
+        for (final l in [..._listeners]) {
+          l.add(value);
+        }
+      },
+      onError: (Object error, StackTrace stack) {
+        for (final l in [..._listeners]) {
+          l.addError(error, stack);
+        }
+      },
+    );
+    controller.onCancel = () {
+      _listeners.remove(controller);
+      if (_listeners.isNotEmpty) return null;
+      final upstream = _upstream;
+      _upstream = null;
+      _hasValue = false;
+      _value = null;
+      release();
+      return upstream?.cancel();
+    };
+  }, isBroadcast: true);
+}
+
 extension ReactiveQueries on GeneratedDatabase {
   /// A stream that runs [compute] once on listen and again whenever any of
   /// [tables] is written (after the transaction commits). Bursts of writes
   /// are coalesced, and values deep-equal to the previous emission are
   /// skipped so Riverpod listeners don't rebuild needlessly.
+  ///
+  /// [shareKey] makes the stream *shared*: every caller that passes an equal
+  /// key (a record naming the query and all its parameters) listens to one
+  /// computation instead of running its own. Use it for expensive queries
+  /// several screens show at once (Home, the library counts and the
+  /// notification planner all read today's habits): each write then costs
+  /// one recomputation, not one per subscriber.
   Stream<T> watchComputed<T>(
     Iterable<ResultSetImplementation<dynamic, dynamic>> tables,
-    Future<T> Function() compute,
-  ) {
+    Future<T> Function() compute, {
+    Object? shareKey,
+  }) {
+    if (shareKey != null) {
+      final registry = _sharedQueries[this] ??= <Object, Object>{};
+      final live = registry[shareKey];
+      if (live != null) return (live as _SharedQuery<T>).stream;
+      final watched = tables.toList();
+      final shared = _SharedQuery<T>(
+        start: () => watchComputed(watched, compute),
+        release: () => registry.remove(shareKey),
+      );
+      registry[shareKey] = shared;
+      return shared.stream;
+    }
     const eq = DeepCollectionEquality();
     final query = TableUpdateQuery.onAllTables(tables);
     StreamSubscription<Set<TableUpdate>>? sub;

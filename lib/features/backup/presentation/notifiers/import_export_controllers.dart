@@ -83,6 +83,8 @@ class ExportController extends AutoDisposeNotifier<ExportState> {
   void setAttachments(bool v) =>
       _set(state.options.copyWith(includeAttachments: v));
 
+  void setSettings(bool v) => _set(state.options.copyWith(includeSettings: v));
+
   void setTarget(ExportTarget t) => _set(state.options.copyWith(target: t));
 
   /// Builds and saves the export. Returns the message for the snackbar,

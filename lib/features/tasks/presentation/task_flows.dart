@@ -2,7 +2,8 @@
 /// TASK FLOWS — the UI flows around task writes (snackbars, sheets)
 /// ============================================================
 ///
-/// What: complete (with the 5 s Undo snackbar), reopen, reschedule via the
+/// What: complete (with the 5 s Undo snackbar), reopen, subtask ticks (the
+/// last one completes the task), reschedule via the
 /// due date sheet (with Undo) and the priority sheet. Rows, swipe actions,
 /// the long-press sheet (task_item_actions.dart), the board and the
 /// editor all call these.
@@ -56,6 +57,38 @@ void completeTask(
 /// Reopens a completed task (tap on a filled check / "Mark as not done").
 Future<void> reopenTask(WidgetRef ref, String id) =>
     ref.read(taskCompletionProvider.notifier).reopen(id);
+
+/// A subtask's check circle was tapped on a row or board card. A task is
+/// done exactly when all its subtasks are ([TaskActions.toggleSubtask]):
+/// ticking the last open one completes the task with the same delay and
+/// "… completed · UNDO" as its own check (Undo un-ticks that subtask too);
+/// un-ticking one of a done task reopens it.
+Future<void> toggleTaskSubtask(
+  BuildContext context,
+  WidgetRef ref,
+  TaskItem task,
+  Subtask subtask,
+) async {
+  // Everything the flow needs from context / ref is read before the await:
+  // the row may be gone when the write lands.
+  final actions = ref.read(taskActionsProvider);
+  final controller = ref.read(taskCompletionProvider.notifier);
+  final wait = context.reduceMotion
+      ? Duration.zero
+      : TaskCompletionController.delay;
+  final outcome = await actions.toggleSubtask(
+    task,
+    subtask,
+    completeAfter: wait,
+  );
+  if (outcome != SubtaskOutcome.completedTask || !context.mounted) return;
+  showUndoSnackbar(
+    context,
+    message: '${_quoted(task.title)} completed',
+    icon: FontAwesomeIcons.solidCircleCheck,
+    onUndo: () => controller.undo(task.id),
+  );
+}
 
 /// Asks for a new due date for [tasks] and moves them, with Undo.
 /// Returns true when anything changed.

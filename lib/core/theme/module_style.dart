@@ -104,8 +104,7 @@ class ModuleStyle {
     AppModule.scan => scan,
   };
 
-  static ModuleStyle forType(ItemType type) =>
-      of(AppModule.fromItemType(type));
+  static ModuleStyle forType(ItemType type) => of(AppModule.fromItemType(type));
 }
 
 extension ItemTypeStyle on ItemType {

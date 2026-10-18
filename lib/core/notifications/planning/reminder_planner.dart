@@ -30,7 +30,6 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
-import 'package:intl/intl.dart';
 
 abstract final class ReminderPlanner {
   /// Planned notifications for every reminder occurrence in
@@ -58,6 +57,9 @@ abstract final class ReminderPlanner {
           _describe(input, r, occurrence, fireAt, taskLinked, linkedTask),
         );
       }
+      result.addAll(
+        _repeats(input, r, taskLinked, linkedTask, pendingUntil ?? until),
+      );
     }
     return result;
   }
@@ -122,6 +124,45 @@ abstract final class ReminderPlanner {
     return result;
   }
 
+  /// A plan key of a "repeat until done" copy: `rem:<id>:<epoch>:r<n>`.
+  static bool isRepeatKey(String key) => key.split(':').length > 3;
+
+  /// "Repeat until done" (Settings › Notifications): a reminder that is
+  /// still open — not done, not archived — is shown again every
+  /// `repeatIntervalMinutes`, up to `repeatCount` times, counted from its
+  /// pending time (the snooze, once snoozed). Marking it done, snoozing or
+  /// switching it off drops the copies at the next pass (they are plain plan
+  /// entries). Alarm-style reminders keep ringing by themselves and are
+  /// left out; a repeating reminder's copies stop before its next
+  /// occurrence. Copies carry no inbox entry of their own.
+  static List<PlannedNotification> _repeats(
+    PlannerInput input,
+    Reminder r,
+    bool taskLinked,
+    TaskItem? task,
+    DateTime until,
+  ) {
+    final every = input.settings.repeatIntervalMinutes;
+    if (every <= 0 || r.alertStyle == AlertStyle.alarm) return const [];
+    final snooze = r.snoozedUntil;
+    final base = snooze != null && snooze.isAfter(input.now)
+        ? snooze
+        : r.triggerAt;
+    final limit = r.recurrence?.nextAfter(r.triggerAt, r.triggerAt);
+    final out = <PlannedNotification>[];
+    for (var k = 1; k <= input.settings.repeatCount; k++) {
+      final at = base.add(Duration(minutes: every * k));
+      if (!at.isAfter(input.now)) continue;
+      if (!at.isBefore(until) || (limit != null && !at.isBefore(limit))) break;
+      final first = _describe(input, r, r.triggerAt, at, taskLinked, task);
+      final key = '${first.key}:r$k';
+      out.add(
+        first.copyWith(key: key, id: notificationIdForKey(key), inbox: false),
+      );
+    }
+    return out;
+  }
+
   /// The "missed" copy of the reminder occurrence behind plan [key]
   /// (`rem:<id>:<epoch seconds>`), to show right now ([at]) when the OS
   /// never delivered it (its alarm was wiped by a force-stop / an OEM
@@ -138,6 +179,8 @@ abstract final class ReminderPlanner {
   }) {
     final parts = key.split(':');
     if (parts.length < 3 || parts[0] != 'rem') return null;
+    // A lost repeat is not worth a "Missed" of its own (its first alert was).
+    if (isRepeatKey(key)) return null;
     final seconds = int.tryParse(parts[2]);
     final r = input.reminders.firstWhereOrNull((r) => r.id == parts[1]);
     if (seconds == null || r == null) return null;
@@ -250,7 +293,7 @@ abstract final class ReminderPlanner {
       final day = switch (diff) {
         0 => null,
         1 => 'tomorrow',
-        _ => DateFormat('EEE, MMM d').format(dueDay),
+        _ => DateFormats.of('EEE, MMM d').format(dueDay),
       };
       final time = task.dueAt == null || task.dueTimeMinutes == null
           ? null

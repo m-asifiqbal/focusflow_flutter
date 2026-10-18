@@ -4,8 +4,12 @@
 /// and Drive error mapping.
 library;
 
+import 'dart:convert';
+
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focusflow/core/settings/app_settings.dart';
+import 'package:focusflow/core/settings/backup_settings.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_files.dart';
@@ -13,7 +17,9 @@ import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/drive_backup_file.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
 import 'package:focusflow/core/sync/google_drive_store.dart';
+import 'package:focusflow/core/sync/settings_bridge.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
+import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/features/backup/domain/entities/backup_record.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
@@ -51,7 +57,10 @@ void main() {
   tearDown(() => h.dispose());
 
   /// A backup made on another device (its own database) uploaded to Drive.
-  Future<void> uploadFromOtherDevice({BackupKey? key}) async {
+  Future<void> uploadFromOtherDevice({
+    BackupKey? key,
+    SettingsBackupBridge settings = const NoSettingsBackupBridge(),
+  }) async {
     final other = await TestHarness.create(now: syncNow);
     addTearDown(other.dispose);
     final otherFiles = tempFiles(addTearDown);
@@ -62,6 +71,7 @@ void main() {
       files: otherFiles,
       deviceId: _otherId,
       vault: const FakeVaultBridge(),
+      settings: settings,
       clock: other.clock,
     );
     final built = await engine.build(key: key);
@@ -99,6 +109,70 @@ void main() {
       expect(phases.last, SyncPhase.done);
     },
   );
+
+  group('settings', () {
+    final theirs = FakeSettingsBridge(
+      exported: BackupSettings.of(
+        const AppSettings().copyWith(
+          accent: AccentColor.blue,
+          quietHours: true,
+        ),
+      ),
+    );
+
+    test(
+      "the automatic merge never applies another device's settings",
+      () async {
+        await uploadFromOtherDevice(settings: theirs);
+
+        h.clock.advance(const Duration(minutes: 5));
+        final out = await h.read(driveSyncProvider).syncNow();
+
+        expect(out.mergedBackups, 1); // its items came over…
+        final s = h.read(settingsProvider);
+        expect(s.accent, const AppSettings().accent); // …its settings did not
+        expect(s.quietHours, isFalse);
+      },
+    );
+
+    test('a manual restore from that backup does apply them', () async {
+      await uploadFromOtherDevice(settings: theirs);
+      final sync = h.read(driveSyncProvider);
+      final other = (await sync.listBackups()).firstWhere(
+        (b) => b.deviceId == _otherId,
+      );
+
+      final archive = await sync.download(other.fileId);
+      expect(archive.manifest.hasSettings, isTrue);
+      final result = await h
+          .read(backupEngineProvider)
+          .restore(archive, mode: RestoreMode.replace);
+
+      expect(result.settingsRestored, isTrue);
+      final s = h.read(settingsProvider);
+      expect(s.accent, AccentColor.blue);
+      expect(s.quietHours, isTrue);
+    });
+
+    test('every backup this device uploads carries its settings', () async {
+      await h
+          .read(settingsProvider.notifier)
+          .update(
+            (s) => s.copyWith(accent: AccentColor.indigo, repeatCount: 7),
+          );
+
+      final sync = h.read(driveSyncProvider);
+      final out = await sync.syncNow(merge: false);
+      final archive = await sync.download(out.uploaded.fileId);
+
+      expect(archive.manifest.hasSettings, isTrue);
+      final carried = BackupSettings.fromJson(
+        jsonDecode(utf8.decode(archive.settings!)),
+      )!;
+      expect(carried.settings['accent'], 'indigo');
+      expect(carried.settings['repeatCount'], 7);
+    });
+  });
 
   test('keeps only the last N backups of this device', () async {
     await uploadFromOtherDevice();

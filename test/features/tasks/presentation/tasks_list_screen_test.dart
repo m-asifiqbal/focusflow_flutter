@@ -218,6 +218,66 @@ void main() {
     );
   });
 
+  testWidgets('ticking the last open subtask completes the task, with Undo', (
+    tester,
+  ) async {
+    final h = await _harness(tester);
+    final tasks = h.read(tasksRepositoryProvider);
+    await pumpApp(tester, h, AppRoutes.tasks);
+    const title = 'Review FocusFlow Q3 Strategy'; // 2 of 5 subtasks done
+
+    for (final step in ['Risks', 'Roadmap']) {
+      final check = find.bySemanticsLabel('Complete subtask $step');
+      await tester.ensureVisible(check);
+      await tester.pump(); // lay out at the new scroll offset before tapping
+      await tester.tap(check);
+      await settle(tester);
+    }
+    // Not the last one yet: the task is still open.
+    expect(find.bySemanticsLabel('Complete $title'), findsOneWidget);
+    expect(find.text('"$title" completed'), findsNothing);
+
+    final last = find.bySemanticsLabel('Complete subtask Slides');
+    await tester.ensureVisible(last);
+    await tester.pump();
+    await tester.tap(last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    // The task shows done at once and says so, like a tap on its own check.
+    expect(find.bySemanticsLabel('Mark $title as not done'), findsOneWidget);
+    expect(find.text('"$title" completed'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1300));
+    await settle(tester);
+    final done = await tester.runAsync(
+      () => tasks.watchTasks(const TasksQuery(scope: TasksScope.all)).first,
+    );
+    expect(
+      done!
+          .firstWhere((t) => t.title == title && t.isCompleted)
+          .subtasks
+          .map((s) => s.done),
+      everyElement(isTrue),
+    );
+
+    // Undo takes the last subtask back with the completion.
+    await tester.tap(find.text('UNDO'));
+    await settle(tester);
+    final reopened = await tester.runAsync(
+      () => tasks.watchTasks(const TasksQuery(scope: TasksScope.all)).first,
+    );
+    final task = reopened!.singleWhere((t) => t.title == title && t.isActive);
+    expect(task.isCompleted, isFalse);
+    expect(task.subtasks.map((s) => s.title), [
+      'Outline',
+      'Numbers',
+      'Risks',
+      'Roadmap',
+      'Slides',
+    ]);
+    expect(task.subtasks.map((s) => s.done), [true, true, true, true, false]);
+  });
+
   testWidgets('"Reschedule all" moves overdue tasks to today', (tester) async {
     final h = await _harness(tester);
     await pumpApp(tester, h, AppRoutes.tasks);

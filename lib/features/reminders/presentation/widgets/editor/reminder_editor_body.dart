@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/notifications/alarm_overlay.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -63,6 +64,9 @@ class ReminderEditorBody extends ConsumerWidget {
     final fullScreenOff =
         r.alertStyle == AlertStyle.alarm &&
         ref.watch(fullScreenAlarmsAllowedProvider).valueOrNull == false;
+    final overAppsOff =
+        r.alertStyle == AlertStyle.alarm &&
+        ref.watch(alarmOverAppsAllowedProvider).valueOrNull == false;
     // A one-time time that has passed moves forward on Save; say so here.
     final now = ref.watch(minuteClockProvider);
     final rolled = state.pastTimeRollsTo(now);
@@ -127,6 +131,16 @@ class ReminderEditorBody extends ConsumerWidget {
                 'regular alert.',
             actionLabel: 'Allow',
             onAction: () => allowFullScreenAlarms(ref),
+          ),
+        ],
+        if (overAppsOff) ...[
+          const SizedBox(height: AppSpacing.md),
+          FFInfoBanner(
+            icon: FontAwesomeIcons.windowRestore,
+            colors: ModuleStyle.reminders.colors,
+            text: ReminderReliabilityBanners.overAppsText,
+            actionLabel: 'Allow',
+            onAction: () => allowAlarmOverApps(ref),
           ),
         ],
         gap,

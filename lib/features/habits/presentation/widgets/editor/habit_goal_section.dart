@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
@@ -24,7 +25,6 @@ import 'package:focusflow/features/habits/presentation/notifiers/habit_editor_co
 import 'package:focusflow/features/habits/presentation/providers/habits_providers.dart';
 import 'package:focusflow/features/habits/presentation/widgets/editor/habit_editor_sheets.dart';
 import 'package:focusflow/features/habits/presentation/widgets/editor/habit_stepper.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 class HabitGoalSection extends ConsumerWidget {
   const HabitGoalSection({required this.args, required this.draft, super.key});
@@ -286,7 +286,7 @@ class _WeekdayCircles extends StatelessWidget {
     final days = [for (var i = 0; i < 7; i++) (weekStart - 1 + i) % 7 + 1];
     // 2026-06-01 is a Monday: weekday d → a date with that weekday.
     String name(int d, String pattern) =>
-        DateFormat(pattern).format(DateTime(2026, 6, d));
+        DateFormats.of(pattern).format(DateTime(2026, 6, d));
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = ((constraints.maxWidth - HabitDimens.weekdayGap * 6) / 7)

@@ -229,12 +229,58 @@ void main() {
     await tapText(tester, 'Default snooze');
     await tapText(tester, '15 min');
     expect(settings().defaultSnoozeMinutes, 15);
-    await tapText(tester, 'Show on lock screen');
-    await tapText(tester, 'Hidden');
-    expect(settings().lockScreenVisibility, LockScreenVisibility.hidden);
     await tapText(tester, 'App icon badge');
     await tapText(tester, 'Due today');
     expect(settings().badgeMode, BadgeMode.today);
+  });
+
+  testWidgets('lock screen: an on / off switch, details only while on', (
+    tester,
+  ) async {
+    await setUp(tester);
+    await open(tester);
+    expect(settings().showOnLockScreen, isTrue);
+    expect(find.text('Lock screen details'), findsOneWidget);
+
+    await tapText(tester, 'Show on lock screen');
+    expect(settings().lockScreenVisibility, LockScreenVisibility.hidden);
+    expect(find.text('Lock screen details'), findsNothing);
+
+    await tapText(tester, 'Show on lock screen');
+    expect(settings().lockScreenVisibility, LockScreenVisibility.titleOnly);
+
+    await tapText(tester, 'Lock screen details');
+    await tapText(tester, 'Full content');
+    expect(settings().lockScreenVisibility, LockScreenVisibility.full);
+  });
+
+  testWidgets('repeat until done: presets, custom minutes, off', (
+    tester,
+  ) async {
+    await setUp(tester);
+    await open(tester);
+    expect(settings().repeatIntervalMinutes, 0);
+    expect(find.text('Repeat up to'), findsNothing);
+
+    await tapText(tester, 'Repeat until done');
+    await tapText(tester, 'Every 15 min');
+    expect(settings().repeatIntervalMinutes, 15);
+    expect(find.text('Repeat up to'), findsOneWidget);
+
+    await tapText(tester, 'Repeat up to');
+    await tapText(tester, '5 times');
+    expect(settings().repeatCount, 5);
+
+    // A custom length.
+    await tapText(tester, 'Repeat until done');
+    await tester.enterText(find.byType(TextField), '45');
+    await tester.pump();
+    await tapText(tester, 'Set');
+    expect(settings().repeatIntervalMinutes, 45);
+
+    await tapText(tester, 'Repeat until done');
+    await tapText(tester, 'Never');
+    expect(settings().repeatIntervalMinutes, 0);
   });
 
   testWidgets('no overflow at 360 pt and text scale 1.3', (tester) async {

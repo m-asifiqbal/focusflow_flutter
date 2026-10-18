@@ -18,6 +18,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class ZoneCalendar {
@@ -32,6 +33,14 @@ class ZoneCalendar {
   DateTime dayOf(DateTime instant) {
     final w = wall(instant);
     return DateTime(w.year, w.month, w.day);
+  }
+
+  /// [DateUtilsX.dayNumber] of the calendar day of [instant] in [location]
+  /// — [dayOf] without building a `DateTime` marker, for lookups keyed by
+  /// day.
+  int dayNumberOf(DateTime instant) {
+    final w = wall(instant);
+    return DateUtilsX.daysFromCivil(w.year, w.month, w.day);
   }
 
   /// Minutes after midnight of [instant] on the wall clock (0…1439).

@@ -18,11 +18,11 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_snapshot.dart';
 import 'package:focusflow/features/insights/presentation/insights_tokens.dart';
 import 'package:focusflow/features/insights/presentation/widgets/insights_no_data.dart';
-import 'package:intl/intl.dart' show DateFormat;
 
 class ProductivityChartCard extends StatelessWidget {
   const ProductivityChartCard({required this.snapshot, super.key});
@@ -33,13 +33,13 @@ class ProductivityChartCard extends StatelessWidget {
   static const int _maxLabels = 7;
 
   String _label(ProductivityPoint p, int count) => p.days == 1 && count <= 7
-      ? DateFormat('EEE').format(p.start)
-      : DateFormat('MMM d').format(p.start);
+      ? DateFormats.of('EEE').format(p.start)
+      : DateFormats.of('MMM d').format(p.start);
 
   String _spoken(ProductivityPoint p) {
     final when = p.days == 1
-        ? DateFormat('EEEE, MMM d').format(p.start)
-        : 'Week of ${DateFormat('MMM d').format(p.start)}';
+        ? DateFormats.of('EEEE, MMM d').format(p.start)
+        : 'Week of ${DateFormats.of('MMM d').format(p.start)}';
     return '$when: ${p.tasks} tasks, ${p.habits} habit check-ins';
   }
 

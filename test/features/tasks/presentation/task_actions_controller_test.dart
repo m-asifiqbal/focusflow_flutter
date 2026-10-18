@@ -2,7 +2,8 @@
 /// undoing (or reopening) it discards the spawned next occurrence; reorder
 /// in smart sort writes the visible order; a completion that lands after
 /// the task was completed elsewhere is a no-op (never reopens it); reschedule returns a working
-/// Undo.
+/// Undo; subtask ticks keep a task and its subtasks consistent (the last open
+/// one completes the task, un-ticking one of a done task reopens it).
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -186,6 +187,217 @@ void main() {
     await undo();
     expect((await repo.getTask(a))!.dueDate, DateTime(2026, 6, 10));
     expect((await repo.getTask(b))!.dueDate, DateTime(2026, 6, 11));
+  });
+
+  group('subtask ticks keep the task consistent', () {
+    Future<String> trip({
+      List<bool> done = const [true, true, false],
+      String? rrule,
+    }) => repo.save(
+      TaskItem(
+        id: '',
+        title: 'Trip',
+        dueDate: rrule == null ? null : DateTime(2026, 6, 13),
+        repeatRule: rrule,
+        subtasks: [
+          for (var i = 0; i < done.length; i++)
+            Subtask.draft('Step $i', done: done[i]),
+        ],
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+
+    Future<TaskItem> get(String id) async => (await repo.getTask(id))!;
+    Future<List<bool>> states(String id) async => [
+      for (final s in (await get(id)).subtasks) s.done,
+    ];
+    Future<void> settle() =>
+        Future<void>.delayed(const Duration(milliseconds: 60));
+
+    test('a tick that is not the last only ticks that subtask', () async {
+      final id = await trip(done: [true, false, false]);
+      final task = await get(id);
+      final outcome = await h
+          .read(taskActionsProvider)
+          .toggleSubtask(task, task.subtasks[1], completeAfter: Duration.zero);
+
+      expect(outcome, SubtaskOutcome.toggled);
+      expect(await states(id), [true, true, false]);
+      expect((await get(id)).isCompleted, isFalse);
+      expect(h.read(taskCompletionProvider), isEmpty);
+    });
+
+    test('un-ticking a subtask of an open task only un-ticks it', () async {
+      final id = await trip();
+      final task = await get(id);
+      final outcome = await h
+          .read(taskActionsProvider)
+          .toggleSubtask(task, task.subtasks[0], completeAfter: Duration.zero);
+
+      expect(outcome, SubtaskOutcome.toggled);
+      expect(await states(id), [false, true, false]);
+    });
+
+    test('ticking the last open subtask completes the task', () async {
+      final id = await trip();
+      final task = await get(id);
+      final outcome = await h
+          .read(taskActionsProvider)
+          .toggleSubtask(task, task.subtasks[2], completeAfter: Duration.zero);
+      await settle();
+
+      expect(outcome, SubtaskOutcome.completedTask);
+      expect((await get(id)).isCompleted, isTrue);
+      expect(await states(id), [true, true, true]);
+      expect(h.read(taskCompletionProvider), isEmpty);
+    });
+
+    test('the row shows done while the completion waits its delay', () async {
+      final id = await trip();
+      final task = await get(id);
+      final controller = h.read(taskCompletionProvider.notifier);
+      await h
+          .read(taskActionsProvider)
+          .toggleSubtask(
+            task,
+            task.subtasks[2],
+            completeAfter: const Duration(milliseconds: 80),
+          );
+
+      expect(controller.isPending(id), isTrue);
+      expect((await get(id)).isCompleted, isFalse, reason: 'not written yet');
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(controller.isPending(id), isFalse);
+      expect((await get(id)).isCompleted, isTrue);
+    });
+
+    test('Undo before the delay gives the subtask back too', () async {
+      final id = await trip();
+      final task = await get(id);
+      final controller = h.read(taskCompletionProvider.notifier);
+      await h
+          .read(taskActionsProvider)
+          .toggleSubtask(
+            task,
+            task.subtasks[2],
+            completeAfter: const Duration(seconds: 5),
+          );
+
+      await controller.undo(id);
+
+      expect(controller.isPending(id), isFalse);
+      expect(await states(id), [true, true, false]);
+      expect((await get(id)).isCompleted, isFalse);
+    });
+
+    test('Undo after the write reopens the task and un-ticks it', () async {
+      final id = await trip();
+      final task = await get(id);
+      await h
+          .read(taskActionsProvider)
+          .toggleSubtask(task, task.subtasks[2], completeAfter: Duration.zero);
+      await settle();
+
+      await h.read(taskCompletionProvider.notifier).undo(id);
+
+      expect(await states(id), [true, true, false]);
+      expect((await get(id)).isCompleted, isFalse);
+    });
+
+    test('un-checking the done task puts the last subtask back too', () async {
+      final id = await trip();
+      final task = await get(id);
+      await h
+          .read(taskActionsProvider)
+          .toggleSubtask(task, task.subtasks[2], completeAfter: Duration.zero);
+      await settle();
+
+      await h.read(taskCompletionProvider.notifier).reopen(id);
+
+      // Open again with something left to do — never "all done but open".
+      expect(await states(id), [true, true, false]);
+      expect((await get(id)).isCompleted, isFalse);
+    });
+
+    test('un-ticking a subtask of a done task reopens it', () async {
+      final id = await trip(done: [false, false, false]);
+      await repo.complete(id); // every subtask is ticked now
+      final task = await get(id);
+      expect(task.isCompleted, isTrue);
+
+      final outcome = await h
+          .read(taskActionsProvider)
+          .toggleSubtask(task, task.subtasks[1]);
+
+      expect(outcome, SubtaskOutcome.reopenedTask);
+      expect((await get(id)).isCompleted, isFalse);
+      expect(await states(id), [true, false, true]);
+    });
+
+    test('taps are ignored while the task is settling', () async {
+      final id = await trip(done: [true, false, false]);
+      final stale = await get(id);
+      final actions = h.read(taskActionsProvider);
+      await actions.toggleSubtask(stale, stale.subtasks[1]);
+      final last = await actions.toggleSubtask(
+        stale,
+        stale.subtasks[2],
+        completeAfter: const Duration(seconds: 5),
+      );
+      expect(last, SubtaskOutcome.completedTask);
+
+      final during = await actions.toggleSubtask(stale, stale.subtasks[0]);
+
+      expect(during, SubtaskOutcome.ignored);
+      expect(await states(id), [true, true, true]);
+    });
+
+    test(
+      'quick taps made on one stale snapshot still finish the task',
+      () async {
+        final id = await trip(done: [true, false, false]);
+        final stale = await get(id); // both of these still look open
+        final actions = h.read(taskActionsProvider);
+
+        final first = await actions.toggleSubtask(
+          stale,
+          stale.subtasks[1],
+          completeAfter: Duration.zero,
+        );
+        final second = await actions.toggleSubtask(
+          stale,
+          stale.subtasks[2],
+          completeAfter: Duration.zero,
+        );
+        await settle();
+
+        expect(first, SubtaskOutcome.toggled);
+        expect(second, SubtaskOutcome.completedTask);
+        expect((await get(id)).isCompleted, isTrue);
+      },
+    );
+
+    test('a repeating task rolls over; Undo takes the next one back', () async {
+      final id = await trip(rrule: 'FREQ=DAILY');
+      final task = await get(id);
+      await h
+          .read(taskActionsProvider)
+          .toggleSubtask(task, task.subtasks[2], completeAfter: Duration.zero);
+      await settle();
+
+      var tasks = await all();
+      expect(tasks, hasLength(2));
+      final next = tasks.firstWhere((t) => t.id != id);
+      expect(next.subtasks.map((s) => s.done), [false, false, false]);
+
+      await h.read(taskCompletionProvider.notifier).undo(id);
+
+      tasks = await all();
+      expect(tasks, hasLength(1));
+      expect(tasks.single.isCompleted, isFalse);
+      expect(await states(id), [true, true, false]);
+    });
   });
 
   test('board Done → To do discards the spawned next occurrence', () async {

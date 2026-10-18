@@ -89,6 +89,8 @@ class AppSettings {
     this.quietStartMinutes = 22 * 60,
     this.quietEndMinutes = 7 * 60,
     this.defaultSnoozeMinutes = 10,
+    this.repeatIntervalMinutes = 0,
+    this.repeatCount = 3,
     this.lockScreenVisibility = LockScreenVisibility.titleOnly,
     this.badgeMode = BadgeMode.overdue,
     // ── Modules ──
@@ -180,7 +182,22 @@ class AppSettings {
   final int quietStartMinutes;
   final int quietEndMinutes;
   final int defaultSnoozeMinutes;
+
+  /// "Repeat until done": a reminder / task alert that is not marked done
+  /// (or snoozed) is shown again every this many minutes; 0 = off.
+  final int repeatIntervalMinutes;
+
+  /// How many repeats at most ([repeatIntervalMinutes] on).
+  final int repeatCount;
   final LockScreenVisibility lockScreenVisibility;
+
+  /// Notifications may appear on the lock screen at all.
+  bool get showOnLockScreen =>
+      lockScreenVisibility != LockScreenVisibility.hidden;
+
+  /// Longest repeat interval and the most repeats a setting may hold.
+  static const int maxRepeatIntervalMinutes = 12 * 60;
+  static const int maxRepeatCount = 10;
   final BadgeMode badgeMode;
 
   final NotesView notesView;
@@ -278,6 +295,8 @@ class AppSettings {
     int? quietStartMinutes,
     int? quietEndMinutes,
     int? defaultSnoozeMinutes,
+    int? repeatIntervalMinutes,
+    int? repeatCount,
     LockScreenVisibility? lockScreenVisibility,
     BadgeMode? badgeMode,
     NotesView? notesView,
@@ -353,6 +372,9 @@ class AppSettings {
       quietStartMinutes: quietStartMinutes ?? this.quietStartMinutes,
       quietEndMinutes: quietEndMinutes ?? this.quietEndMinutes,
       defaultSnoozeMinutes: defaultSnoozeMinutes ?? this.defaultSnoozeMinutes,
+      repeatIntervalMinutes:
+          repeatIntervalMinutes ?? this.repeatIntervalMinutes,
+      repeatCount: repeatCount ?? this.repeatCount,
       lockScreenVisibility: lockScreenVisibility ?? this.lockScreenVisibility,
       badgeMode: badgeMode ?? this.badgeMode,
       notesView: notesView ?? this.notesView,
@@ -438,6 +460,8 @@ class AppSettings {
     'quietStartMinutes': quietStartMinutes,
     'quietEndMinutes': quietEndMinutes,
     'defaultSnoozeMinutes': defaultSnoozeMinutes,
+    'repeatIntervalMinutes': repeatIntervalMinutes,
+    'repeatCount': repeatCount,
     'lockScreenVisibility': lockScreenVisibility.name,
     'badgeMode': badgeMode.name,
     'notesView': notesView.name,
@@ -510,7 +534,12 @@ class AppSettings {
       onboardingSeen: b('onboardingSeen', d.onboardingSeen),
       accountMode: e(AccountMode.values, j['accountMode'], d.accountMode),
       displayName: s('displayName', d.displayName),
-      dailyFocusGoal: r('dailyFocusGoal', d.dailyFocusGoal, 1, maxDailyFocusGoal),
+      dailyFocusGoal: r(
+        'dailyFocusGoal',
+        d.dailyFocusGoal,
+        1,
+        maxDailyFocusGoal,
+      ),
       timeZone: sn('timeZone'),
       languageCode: s('languageCode', d.languageCode),
       startScreen: e(StartScreen.values, j['startScreen'], d.startScreen),
@@ -559,6 +588,13 @@ class AppSettings {
         1,
         minutesPerDay,
       ),
+      repeatIntervalMinutes: r(
+        'repeatIntervalMinutes',
+        d.repeatIntervalMinutes,
+        0,
+        maxRepeatIntervalMinutes,
+      ),
+      repeatCount: r('repeatCount', d.repeatCount, 1, maxRepeatCount),
       lockScreenVisibility: e(
         LockScreenVisibility.values,
         j['lockScreenVisibility'],

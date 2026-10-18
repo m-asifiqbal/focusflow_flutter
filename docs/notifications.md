@@ -103,6 +103,28 @@ What survives, and what the engine does about the rest:
 * The activity shows over the lock screen **only** when launched by an
   alarm-style full-screen notification (MainActivity.kt).
 
+## Keeping it light
+The planner and the engine run on the UI isolate, so they are written not to
+cost frames (measured on a heavy dataset: 250 tasks, 150 reminders, 25 habits
+with 6 months of history — `NotificationPlanner.plan` went from ~3.3 s to
+~35 ms, a launch from seconds of CPU to well under half a second):
+* **`TaskDayIndex`** sorts the open dated tasks once by integer day number;
+  the overdue / due-today counts behind every badge and digest are binary
+  searches. Badges are decided *after* the cap, one lookup per distinct day.
+* **Integer day maths** (`DateUtilsX.dayNumber`, `HabitSchedule.isDueByNumber`)
+  everywhere a loop walks days — a local `DateTime` is a time-zone lookup.
+  Streaks, the schedule and the streak-at-risk projection are linear.
+* **One pass at launch**, and it waits ~1.5 s (`notificationSettleProvider`)
+  for the first screen to load and animate — unless a notification tap
+  launched the app, which is served at once. Settings that plan nothing
+  (theme, layout, backup …) and the permission *first loading* do not
+  trigger a re-plan; `ReconcilingNotificationEngine._notPlanned` lists the
+  former (everything else, new settings included, does).
+* **Shared live queries:** `watchComputed(shareKey: …)` lets subscribers with
+  the same parameters (Home, the library counts and the planner all read
+  today's habits) share one computation.
+* Auto backups encode, hash, seal and zip on their own isolate.
+
 ## iOS
 * The tones are bundled as Flutter assets (`assets/sounds/`) and copied to
   `Library/Sounds` at start-up; iOS plays `<tone>.wav` from there (a missing

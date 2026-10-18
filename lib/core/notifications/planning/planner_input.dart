@@ -15,10 +15,10 @@ import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/notifications/planning/quiet_hours.dart';
 import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
-import 'package:intl/intl.dart';
 
 @immutable
 class PlannerInput {
@@ -85,7 +85,7 @@ class PlannerInput {
   String formatTime(DateTime instant) {
     final w = calendar.wall(instant);
     final local = DateTime(w.year, w.month, w.day, w.hour, w.minute);
-    return DateFormat(
+    return DateFormats.of(
       settings.use24HourTime ? 'HH:mm' : 'h:mm a',
     ).format(local);
   }
