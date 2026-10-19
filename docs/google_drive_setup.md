@@ -41,7 +41,7 @@ OAuth client ID**:
 | Client type | Settings | Used as |
 |---|---|---|
 | **Web application** | none | `GOOGLE_SERVER_CLIENT_ID` (Android requires it, for Credential Manager) |
-| **Android** | package `com.iqballab.focusflow` + SHA-1 of each signing key (debug, upload, Play app signing) | picked up automatically by package + SHA-1 |
+| **Android**, one per signing key | package `com.iqballab.focusflow` + **one** SHA-1 each: debug, upload, Play app signing (see docs/release.md) | picked up automatically by package + SHA-1 |
 | **iOS** | bundle id `com.iqballab.focusflow` | `GOOGLE_IOS_CLIENT_ID` + its reversed id |
 
 Get the debug SHA-1 with
@@ -83,8 +83,8 @@ them the app builds and runs; Drive says "not set up in this build".
 
 - [ ] Google Drive API enabled in the Cloud project
 - [ ] OAuth consent screen: External, scope `.../auth/drive.appdata`, test users added
-- [ ] Android OAuth client: package `com.iqballab.focusflow` + SHA-1 of the debug,
-      upload and Play app-signing keys
+- [ ] Android OAuth clients (package `com.iqballab.focusflow`), one per key: the debug
+      key, the upload key and — after the first Play upload — the Play app-signing key
 - [ ] Web OAuth client id → `GOOGLE_SERVER_CLIENT_ID`
 - [ ] iOS OAuth client (bundle id `com.iqballab.focusflow`) id → `GOOGLE_IOS_CLIENT_ID`
 
@@ -136,17 +136,18 @@ account owner can create. In order:
    the consent screen and the three OAuth clients (sections 1–2 above), then
    `cp config/google.example.json config/google.json` and paste the Web and
    iOS client ids.
-2. **Register the SHA-1 of every key that signs a build** on the *Android*
-   OAuth client (package `com.iqballab.focusflow`). Google matches the app by
-   package + SHA-1; a mismatch fails sign-in with a generic error (code 10 /
-   "developer error"), only on that build:
+2. **Register the SHA-1 of every key that signs a build**: one *Android*
+   OAuth client per key (the form takes a single SHA-1), all with package
+   `com.iqballab.focusflow`. Google matches the app by package + SHA-1; a
+   mismatch fails sign-in with a generic error (code 10 / "developer error"),
+   only on that build:
    * debug builds — Windows:
      `keytool -list -v -alias androiddebugkey -keystore %USERPROFILE%\.android\debug.keystore -storepass android -keypass android`
      (`keytool` is in `<Android Studio>\jbr\bin`), or `cd android` then
      `gradlew signingReport`;
-   * release builds — **until `android/key.properties` exists, release builds
-     are signed with the debug key** (see `android/app/build.gradle.kts`), so
-     the debug SHA-1 is the one that matters for a locally built release APK;
+   * release builds — signed with the **upload key** from `android/key.properties`
+     (docs/release.md); without that file they fall back to the debug key (see
+     `android/app/build.gradle.kts`). `gradlew signingReport` shows which;
    * Play Store — add the *upload* key SHA-1 and, after the first upload, the
      *app signing* key SHA-1 from Play Console › App integrity.
 3. **Build with the ids.** A plain `flutter build apk` / Android Studio "Run"
