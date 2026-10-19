@@ -21,6 +21,13 @@
          exemption; asked only when the user taps Allow). -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Alarm guard (Settings › Notifications › Keep alarms running): a quiet
+         foreground service that keeps the app alive and its alarms armed
+         while reminders or alarms are due, so they still go off after the app
+         is swiped away. Type specialUse: no other type fits (see the
+         <service> below and docs/notifications.md). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- "Alarm-style (full screen)" reminders. -->
@@ -98,6 +105,28 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- The alarm guard (see android/.../guard/AlarmGuard.kt). The service
+             is the foreground half; the receiver brings it back after a reboot
+             or an update and when its watchdog alarm fires. -->
+        <service
+            android:name=".guard.AlarmGuardService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps scheduled alarms and reminders reliable after the app is swiped away: an ongoing notification while something is due, so phone-maker task killers leave the app's alarms alone and the app can re-arm any the system dropped." />
+        </service>
+        <receiver
+            android:name=".guard.AlarmGuardReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
 
         <!-- flutter_local_notifications: scheduled alerts, reboot reschedule, actions. -->
         <receiver

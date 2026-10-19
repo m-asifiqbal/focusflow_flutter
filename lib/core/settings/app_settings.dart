@@ -29,6 +29,11 @@ enum LockScreenVisibility { full, titleOnly, hidden }
 
 enum BadgeMode { overdue, today, none }
 
+/// Settings › Appearance › Visual effects: how much the costly effects (tab
+/// bar blur, card → page transition, shimmer) are drawn. [auto] follows the
+/// device (reduced on a low-end phone), the others force it.
+enum PerformanceMode { auto, full, reduced }
+
 enum BackupFrequency { daily, weekly }
 
 enum LocalBackupFrequency { off, daily, weekly }
@@ -71,6 +76,7 @@ class AppSettings {
     this.listDensity = ListDensity.comfortable,
     this.reduceMotion = false,
     this.useSystemFont = false,
+    this.performanceMode = PerformanceMode.auto,
     // ── Notifications ──
     this.notificationsEnabled = true,
     this.morningBriefing = true,
@@ -93,6 +99,7 @@ class AppSettings {
     this.repeatCount = 3,
     this.lockScreenVisibility = LockScreenVisibility.titleOnly,
     this.badgeMode = BadgeMode.overdue,
+    this.keepAlarmsAlive = true,
     // ── Modules ──
     this.notesView = NotesView.grid,
     this.notesSort = NotesSort.lastEdited,
@@ -164,6 +171,7 @@ class AppSettings {
   final ListDensity listDensity;
   final bool reduceMotion;
   final bool useSystemFont;
+  final PerformanceMode performanceMode;
 
   final bool notificationsEnabled;
   final bool morningBriefing;
@@ -199,6 +207,11 @@ class AppSettings {
   static const int maxRepeatIntervalMinutes = 12 * 60;
   static const int maxRepeatCount = 10;
   final BadgeMode badgeMode;
+
+  /// Android: keep a quiet foreground service running while reminders or
+  /// alarms are due, so they still go off after the app is swiped away
+  /// (the alarm guard, see core/notifications/alarm_guard.dart).
+  final bool keepAlarmsAlive;
 
   final NotesView notesView;
   final NotesSort notesSort;
@@ -278,6 +291,7 @@ class AppSettings {
     ListDensity? listDensity,
     bool? reduceMotion,
     bool? useSystemFont,
+    PerformanceMode? performanceMode,
     bool? notificationsEnabled,
     bool? morningBriefing,
     int? morningBriefingMinutes,
@@ -299,6 +313,7 @@ class AppSettings {
     int? repeatCount,
     LockScreenVisibility? lockScreenVisibility,
     BadgeMode? badgeMode,
+    bool? keepAlarmsAlive,
     NotesView? notesView,
     NotesSort? notesSort,
     String? Function()? notesDefaultColor,
@@ -354,6 +369,7 @@ class AppSettings {
       listDensity: listDensity ?? this.listDensity,
       reduceMotion: reduceMotion ?? this.reduceMotion,
       useSystemFont: useSystemFont ?? this.useSystemFont,
+      performanceMode: performanceMode ?? this.performanceMode,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       morningBriefing: morningBriefing ?? this.morningBriefing,
       morningBriefingMinutes:
@@ -377,6 +393,7 @@ class AppSettings {
       repeatCount: repeatCount ?? this.repeatCount,
       lockScreenVisibility: lockScreenVisibility ?? this.lockScreenVisibility,
       badgeMode: badgeMode ?? this.badgeMode,
+      keepAlarmsAlive: keepAlarmsAlive ?? this.keepAlarmsAlive,
       notesView: notesView ?? this.notesView,
       notesSort: notesSort ?? this.notesSort,
       notesDefaultColor: notesDefaultColor != null
@@ -443,6 +460,7 @@ class AppSettings {
     'listDensity': listDensity.name,
     'reduceMotion': reduceMotion,
     'useSystemFont': useSystemFont,
+    'performanceMode': performanceMode.name,
     'notificationsEnabled': notificationsEnabled,
     'morningBriefing': morningBriefing,
     'morningBriefingMinutes': morningBriefingMinutes,
@@ -464,6 +482,7 @@ class AppSettings {
     'repeatCount': repeatCount,
     'lockScreenVisibility': lockScreenVisibility.name,
     'badgeMode': badgeMode.name,
+    'keepAlarmsAlive': keepAlarmsAlive,
     'notesView': notesView.name,
     'notesSort': notesSort.name,
     'notesDefaultColor': notesDefaultColor,
@@ -555,6 +574,11 @@ class AppSettings {
       listDensity: e(ListDensity.values, j['listDensity'], d.listDensity),
       reduceMotion: b('reduceMotion', d.reduceMotion),
       useSystemFont: b('useSystemFont', d.useSystemFont),
+      performanceMode: e(
+        PerformanceMode.values,
+        j['performanceMode'],
+        d.performanceMode,
+      ),
       notificationsEnabled: b('notificationsEnabled', d.notificationsEnabled),
       morningBriefing: b('morningBriefing', d.morningBriefing),
       morningBriefingMinutes: minute(
@@ -601,6 +625,7 @@ class AppSettings {
         d.lockScreenVisibility,
       ),
       badgeMode: e(BadgeMode.values, j['badgeMode'], d.badgeMode),
+      keepAlarmsAlive: b('keepAlarmsAlive', d.keepAlarmsAlive),
       notesView: e(NotesView.values, j['notesView'], d.notesView),
       notesSort: e(NotesSort.values, j['notesSort'], d.notesSort),
       notesDefaultColor: sn('notesDefaultColor'),

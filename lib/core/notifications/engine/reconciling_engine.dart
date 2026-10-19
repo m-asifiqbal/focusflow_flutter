@@ -49,9 +49,11 @@ import 'package:focusflow/core/notifications/engine/notification_actions.dart';
 import 'package:focusflow/core/notifications/engine/notification_gateway.dart';
 import 'package:focusflow/core/notifications/engine/notification_reconciler.dart';
 import 'package:focusflow/core/notifications/engine/planner_snapshot.dart';
+import 'package:focusflow/core/notifications/engine/rearm_policy.dart';
 import 'package:focusflow/core/notifications/engine/refresh_port.dart';
 import 'package:focusflow/core/notifications/engine/task_reminder_zones.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
+import 'package:focusflow/core/notifications/alarm_guard.dart';
 import 'package:focusflow/core/notifications/alarm_overlay.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/notifications/notification_providers.dart';
@@ -149,6 +151,10 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       ..add(
         _ref.listen<AppSettings>(settingsProvider, (prev, next) {
           if (prev?.timeZone != next.timeZone) unawaited(_resolveZone());
+          // The alarm guard follows its switch at once (nothing is re-planned).
+          if (prev != null && prev.keepAlarmsAlive != next.keepAlarmsAlive) {
+            unawaited(_syncGuard());
+          }
           // A theme, layout or backup setting changes nothing that is
           // planned: it must not cost a full re-plan.
           if (prev == null || _changesPlan(prev, next)) schedule();
@@ -197,6 +203,7 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     'listDensity',
     'reduceMotion',
     'useSystemFont',
+    'performanceMode',
     'notesView',
     'notesSort',
     'notesDefaultColor',
@@ -231,6 +238,7 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     'localBackupFrequency',
     'lastSyncAt',
     'recentSearches',
+    'keepAlarmsAlive',
   };
 
   static bool _changesPlan(AppSettings a, AppSettings b) {
@@ -362,18 +370,28 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       final input = await _ref
           .read(plannerSnapshotLoaderProvider)
           .load(settings, _location);
+      // First pass of this process: the app may have been killed (and its
+      // alarms with it) since the last one, so the alarms are renewed — but
+      // only those the OS no longer holds, unless a full renewal is due
+      // (see RearmPolicy): re-sending all of them at every launch made it
+      // stutter.
+      final renew = !_rearmed;
+      final prefs = _ref.read(sharedPreferencesProvider);
+      final now = _ref.read(clockProvider).now();
+      final full = renew && RearmPolicy.fullDue(prefs, now);
       final result = await _ref
           .read(notificationReconcilerProvider)
           .reconcile(
             input,
             allowed: permission == NotificationPermission.granted,
             location: _location,
-            // First pass of this process: the app may have been killed
-            // (and its alarms with it) since the last one.
-            rearm: !_rearmed,
+            rearm: renew,
+            trustArmed: renew && !full,
           );
       _rearmed = true;
+      if (full) await RearmPolicy.markFull(prefs, now);
       lastResult = result;
+      unawaited(_syncGuard());
       if (!_legacyRetired) {
         // Every pending request now uses the current channels.
         _legacyRetired = true;
@@ -385,6 +403,25 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       );
     } catch (e, st) {
       AppLogger.e('Notification reconcile failed', error: e, stackTrace: st);
+    }
+  }
+
+  /// Reports what the OS now holds to the alarm guard, which keeps the app
+  /// alive for it (core/notifications/alarm_guard.dart).
+  Future<void> _syncGuard() async {
+    final result = lastResult;
+    if (result == null || _disposed) return;
+    try {
+      await _ref
+          .read(alarmGuardProvider)
+          .sync(
+            enabled: _ref.read(settingsProvider).keepAlarmsAlive,
+            pending: result.vitalPending,
+            nextAt: result.nextVitalAt,
+            lastAt: result.lastVitalAt,
+          );
+    } catch (e) {
+      AppLogger.w('Alarm guard sync failed: $e');
     }
   }
 

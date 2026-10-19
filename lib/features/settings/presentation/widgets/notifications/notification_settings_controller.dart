@@ -137,6 +137,12 @@ class NotificationSettingsController {
 
   Future<void> setBadge(BadgeMode m) =>
       _update((s) => s.copyWith(badgeMode: m));
+
+  /// Android: keep a quiet foreground service running while alarms or
+  /// reminders are due, so they still go off after the app is swiped away.
+  /// The engine listens to the setting and starts / stops the service.
+  Future<void> setKeepAlarmsAlive(bool on) =>
+      _update((s) => s.copyWith(keepAlarmsAlive: on));
 }
 
 final notificationSettingsControllerProvider =

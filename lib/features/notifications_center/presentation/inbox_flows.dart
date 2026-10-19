@@ -17,12 +17,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/core/router/open_location.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
 import 'package:focusflow/features/notifications_center/presentation/notifiers/inbox_actions_controller.dart';
 import 'package:focusflow/features/tasks/presentation/task_flows.dart';
-import 'package:go_router/go_router.dart';
 
 /// The list a row without an item opens (overdue digest → Tasks, …).
 String? inboxFallbackRoute(InboxKind kind) => switch (kind) {
@@ -34,15 +34,18 @@ String? inboxFallbackRoute(InboxKind kind) => switch (kind) {
   InboxKind.system => null,
 };
 
-/// Row tap / View / Open / Fix: marks read and opens the item or the
-/// kind's list — both as drill-ins, so back returns to the notifications.
+/// Row tap / View / Open / Fix: marks read and opens the item or the kind's
+/// list — a drill-in, so back returns to the notifications. The lists that
+/// live in the tab shell (Tasks, Reminders, Habits, Backup …) can't be pushed
+/// over this full-screen route (it left a blank screen), so
+/// [OpenLocation.openLocation] switches to their tab instead.
 void openInboxEntry(BuildContext context, WidgetRef ref, InboxEntry e) {
   unawaited(ref.read(inboxActionsControllerProvider).markRead(e));
   final target = e.ref;
   final route = target != null
       ? AppRoutes.open(target)
       : inboxFallbackRoute(e.kind);
-  if (route != null) context.push(route);
+  if (route != null) context.openLocation(route);
 }
 
 /// Runs the inline button [action] of [e].

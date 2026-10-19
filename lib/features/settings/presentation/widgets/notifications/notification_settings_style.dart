@@ -65,6 +65,9 @@ abstract final class NotificationTints {
   /// Repeat until done — amber.
   static const repeat = NotificationTints.morning;
 
+  /// Keep alarms running — emerald shield.
+  static const guard = NotificationTints.security;
+
   /// App icon badge — pink.
   static const badge = TagPalette.personal;
 

@@ -19,11 +19,15 @@ import android.view.WindowManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.iqballab.focusflow.guard.AlarmGuard
+import com.iqballab.focusflow.guard.AlarmGuardService
+import com.iqballab.focusflow.guard.ArmedAlarms
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.security.MessageDigest
+import java.util.concurrent.Executors
 import org.json.JSONObject
 
 /**
@@ -46,6 +50,7 @@ import org.json.JSONObject
  */
 class MainActivity : FlutterFragmentActivity() {
     private var overLockScreen = false
+    private val armedWorker = Executors.newSingleThreadExecutor()
     private var lockReceiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +65,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onDestroy() {
         setOverLockScreen(false)
+        armedWorker.shutdown()
         super.onDestroy()
     }
 
@@ -153,6 +159,42 @@ class MainActivity : FlutterFragmentActivity() {
                         result.success(null)
                     }
                     "openAutostartSettings" -> result.success(openAutostartSettings())
+                    "syncAlarmGuard" -> {
+                        // The notification engine's report after each pass:
+                        // what is due, so the guard starts, stops and shows
+                        // the next time. Dart ints arrive as Int or Long.
+                        AlarmGuard.sync(
+                            applicationContext,
+                            enabled = call.argument<Boolean>("enabled") ?: true,
+                            pending = call.argument<Number>("pending")?.toInt() ?: 0,
+                            nextAt = call.argument<Number>("nextAt")?.toLong() ?: 0L,
+                            lastAt = call.argument<Number>("lastAt")?.toLong() ?: 0L,
+                        )
+                        result.success(null)
+                    }
+                    "alarmGuardRunning" -> result.success(AlarmGuardService.running)
+                    "armedNotificationIds" -> {
+                        // Which of these requests the OS still holds an alarm
+                        // for (see ArmedAlarms). Off the platform thread: it
+                        // is one lookup per id, and that thread delivers
+                        // touches and frames.
+                        val ids = call.argument<List<Number>>("ids").orEmpty().map { it.toInt() }
+                        val app = applicationContext
+                        armedWorker.execute {
+                            val armed = try {
+                                ArmedAlarms.armed(app, ids)
+                            } catch (e: Exception) {
+                                null
+                            }
+                            runOnUiThread {
+                                try {
+                                    result.success(armed)
+                                } catch (e: Exception) {
+                                    // The engine is gone: nobody is waiting.
+                                }
+                            }
+                        }
+                    }
                     "showAlarmScreen" -> {
                         // An alarm rings while the app is open: show the alarm
                         // screen too (a heads-up alone is easy to miss).

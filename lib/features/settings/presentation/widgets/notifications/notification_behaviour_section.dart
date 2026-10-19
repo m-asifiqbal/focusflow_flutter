@@ -11,6 +11,7 @@
 /// ============================================================
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
@@ -66,6 +67,22 @@ class NotificationBehaviourSection extends ConsumerWidget {
             title: 'Repeat up to',
             value: NotificationLabels.repeatCount(s.repeatCount),
             onTap: () => _pickRepeatCount(context, s, c),
+          ),
+        // Android only: the guard is a foreground service (see
+        // core/notifications/alarm_guard.dart).
+        if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+          FFListRow.toggle(
+            leading: const NotificationRowTile(
+              FontAwesomeIcons.shieldHalved,
+              NotificationTints.guard,
+            ),
+            title: 'Keep alarms running',
+            subtitle: s.keepAlarmsAlive
+                ? 'A quiet notification keeps alarms and reminders on time '
+                      'after you close the app'
+                : 'Some phones stop alarms when the app is swiped away',
+            value: s.keepAlarmsAlive,
+            onChanged: c.setKeepAlarmsAlive,
           ),
         FFListRow.toggle(
           leading: const NotificationRowTile(

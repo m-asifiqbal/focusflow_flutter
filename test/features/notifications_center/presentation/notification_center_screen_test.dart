@@ -1,15 +1,22 @@
 /// Screen 27 — Notification center: mockup data (light + dark captures),
 /// filter chips, Read all, inline Done / Snooze through the shared
-/// notification actions, swipe-dismiss with Undo, tap opens the item (or
-/// its list, pushed so back returns here), the empty state and no
-/// overflow at 360 pt / text scale 1.3.
+/// notification actions, swipe-dismiss with Undo, tap opens the item (back
+/// returns here) or, for a row without one, its list in its tab, the empty
+/// state and no overflow at 360 pt / text scale 1.3.
 library;
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/features/backup/presentation/screens/backup_sync_screen.dart';
+import 'package:focusflow/features/habits/presentation/screens/habits_list_screen.dart';
+import 'package:focusflow/features/notifications_center/presentation/screens/notification_center_screen.dart';
 import 'package:focusflow/features/notifications_center/presentation/widgets/inbox_row.dart';
+import 'package:focusflow/features/tasks/presentation/screens/tasks_list_screen.dart';
+import 'package:focusflow/features/vault/presentation/screens/vault_screen.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
 import '../../../helpers/screen_harness.dart';
@@ -24,10 +31,8 @@ void main() {
   Future<void> boot(WidgetTester tester, {bool withData = true}) async {
     await loadAppFonts();
     h = (await tester.runAsync(
-      () => TestHarness.create(
-        now: inboxNow,
-        overrides: isolatedNotifications(),
-      ),
+      () =>
+          TestHarness.create(now: inboxNow, overrides: isolatedNotifications()),
     ))!;
     addTearDown(() => tester.runAsync(h.dispose));
     if (withData) seed = (await tester.runAsync(() => seedInboxMockup(h)))!;
@@ -142,21 +147,61 @@ void main() {
     expect(await unread(tester), 2);
   });
 
-  testWidgets('a row without an item opens its list as a drill-in', (
-    tester,
-  ) async {
-    await boot(tester);
-    await pumpApp(tester, h, AppRoutes.notificationCenter);
-    await tester.tap(find.text('View'));
-    await settle(tester);
-    final router = h.read(routerProvider);
-    expect(router.state.uri.toString(), AppRoutes.tasks);
-    // Pushed, not `go`: back returns to the notification center.
-    expect(router.canPop(), isTrue);
-    router.pop();
-    await settle(tester);
-    expect(router.state.uri.toString(), AppRoutes.notificationCenter);
-    expect(find.text('2 tasks are overdue'), findsOneWidget);
+  // Regression: these rows have no item, so they open a tab page (a list).
+  // Pushing one over this full-screen route stacked a second tab shell with
+  // the same page key and left a blank screen. Opened the way the app does
+  // it: Home → bell → notification centre → tap.
+  group('a row without an item opens its list', () {
+    // (row, where it goes, the screen, whether it is a drill-in). The Tasks /
+    // Habits / Backup pages live in the tab shell, so the tab is switched to;
+    // the vault is a root-level page, so it is pushed and back returns here.
+    final cases = <(String, String, Type, bool)>[
+      ('2 tasks are overdue', AppRoutes.tasks, TasksListScreen, false),
+      ('Drink Water — 6/8', AppRoutes.habits, HabitsListScreen, false),
+      ('Backup complete', AppRoutes.settingsBackup, BackupSyncScreen, false),
+      ('Weak password detected', AppRoutes.vault, VaultScreen, true),
+    ];
+    for (final (title, route, screen, drillIn) in cases) {
+      testWidgets('$title → $route', (tester) async {
+        await boot(tester);
+        await pumpApp(tester, h, AppRoutes.home);
+        final router = h.read(routerProvider);
+        unawaited(router.push<void>(AppRoutes.notificationCenter));
+        await settle(tester);
+        expect(find.byType(NotificationCenterScreen), findsOneWidget);
+
+        await tester.tap(find.text(title));
+        await settle(tester);
+
+        expect(tester.takeException(), isNull);
+        expect(router.state.uri.toString(), route);
+        expect(find.byType(NotificationCenterScreen), findsNothing);
+        // On screen and tappable — not built into a hidden navigator.
+        expect(find.byType(screen).hitTestable(), findsOneWidget);
+
+        if (drillIn) {
+          router.pop();
+          await settle(tester);
+          expect(find.byType(screen), findsNothing);
+          expect(
+            find.byType(NotificationCenterScreen).hitTestable(),
+            findsOneWidget,
+          );
+        }
+      });
+    }
+
+    testWidgets('View on the overdue digest, centre opened by go', (
+      tester,
+    ) async {
+      await boot(tester);
+      await pumpApp(tester, h, AppRoutes.notificationCenter);
+      await tester.tap(find.text('View'));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(h.read(routerProvider).state.uri.toString(), AppRoutes.tasks);
+      expect(find.byType(TasksListScreen).hitTestable(), findsOneWidget);
+    });
   });
 
   testWidgets('empty state', (tester) async {

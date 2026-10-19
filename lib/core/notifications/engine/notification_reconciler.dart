@@ -61,6 +61,9 @@ class ReconcileResult {
     this.caughtUp = 0,
     this.badge,
     this.nextFireAt,
+    this.vitalPending = 0,
+    this.nextVitalAt,
+    this.lastVitalAt,
   });
 
   final int delivered;
@@ -80,6 +83,13 @@ class ReconcileResult {
   /// [NotificationReconciler.dueRecheck] from now while due requests wait
   /// for the OS.
   final DateTime? nextFireAt;
+
+  /// Reminders, alarms and task alerts ([NotificationPlanner.isVital]) the OS
+  /// holds after the pass, and when the soonest / the last of them is due:
+  /// what the alarm guard (core/notifications/alarm_guard.dart) keeps alive.
+  final int vitalPending;
+  final DateTime? nextVitalAt;
+  final DateTime? lastVitalAt;
 
   @override
   String toString() =>
@@ -131,7 +141,13 @@ class NotificationReconciler {
   /// this the plan would look "unchanged" and those reminders would never
   /// fire again. With [rearm]:
   ///   • every planned request is handed to the OS again (same id =
-  ///     replaced, so a healthy alarm is simply renewed);
+  ///     replaced, so a healthy alarm is simply renewed) — except, with
+  ///     [trustArmed], those [NotificationGateway.armedIds] verifies the OS
+  ///     still holds an alarm for: re-sending a healthy request costs the
+  ///     platform thread a re-write of the plugin's whole list, N requests
+  ///     N times over, which is what made a launch stutter. After a
+  ///     force-stop nothing is armed, so everything is still renewed; where
+  ///     it cannot be told (null) so is everything;
   ///   • a request that is past its time yet still listed as pending was
   ///     lost, not late: it is shown now as "Missed" (reminders, within
   ///     [catchUpWindow]) instead of silently disappearing.
@@ -140,6 +156,7 @@ class NotificationReconciler {
     required bool allowed,
     required tz.Location location,
     bool rearm = false,
+    bool trustArmed = false,
   }) async {
     final now = input.now;
     final pending = await gateway.pendingIds();
@@ -203,6 +220,11 @@ class NotificationReconciler {
         ? NotificationPlanner.plan(input, maxCount: input.maxScheduled)
         : const <PlannedNotification>[];
     final desiredIds = {for (final n in desired) n.id};
+    // Which of them the OS really holds an alarm for (only a launch that
+    // renews, and only when allowed to trust it: see [rearm]).
+    final armed = rearm && trustArmed && desired.isNotEmpty
+        ? await gateway.armedIds(desiredIds)
+        : null;
     final known = {for (final e in kept) e.id: e};
     // A desired request with the same id replaces a due one (rescheduled).
     final waiting = [
@@ -222,15 +244,18 @@ class NotificationReconciler {
       cancelled++;
     }
     var scheduled = 0;
+    var vitalPending = 0;
+    DateTime? nextVital;
+    DateTime? lastVital;
     final next = <LedgerEntry>[];
     for (final n in desired) {
       final entry = LedgerEntry.of(n, variant: options.variant, exact: exact);
       final old = known[n.id];
       final unchanged =
-          !rearm &&
           old != null &&
           old.fingerprint == entry.fingerprint &&
-          pending.contains(n.id);
+          pending.contains(n.id) &&
+          (!rearm || (armed?.contains(n.id) ?? false));
       if (!unchanged) {
         try {
           await gateway.schedule(n, location, options);
@@ -242,6 +267,15 @@ class NotificationReconciler {
         }
       }
       next.add(entry);
+      if (NotificationPlanner.isVital(n)) {
+        vitalPending++;
+        if (nextVital == null || n.fireAt.isBefore(nextVital)) {
+          nextVital = n.fireAt;
+        }
+        if (lastVital == null || n.fireAt.isAfter(lastVital)) {
+          lastVital = n.fireAt;
+        }
+      }
     }
     await ledger.commit(previous, [...waiting, ...next], now: now);
 
@@ -266,6 +300,9 @@ class NotificationReconciler {
       caughtUp: caughtUp,
       badge: badge,
       nextFireAt: wake,
+      vitalPending: vitalPending,
+      nextVitalAt: nextVital,
+      lastVitalAt: lastVital,
     );
   }
 
