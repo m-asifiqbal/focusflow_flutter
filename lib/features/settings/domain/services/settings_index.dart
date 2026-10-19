@@ -183,6 +183,10 @@ abstract final class SettingsIndex {
       ('Streak at risk', ['habits', 'reminder']),
       ('Quiet hours', ['do not disturb', 'silence', 'night']),
       ('Default snooze', ['later', 'minutes']),
+      (
+        'Keep alarms running',
+        ['background service', 'swipe away', 'app closed', 'alarm not ringing'],
+      ),
       ('Lock screen', ['preview', 'privacy', 'title only']),
       ('App badge', ['count', 'icon', 'overdue']),
     ])
@@ -202,6 +206,7 @@ abstract final class SettingsIndex {
       ('Notes default view', ['grid', 'list']),
       ('List density', ['compact', 'comfortable', 'spacing']),
       ('Reduce motion', ['animations', 'accessibility']),
+      ('Visual effects', ['performance', 'lag', 'slow', 'blur', 'low end']),
       ('Use system font', ['typeface', 'font']),
     ])
       SettingsEntry(

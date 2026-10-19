@@ -69,6 +69,14 @@ abstract class NotificationGateway {
   /// Ids the OS currently has pending (scheduled, not yet delivered).
   Future<Set<int>> pendingIds();
 
+  /// The subset of [ids] the OS verifiably still holds an alarm for, or null
+  /// when that cannot be told (iOS keeps its requests itself; no native
+  /// side). The reconciler uses it to renew only what Android actually
+  /// dropped instead of re-sending every request at every launch: each
+  /// Android schedule call re-writes the plugin's whole list on the
+  /// platform thread, so a launch cost N × N work and stuttered.
+  Future<Set<int>?> armedIds(Set<int> ids);
+
   /// Schedules (or replaces, same id) one notification at its fire time.
   Future<void> schedule(
     PlannedNotification n,

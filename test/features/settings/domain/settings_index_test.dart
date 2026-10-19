@@ -30,6 +30,10 @@ void main() {
     'merge': AppRoutes.settingsTagsFolders,
     'date format': AppRoutes.settingsGeneral,
     'date & time': AppRoutes.settingsGeneral,
+    'keep alarms running': AppRoutes.settingsNotifications,
+    'swipe away': AppRoutes.settingsNotifications,
+    'visual effects': AppRoutes.settingsAppearance,
+    'lag': AppRoutes.settingsAppearance,
   };
 
   for (final MapEntry(key: query, value: route) in cases.entries) {

@@ -143,6 +143,28 @@ class _LayoutSection extends ConsumerWidget {
             if (c?.value != null) await editor.setListDensity(c!.value!);
           },
         ),
+        FFListRow(
+          leading: settingsTile(FontAwesomeIcons.gaugeHigh, SettingsTints.teal),
+          title: 'Visual effects',
+          subtitle: 'Choose Reduced if scrolling or opening screens feels slow',
+          value: SettingsLabels.performance(s.performanceMode),
+          onTap: () async {
+            final c = await showNotificationOptionSheet<PerformanceMode>(
+              context,
+              title: 'Visual effects',
+              selected: s.performanceMode,
+              options: [
+                for (final m in PerformanceMode.values)
+                  NotificationOption(
+                    value: m,
+                    label: SettingsLabels.performance(m),
+                    subtitle: SettingsLabels.performanceHint(m),
+                  ),
+              ],
+            );
+            if (c?.value != null) await editor.setPerformanceMode(c!.value!);
+          },
+        ),
         FFListRow.toggle(
           leading: settingsTile(
             FontAwesomeIcons.wandMagicSparkles,

@@ -13,9 +13,10 @@
 /// decided field by field, and a restore must never hand a phone someone
 /// else's *identity*:
 ///
-///  * [deviceBound] fields describe this install or this sign-in (onboarding
-///    seen, Google account mode, last sync time, search history) — never
-///    written to a backup, never read from one.
+///  * [deviceBound] fields describe this install, this sign-in or this
+///    phone (onboarding seen, Google account mode, last sync time, search
+///    history, visual-effects mode) — never written to a backup, never read
+///    from one.
 ///  * **Replace** takes every field the backup has; **Merge** only fills in
 ///    fields still at their default, so what the user already changed on
 ///    this phone wins (the same "keep local work" promise as for items).
@@ -71,11 +72,14 @@ class BackupSettings {
   static const int currentVersion = 1;
 
   /// [AppSettings] JSON keys that stay with the device / sign-in.
+  /// `performanceMode` is a statement about *this phone* (Reduced chosen on a
+  /// 2 GB handset must not follow a backup onto a flagship).
   static const Set<String> deviceBound = {
     'onboardingSeen',
     'accountMode',
     'lastSyncAt',
     'recentSearches',
+    'performanceMode',
   };
 
   /// The longest preference value taken from a file (they are enum names).

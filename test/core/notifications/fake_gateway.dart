@@ -36,6 +36,20 @@ class FakeGateway implements NotificationGateway {
   @override
   Future<Set<int>> pendingIds() async => pending.keys.toSet();
 
+  /// What the OS verifiably still holds an alarm for ([armedIds]); null =
+  /// cannot be told (the default: the reconciler renews everything).
+  Set<int>? armed;
+
+  /// Ids asked about by [armedIds], in order of the calls.
+  final List<Set<int>> armedAsked = [];
+
+  @override
+  Future<Set<int>?> armedIds(Set<int> ids) async {
+    armedAsked.add(ids);
+    final known = armed;
+    return known == null ? null : ids.intersection(known);
+  }
+
   @override
   Future<void> schedule(
     PlannedNotification n,

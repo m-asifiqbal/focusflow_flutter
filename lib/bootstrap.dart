@@ -19,10 +19,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/app.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/performance/device_performance.dart';
 import 'package:focusflow/core/storage/secure_store.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
+import 'package:focusflow/shared/providers/performance_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -74,11 +76,15 @@ Future<Widget> buildRoot({
   final secure = secureStore ?? SecureStore();
   final SharedPreferences prefs;
   final String dbKey;
+  final DevicePerformance device;
   try {
-    // Independent reads (disk vs keychain): run them together.
-    (prefs, dbKey) = await (
+    // Independent reads (disk, keychain, device info): run them together.
+    // The device read never throws and gives up quickly: it only picks the
+    // Automatic look of Settings › Appearance › Visual effects.
+    (prefs, dbKey, device) = await (
       (loadPrefs ?? SharedPreferences.getInstance)(),
       secure.getOrCreateDatabaseKey(),
+      DevicePerformance.detect(),
     ).wait;
   } on Object catch (e) {
     // The type is enough to triage; never log key material.
@@ -103,6 +109,7 @@ Future<Widget> buildRoot({
       secureStoreProvider.overrideWithValue(secure),
       databaseKeyProvider.overrideWithValue(dbKey),
       deviceIdProvider.overrideWithValue(deviceId),
+      devicePerformanceProvider.overrideWithValue(device),
       ...extra,
     ],
     child: const FocusFlowApp(),
@@ -114,10 +121,11 @@ Future<Widget> buildRoot({
 String _errorTypes(Object e) {
   if (e is ParallelWaitError) {
     final errors = e.errors;
-    if (errors is (AsyncError?, AsyncError?)) {
+    if (errors is (AsyncError?, AsyncError?, AsyncError?)) {
       return [
         errors.$1,
         errors.$2,
+        errors.$3,
       ].whereType<AsyncError>().map((a) => a.error.runtimeType).join(', ');
     }
   }

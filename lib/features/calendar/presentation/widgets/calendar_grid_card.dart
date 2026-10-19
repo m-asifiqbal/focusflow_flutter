@@ -78,18 +78,23 @@ class _CalendarMonthCardState extends State<CalendarMonthCard> {
   Widget build(BuildContext context) {
     final grid = CalendarRules.monthGrid(widget.month, widget.weekStart);
     final key = ValueKey(widget.month);
-    final rows = Column(
+    // Its own layer: the month swipe fades and slides this subtree, and
+    // without a boundary every frame of that animation repaints all 42 cells
+    // (numbers, dots, semantics) instead of moving one cached picture.
+    final rows = RepaintBoundary(
       key: key,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var r = 0; r < grid.length; r += 7)
-          Row(
-            children: [
-              for (final day in grid.sublist(r, r + 7))
-                Expanded(child: _cell(day)),
-            ],
-          ),
-      ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var r = 0; r < grid.length; r += 7)
+            Row(
+              children: [
+                for (final day in grid.sublist(r, r + 7))
+                  Expanded(child: _cell(day)),
+              ],
+            ),
+        ],
+      ),
     );
     return _GridCard(
       weekStart: widget.weekStart,

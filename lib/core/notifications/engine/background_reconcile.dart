@@ -22,6 +22,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/notifications/engine/notification_reconciler.dart';
 import 'package:focusflow/core/notifications/engine/planner_snapshot.dart';
+import 'package:focusflow/core/notifications/engine/rearm_policy.dart';
 import 'package:focusflow/core/notifications/engine/refresh_port.dart';
 import 'package:focusflow/core/notifications/engine/task_reminder_zones.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
@@ -60,12 +61,20 @@ Future<ReconcileResult> reconcileInBackground(
     plannerSnapshotLoaderProvider,
   ).load(settings, location);
   final permission = await read(notificationPermissionProvider.future);
+  // No trust in the OS here: nobody is watching frames in the background,
+  // so a renewing pass renews everything (and tells the app it need not).
   final result = await read(notificationReconcilerProvider).reconcile(
     input,
     allowed: permission == NotificationPermission.granted,
     location: location,
     rearm: rearm,
   );
+  if (rearm) {
+    await RearmPolicy.markFull(
+      read(sharedPreferencesProvider),
+      read(clockProvider).now(),
+    );
+  }
   NotificationRefreshPort.ping();
   return result;
 }

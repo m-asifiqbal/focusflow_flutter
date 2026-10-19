@@ -112,6 +112,22 @@ abstract final class SettingsLabels {
     ListDensity.compact => 'Compact',
   };
 
+  static String performance(PerformanceMode m) => switch (m) {
+    PerformanceMode.auto => 'Automatic',
+    PerformanceMode.full => 'Full',
+    PerformanceMode.reduced => 'Reduced',
+  };
+
+  static String performanceHint(PerformanceMode m) => switch (m) {
+    PerformanceMode.auto =>
+      'Lighter effects on phones that struggle, full on the rest.',
+    PerformanceMode.full =>
+      'Frosted tab bar, cards that open into their page, shimmering placeholders.',
+    PerformanceMode.reduced =>
+      'A plain tab bar, pages that slide in and still placeholders — smoother '
+          'on older phones.',
+  };
+
   /// "30 s", "1 min", "Never".
   static String clipboard(int seconds) {
     if (seconds <= 0) return 'Never';

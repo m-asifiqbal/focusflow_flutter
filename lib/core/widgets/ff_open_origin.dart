@@ -19,6 +19,7 @@ import 'package:flutter/widgets.dart';
 import 'package:focusflow/core/router/open_origin.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/widgets/ff_effects.dart';
 
 class FFOpenOriginTracker extends StatefulWidget {
   const FFOpenOriginTracker({
@@ -54,6 +55,8 @@ class _FFOpenOriginTrackerState extends State<FFOpenOriginTracker> {
   void _record() {
     // A drop can rebuild the list (and unmount this card) mid-event.
     if (!mounted) return;
+    // Reduced effects: the page slides in like any other (no grow-from-card).
+    if (FFEffects.reducedOf(context)) return;
     final box = context.findRenderObject();
     if (box is! RenderBox) return;
     final rect = _rectOf(box);

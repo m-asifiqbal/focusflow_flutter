@@ -25,8 +25,10 @@ import 'package:focusflow/core/startup/app_startup.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_text_scaler.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/widgets/ff_effects.dart';
 import 'package:focusflow/core/widgets/ff_haptics.dart';
 import 'package:focusflow/features/settings/presentation/widgets/app_lock_gate.dart';
+import 'package:focusflow/shared/providers/performance_provider.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
 /// The settings the app shell applies globally.
@@ -56,6 +58,7 @@ class FocusFlowApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final a = ref.watch(settingsProvider.select(appearanceOf));
+    final reducedEffects = ref.watch(reducedEffectsProvider);
 
     return MaterialApp.router(
       title: AppInfo.name,
@@ -76,6 +79,7 @@ class FocusFlowApp extends ConsumerWidget {
         textScale: a.textScale,
         reduceMotion: a.reduceMotion,
         hapticsEnabled: a.hapticsEnabled,
+        reducedEffects: reducedEffects,
         child: AppStartupHost(
           child: AppLockGate(
             child: GestureDetector(
@@ -106,6 +110,7 @@ class AppAppearanceScope extends StatelessWidget {
     required this.reduceMotion,
     required this.child,
     this.hapticsEnabled = true,
+    this.reducedEffects = false,
     super.key,
   });
 
@@ -113,6 +118,9 @@ class AppAppearanceScope extends StatelessWidget {
   final double textScale;
   final bool reduceMotion;
   final bool hapticsEnabled;
+
+  /// Draw the costly effects in their cheap form (see FFEffects).
+  final bool reducedEffects;
   final Widget child;
 
   @override
@@ -123,7 +131,10 @@ class AppAppearanceScope extends StatelessWidget {
         textScaler: AppTextScaler.compose(mq.textScaler, textScale),
         disableAnimations: mq.disableAnimations || reduceMotion,
       ),
-      child: FFHaptics(enabled: hapticsEnabled, child: child),
+      child: FFEffects(
+        reduced: reducedEffects,
+        child: FFHaptics(enabled: hapticsEnabled, child: child),
+      ),
     );
   }
 }

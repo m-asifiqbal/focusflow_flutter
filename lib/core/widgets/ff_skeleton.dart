@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/ff_card.dart';
+import 'package:focusflow/core/widgets/ff_effects.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
 
 class FFSkeleton extends StatelessWidget {
@@ -80,8 +81,11 @@ class _FFShimmerState extends State<FFShimmer>
     _sync();
   }
 
+  /// Reduce motion or reduced visual effects: a static placeholder.
+  bool get _still => context.reduceMotion || FFEffects.reducedOf(context);
+
   void _sync() {
-    final run = widget.enabled && !context.reduceMotion;
+    final run = widget.enabled && !_still;
     if (run && !_c.isAnimating) {
       _c.repeat();
     } else if (!run && _c.isAnimating) {
@@ -97,7 +101,7 @@ class _FFShimmerState extends State<FFShimmer>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.enabled || context.reduceMotion) return widget.child;
+    if (!widget.enabled || _still) return widget.child;
     final ff = context.ff;
     final base = ff.surfaceMuted;
     final highlight = Color.alphaBlend(

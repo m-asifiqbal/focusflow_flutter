@@ -10,6 +10,7 @@ import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_typography.dart';
+import 'package:focusflow/core/widgets/ff_effects.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
 import '../../../helpers/screen_harness.dart';
@@ -179,6 +180,29 @@ void main() {
     expect(settings().reduceMotion, isTrue);
     await tap(tester, find.text('Use system font'));
     expect(settings().useSystemFont, isTrue);
+  });
+
+  testWidgets('visual effects: Automatic, Full or Reduced, applied at once', (
+    tester,
+  ) async {
+    await setUp(tester);
+    await pumpApp(tester, h, AppRoutes.settingsAppearance);
+    expect(settings().performanceMode, PerformanceMode.auto);
+
+    // What the design system sees (the page itself has no tab bar).
+    bool reduced() =>
+        FFEffects.reducedOf(tester.element(find.text('Appearance').first));
+
+    await tap(tester, find.text('Visual effects'));
+    await tap(tester, find.text('Reduced').last);
+    expect(settings().performanceMode, PerformanceMode.reduced);
+    // The app shell follows immediately.
+    expect(reduced(), isTrue);
+
+    await tap(tester, find.text('Visual effects'));
+    await tap(tester, find.text('Full').last);
+    expect(settings().performanceMode, PerformanceMode.full);
+    expect(reduced(), isFalse);
   });
 
   testWidgets('alternate app icons are honest about availability', (

@@ -73,6 +73,9 @@ class SettingsEditor {
   Future<void> setUseSystemFont(bool v) =>
       _set((s) => s.copyWith(useSystemFont: v));
 
+  Future<void> setPerformanceMode(PerformanceMode v) =>
+      _set((s) => s.copyWith(performanceMode: v));
+
   // ── General ──
   Future<void> setDateFormat(String pattern) =>
       _set((s) => s.copyWith(dateFormat: pattern));

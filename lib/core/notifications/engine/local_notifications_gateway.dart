@@ -326,6 +326,23 @@ class LocalNotificationsGateway implements NotificationGateway {
   }
 
   @override
+  Future<Set<int>?> armedIds(Set<int> ids) async {
+    if (!_ready || !_isAndroid) return null;
+    if (ids.isEmpty) return {};
+    try {
+      final armed = await _native.invokeListMethod<int>(
+        'armedNotificationIds',
+        {'ids': ids.toList()},
+      );
+      return armed?.toSet();
+    } catch (e) {
+      // No native side (the background isolate, tests): not knowing is the
+      // safe answer — the caller then renews everything.
+      return null;
+    }
+  }
+
+  @override
   Future<void> schedule(
     PlannedNotification n,
     tz.Location location,

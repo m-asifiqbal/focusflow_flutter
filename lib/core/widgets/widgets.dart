@@ -22,6 +22,7 @@ export 'ff_card.dart';
 export 'ff_check_circle.dart';
 export 'ff_chips.dart';
 export 'ff_dialog.dart';
+export 'ff_effects.dart';
 export 'ff_empty_state.dart';
 export 'ff_grouped_list.dart';
 export 'ff_headers.dart';

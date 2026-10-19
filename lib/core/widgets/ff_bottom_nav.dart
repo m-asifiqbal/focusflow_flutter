@@ -46,6 +46,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/widgets/ff_effects.dart';
 import 'package:focusflow/core/widgets/ff_haptics.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
 import 'package:focusflow/core/widgets/src/ff_token_gaps.dart';
@@ -161,7 +162,9 @@ class _FFBottomNavState extends State<FFBottomNav>
     final bottomGap = bottomInset > 0
         ? bottomInset - AppSpacing.sm
         : AppSpacing.sm;
-    final glass = _GlassColors.of(context);
+    // Reduced effects: no live blur, so a more opaque glass instead.
+    final reduced = FFEffects.reducedOf(context);
+    final glass = _GlassColors.of(context, reduced: reduced);
 
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.15,
@@ -175,7 +178,7 @@ class _FFBottomNavState extends State<FFBottomNav>
         child: Row(
           children: [
             Expanded(
-              child: _Pill(glass: glass, state: this),
+              child: _Pill(glass: glass, state: this, blur: !reduced),
             ),
             const SizedBox(width: FFBottomNav._gap),
             _Fab(
@@ -192,12 +195,32 @@ class _FFBottomNavState extends State<FFBottomNav>
   }
 }
 
+/// A backdrop blur around [child] - or [child] alone when [blur] is off
+/// (reduced visual effects).
+class _MaybeBlur extends StatelessWidget {
+  const _MaybeBlur({required this.blur, required this.child});
+
+  final bool blur;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => blur
+      ? BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: child,
+        )
+      : child;
+}
+
 /// The frosted capsule with the sliding highlight and the four tabs.
 class _Pill extends StatelessWidget {
-  const _Pill({required this.glass, required this.state});
+  const _Pill({required this.glass, required this.state, required this.blur});
 
   final _GlassColors glass;
   final _FFBottomNavState state;
+
+  /// A live backdrop blur behind the glass (off under reduced effects).
+  final bool blur;
 
   @override
   Widget build(BuildContext context) {
@@ -214,8 +237,8 @@ class _Pill extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(radius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: _MaybeBlur(
+            blur: blur,
             child: CustomPaint(
               // The thin bevel rim along the glass edge, over the fill.
               foregroundPainter: _NeuEdgePainter(
@@ -407,7 +430,35 @@ class _GlassColors {
   final Color active;
   final Color inactive;
 
-  factory _GlassColors.of(BuildContext context) {
+  /// [reduced]: the same colours with a nearly opaque fill, for use
+  /// without the backdrop blur (content would show through sharply).
+  factory _GlassColors.of(BuildContext context, {bool reduced = false}) {
+    final glass = _GlassColors._themed(context);
+    if (!reduced) return glass;
+    final fill = glass.fill as LinearGradient;
+    return glass.copyWith(
+      fill: LinearGradient(
+        begin: fill.begin,
+        end: fill.end,
+        colors: [for (final c in fill.colors) c.withValues(alpha: 0.95)],
+      ),
+    );
+  }
+
+  _GlassColors copyWith({Gradient? fill}) => _GlassColors(
+    fill: fill ?? this.fill,
+    glow: glow,
+    shade: shade,
+    innerLight: innerLight,
+    innerShade: innerShade,
+    shadow: shadow,
+    activeFill: activeFill,
+    activeBorder: activeBorder,
+    active: active,
+    inactive: inactive,
+  );
+
+  factory _GlassColors._themed(BuildContext context) {
     final ff = context.ff;
     if (ff.isDark) {
       return _GlassColors(

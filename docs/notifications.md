@@ -40,18 +40,80 @@ ringing (phone off) comes back as "Missed". If the system refuses the alarm
 (no exact-alarm grant) it falls back to a notification. iOS has no alarm API:
 alarm-style stays a time-sensitive notification there.
 
+## The alarm guard (Android)
+"Alarms stop when I clear the app from recents." What *fires* an alarm and what
+*keeps the app alive* are different jobs, so the guard layers a keeper on top
+of the exact alarms (code: `android/app/src/main/kotlin/.../guard/`,
+`core/notifications/alarm_guard.dart`):
+* **Trigger — `AlarmManager`, exact.** `setAlarmClock` for alarm-style
+  reminders, `setExactAndAllowWhileIdle` for the rest. The only API that fires
+  at the exact minute with the app not running and the phone in Doze.
+  **WorkManager is deliberately not the trigger:** a periodic job is at best
+  every 15 min and Doze defers it, so it cannot ring an alarm on time (it stays
+  what it was: the 12 h backup / maintenance task).
+* **Keeper — `AlarmGuardService`, a sticky foreground service** (type
+  `specialUse`, a quiet low-importance notification "Keeping your alarms on
+  time · Next: 7:30 AM" with nothing private on it). It runs while a reminder,
+  alarm or task alert is due — the engine reports that after every pass
+  (`ReconcileResult.vitalPending`; digests and nudges do not count) — and stops
+  itself when nothing is left (3 h after the last due time). A process hosting
+  a foreground service is the last one phone makers' task killers and memory
+  cleaners take, and Android restarts it if it is killed anyway.
+  Switch: Settings › Notifications › **Keep alarms running**
+  (`AppSettings.keepAlarmsAlive`, on by default, Android only).
+* **Watchdog — an exact `AlarmManager` alarm** every 15 min (and 20 s after the
+  app is swiped away). If the service is gone it is restarted — an exact alarm
+  may start a foreground service from the background, a WorkManager job may
+  not — and everything is re-armed; if it is alive the watchdog asks it for its
+  periodic check.
+* **Receiver — `AlarmGuardReceiver`:** brings the guard back after a reboot and
+  after an app update (both stop it).
+* **Self-repair (`AlarmGuard.verifyAlarms` / `healNotifications`):** each alarm
+  the `alarm` plugin has stored is checked against `AlarmManager` (no live
+  `PendingIntent` = not armed) and re-armed; an alarm that passed its time
+  without ringing is rung now (older than its 15 min stale window: dropped, and
+  reported as "Missed" on the next start, like after a reboot); the scheduled
+  notifications of flutter_local_notifications are re-armed (at most every 6 h)
+  by running that plugin's own boot receiver. Alarms that are ringing, queued
+  or only just due are never touched (delivering one again makes the alarm
+  service silence it).
+* **What it cannot do:** survive a *force-stop*. On Xiaomi / Oppo / Vivo /
+  Huawei / some Samsung modes a swipe from recents *is* a force-stop unless the
+  user allowed auto-start for the app; Android then removes the process, its
+  services and all its alarms and nothing runs until the app is opened. That is
+  an OS rule no service or WorkManager job can get around — the engine's
+  re-arm + "Missed" catch-up on the next start, and the auto-start guidance
+  below, remain the answer. The guard shrinks the cases where an alarm is lost
+  anyway (task killers that spare foreground services, cleaners that only wipe
+  alarms, a killed process, reboots and updates).
+* **Play Console:** the service uses `FOREGROUND_SERVICE_SPECIAL_USE`; declare it
+  (App content › Foreground service permissions) as: "Keeps scheduled alarms and
+  reminders reliable after the app is swiped away." The manifest's
+  `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` says the same.
+* **Verification status:** the Kotlin compiles (`:app:compileDebugKotlin`), the
+  merged manifest has the service / receiver, and the Dart side is unit-tested;
+  the native behaviour has **not** been run on a phone. Try it: set an alarm two
+  minutes ahead, clear the app from recents, wait.
+
 ## When the app is killed
 What survives, and what the engine does about the rest:
 * **Swiped away on stock Android / Samsung with default settings:** nothing
-  is lost. The alarms belong to the OS and fire with no app process.
+  is lost. The alarms belong to the OS and fire with no app process (and the
+  alarm guard above keeps the app's process up while something is due).
 * **Force-stopped, or swiped away on Xiaomi / Oppo / Vivo / Huawei / some
   Samsung modes:** Android drops *every* alarm of the app. The plugin's own
   list of pending requests is stored data and keeps naming them, so the
   engine cannot tell. Therefore:
   * the **first pass of every process** (app launch, the 12 h background
     task) passes `rearm: true` to `NotificationReconciler.reconcile`:
-    every planned request is handed to the OS again (same id = replaced, so
-    a healthy alarm is just renewed);
+    planned requests are handed to the OS again (same id = replaced, so a
+    healthy alarm is just renewed). A *launch* first asks the OS which alarms
+    it still holds (`NotificationGateway.armedIds`, native `ArmedAlarms`: a
+    live `PendingIntent` for the request code — Android drops every one on a
+    force-stop) and renews only the others, so a healthy launch sends
+    nothing; after a force-stop none is armed and all are renewed. A *full*
+    renewal (everything, no questions) still runs at a launch when the last
+    one is 24 h old (`RearmPolicy`) and always in the background task;
   * a request that is past its time yet still listed was *lost*, not late
     (a delivered one-shot request leaves the plugin's list at once). A lost
     reminder / task alert is recorded in the inbox and shown now as
@@ -120,10 +182,32 @@ with 6 months of history — `NotificationPlanner.plan` went from ~3.3 s to
   (theme, layout, backup …) and the permission *first loading* do not
   trigger a re-plan; `ReconcilingNotificationEngine._notPlanned` lists the
   former (everything else, new settings included, does).
+* **A launch renews only what Android dropped.** Every Android schedule call
+  of flutter_local_notifications re-reads and re-writes the plugin's whole
+  stored list on the platform thread — the thread that also delivers touches
+  and frame callbacks — so re-sending N requests (up to 240) at every launch
+  was N × N work right while the user started to scroll: the "laggy first
+  seconds". Now only the requests without a live alarm are re-sent (see
+  *When the app is killed*); `ReconcileResult`, the ledger and "Missed"
+  catch-up are unchanged.
 * **Shared live queries:** `watchComputed(shareKey: …)` lets subscribers with
   the same parameters (Home, the library counts and the planner all read
   today's habits) share one computation.
 * Auto backups encode, hash, seal and zip on their own isolate.
+
+## Visual effects (low-end phones)
+Settings › Appearance › **Visual effects**: *Automatic* (default), *Full*,
+*Reduced* (`AppSettings.performanceMode`, kept out of backups — it describes
+this phone). Reduced drops the effects that cost a weak GPU the most:
+* the **tab bar's live blur** becomes a plain, more opaque glass;
+* a tapped card no longer **grows into its page** (a plain slide instead);
+* **shimmer** placeholders are still.
+Automatic follows `DevicePerformance` (read once at start-up, in parallel
+with the other reads): Android "low RAM" flag, ≤ 3 GB installed memory or
+Android older than 8.0 ⇒ reduced; anything unknown ⇒ full; iOS ⇒ full. The
+design system reads it through `FFEffects` (provided in `app.dart`).
+Month-grid swipes in the Calendar also got their own repaint layer, so the
+animation moves one cached picture instead of repainting 42 cells per frame.
 
 ## iOS
 * The tones are bundled as Flutter assets (`assets/sounds/`) and copied to

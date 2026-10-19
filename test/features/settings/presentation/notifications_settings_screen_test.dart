@@ -5,6 +5,7 @@
 /// overflow at 360 pt / text scale 1.3.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -252,6 +253,42 @@ void main() {
     await tapText(tester, 'Lock screen details');
     await tapText(tester, 'Full content');
     expect(settings().lockScreenVisibility, LockScreenVisibility.full);
+  });
+
+  testWidgets('keep alarms running: a switch on Android, absent elsewhere', (
+    tester,
+  ) async {
+    await setUp(tester);
+    await open(tester);
+    expect(settings().keepAlarmsAlive, isTrue, reason: 'on by default');
+    expect(
+      find.text(
+        'A quiet notification keeps alarms and reminders on time after you '
+        'close the app',
+      ),
+      findsOneWidget,
+    );
+
+    await tapText(tester, 'Keep alarms running');
+    expect(settings().keepAlarmsAlive, isFalse);
+    expect(
+      find.text('Some phones stop alarms when the app is swiped away'),
+      findsOneWidget,
+    );
+
+    await tapText(tester, 'Keep alarms running');
+    expect(settings().keepAlarmsAlive, isTrue);
+  });
+
+  testWidgets('keep alarms running is an Android-only row', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    // Also on failure; the invariant check needs it reset in the body.
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    await setUp(tester);
+    await open(tester);
+    expect(find.text('Keep alarms running'), findsNothing);
+    expect(find.text('Show on lock screen'), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('repeat until done: presets, custom minutes, off', (
