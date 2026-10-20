@@ -35,6 +35,7 @@ class DriveBackupFile {
     this.isAuto = false,
     this.isEncrypted = false,
     this.kdfSalt,
+    this.contentHash,
   });
 
   static const String kindKey = 'ffKind';
@@ -55,8 +56,17 @@ class DriveBackupFile {
   /// Base64 salt of the backup key (to tell whether our key opens it).
   final String? kdfSalt;
 
+  /// The backup's `BuiltBackup.contentHash` (data, settings, profile
+  /// picture), so a sync can tell "Drive already has exactly this device's
+  /// state" without downloading anything. Null for backups written before
+  /// it was added.
+  final String? contentHash;
+
   /// appProperties written with a backup (values ≤ 100 bytes each).
-  static Map<String, String> propertiesFor(BackupManifest m) => {
+  static Map<String, String> propertiesFor(
+    BackupManifest m, {
+    String contentHash = '',
+  }) => {
     kindKey: kindBackup,
     'deviceId': m.deviceId,
     'deviceName': _cap(m.deviceName),
@@ -66,6 +76,7 @@ class DriveBackupFile {
     'isAuto': '${m.isAuto}',
     'encrypted': '${m.isEncrypted}',
     if (m.encryption != null) 'kdfSalt': base64Encode(m.encryption!.salt),
+    if (contentHash.isNotEmpty) 'contentHash': contentHash,
   };
 
   /// Null for files that are not FocusFlow backups.
@@ -85,6 +96,7 @@ class DriveBackupFile {
       isAuto: p['isAuto'] == 'true',
       isEncrypted: p['encrypted'] == 'true',
       kdfSalt: p['kdfSalt'],
+      contentHash: p['contentHash'],
     );
   }
 

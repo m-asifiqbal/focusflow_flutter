@@ -19,6 +19,7 @@ import 'package:focusflow/core/utils/date_utils.dart';
 abstract final class BackupTints {
   static const drive = TagPalette.work;
   static const frequency = TagPalette.design;
+  static final openSync = ModuleStyle.scan.colors;
   static const wifi = TagPalette.travel;
   static final encrypt = ModuleStyle.notes.colors;
   static final keep = ModuleStyle.vault.colors;

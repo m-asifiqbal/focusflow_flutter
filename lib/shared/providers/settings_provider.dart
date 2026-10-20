@@ -92,6 +92,7 @@ class SettingsController extends Notifier<AppSettings> {
       wipeAfterFailedAttempts: s.wipeAfterFailedAttempts,
       // Backup & sync.
       autoBackupDrive: s.autoBackupDrive,
+      syncOnOpen: s.syncOnOpen,
       backupFrequency: s.backupFrequency,
       backupMinutes: s.backupMinutes,
       backupWifiOnly: s.backupWifiOnly,

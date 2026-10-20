@@ -239,6 +239,7 @@ abstract final class SettingsIndex {
       ('Back up now', ['sync now', 'drive']),
       ('Auto backup to Google Drive', ['automatic', 'cloud']),
       ('Backup frequency', ['daily', 'weekly']),
+      ('Sync when app opens', ['auto sync', 'launch', 'other devices']),
       ('Back up on Wi-Fi only', ['cellular', 'mobile data']),
       ('Encrypt backups', ['password', 'security']),
       ('Local backups', ['device', 'offline']),

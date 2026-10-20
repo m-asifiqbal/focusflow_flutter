@@ -3,6 +3,7 @@
 /// ============================================================
 ///
 /// What:
+/// * [syncNowWithPrompt] — every manual "Sync now", behind the PIN choice;
 /// * [resolveBackupEncryption] — "Encrypt backups" is on but no backup PIN
 ///   exists: Set a backup PIN, or explicitly "Back up without encryption"
 ///   (turns the setting off). Asked at Drive connect, before the first
@@ -21,6 +22,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/backup_key_policy.dart';
+import 'package:focusflow/core/sync/cloud_account.dart';
+import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -37,6 +40,23 @@ const String kBackupPinMessage =
     'Backups are encrypted with this backup PIN — it is separate from your '
     'vault PIN. Use the same PIN on your other devices; without it a '
     'backup cannot be opened.';
+
+/// "Sync now" (Backup & Sync card, Settings account card): with "Encrypt
+/// backups" on and no backup PIN, asks first (Set a backup PIN / Back up
+/// without encryption) — never uploads plaintext silently. Returns the
+/// outcome; null when cancelled, failed (see syncStatusProvider) or a sync
+/// was already running.
+Future<SyncOutcome?> syncNowWithPrompt(
+  BuildContext context,
+  WidgetRef ref,
+) async {
+  if (await backupEncryptionUnresolved(ref)) {
+    if (!context.mounted || !await resolveBackupEncryption(context, ref)) {
+      return null;
+    }
+  }
+  return ref.read(syncStatusProvider.notifier).syncNow();
+}
 
 /// Whether "Encrypt backups" is on without a usable backup key (the next
 /// backup would stop and ask).

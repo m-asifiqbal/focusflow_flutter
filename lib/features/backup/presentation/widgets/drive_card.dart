@@ -163,18 +163,6 @@ class DriveCard extends ConsumerWidget {
   }
 }
 
-/// "Sync now": with "Encrypt backups" on and no backup PIN, asks first
-/// (Set a backup PIN / Back up without encryption) — never uploads
-/// plaintext silently.
-Future<void> syncNowWithPrompt(BuildContext context, WidgetRef ref) async {
-  if (await backupEncryptionUnresolved(ref)) {
-    if (!context.mounted || !await resolveBackupEncryption(context, ref)) {
-      return;
-    }
-  }
-  await ref.read(syncStatusProvider.notifier).syncNow();
-}
-
 /// The two half-width card buttons (Sync now / Restore). The shared
 /// FFPrimaryButton's 17 pt label and 20 pt padding don't fit half a card
 /// at 390 pt, so these use the 16 pt button style, tighter padding and

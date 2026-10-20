@@ -15,7 +15,7 @@ import 'package:focusflow/core/sync/merge_report.dart';
 @immutable
 class SyncOutcome {
   const SyncOutcome({
-    required this.uploaded,
+    this.uploaded,
     this.pruned = 0,
     this.mergedBackups = 0,
     this.report = const MergeReport(),
@@ -24,7 +24,10 @@ class SyncOutcome {
     this.mergeDeferred = false,
   });
 
-  final DriveBackupFile uploaded;
+  /// The backup this sync uploaded; null when Drive already held this
+  /// device's current data and the sync only merged ([DriveSync.syncNow]
+  /// with `skipUnchanged`).
+  final DriveBackupFile? uploaded;
 
   /// Old Drive backups of this device removed ("Keep last N").
   final int pruned;

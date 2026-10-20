@@ -2,7 +2,8 @@
 /// BACKUP SETTINGS SECTIONS — AUTOMATIC BACKUP + LOCAL BACKUP (34)
 /// ============================================================
 ///
-/// What: Auto backup to Drive, Frequency (Daily · 9:00 PM), Wi-Fi only,
+/// What: Auto backup to Drive, Frequency (Daily · 9:00 PM), Sync when app
+/// opens, Wi-Fi only (applies to both automatic kinds),
 /// Encrypt backups (sets the backup PIN — separate from the vault PIN —
 /// the first time), Keep last N;
 /// Back up to device now, Backup location, Auto local backup.
@@ -138,6 +139,13 @@ class AutomaticBackupSection extends ConsumerWidget {
             value: BackupLabels.frequency(s),
             enabled: s.autoBackupDrive,
             onTap: () => _frequency(context, ref),
+          ),
+          FFListRow.toggle(
+            leading: _tile(FontAwesomeIcons.arrowsRotate, BackupTints.openSync),
+            title: 'Sync when app opens',
+            subtitle: 'Gets changes from your other devices',
+            value: s.syncOnOpen,
+            onChanged: (v) => edit.update((s) => s.copyWith(syncOnOpen: v)),
           ),
           FFListRow.toggle(
             leading: _tile(FontAwesomeIcons.wifi, BackupTints.wifi),

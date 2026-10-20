@@ -97,9 +97,12 @@ them the app builds and runs; Drive says "not set up in this build".
 - **Sync now** works in these steps:
   1. Build a `.ffbackup`. It's encrypted with the stored backup key when
      "Encrypt backups" is on. It carries the app's settings too
-     (`settings.json`), so a manual **Restore** on a new phone brings back
-     the configuration as well as the data. The automatic merge in step 5
-     never applies another device's settings.
+     (`settings.json`) and the profile picture (`profile-photo.jpg`), so a
+     manual **Restore** on a new phone brings back the configuration and
+     the picture as well as the data. Replace restores the backup's
+     picture. Merge restores it only when the phone has none. The
+     automatic merge in step 5 never applies another device's settings or
+     picture.
   2. Upload it.
   3. Keep this device's last *N* backups and delete the older ones.
   4. Update the devices manifest.
@@ -122,6 +125,16 @@ them the app builds and runs; Drive says "not set up in this build".
   - The background isolate opens the encrypted database with the key from
     the keychain. If there is no key, it does nothing and never creates
     one.
+- **Sync when app opens** (on by default, Backup & Sync › Automatic
+  backup): a cold start, or coming back after at least a minute away,
+  runs a sync without user interaction. It needs a Google Drive account, the
+  network that "Wi-Fi only" allows, and no sync in the last 2 minutes. If
+  the device is offline, it skips without showing an error. Every backup
+  stores a SHA-256 of its data, settings and profile picture in its
+  appProperties (`contentHash`). When this device's newest backup already
+  has the current state, the sync on open uploads and prunes nothing. It only merges other devices' newer backups,
+  so opening the app often doesn't push older restore points out of
+  "Keep last N". *Sync now* and the scheduled backup always upload.
 - **Sign out** forgets the profile, and local data stays. **Delete account
   & Drive data** deletes every file in appDataFolder and revokes the grant
   (`disconnect`).

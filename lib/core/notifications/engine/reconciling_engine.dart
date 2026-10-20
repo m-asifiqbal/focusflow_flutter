@@ -230,6 +230,7 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     'breachMonitoring',
     'wipeAfterFailedAttempts',
     'autoBackupDrive',
+    'syncOnOpen',
     'backupFrequency',
     'backupMinutes',
     'backupWifiOnly',

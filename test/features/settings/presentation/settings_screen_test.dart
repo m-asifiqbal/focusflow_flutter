@@ -1,7 +1,8 @@
 /// Screen 30 — Settings root: the mockup state (signed in, live values)
 /// in light + dark; signed-out card; search finds sub-page rows and deep
-/// links; pickers write settings; sign out asks and signs out; no overflow
-/// at 360 pt / text scale 1.3.
+/// links; pickers write settings; sign out asks and signs out; the account
+/// card's Sync button syncs in place; no overflow at 360 pt / text scale
+/// 1.3.
 library;
 
 import 'package:flutter/foundation.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/crypto/biometric_auth.dart';
 import 'package:focusflow/core/items/library_counts.dart';
+import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
@@ -27,6 +29,8 @@ import 'package:focusflow/features/vault/presentation/providers/vault_crypto_pro
 import 'package:focusflow/features/vault/presentation/screens/vault_security_settings_screen.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
+import '../../../core/sync/drive_fakes.dart';
+import '../../../core/sync/sync_fixtures.dart';
 import '../../../helpers/screen_harness.dart';
 import '../../../helpers/test_container.dart';
 
@@ -50,16 +54,19 @@ class _FixedAccount extends CloudAccountNotifier {
 }
 
 class _FakeController implements CloudAccountController {
-  _FakeController(this.ref);
+  _FakeController(this.ref, {this.google = false});
 
   final Ref ref;
   int signOuts = 0;
+
+  /// Drive set up in this build (shows the account card's Sync button).
+  final bool google;
 
   @override
   bool get appleAvailable => false;
 
   @override
-  bool get googleAvailable => false;
+  bool get googleAvailable => google;
 
   @override
   Future<CloudAccount?> signInWithApple() async => null;
@@ -104,6 +111,7 @@ void main() {
   Future<void> setUp(
     WidgetTester tester, {
     CloudAccount? account = _asif,
+    List<Override> extra = const [],
   }) async {
     await loadAppFonts();
     h = (await tester.runAsync(
@@ -117,8 +125,9 @@ void main() {
         overrides: [
           cloudAccountProvider.overrideWith(() => _FixedAccount(account)),
           cloudAccountControllerProvider.overrideWith(
-            (ref) => controller = _FakeController(ref),
+            (ref) => controller = _FakeController(ref, google: account != null),
           ),
+          ...extra,
           appVersionProvider.overrideWith((ref) async => 'v1.0.0 (24)'),
           storageRepositoryProvider.overrideWithValue(_FakeStorage()),
           deviceAuthenticatorProvider.overrideWithValue(_OwnerAuth()),
@@ -168,7 +177,7 @@ void main() {
       'Settings',
       'Asif Iqbal',
       'asif.design@gmail.com',
-      'SYNCED 2 MIN AGO',
+      'Synced 2 min ago',
       'English',
       'Home',
       'Saturday',
@@ -331,6 +340,49 @@ void main() {
       textScale: 1.3,
     );
     expect(tester.takeException(), isNull);
+    expect(find.bySemanticsLabel('Sync now'), findsOneWidget);
     await captureScreen(tester, '30_settings_small');
+  });
+
+  testWidgets('account card Sync button syncs in place and toasts', (
+    tester,
+  ) async {
+    final drive = FakeDriveStore();
+    await setUp(
+      tester,
+      extra: driveOverrides(
+        drive: drive,
+        files: tempFiles(addTearDown),
+        secure: MemorySecureStore(),
+        net: FakeNetwork(),
+      ),
+    );
+    drive.now = h.clock.now;
+    await tester.runAsync(
+      // No backup PIN prompt; no launch sync racing the tap.
+      () => h.updateSettings(
+        (s) => s.copyWith(encryptBackups: false, syncOnOpen: false),
+      ),
+    );
+    await pumpApp(tester, h, AppRoutes.settings);
+
+    await tester.tap(find.bySemanticsLabel('Sync now'));
+    // The backup is built on an isolate: let real time pass.
+    final toast = find.text('Backed up to Google Drive');
+    for (var i = 0; i < 60 && toast.evaluate().isEmpty; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(toast, findsOneWidget);
+    expect(drive.backupNames, hasLength(1));
+    expect(h.read(syncStatusProvider).phase, SyncPhase.done);
+    // The button's tap never falls through to the card (Account & profile).
+    expect(
+      h.read(routerProvider).routerDelegate.currentConfiguration.uri.path,
+      AppRoutes.settings,
+    );
+    await settle(tester);
   });
 }

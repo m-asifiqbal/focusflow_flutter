@@ -25,7 +25,13 @@
 /// restore puts them back — Replace takes the backup's, Merge only fills in
 /// what is still at its default — unless the caller opts out (Drive's
 /// automatic merge of another device's backup never touches this device's
-/// settings). A damaged settings entry only skips the settings.
+/// settings). A damaged settings entry only skips the settings. The profile
+/// picture goes with the settings (full backups only): Replace puts the
+/// backup's back, Merge only when this device has none.
+///
+/// [BuiltBackup.contentHash] / [BackupEngine.fingerprint] name everything a
+/// full backup carries (data, settings, profile picture), so a sync can see
+/// that Drive already holds exactly this device's current state.
 /// ============================================================
 library;
 
@@ -64,10 +70,18 @@ enum RestoreMode {
 /// A freshly built backup: zip bytes + the manifest written into it.
 @immutable
 class BuiltBackup {
-  const BuiltBackup({required this.bytes, required this.manifest});
+  const BuiltBackup({
+    required this.bytes,
+    required this.manifest,
+    this.contentHash = '',
+  });
 
   final Uint8List bytes;
   final BackupManifest manifest;
+
+  /// SHA-256 over the plaintext content (data checksum, settings, profile
+  /// picture) — see [BackupEngine.contentHashOf].
+  final String contentHash;
 }
 
 /// What a restore did.
@@ -81,6 +95,7 @@ class RestoreResult {
     this.filesMissing = 0,
     this.settingsRestored = false,
     this.settingsFailed = false,
+    this.photoRestored = false,
   });
 
   final RestoreMode mode;
@@ -103,6 +118,9 @@ class RestoreResult {
   /// The backup has settings that could not be read or saved (damaged, or
   /// written by a newer app). The data itself is restored regardless.
   final bool settingsFailed;
+
+  /// The backup's profile picture was put on this device.
+  final bool photoRestored;
 }
 
 class BackupEngine {
@@ -133,6 +151,47 @@ class BackupEngine {
   /// Reads the whole database (raw rows) — tests and the sync engine.
   Future<DbSnapshot> snapshot() => _io.read();
 
+  /// The [BuiltBackup.contentHash] a full backup would have right now:
+  /// data, settings and profile picture. The snapshot is read in rowid
+  /// order and the settings JSON in a fixed key order, so an unchanged
+  /// device always gives the same fingerprint (the sync on app open uses it
+  /// to skip re-uploading identical backups). Runs the encoding off the UI
+  /// isolate, like [build].
+  Future<String> fingerprint() async {
+    final snapshot = await _io.read();
+    final data = await Isolate.run(
+      () => BackupArchive.sha256Hex(snapshot.encode()),
+    );
+    return contentHashOf(
+      data,
+      await _exportSettings(),
+      await _readProfilePhoto(),
+    );
+  }
+
+  /// One hash for a backup's plaintext content: the data checksum plus the
+  /// settings and profile picture bytes (each null = absent).
+  static String contentHashOf(
+    String dataChecksum,
+    Uint8List? settings,
+    Uint8List? photo,
+  ) {
+    String part(Uint8List? b) => b == null ? '-' : BackupArchive.sha256Hex(b);
+    return BackupArchive.sha256Hex(
+      utf8.encode('$dataChecksum|${part(settings)}|${part(photo)}'),
+    );
+  }
+
+  /// The local profile picture; null when there is none (or unreadable —
+  /// never a reason to fail a backup).
+  Future<Uint8List?> _readProfilePhoto() async {
+    try {
+      return await files.read(AppFiles.profilePhotoPath);
+    } on Object {
+      return null;
+    }
+  }
+
   // ─────────────────────────────── Build ───────────────────────────────
 
   /// Builds a `.ffbackup`. [key] null = not encrypted. [devices] are the
@@ -159,6 +218,11 @@ class BackupEngine {
       payloads[path] = bytes;
     }
     final configuration = includeSettings ? await _exportSettings() : null;
+    // The profile picture travels with the settings, in full backups only:
+    // an export of chosen modules is data, not this person's profile.
+    final photo = includeSettings && filter == null
+        ? await _readProfilePhoto()
+        : null;
     final profile = await _profile();
     final createdAt = clock.now();
     final self = LinkedDevice(
@@ -187,9 +251,13 @@ class BackupEngine {
     // data): an auto backup a few seconds after launch must not freeze the
     // first screens for as long as the database is big.
     final (bytes, manifest) = await Isolate.run(
-      () => _assemble(head, snapshot, payloads, configuration, key),
+      () => _assemble(head, snapshot, payloads, configuration, photo, key),
     );
-    return BuiltBackup(bytes: bytes, manifest: manifest);
+    return BuiltBackup(
+      bytes: bytes,
+      manifest: manifest,
+      contentHash: contentHashOf(manifest.checksum, configuration, photo),
+    );
   }
 
   /// The isolate half of [build]: encodes the snapshot, describes it in the
@@ -199,11 +267,19 @@ class BackupEngine {
     DbSnapshot snapshot,
     Map<String, Uint8List> files,
     Uint8List? configuration,
+    Uint8List? photo,
     BackupKey? key,
   ) async {
     final plain = snapshot.encode();
     final manifest = head.describe(snapshot, plain, files.keys);
-    final bytes = await _pack(manifest, plain, configuration, files, key);
+    final bytes = await _pack(
+      manifest,
+      plain,
+      configuration,
+      photo,
+      files,
+      key,
+    );
     return (bytes, manifest);
   }
 
@@ -228,6 +304,7 @@ class BackupEngine {
     BackupManifest manifest,
     Uint8List plain,
     Uint8List? configuration,
+    Uint8List? photo,
     Map<String, Uint8List> files,
     BackupKey? key,
   ) async {
@@ -241,6 +318,9 @@ class BackupEngine {
       settings: configuration == null || key == null
           ? configuration
           : await BackupCipher.seal(configuration, key),
+      profilePhoto: photo == null || key == null
+          ? photo
+          : await BackupCipher.seal(photo, key),
       files: sealed,
     ).encode();
   }
@@ -408,6 +488,13 @@ class BackupEngine {
         settingsFailed = true;
       }
     }
+    final photoRestored =
+        applySettings &&
+        await _restoreProfilePhoto(
+          archive,
+          key,
+          replace: mode == RestoreMode.replace,
+        );
     return RestoreResult(
       mode: mode,
       report: report,
@@ -416,7 +503,31 @@ class BackupEngine {
       filesMissing: missing,
       settingsRestored: settingsRestored,
       settingsFailed: settingsFailed,
+      photoRestored: photoRestored,
     );
+  }
+
+  /// Puts the backup's profile picture on this device: Replace always,
+  /// Merge only when this device has none (a picture chosen here wins, like
+  /// its settings). Never fails a restore — the data is back already.
+  Future<bool> _restoreProfilePhoto(
+    BackupArchive archive,
+    BackupKey? key, {
+    required bool replace,
+  }) async {
+    final sealed = archive.profilePhoto;
+    if (sealed == null) return false;
+    try {
+      if (!replace && await files.exists(AppFiles.profilePhotoPath)) {
+        return false;
+      }
+      final bytes = archive.manifest.isEncrypted
+          ? await BackupCipher.open(sealed, key!)
+          : sealed;
+      return await files.write(AppFiles.profilePhotoPath, bytes) != null;
+    } on Object {
+      return false;
+    }
   }
 
   /// The local vault's key id (null = no vault / unreadable).

@@ -91,10 +91,10 @@ void main() {
           .syncNow(onProgress: (p, _) => phases.add(p));
 
       expect(store.backupNames, hasLength(1));
-      final f = store.files[out.uploaded.fileId]!;
+      final f = store.files[out.uploaded!.fileId]!;
       expect(f.properties['deviceId'], TestHarness.deviceId);
       expect(f.properties[DriveBackupFile.kindKey], DriveBackupFile.kindBackup);
-      expect(out.uploaded.isEncrypted, isFalse); // "Encrypt backups" off
+      expect(out.uploaded!.isEncrypted, isFalse); // "Encrypt backups" off
 
       final manifest = await h.read(driveSyncProvider).manifest();
       expect(manifest.devices.map((d) => d.deviceId), [TestHarness.deviceId]);
@@ -103,7 +103,7 @@ void main() {
           .read(backupRecordsRepositoryProvider)
           .watchLatest(location: BackupLocation.drive)
           .first;
-      expect(latest?.driveFileId, out.uploaded.fileId);
+      expect(latest?.driveFileId, out.uploaded!.fileId);
       expect(phases.first, SyncPhase.preparing);
       expect(phases, contains(SyncPhase.uploading));
       expect(phases.last, SyncPhase.done);
@@ -163,7 +163,7 @@ void main() {
 
       final sync = h.read(driveSyncProvider);
       final out = await sync.syncNow(merge: false);
-      final archive = await sync.download(out.uploaded.fileId);
+      final archive = await sync.download(out.uploaded!.fileId);
 
       expect(archive.manifest.hasSettings, isTrue);
       final carried = BackupSettings.fromJson(

@@ -133,6 +133,7 @@ class AppSettings {
     this.wipeAfterFailedAttempts = false,
     // ── Backup & sync ──
     this.autoBackupDrive = true,
+    this.syncOnOpen = true,
     this.backupFrequency = BackupFrequency.daily,
     this.backupMinutes = 21 * 60,
     this.backupWifiOnly = true,
@@ -256,6 +257,10 @@ class AppSettings {
   final bool wipeAfterFailedAttempts;
 
   final bool autoBackupDrive;
+
+  /// Sync with Google Drive whenever the app is opened (core/sync/
+  /// open_sync.dart); uploads only when the data changed.
+  final bool syncOnOpen;
   final BackupFrequency backupFrequency;
   final int backupMinutes;
   final bool backupWifiOnly;
@@ -342,6 +347,7 @@ class AppSettings {
     bool? breachMonitoring,
     bool? wipeAfterFailedAttempts,
     bool? autoBackupDrive,
+    bool? syncOnOpen,
     BackupFrequency? backupFrequency,
     int? backupMinutes,
     bool? backupWifiOnly,
@@ -431,6 +437,7 @@ class AppSettings {
       wipeAfterFailedAttempts:
           wipeAfterFailedAttempts ?? this.wipeAfterFailedAttempts,
       autoBackupDrive: autoBackupDrive ?? this.autoBackupDrive,
+      syncOnOpen: syncOnOpen ?? this.syncOnOpen,
       backupFrequency: backupFrequency ?? this.backupFrequency,
       backupMinutes: backupMinutes ?? this.backupMinutes,
       backupWifiOnly: backupWifiOnly ?? this.backupWifiOnly,
@@ -511,6 +518,7 @@ class AppSettings {
     'breachMonitoring': breachMonitoring,
     'wipeAfterFailedAttempts': wipeAfterFailedAttempts,
     'autoBackupDrive': autoBackupDrive,
+    'syncOnOpen': syncOnOpen,
     'backupFrequency': backupFrequency.name,
     'backupMinutes': backupMinutes,
     'backupWifiOnly': backupWifiOnly,
@@ -679,6 +687,7 @@ class AppSettings {
         d.wipeAfterFailedAttempts,
       ),
       autoBackupDrive: b('autoBackupDrive', d.autoBackupDrive),
+      syncOnOpen: b('syncOnOpen', d.syncOnOpen),
       backupFrequency: e(
         BackupFrequency.values,
         j['backupFrequency'],

@@ -95,10 +95,12 @@ class SyncController extends Notifier<SyncStatus> {
   /// Backs up to Drive and merges other devices' newer backups. Returns
   /// null when it failed (see [SyncStatus.failure]) or a sync was already
   /// running. [interactive] lets Google show its consent sheet if needed
-  /// (false for background runs).
+  /// (false for background runs). [skipUnchanged]: don't upload when
+  /// Drive already has this device's current data (sync on app open).
   Future<SyncOutcome?> syncNow({
     bool isAuto = false,
     bool interactive = true,
+    bool skipUnchanged = false,
   }) async {
     if (state.isBusy) return null;
     final last = state.lastSyncAt;
@@ -122,6 +124,7 @@ class SyncController extends Notifier<SyncStatus> {
           .syncNow(
             isAuto: isAuto,
             interactive: interactive,
+            skipUnchanged: skipUnchanged,
             onProgress: (phase, progress) {
               if (phase == SyncPhase.done) return;
               state = SyncStatus(
@@ -131,9 +134,10 @@ class SyncController extends Notifier<SyncStatus> {
               );
             },
           );
-      // The backup is in Drive: this counts as a successful sync even
-      // when some merge step was skipped (warnings), so the scheduler
-      // doesn't upload + prune again at every opportunity.
+      // The backup is in Drive (just uploaded, or already there with this
+      // exact data): this counts as a successful sync even when some merge
+      // step was skipped (warnings), so the scheduler doesn't upload +
+      // prune again at every opportunity.
       final now = ref.read(clockProvider).now();
       await ref
           .read(sharedPreferencesProvider)
@@ -186,7 +190,11 @@ class SyncController extends Notifier<SyncStatus> {
 
   /// One line for the status box after a successful sync.
   static String summary(SyncOutcome o) {
-    final parts = <String>['Backed up to Google Drive'];
+    final parts = <String>[
+      o.uploaded == null
+          ? 'Up to date with Google Drive'
+          : 'Backed up to Google Drive',
+    ];
     final n = o.report.changes;
     if (n > 0) {
       parts.add('$n ${n == 1 ? 'item' : 'items'} updated from another device');

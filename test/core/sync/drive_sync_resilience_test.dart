@@ -202,7 +202,7 @@ void main() {
       final h = await harness();
       final sync = h.read(driveSyncProvider);
       final first = await sync.syncNow(merge: false);
-      store.failIds.add(first.uploaded.fileId);
+      store.failIds.add(first.uploaded!.fileId);
       for (var i = 0; i < 10; i++) {
         h.clock.advance(const Duration(minutes: 1));
         await sync.syncNow(merge: false);
@@ -315,7 +315,7 @@ void main() {
         params: BackupKdfParams.generate(memoryKiB: 256, iterations: 1),
       );
       final out = await h.read(driveSyncProvider).syncNow();
-      expect(out.uploaded.isEncrypted, isTrue);
+      expect(out.uploaded!.isEncrypted, isTrue);
       final rec = await h
           .read(backupRecordsRepositoryProvider)
           .watchLatest(location: BackupLocation.drive)
@@ -396,7 +396,7 @@ void main() {
             .watchAll(location: BackupLocation.drive)
             .first;
         expect(
-          history.where((r) => r.driveFileId == out.uploaded.fileId),
+          history.where((r) => r.driveFileId == out.uploaded!.fileId),
           isEmpty,
         );
 

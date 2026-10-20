@@ -413,6 +413,7 @@ class _GlassColors {
     required this.activeBorder,
     required this.active,
     required this.inactive,
+    this.edge,
   });
 
   final Gradient fill;
@@ -424,6 +425,12 @@ class _GlassColors {
   final Color shade;
   final Color innerLight;
   final Color innerShade;
+
+  /// A hairline all around the capsule (dark only). On a dark canvas the
+  /// white glow is too faint to outline the start edge, so without it the
+  /// pill's left side melted into the background while the lit bottom-end
+  /// edge stood out.
+  final Color? edge;
   final List<BoxShadow> shadow;
   final Color activeFill;
   final Color activeBorder;
@@ -456,6 +463,7 @@ class _GlassColors {
     activeBorder: activeBorder,
     active: active,
     inactive: inactive,
+    edge: edge,
   );
 
   factory _GlassColors._themed(BuildContext context) {
@@ -475,8 +483,11 @@ class _GlassColors {
         ),
         glow: Colors.white.withValues(alpha: 0.10),
         shade: Colors.black.withValues(alpha: 0.55),
-        innerLight: Colors.white.withValues(alpha: 0.14),
-        innerShade: Colors.black.withValues(alpha: 0.40),
+        // A lighter inner pair than light mode: a 40 % black lip inside the
+        // top-start edge blacked out the pill's left side on dark canvases.
+        innerLight: Colors.white.withValues(alpha: 0.10),
+        innerShade: Colors.black.withValues(alpha: 0.18),
+        edge: Colors.white.withValues(alpha: 0.12),
         shadow: [
           BoxShadow(
             offset: const Offset(0, 14),
@@ -539,7 +550,9 @@ class _GlassColors {
 /// * [rim] true, *over* the glass and clipped to the capsule: the two inner
 ///   shadows — black along the inside of the top-start edge, white along the
 ///   inside of the bottom-end edge. That inner pair is what gives the
-///   pressed-in "lip" of the reference instead of a flat outline.
+///   pressed-in "lip" of the reference instead of a flat outline. Dark mode
+///   adds a hairline [_GlassColors.edge] on top so every side keeps a
+///   visible outline.
 /// Static: it repaints only when the pill's size or colours change.
 class _NeuEdgePainter extends CustomPainter {
   const _NeuEdgePainter({
@@ -587,6 +600,16 @@ class _NeuEdgePainter extends CustomPainter {
           _outsideOf(shape.shift(_lightOffset), box),
           _blurred(glass.innerLight, _lightSigma),
         );
+      final edge = glass.edge;
+      if (edge != null) {
+        canvas.drawRRect(
+          shape.deflate(0.5),
+          Paint()
+            ..color = edge
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1,
+        );
+      }
     } else {
       canvas
         ..clipPath(_outsideOf(shape, box))
@@ -606,7 +629,8 @@ class _NeuEdgePainter extends CustomPainter {
       old.glass.glow != glass.glow ||
       old.glass.shade != glass.shade ||
       old.glass.innerLight != glass.innerLight ||
-      old.glass.innerShade != glass.innerShade;
+      old.glass.innerShade != glass.innerShade ||
+      old.glass.edge != glass.edge;
 }
 
 /// One tab slot: the icon (colour eases with [strength]) and, while the tab

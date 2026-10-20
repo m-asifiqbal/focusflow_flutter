@@ -50,6 +50,12 @@ void main() {
     expect(find.text('Today, 9:39 AM'), findsOneWidget);
     expect(find.text('Google Drive · 2.4 MB · auto'), findsOneWidget);
     expect(find.text('Local · /FocusFlow · 2.3 MB'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Disconnect Google account'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await settle(tester);
     expect(find.text('Disconnect Google account'), findsOneWidget);
     await captureScreen(tester, '34_backup_sync_bottom');
 

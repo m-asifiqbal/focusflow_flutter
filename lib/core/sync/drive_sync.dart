@@ -11,6 +11,10 @@
 ///   4. update `focusflow-devices.json` (linked devices, shared KDF salt);
 ///   5. merge (last-write-wins per item) the newest backup of every *other*
 ///      device that is newer than the one handled last time.
+/// With `skipUnchanged` (sync on app open) the build, upload, prune and
+/// devices update are skipped when this device's newest Drive backup
+/// already has the current data, settings and profile picture
+/// (`contentHash` in its appProperties) — only the key pick and step 5 run.
 /// Only steps 1–2 can fail the sync. After the upload every step is
 /// isolated: a prune / manifest / merge problem becomes a
 /// [SyncOutcome.warnings] line, so one unreadable backup from another
@@ -98,10 +102,17 @@ class DriveSync {
   /// Backs up to Drive, prunes and (when [merge]) merges other devices'
   /// newer backups. Throws [DriveFailure], [BackupPinRequired] or
   /// [BackupKeyUnavailable] — only before / during the upload.
+  ///
+  /// [skipUnchanged] (the sync on app open): when this device's newest
+  /// Drive backup already holds exactly the current data, sealed with the
+  /// current key, nothing is uploaded or pruned — only other devices'
+  /// changes are merged. Frequent opens then neither re-upload identical
+  /// data nor push older restore points out of "Keep last N".
   Future<SyncOutcome> syncNow({
     bool isAuto = false,
     bool merge = true,
     bool interactive = false,
+    bool skipUnchanged = false,
     SyncProgress? onProgress,
   }) async {
     void report(SyncPhase p, [double? v]) => onProgress?.call(p, v);
@@ -111,11 +122,19 @@ class DriveSync {
     final store = await requireStore(interactive: interactive);
     final files = await store.list();
     final manifestFile = files.where(DriveManifest.isManifest).firstOrNull;
+    final backups = files.map(DriveBackupFile.fromFile).nonNulls.toList();
+
+    if (skipUnchanged && await _upToDate(backups, key)) {
+      if (!merge || state.decisionPending) {
+        report(SyncPhase.done, 1);
+        return SyncOutcome(mergeDeferred: merge && state.decisionPending);
+      }
+      return _mergeOthers(store, backups, key, null, 0, <String>[], report);
+    }
+
     var manifest = manifestFile == null
         ? const DriveManifest()
         : DriveManifest.decode(await store.download(manifestFile.id));
-    final backups = files.map(DriveBackupFile.fromFile).nonNulls.toList();
-
     final built = await engine.build(
       key: key,
       isAuto: isAuto,
@@ -127,7 +146,10 @@ class DriveSync {
     final file = await store.upload(
       DriveBackupFile.fileNameFor(m.createdAt, deviceId),
       built.bytes,
-      properties: DriveBackupFile.propertiesFor(m),
+      properties: DriveBackupFile.propertiesFor(
+        m,
+        contentHash: built.contentHash,
+      ),
       onProgress: (v) => report(SyncPhase.uploading, v),
     );
     final uploaded =
@@ -229,11 +251,33 @@ class DriveSync {
     return pruned;
   }
 
+  /// This device's newest Drive backup holds exactly the current data,
+  /// settings and profile picture (same content hash) sealed the way the
+  /// next backup would be (same key salt, or both unencrypted). Unknown →
+  /// false (upload).
+  Future<bool> _upToDate(List<DriveBackupFile> backups, BackupKey? key) async {
+    DriveBackupFile? newest;
+    for (final b in backups) {
+      if (b.deviceId != deviceId) continue;
+      if (newest == null || b.createdAt.isAfter(newest.createdAt)) newest = b;
+    }
+    final hash = newest?.contentHash;
+    if (newest == null || hash == null || hash.isEmpty) return false;
+    final salt = key == null ? null : base64Encode(key.params.salt);
+    if (newest.kdfSalt != salt) return false;
+    try {
+      return await engine.fingerprint() == hash;
+    } on Object catch (e) {
+      AppLogger.w('Change check failed (${e.runtimeType})');
+      return false;
+    }
+  }
+
   Future<SyncOutcome> _mergeOthers(
     DriveStore store,
     List<DriveBackupFile> backups,
     BackupKey? key,
-    DriveBackupFile uploaded,
+    DriveBackupFile? uploaded,
     int pruned,
     List<String> warnings,
     void Function(SyncPhase p, [double? v]) report,
