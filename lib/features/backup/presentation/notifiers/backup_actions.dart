@@ -9,7 +9,7 @@
 /// Why: widgets only call these; every service comes from providers. After
 /// a restore the notification plan is rebuilt (restored reminders/habits
 /// get their alerts back, removed ones lose them) and restored view
-/// preferences are re-read.
+/// preferences and the profile picture are re-read.
 /// ============================================================
 library;
 
@@ -22,6 +22,7 @@ import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
+import 'package:focusflow/features/auth/presentation/providers/account_providers.dart';
 import 'package:focusflow/features/backup/domain/entities/backup_record.dart';
 import 'package:focusflow/features/backup/presentation/providers/backup_providers.dart';
 import 'package:focusflow/features/tasks/presentation/providers/tasks_list_providers.dart';
@@ -74,6 +75,8 @@ class BackupActions {
         ..invalidate(taskSortProvider)
         ..invalidate(taskViewProvider);
     }
+    // The avatars read the picture file once; show the restored one.
+    if (result.photoRestored) ref.invalidate(profilePhotoProvider);
     await _noteRestored(archive.manifest, mode);
     try {
       await ref.read(notificationEngineProvider).onResume();

@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/library_counts.dart';
 import 'package:focusflow/core/notifications/notification_providers.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
+import 'package:focusflow/core/sync/backup_files.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/device_profile.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
@@ -162,7 +163,7 @@ final deviceTimeZoneProvider = FutureProvider<String>((ref) async {
 });
 
 /// Relative path of the local profile picture (never synced).
-const String profilePhotoPath = 'profile/avatar.jpg';
+const String profilePhotoPath = AppFiles.profilePhotoPath;
 
 /// The profile picture bytes, or null for the initial-letter avatar.
 final profilePhotoProvider = FutureProvider.autoDispose<Uint8List?>((

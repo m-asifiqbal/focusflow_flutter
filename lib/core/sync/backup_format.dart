@@ -8,13 +8,16 @@
 /// db.json            DbSnapshot JSON (sealed with AES-GCM when encrypted)
 /// settings.json      optional: the app's settings (BackupSettings JSON,
 ///                    sealed too); the manifest's `hasSettings` says so
+/// profile-photo.jpg  optional: the user's profile picture (sealed too),
+///                    full backups only; restored with the settings
 /// attachments/<path> files referenced by attachment rows / note covers
 ///                    (paths relative to app documents; sealed too)
 /// ```
 /// `checksum` is SHA-256 of the *plaintext* db.json, so corruption and a
 /// wrong key are both detected before anything touches the database.
-/// settings.json is additive (same `formatVersion`): an app that predates it
-/// ignores the entry and restores the data alone.
+/// settings.json and profile-photo.jpg are additive (same `formatVersion`):
+/// an app that predates them ignores the entries and restores the data
+/// alone.
 /// ============================================================
 library;
 
@@ -135,6 +138,7 @@ class BackupManifest {
   static const String fileName = 'manifest.json';
   static const String dbFileName = 'db.json';
   static const String settingsFileName = 'settings.json';
+  static const String profilePhotoFileName = 'profile-photo.jpg';
   static const String attachmentsDir = 'attachments/';
 
   final int formatVersion;
@@ -274,6 +278,7 @@ class BackupArchive {
     required this.manifest,
     required this.dbJson,
     this.settings,
+    this.profilePhoto,
     this.files = const {},
   });
 
@@ -285,6 +290,9 @@ class BackupArchive {
   /// settings.json bytes (sealed when encrypted); null = the backup carries
   /// no settings.
   final Uint8List? settings;
+
+  /// The profile picture's bytes (sealed when encrypted); null = none.
+  final Uint8List? profilePhoto;
 
   /// Relative path → bytes (sealed when encrypted).
   final Map<String, Uint8List> files;
@@ -304,6 +312,11 @@ class BackupArchive {
       ..addFile(ArchiveFile.bytes(BackupManifest.dbFileName, dbJson));
     if (settings case final bytes?) {
       zip.addFile(ArchiveFile.bytes(BackupManifest.settingsFileName, bytes));
+    }
+    if (profilePhoto case final bytes?) {
+      zip.addFile(
+        ArchiveFile.bytes(BackupManifest.profilePhotoFileName, bytes),
+      );
     }
     for (final e in files.entries) {
       zip.addFile(
@@ -350,6 +363,9 @@ class BackupArchive {
         manifest: manifest,
         dbJson: dbFile.content,
         settings: zip.findFile(BackupManifest.settingsFileName)?.content,
+        profilePhoto: zip
+            .findFile(BackupManifest.profilePhotoFileName)
+            ?.content,
         files: files,
       );
     } on Object {

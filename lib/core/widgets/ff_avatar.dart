@@ -2,8 +2,9 @@
 /// FF AVATAR · COLOUR SWATCHES — profile circle and colour pickers
 /// ============================================================
 ///
-/// * [FFAvatar] — gradient circle with a white initial (or an image), 3 pt
-///   white ring and soft shadow (home header, settings profile card).
+/// * [FFAvatar] — gradient circle with a white initial (or an image), 2 pt
+///   white ring and soft shadow (home header, settings profile card); a
+///   rounded square instead when given a [FFAvatar.radius].
 /// * [FFColorSwatchRow] — wrapping row of round swatches; the selected one
 ///   gets a primary ring + tick (note colours, habit colours, accents).
 /// ============================================================
@@ -22,6 +23,7 @@ class FFAvatar extends StatelessWidget {
     this.image,
     this.size = 44,
     this.border = true,
+    this.radius,
     this.onTap,
     this.semanticLabel,
     super.key,
@@ -32,8 +34,11 @@ class FFAvatar extends StatelessWidget {
   final ImageProvider? image;
   final double size;
 
-  /// 3 pt white ring + soft shadow.
+  /// 2 pt white ring + soft shadow.
   final bool border;
+
+  /// Corner radius of a rounded-square avatar; null = a circle.
+  final double? radius;
   final VoidCallback? onTap;
   final String? semanticLabel;
 
@@ -53,11 +58,14 @@ class FFAvatar extends StatelessWidget {
     final letter = hasInitial
         ? initial!.trim().characters.first.toUpperCase()
         : '';
+    final shape = radius == null ? BoxShape.circle : BoxShape.rectangle;
+    final corners = radius == null ? null : BorderRadius.circular(radius!);
     final avatar = SizedBox.square(
       dimension: size,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
+          shape: shape,
+          borderRadius: corners,
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -72,10 +80,11 @@ class FFAvatar extends StatelessWidget {
         child: DecoratedBox(
           position: DecorationPosition.foreground,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: border ? Border.all(color: ff.onGradient, width: 3) : null,
+            shape: shape,
+            borderRadius: corners,
+            border: border ? Border.all(color: ff.onGradient, width: 2) : null,
           ),
-          child: ClipOval(
+          child: _clip(
             child: photo != null
                 ? Image(image: photo, fit: BoxFit.cover)
                 : Center(
@@ -108,6 +117,11 @@ class FFAvatar extends StatelessWidget {
       child: onTap == null ? avatar : FFPressable(onTap: onTap, child: avatar),
     );
   }
+
+  /// Clips the picture / initial to the avatar's shape.
+  Widget _clip({required Widget child}) => radius == null
+      ? ClipOval(child: child)
+      : ClipRRect(borderRadius: BorderRadius.circular(radius!), child: child);
 }
 
 class FFColorSwatchRow extends StatelessWidget {

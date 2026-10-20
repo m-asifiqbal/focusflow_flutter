@@ -3,7 +3,9 @@
 /// ============================================================
 ///
 /// Returns JPEG bytes (≤ 1024 px) for the local profile picture on
-/// Account & profile (screen 36). The picture never leaves the device.
+/// Account & profile (screen 36). The picture stays on the device except
+/// inside this user's own backups (local / Google Drive app folder),
+/// sealed with the backup key when "Encrypt backups" is on.
 /// Behind a provider so widget tests can fake it.
 /// ============================================================
 library;

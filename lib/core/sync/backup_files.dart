@@ -23,6 +23,10 @@ class AppFiles {
 
   final Future<Directory> Function() _root;
 
+  /// The local profile picture (Account & profile). Full backups carry it
+  /// next to the settings (backup_engine.dart).
+  static const String profilePhotoPath = 'profile/avatar.jpg';
+
   Future<Directory> root() => _root();
 
   /// Absolute file for [relative] or null when it would escape the root.

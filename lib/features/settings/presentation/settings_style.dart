@@ -183,14 +183,14 @@ abstract final class SettingsLabels {
     HomeSection.habits => "Today's habit rings",
   };
 
-  /// Uppercase sync pill text: "SYNCED 2 MIN AGO", "SYNCED JUST NOW".
+  /// Sync pill text, sentence case: "Synced 2 min ago", "Synced just now".
   static String syncedAgo(DateTime? at, DateTime now) {
-    if (at == null) return 'NOT SYNCED YET';
+    if (at == null) return 'Not synced yet';
     final d = now.difference(at);
-    if (d.inMinutes < 1) return 'SYNCED JUST NOW';
-    if (d.inHours < 1) return 'SYNCED ${d.inMinutes} MIN AGO';
-    if (d.inDays < 1) return 'SYNCED ${d.inHours} H AGO';
-    if (d.inDays == 1) return 'SYNCED YESTERDAY';
-    return 'SYNCED ${d.inDays} DAYS AGO';
+    if (d.inMinutes < 1) return 'Synced just now';
+    if (d.inHours < 1) return 'Synced ${d.inMinutes} min ago';
+    if (d.inDays < 1) return 'Synced ${d.inHours} h ago';
+    if (d.inDays == 1) return 'Synced yesterday';
+    return 'Synced ${d.inDays} days ago';
   }
 }

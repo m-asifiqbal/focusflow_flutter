@@ -6,7 +6,9 @@
 ///               ("WORK", "FINANCE"). Keeps its pastel look in dark mode,
 ///               exactly like the dark home mockup (37).
 /// * [FFBadge] — status pill ("3 LEFT", "CONNECTED", "STRONG"); adapts
-///               to dark mode (solid @15% + lightened ink).
+///               to dark mode (solid @15% + lightened ink). `uppercase:
+///               false` reads as text instead ("Synced 2 min ago": sentence
+///               case, medium weight, no tracking).
 /// * [FFDot]   — a small coloured circle (calendar dots, legends).
 /// * [FFDividerInset] — 1px row separator inset 60 from the start.
 /// ============================================================
@@ -57,10 +59,14 @@ class FFBadge extends StatelessWidget {
     this.colors,
     this.icon,
     this.solid = false,
+    this.uppercase = true,
     super.key,
   });
 
   final String label;
+
+  /// False: the label as written, medium weight, no letter spacing.
+  final bool uppercase;
 
   /// Defaults to the primary family.
   final ModuleColors? colors;
@@ -81,7 +87,14 @@ class FFBadge extends StatelessWidget {
       bg = solid ? colors!.solid : colors!.softFor(ff.brightness);
       fg = solid ? ff.onGradient : colors!.inkFor(ff.brightness);
     }
-    final style = context.text.tag.copyWith(fontSize: 11.5, color: fg);
+    final style = uppercase
+        ? context.text.tag.copyWith(fontSize: 11.5, color: fg)
+        : context.text.tag.copyWith(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0,
+            color: fg,
+          );
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: 10,
@@ -100,7 +113,7 @@ class FFBadge extends StatelessWidget {
           ],
           Flexible(
             child: Text(
-              label.toUpperCase(),
+              uppercase ? label.toUpperCase() : label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: style,
