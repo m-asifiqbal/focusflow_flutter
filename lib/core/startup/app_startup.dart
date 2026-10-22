@@ -3,6 +3,8 @@
 /// ============================================================
 ///
 /// - Notification engine start / resume reconcile (core/notifications)
+/// - Launcher shortcuts (app-icon long press): the one that started the app
+///   and those tapped while it runs (core/platform/launcher_shortcuts.dart)
 /// - Background job scheduling (core/sync/background_tasks.dart), which also
 ///   runs an overdue backup
 /// - Maintenance: purge Recently Deleted items older than 30 days
@@ -26,11 +28,14 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
+import 'package:focusflow/core/platform/launcher_shortcuts.dart';
+import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/startup/maintenance.dart';
 import 'package:focusflow/core/sync/background_tasks.dart';
 import 'package:focusflow/core/sync/open_sync.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 
 class AppStartupHost extends ConsumerStatefulWidget {
   const AppStartupHost({required this.child, super.key});
@@ -47,6 +52,7 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
   static const Duration settleDelay = Duration(seconds: 4);
 
   Timer? _settleTimer;
+  LauncherShortcuts? _shortcuts;
 
   /// When the app last left the foreground (null while visible).
   DateTime? _hiddenAt;
@@ -60,6 +66,7 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
 
   @override
   void dispose() {
+    _shortcuts?.stopListening();
     _settleTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -88,6 +95,7 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
       'notifications.start',
       () => ref.read(notificationEngineProvider).start(),
     );
+    _run('shortcuts', _startShortcuts);
     _settleTimer = Timer(settleDelay, () {
       if (!mounted) return;
       _run(
@@ -97,6 +105,22 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
       _run('maintenance', () => ref.read(maintenanceProvider).runIfDue());
       _run('sync.open', () => ref.read(openSyncProvider).runIfDue());
     });
+  }
+
+  /// Listens for launcher shortcuts, then opens the one that launched the
+  /// app (if any) — listener first, so none tapped in between is lost.
+  Future<void> _startShortcuts() async {
+    final shortcuts = ref.read(launcherShortcutsProvider);
+    _shortcuts = shortcuts;
+    shortcuts.listen(_openShortcut);
+    final first = await shortcuts.initial();
+    if (first != null) _openShortcut(first);
+  }
+
+  void _openShortcut(LauncherShortcut shortcut) {
+    // Before onboarding there is nothing to open yet.
+    if (!mounted || !ref.read(settingsProvider).onboardingSeen) return;
+    openLauncherShortcut(ref.read(routerProvider), shortcut);
   }
 
   void _onResume({required Duration away}) {

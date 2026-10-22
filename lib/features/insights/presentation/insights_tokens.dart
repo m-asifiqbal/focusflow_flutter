@@ -68,6 +68,9 @@ abstract final class InsightsDimens {
 
   /// Below the chips, above the KPI grid.
   static const double chipsGap = 10;
+
+  /// Content opacity while another range is loading.
+  static const double staleOpacity = 0.45;
 }
 
 abstract final class InsightsColors {

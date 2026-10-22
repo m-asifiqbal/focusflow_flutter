@@ -613,7 +613,7 @@ abstract final class ActionTints {
     ink: Color(0xFF0F766E),
   );
 
-  /// "Lock with Vault PIN" — slate.
+  /// "Lock with a PIN" (notes) — slate.
   static const lock = ModuleColors(
     solid: AppPalette.slate500,
     soft: AppPalette.slate100,

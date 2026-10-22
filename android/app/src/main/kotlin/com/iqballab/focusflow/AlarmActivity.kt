@@ -8,7 +8,11 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -42,10 +46,28 @@ import java.util.Date
  */
 class AlarmActivity : Activity() {
     private var alarmId = 0
+    private val handler = Handler(Looper.getMainLooper())
+
+    /** True once *this* ring was seen; only then may "not ringing" close the screen. */
+    private var sawRinging = false
+
     private val ringing = Observer<Boolean> { isRinging ->
-        // The flag is sticky: a screen opened a moment before the service
-        // marks the new ring would otherwise see the previous alarm's "false".
-        if (isRinging == false && AlarmService.ringingAlarmIds.isEmpty()) finish()
+        // LiveData replays its last value on subscribe, and after any earlier
+        // alarm that value is a stale "false" — while the plugin only lists the
+        // new alarm as playing once its audio starts, a moment *after* the
+        // full-screen intent has launched this screen. Closing on that stale
+        // value made the screen vanish as it opened. So only a "false" that
+        // follows a real ring (or one we saw ringing) closes it.
+        if (isRinging == true || AlarmService.ringingAlarmIds.isNotEmpty()) {
+            sawRinging = true
+        } else if (isRinging == false && sawRinging) {
+            finish()
+        }
+    }
+
+    /** Opened for an alarm that never started (stale notification tap): don't linger. */
+    private val closeIfNeverRang = Runnable {
+        if (!sawRinging && AlarmService.ringingAlarmIds.isEmpty()) finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +76,7 @@ class AlarmActivity : Activity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         render(intent)
         AlarmRingingLiveData.instance.observeForever(ringing)
+        handler.postDelayed(closeIfNeverRang, NEVER_RANG_GRACE_MS)
     }
 
     /** A second alarm while this one is up (singleInstance) refreshes it. */
@@ -64,10 +87,16 @@ class AlarmActivity : Activity() {
     }
 
     override fun onDestroy() {
+        handler.removeCallbacks(closeIfNeverRang)
         AlarmRingingLiveData.instance.removeObserver(ringing)
         super.onDestroy()
     }
 
+    /**
+     * Over the keyguard and screen on — without dismissing it: an alarm must
+     * show on a PIN-locked phone, and `requestDismissKeyguard` would put the
+     * unlock prompt in front of the Stop button.
+     */
     private fun showOverLockScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -208,6 +237,31 @@ class AlarmActivity : Activity() {
     ).toInt()
 
     companion object {
+        /** How long a screen opened for an alarm that never rang waits before closing. */
+        private const val NEVER_RANG_GRACE_MS = 6_000L
+
+        /**
+         * Lights the screen for a ringing alarm. The full-screen intent and
+         * `turnScreenOn` only help once the activity is actually launched —
+         * which phone makers sometimes refuse — so the process wakes the
+         * display itself, briefly. Deprecated flags, but the only way to wake
+         * the screen without an activity.
+         */
+        fun wakeScreen(context: Context) {
+            try {
+                val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+                    ?: return
+                if (pm.isInteractive) return
+                @Suppress("DEPRECATION")
+                pm.newWakeLock(
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    "focusflow:alarm-wake"
+                ).acquire(10_000L)
+            } catch (e: Exception) {
+                Log.w("AlarmActivity", "Could not wake the screen: ${e.message}")
+            }
+        }
+
         private const val RECEIVER = "com.gdelataillade.alarm.alarm.AlarmReceiver"
         private const val ACTION_STOP = "com.gdelataillade.alarm.ACTION_STOP"
         private const val ACTION_SNOOZE = "com.gdelataillade.alarm.ACTION_SNOOZE"
@@ -222,12 +276,13 @@ class AlarmActivity : Activity() {
 
         /**
          * An alarm has just started ringing: put its screen in front of
-         * whatever the user is doing. Without "Display over other apps" this
-         * does nothing (Android would refuse) and the full-screen intent /
-         * the notification's heads-up stay the only way in.
+         * whatever the user is doing. Android 10+ only lets a background app
+         * do that with "Display over other apps" — without it the start is
+         * refused silently (no exception), so it is still attempted (some
+         * phone makers allow it) and the full-screen intent / the
+         * notification's heads-up stay the fallback.
          */
         fun bringToFront(context: Context) {
-            if (!canShowOverApps(context)) return
             try {
                 val now = Date()
                 val saved = AlarmStorage(context).getSavedAlarms()
@@ -249,6 +304,7 @@ class AlarmActivity : Activity() {
                 )
             } catch (e: Exception) {
                 // The notification still rings and has its own buttons.
+                Log.w("AlarmActivity", "Could not bring alarm to front: ${e.message}")
             }
         }
 
@@ -264,6 +320,7 @@ class AlarmActivity : Activity() {
             context.startActivity(
                 Intent(context, AlarmActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     .putExtra("alarmId", id)
                     .putExtra("alarmTitle", title)
                     .putExtra("alarmBody", body)

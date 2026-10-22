@@ -162,7 +162,19 @@ abstract interface class NotesRepository {
   Future<void> setColor(String id, String? colorHex);
   Future<void> setPinned(String id, bool pinned);
   Future<void> setFavorite(String id, bool favorite);
+
+  /// Locks / unlocks [id]. Unlocking also forgets its PIN verifier; locking
+  /// without one is the legacy "Vault PIN" lock.
   Future<void> setLocked(String id, bool locked);
+
+  /// Locks [id] with its own PIN: [verifier] is what NotePinService made
+  /// (never the PIN itself). Replaces a previous PIN.
+  Future<void> lockWithPin(String id, String verifier);
+
+  /// The PIN verifier of [id]; null when it has none (not locked, or locked
+  /// the legacy way with the Vault PIN). Kept out of [Note] so lists never
+  /// carry it.
+  Future<String?> lockVerifier(String id);
   Future<void> setFolder(String id, String? folderId);
 
   /// Points the note at a reminder (null clears the pointer only — use

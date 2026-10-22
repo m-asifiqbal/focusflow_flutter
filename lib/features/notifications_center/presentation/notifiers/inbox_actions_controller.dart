@@ -2,7 +2,7 @@
 /// INBOX ACTIONS CONTROLLER — the writes behind screen 27's buttons
 /// ============================================================
 ///
-/// What: mark read / read all, swipe-dismiss, and the inline Done / Snooze
+/// What: mark read / read all, swipe-dismiss, clear all, and the inline Done / Snooze
 /// / Log buttons. Done, Snooze and Log run [NotificationActions] — the
 /// same code the OS notification buttons run (acceptance: "Actions perform
 /// the same logic as system notification actions"). Each write returns an
@@ -49,6 +49,20 @@ class InboxActionsController {
   Future<InboxUndo> dismiss(InboxEntry e) async {
     await inbox.dismiss(e.id);
     return () => inbox.undismiss(e.id);
+  }
+
+  /// "Clear all" of one day: dismisses every entry of [entries]; the undo
+  /// brings them all back.
+  Future<InboxUndo> dismissAll(List<InboxEntry> entries) async {
+    final ids = [for (final e in entries) e.id];
+    for (final id in ids) {
+      await inbox.dismiss(id);
+    }
+    return () async {
+      for (final id in ids) {
+        await inbox.undismiss(id);
+      }
+    };
   }
 
   /// "Done" on a reminder entry: marks it (and its linked task) done.

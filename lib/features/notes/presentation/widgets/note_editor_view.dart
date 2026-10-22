@@ -25,6 +25,7 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/notes/data/voice/voice_dictation.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
+import 'package:focusflow/features/notes/presentation/note_lock_flows.dart';
 import 'package:focusflow/features/notes/presentation/notifiers/note_editor_controller.dart';
 import 'package:focusflow/features/notes/presentation/providers/notes_providers.dart';
 import 'package:focusflow/features/notes/presentation/state/note_editor_state.dart';
@@ -129,6 +130,19 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
     }
   }
 
+  /// The header's padlock: lock this note with its own PIN, or — when it is
+  /// locked already — Change PIN / Remove lock. A note locked from here stays
+  /// open for this editing session.
+  Future<void> _lock(Note note) async {
+    await widget.controller.flush();
+    if (!mounted) return;
+    if (note.isLocked) {
+      await showNoteLockOptions(context, ref, note);
+    } else if (await lockNoteWithPin(context, ref, note)) {
+      widget.controller.markUnlocked();
+    }
+  }
+
   void _onEdit() => widget.controller.onChanged(
     NoteDraft(
       title: _title.text,
@@ -194,6 +208,8 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
             status: widget.state.status,
             showStatus: !readOnly,
             pinned: note.isPinned,
+            locked: note.isLocked,
+            onLock: readOnly ? null : () => unawaited(_lock(note)),
             onBack: widget.onBack,
             onPin: readOnly
                 ? null

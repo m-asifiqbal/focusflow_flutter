@@ -22,10 +22,12 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
+import 'package:focusflow/features/vault/presentation/vault_auto_hide.dart';
 import 'package:focusflow/features/vault/presentation/vault_detail_actions.dart';
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
 import 'package:focusflow/features/vault/presentation/widgets/detail/vault_detail_fields.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_fields.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_reveal.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_reauth_sheet.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 import 'package:pdf/widgets.dart' as pw show Barcode, BarcodeBar;
@@ -205,19 +207,31 @@ class _HistorySheetState extends ConsumerState<_HistorySheet> {
   /// Hiding is free; revealing an old password goes through the same
   /// "Ask for PIN to reveal" gate as the detail's eye button.
   Future<void> _toggle(int i) async {
-    if (_shown.contains(i)) {
-      setState(() => _shown.remove(i));
+    if (_auto.isShown(i)) {
+      _auto.hide(i);
       return;
     }
     if (!await confirmVaultReveal(context, ref) || !mounted) return;
-    setState(() => _shown.add(i));
+    _auto.show(i);
+  }
+
+  /// Shown rows hide themselves after 4 s, like the detail's eye.
+  late final VaultAutoHide<int> _auto = VaultAutoHide<int>(
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
+  );
+
+  @override
+  void dispose() {
+    _auto.dispose();
+    super.dispose();
   }
 
   late final Future<List<(DateTime, String)>> _items = readVaultHistory(
     ref,
     widget.entries,
   );
-  final Set<int> _shown = {};
 
   @override
   Widget build(BuildContext context) {
@@ -264,17 +278,16 @@ class _HistorySheetState extends ConsumerState<_HistorySheet> {
                   for (final (i, (at, pw)) in items.indexed)
                     VaultFieldRow(
                       label: 'Changed ${fmt.format(at)}',
-                      value: _shown.contains(i)
-                          ? VaultSecretText(pw, colour: true)
-                          : Text('•' * 12, style: context.vaultMonoStyle),
+                      value: VaultSecretSwitcher(
+                        open: _auto.isShown(i),
+                        revealed: VaultSecretText(pw, colour: true),
+                        masked: Text('•' * 12, style: context.vaultMonoStyle),
+                      ),
                       actions: [
-                        VaultRoundButton(
-                          icon: _shown.contains(i)
-                              ? FontAwesomeIcons.eyeSlash
-                              : FontAwesomeIcons.eye,
-                          semanticLabel: _shown.contains(i)
-                              ? 'Hide password'
-                              : 'Show password',
+                        VaultRevealButton(
+                          open: _auto.isShown(i),
+                          what: 'password',
+                          cycle: _auto.cycleOf(i),
                           onTap: () => unawaited(_toggle(i)),
                         ),
                         VaultRoundButton(

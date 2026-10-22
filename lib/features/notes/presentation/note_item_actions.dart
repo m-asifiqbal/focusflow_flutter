@@ -2,12 +2,16 @@
 /// NOTE ITEM ACTIONS — the note rows of the shared actions sheet (09)
 /// ============================================================
 ///
-/// Trailing rows: Share / export (PDF, TXT, Markdown) and Lock / Unlock
-/// with Vault PIN; the editor adds Word count. Locking, unlocking and exporting a locked
-/// note all need the vault unlocked first ([ensureVaultUnlocked]).
+/// Trailing rows: Share / export (PDF, TXT, Markdown) and the note's lock —
+/// "Lock with a PIN" (the user picks a PIN for this note alone) or, on a
+/// locked note, "Change note PIN" / "Remove note lock"; the editor adds Word
+/// count. Changing, removing and exporting a locked note ask for its PIN
+/// ([verifyNotePin]).
 /// Owned by the notes feature; see shared/item_actions/module_item_actions.dart.
 /// ============================================================
 library;
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,13 +27,13 @@ import 'package:focusflow/features/notes/domain/services/note_content.dart';
 import 'package:focusflow/features/notes/domain/services/note_export.dart';
 import 'package:focusflow/features/notes/presentation/notes_format.dart';
 import 'package:focusflow/features/notes/presentation/providers/notes_providers.dart';
-import 'package:focusflow/features/vault/presentation/vault_gate.dart';
+import 'package:focusflow/features/notes/presentation/note_lock_flows.dart';
 import 'package:focusflow/shared/item_actions/module_item_actions.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
 /// Module rows for [item] (screen 09 order: … Set reminder, Share /
-/// export, Lock with Vault PIN). Each row's onTap runs after the sheet
+/// export, Lock with a PIN). Each row's onTap runs after the sheet
 /// closes. "Word count" is added by the editor's More menu only
 /// ([noteWordCountAction]).
 Future<ModuleItemActions> noteItemActions(
@@ -49,12 +53,26 @@ Future<ModuleItemActions> noteItemActions(
     readSafe: [share],
     trailing: [
       share,
-      FFActionItem(
-        icon: note.isLocked ? FontAwesomeIcons.lockOpen : FontAwesomeIcons.lock,
-        label: note.isLocked ? 'Remove Vault lock' : 'Lock with Vault PIN',
-        colors: ActionTints.lock,
-        onTap: () => setNoteLocked(context, ref, note, !note.isLocked),
-      ),
+      if (note.isLocked) ...[
+        FFActionItem(
+          icon: FontAwesomeIcons.lock,
+          label: 'Change note PIN',
+          colors: ActionTints.lock,
+          onTap: () => unawaited(changeNotePin(context, ref, note)),
+        ),
+        FFActionItem(
+          icon: FontAwesomeIcons.lockOpen,
+          label: 'Remove note lock',
+          colors: ActionTints.lock,
+          onTap: () => unawaited(removeNoteLock(context, ref, note)),
+        ),
+      ] else
+        FFActionItem(
+          icon: FontAwesomeIcons.lock,
+          label: 'Lock with a PIN',
+          colors: ActionTints.lock,
+          onTap: () => unawaited(lockNoteWithPin(context, ref, note)),
+        ),
     ],
   );
 }
@@ -70,7 +88,16 @@ FFActionItem noteWordCountAction(BuildContext context, Note note) =>
 
 /// Format picker (PDF / TXT / Markdown) → share sheet.
 Future<void> shareNote(BuildContext context, WidgetRef ref, Note note) async {
-  if (note.isLocked && !await ensureVaultUnlocked(context)) return;
+  if (note.isLocked &&
+      !await verifyNotePin(
+        context,
+        ref,
+        note,
+        title: 'Enter PIN to export',
+        subtitle: 'Exports are not encrypted.',
+      )) {
+    return;
+  }
   if (!context.mounted) return;
   NoteExportFormat? format;
   await showFFActionSheet(
@@ -118,23 +145,6 @@ Future<void> shareNote(BuildContext context, WidgetRef ref, Note note) async {
       );
     }
   }
-}
-
-/// Locks / unlocks [note] with the Vault PIN.
-Future<void> setNoteLocked(
-  BuildContext context,
-  WidgetRef ref,
-  Note note,
-  bool locked,
-) async {
-  if (!await ensureVaultUnlocked(context)) return;
-  await ref.read(notesRepositoryProvider).setLocked(note.id, locked);
-  if (!context.mounted) return;
-  showFFToast(
-    context,
-    locked ? 'Note locked with your Vault PIN' : 'Vault lock removed',
-    icon: locked ? FontAwesomeIcons.lock : FontAwesomeIcons.lockOpen,
-  );
 }
 
 /// Words, characters and reading time of [note].

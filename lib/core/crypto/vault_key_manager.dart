@@ -14,6 +14,9 @@
 ///   item is re-encrypted ([changePin]).
 /// * Params live in the bundle; after an unlock with weaker params than
 ///   [targetParams], the DEK is transparently re-wrapped with the new cost.
+///   The reverse also holds for a bundle restored from another phone's
+///   backup: when it was slow to open here ([slowUnlock]) it is re-wrapped
+///   with this phone's calibrated (lighter) cost.
 /// * Biometric copy: the DEK in an OS-gated store ([OsGatedVaultStorage]:
 ///   Keychain `biometryCurrentSet` / auth-bound Keystore key), so reading it
 ///   needs a biometric match enforced by the OS. A non-secret marker
@@ -317,15 +320,46 @@ class VaultKeyManager {
   Future<VaultKey?> unlockWithPin(String pin) async {
     final bundle = await _bundle();
     if (bundle == null || !isValidPin(pin)) return null;
+    final watch = Stopwatch()..start();
     final key = await _open(bundle, pin);
+    watch.stop();
     if (key == null) return null;
     if (_needsUpgrade(bundle.params)) {
       await _store.write(
         bundleKey,
         (await _wrap(key, pin, bundle.keyId)).encode(),
       );
+    } else if (await _tooHeavyHere(bundle.params, watch.elapsed)) {
+      // Best effort: the PIN was right, so a failed optimisation must never
+      // fail the unlock (the same cost is simply tried again next time).
+      try {
+        await _store.write(
+          bundleKey,
+          (await _wrap(key, pin, bundle.keyId)).encode(),
+        );
+      } on Object {
+        // Keep the stored bundle as it is.
+      }
     }
     return key;
+  }
+
+  /// An unlock slower than this means the stored cost does not suit this
+  /// phone (see [_tooHeavyHere]); the target of a new wrap is ~0.75 s.
+  static const Duration slowUnlock = Duration(milliseconds: 1500);
+
+  /// A bundle that came with a restored backup carries the cost chosen on
+  /// the OLD phone. When opening it took clearly longer than a good unlock
+  /// here and this phone's own calibrated cost is lighter, the key is
+  /// re-wrapped with that cost (never below [KdfParams.minimum]) so the next
+  /// unlocks are quick and cannot exhaust a small phone's memory.
+  Future<bool> _tooHeavyHere(KdfParams stored, Duration took) async {
+    if (!calibrate || took < slowUnlock) return false;
+    try {
+      return (await _newWrapParams()).isWeakerThan(stored);
+    } on Object {
+      return false;
+    }
   }
 
   Future<VaultKey?> _open(VaultKeyBundle bundle, String pin) async {

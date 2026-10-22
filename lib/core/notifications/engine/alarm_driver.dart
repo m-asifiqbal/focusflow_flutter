@@ -160,8 +160,10 @@ class PackageAlarmDriver implements AlarmDriver {
   }
 
   Future<void> _onRing(AlarmSettings alarm) async {
-    final state = WidgetsBinding.instance.lifecycleState;
-    if (state != AppLifecycleState.resumed) return;
+    // Always ask: native decides whether Android lets the screen open (in the
+    // foreground it does; from the background it needs "Display over other
+    // apps", and is otherwise refused silently — the full-screen intent and
+    // heads-up remain).
     final n = alarm.notificationSettings;
     try {
       await _native.invokeMethod<void>('showAlarmScreen', {

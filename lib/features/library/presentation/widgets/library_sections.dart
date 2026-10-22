@@ -24,6 +24,7 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
+import 'package:focusflow/features/insights/presentation/widgets/focus_timer_sheet.dart';
 import 'package:focusflow/features/library/presentation/library_actions.dart';
 import 'package:focusflow/features/library/presentation/library_format.dart';
 import 'package:focusflow/features/library/presentation/providers/library_providers.dart';
@@ -113,6 +114,11 @@ class LibraryModuleGrid extends ConsumerWidget {
               )
             : card(small[i]),
       if (modules.contains(ItemType.vault)) card(ItemType.vault),
+      FFSecondaryButton(
+        label: 'Start a focus session',
+        icon: FontAwesomeIcons.stopwatch,
+        onPressed: () => showFocusTimer(context),
+      ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

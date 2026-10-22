@@ -29,7 +29,7 @@ const _rows = [
   'Edit tags / move to folder',
   'Set reminder',
   'Share / export (PDF, TXT, MD)',
-  'Lock with Vault PIN',
+  'Lock with a PIN',
 ];
 
 void main() {

@@ -2,9 +2,11 @@
 /// NOTIFICATION CENTER SCREEN — screen 27 (`/notifications`)
 /// ============================================================
 ///
-/// What: back · "Notifications" · "Read all"; kind filter chips; TODAY and
-/// EARLIER cards of inbox rows with unread dots and inline actions; swipe
-/// to dismiss (Undo); tap opens the item. Empty: "You're all caught up".
+/// What: back · "Notifications" · "Read all"; kind filter chips; one card of
+/// inbox rows per day (TODAY, YESTERDAY, MONDAY …) with unread dots and
+/// inline actions. Each day's label is pinned to the top while its rows
+/// scroll and carries a "Clear all" for that day (Undo); swipe to dismiss a
+/// single row (Undo); tap opens the item. Empty: "You're all caught up".
 /// Why: the in-app inbox of everything the notification engine and the
 /// security / sync alerts delivered (live over [inboxSectionsProvider]).
 /// ============================================================
@@ -15,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
 import 'package:focusflow/features/notifications_center/presentation/inbox_flows.dart';
@@ -98,9 +101,11 @@ class _NotificationCenterScreenState
 
   Widget _list(BuildContext context, InboxSections s, InboxKind? kind) {
     bool visible(InboxEntry e) => !_hidden.contains(e.id);
-    final today = s.today.where(visible).toList();
-    final earlier = s.earlier.where(visible).toList();
-    if (today.isEmpty && earlier.isEmpty) {
+    final days = [
+      for (final d in s.days)
+        (day: d.day, entries: d.entries.where(visible).toList()),
+    ].where((d) => d.entries.isNotEmpty).toList();
+    if (days.isEmpty) {
       return Center(
         child: SingleChildScrollView(
           padding: const EdgeInsetsDirectional.all(AppSpacing.screen),
@@ -132,31 +137,34 @@ class _NotificationCenterScreenState
             runInboxAction(context, ref, e, a, snoozeMinutes: snooze),
       ),
     );
-    return ListView(
-      padding: const EdgeInsetsDirectional.fromSTEB(
-        AppSpacing.grouped,
-        AppSpacing.xxl,
-        AppSpacing.grouped,
-        AppSpacing.xxxl,
-      ),
-      children: [
-        if (today.isNotEmpty)
+    return CustomScrollView(
+      slivers: [
+        for (final d in days)
           InboxGroup(
-            label: 'Today',
-            entries: today,
+            key: ValueKey('inbox-day-${DateUtilsX.dayKey(d.day)}'),
+            label: InboxDayLabel.of(d.day, now),
+            entries: d.entries,
             rowBuilder: row,
             onDismiss: _dismiss,
+            onClear: () => _clear(d.entries),
           ),
-        if (today.isNotEmpty && earlier.isNotEmpty)
-          const SizedBox(height: AppSpacing.section),
-        if (earlier.isNotEmpty)
-          InboxGroup(
-            label: 'Earlier',
-            entries: earlier,
-            rowBuilder: row,
-            onDismiss: _dismiss,
-          ),
+        const SliverPadding(
+          padding: EdgeInsetsDirectional.only(bottom: AppSpacing.xxxl),
+        ),
       ],
+    );
+  }
+
+  Future<void> _clear(List<InboxEntry> entries) async {
+    final ids = [for (final e in entries) e.id];
+    setState(() => _hidden.addAll(ids));
+    await clearInboxEntries(
+      context,
+      ref,
+      entries,
+      onUndo: () {
+        if (mounted) setState(() => _hidden.removeAll(ids));
+      },
     );
   }
 

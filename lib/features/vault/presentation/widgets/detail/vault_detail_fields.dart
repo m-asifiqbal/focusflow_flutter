@@ -5,8 +5,9 @@
 /// Per type: Login (username · password · 2FA code · website), Card
 /// (cardholder · number · expiry · CVV · PIN), Wi-Fi (network · password ·
 /// security, QR share) and Secure note (the note). Custom fields follow.
-/// Secrets are masked until revealed ([vaultRevealProvider]); a revealed
-/// password is colour-coded (digits sky, symbols amber); long-press a
+/// Secrets are masked until revealed ([vaultRevealProvider]) and hide again
+/// by themselves after 4 s (a ring around the eye counts it down); a
+/// revealed password is colour-coded (digits sky, symbols amber); long-press a
 /// password for the large-type view. Copies auto-clear.
 /// ============================================================
 library;
@@ -27,6 +28,7 @@ import 'package:focusflow/features/vault/presentation/vault_detail_actions.dart'
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
 import 'package:focusflow/features/vault/presentation/widgets/detail/vault_detail_sheets.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_fields.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_reveal.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_reauth_sheet.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
@@ -56,11 +58,10 @@ class VaultDetailFields extends ConsumerWidget {
           ),
         );
 
-    Widget reveal(String field, String what) => VaultRoundButton(
-      icon: shown.contains(field)
-          ? FontAwesomeIcons.eyeSlash
-          : FontAwesomeIcons.eye,
-      semanticLabel: shown.contains(field) ? 'Hide $what' : 'Show $what',
+    Widget reveal(String field, String what) => VaultRevealButton(
+      open: shown.contains(field),
+      what: what,
+      cycle: ref.read(vaultRevealProvider(id).notifier).cycleOf(field),
       onTap: () => unawaited(toggleVaultReveal(context, ref, id, field)),
     );
 
@@ -75,16 +76,18 @@ class VaultDetailFields extends ConsumerWidget {
       final what = label.toLowerCase();
       return VaultFieldRow(
         label: label,
-        value: open
-            ? VaultSecretText(
-                format == null ? value : format(value),
-                colour: colour,
-              )
-            : Text(
-                _mask(value),
-                style: context.vaultMonoStyle,
-                semanticsLabel: '$label hidden',
-              ),
+        value: VaultSecretSwitcher(
+          open: open,
+          revealed: VaultSecretText(
+            format == null ? value : format(value),
+            colour: colour,
+          ),
+          masked: Text(
+            _mask(value),
+            style: context.vaultMonoStyle,
+            semanticsLabel: '$label hidden',
+          ),
+        ),
         actions: [reveal(field, what), copy(value, label)],
         onLongPress: () => unawaited(() async {
           // Large type shows the raw value: gate it like the eye button

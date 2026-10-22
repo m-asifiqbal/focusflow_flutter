@@ -2,7 +2,7 @@
 /// INSIGHTS RANGE BAR — 7 Days · Today · 30 Days · 90 Days · Custom
 /// ============================================================
 ///
-/// FFChipBar over InsightsPreset. "Custom" opens the platform date-range
+/// FFChipBar over InsightsPreset (plus [InsightsRangeCaption] below it). "Custom" opens the platform date-range
 /// picker (days up to today) and then shows the picked span ("Oct 1 –
 /// Oct 9"); cancelling keeps the previous range.
 /// ============================================================
@@ -10,6 +10,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/theme/app_spacing.dart';
+import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_range.dart';
@@ -72,6 +74,44 @@ class InsightsRangeBar extends ConsumerWidget {
               .select(InsightsRange.preset(p));
         }
       },
+    );
+  }
+}
+
+/// "Oct 16 – Oct 22 · vs previous 7 days": which days the numbers cover and
+/// what every ▲/▼ compares against.
+class InsightsRangeCaption extends ConsumerWidget {
+  const InsightsRangeCaption({super.key});
+
+  static String text(InsightsRange range, DateTime today) {
+    final w = range.resolve(today);
+    final f = DateFormats.of('MMM d');
+    final span = w.days == 1
+        ? (DateUtilsX.isSameDay(w.start, today) ? 'Today' : f.format(w.start))
+        : '${f.format(w.start)} – ${f.format(w.lastDay)}';
+    final vs = w.days == 1 ? 'yesterday' : 'previous ${w.days} days';
+    return '$span · vs $vs';
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final range = ref.watch(insightsRangeProvider);
+    final today = ref.watch(todayProvider);
+    final label = text(range, today);
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.screen,
+      ),
+      child: AnimatedSwitcher(
+        duration: context.motion(AppMotion.fast),
+        child: Text(
+          label,
+          key: ValueKey(label),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.text.caption,
+        ),
+      ),
     );
   }
 }

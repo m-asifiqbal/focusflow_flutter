@@ -10,7 +10,7 @@
 /// * [vaultItemHealthProvider]   — the "Security health" card.
 /// * [vaultTotpConfigProvider]   — the item's 2FA secret, parsed
 ///   ([VaultTotpCode.at] gives the code + seconds left at a time).
-/// * [vaultRevealProvider]       — which secret fields are unmasked.
+/// * [vaultRevealProvider]       — which secret fields are unmasked (4 s).
 /// ============================================================
 library;
 
@@ -24,6 +24,7 @@ import 'package:focusflow/features/vault/domain/services/vault_item_service.dart
 import 'package:focusflow/features/vault/domain/services/vault_payload_codec.dart';
 import 'package:focusflow/features/vault/presentation/notifiers/vault_session_controller.dart';
 import 'package:focusflow/features/vault/presentation/providers/vault_list_providers.dart';
+import 'package:focusflow/features/vault/presentation/vault_auto_hide.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
@@ -125,22 +126,30 @@ final vaultTotpConfigProvider = Provider.autoDispose
     });
 
 /// Fields of one item that are currently unmasked ("password", "cvv",
-/// "pin", "cf3" …). Cleared when the vault locks.
+/// "pin", "cf3" …). Each hides itself again after
+/// [VaultAutoHide.defaultDuration] (4 s); all clear when the vault locks.
 class VaultRevealController
     extends AutoDisposeFamilyNotifier<Set<String>, String> {
+  late VaultAutoHide<String> _auto;
+
   @override
   Set<String> build(String id) {
     ref.watch(vaultSessionProvider.select((s) => s.isUnlocked));
+    // A fresh helper per build: a lock / unlock rebuilds this notifier, and
+    // the old timers must not hide (or notify) anything afterwards.
+    _auto = VaultAutoHide<String>(onChanged: () => state = _auto.shown);
+    ref.onDispose(_auto.dispose);
     return const {};
   }
 
   bool isShown(String field) => state.contains(field);
 
-  void toggle(String field) => state = state.contains(field)
-      ? ({...state}..remove(field))
-      : {...state, field};
+  /// How often [field] was revealed — restarts the eye's countdown ring.
+  int cycleOf(String field) => _auto.cycleOf(field);
 
-  void hideAll() => state = const {};
+  void toggle(String field) => _auto.toggle(field);
+
+  void hideAll() => _auto.hideAll();
 }
 
 final vaultRevealProvider = NotifierProvider.autoDispose

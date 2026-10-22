@@ -232,6 +232,17 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _lockVerifierMeta = const VerificationMeta(
+    'lockVerifier',
+  );
+  @override
+  late final GeneratedColumn<String> lockVerifier = GeneratedColumn<String>(
+    'lock_verifier',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _wordCountMeta = const VerificationMeta(
     'wordCount',
   );
@@ -276,6 +287,7 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     checklistJson,
     coverImagePath,
     isLocked,
+    lockVerifier,
     wordCount,
     reminderId,
   ];
@@ -423,6 +435,15 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
         isLocked.isAcceptableOrUnknown(data['is_locked']!, _isLockedMeta),
       );
     }
+    if (data.containsKey('lock_verifier')) {
+      context.handle(
+        _lockVerifierMeta,
+        lockVerifier.isAcceptableOrUnknown(
+          data['lock_verifier']!,
+          _lockVerifierMeta,
+        ),
+      );
+    }
     if (data.containsKey('word_count')) {
       context.handle(
         _wordCountMeta,
@@ -520,6 +541,10 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_locked'],
       )!,
+      lockVerifier: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lock_verifier'],
+      ),
       wordCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}word_count'],
@@ -574,8 +599,13 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   /// Relative path (under app documents) of the cover image, if any.
   final String? coverImagePath;
 
-  /// Locked notes require the vault PIN to open; previews are blurred.
+  /// Locked notes need their own PIN to open; previews are hidden.
   final bool isLocked;
+
+  /// Argon2id verifier of the note's own PIN (`v1:m:t:salt:hash`, see
+  /// NotePinService) — never the PIN. Null on a locked note = a legacy lock
+  /// made with the vault PIN, which still opens with it.
+  final String? lockVerifier;
   final int wordCount;
 
   /// Linked reminder ("Reminder Fri" in the editor meta line).
@@ -600,6 +630,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     required this.checklistJson,
     this.coverImagePath,
     required this.isLocked,
+    this.lockVerifier,
     required this.wordCount,
     this.reminderId,
   });
@@ -637,6 +668,9 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       map['cover_image_path'] = Variable<String>(coverImagePath);
     }
     map['is_locked'] = Variable<bool>(isLocked);
+    if (!nullToAbsent || lockVerifier != null) {
+      map['lock_verifier'] = Variable<String>(lockVerifier);
+    }
     map['word_count'] = Variable<int>(wordCount);
     if (!nullToAbsent || reminderId != null) {
       map['reminder_id'] = Variable<String>(reminderId);
@@ -677,6 +711,9 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           ? const Value.absent()
           : Value(coverImagePath),
       isLocked: Value(isLocked),
+      lockVerifier: lockVerifier == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lockVerifier),
       wordCount: Value(wordCount),
       reminderId: reminderId == null && nullToAbsent
           ? const Value.absent()
@@ -709,6 +746,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       checklistJson: serializer.fromJson<String>(json['checklistJson']),
       coverImagePath: serializer.fromJson<String?>(json['coverImagePath']),
       isLocked: serializer.fromJson<bool>(json['isLocked']),
+      lockVerifier: serializer.fromJson<String?>(json['lockVerifier']),
       wordCount: serializer.fromJson<int>(json['wordCount']),
       reminderId: serializer.fromJson<String?>(json['reminderId']),
     );
@@ -736,6 +774,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       'checklistJson': serializer.toJson<String>(checklistJson),
       'coverImagePath': serializer.toJson<String?>(coverImagePath),
       'isLocked': serializer.toJson<bool>(isLocked),
+      'lockVerifier': serializer.toJson<String?>(lockVerifier),
       'wordCount': serializer.toJson<int>(wordCount),
       'reminderId': serializer.toJson<String?>(reminderId),
     };
@@ -761,6 +800,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     String? checklistJson,
     Value<String?> coverImagePath = const Value.absent(),
     bool? isLocked,
+    Value<String?> lockVerifier = const Value.absent(),
     int? wordCount,
     Value<String?> reminderId = const Value.absent(),
   }) => NoteRow(
@@ -785,6 +825,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
         ? coverImagePath.value
         : this.coverImagePath,
     isLocked: isLocked ?? this.isLocked,
+    lockVerifier: lockVerifier.present ? lockVerifier.value : this.lockVerifier,
     wordCount: wordCount ?? this.wordCount,
     reminderId: reminderId.present ? reminderId.value : this.reminderId,
   );
@@ -823,6 +864,9 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           ? data.coverImagePath.value
           : this.coverImagePath,
       isLocked: data.isLocked.present ? data.isLocked.value : this.isLocked,
+      lockVerifier: data.lockVerifier.present
+          ? data.lockVerifier.value
+          : this.lockVerifier,
       wordCount: data.wordCount.present ? data.wordCount.value : this.wordCount,
       reminderId: data.reminderId.present
           ? data.reminderId.value
@@ -852,6 +896,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           ..write('checklistJson: $checklistJson, ')
           ..write('coverImagePath: $coverImagePath, ')
           ..write('isLocked: $isLocked, ')
+          ..write('lockVerifier: $lockVerifier, ')
           ..write('wordCount: $wordCount, ')
           ..write('reminderId: $reminderId')
           ..write(')'))
@@ -879,6 +924,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     checklistJson,
     coverImagePath,
     isLocked,
+    lockVerifier,
     wordCount,
     reminderId,
   ]);
@@ -905,6 +951,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           other.checklistJson == this.checklistJson &&
           other.coverImagePath == this.coverImagePath &&
           other.isLocked == this.isLocked &&
+          other.lockVerifier == this.lockVerifier &&
           other.wordCount == this.wordCount &&
           other.reminderId == this.reminderId);
 }
@@ -929,6 +976,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   final Value<String> checklistJson;
   final Value<String?> coverImagePath;
   final Value<bool> isLocked;
+  final Value<String?> lockVerifier;
   final Value<int> wordCount;
   final Value<String?> reminderId;
   final Value<int> rowid;
@@ -952,6 +1000,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     this.checklistJson = const Value.absent(),
     this.coverImagePath = const Value.absent(),
     this.isLocked = const Value.absent(),
+    this.lockVerifier = const Value.absent(),
     this.wordCount = const Value.absent(),
     this.reminderId = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -976,6 +1025,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     this.checklistJson = const Value.absent(),
     this.coverImagePath = const Value.absent(),
     this.isLocked = const Value.absent(),
+    this.lockVerifier = const Value.absent(),
     this.wordCount = const Value.absent(),
     this.reminderId = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1002,6 +1052,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     Expression<String>? checklistJson,
     Expression<String>? coverImagePath,
     Expression<bool>? isLocked,
+    Expression<String>? lockVerifier,
     Expression<int>? wordCount,
     Expression<String>? reminderId,
     Expression<int>? rowid,
@@ -1026,6 +1077,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
       if (checklistJson != null) 'checklist_json': checklistJson,
       if (coverImagePath != null) 'cover_image_path': coverImagePath,
       if (isLocked != null) 'is_locked': isLocked,
+      if (lockVerifier != null) 'lock_verifier': lockVerifier,
       if (wordCount != null) 'word_count': wordCount,
       if (reminderId != null) 'reminder_id': reminderId,
       if (rowid != null) 'rowid': rowid,
@@ -1052,6 +1104,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     Value<String>? checklistJson,
     Value<String?>? coverImagePath,
     Value<bool>? isLocked,
+    Value<String?>? lockVerifier,
     Value<int>? wordCount,
     Value<String?>? reminderId,
     Value<int>? rowid,
@@ -1076,6 +1129,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
       checklistJson: checklistJson ?? this.checklistJson,
       coverImagePath: coverImagePath ?? this.coverImagePath,
       isLocked: isLocked ?? this.isLocked,
+      lockVerifier: lockVerifier ?? this.lockVerifier,
       wordCount: wordCount ?? this.wordCount,
       reminderId: reminderId ?? this.reminderId,
       rowid: rowid ?? this.rowid,
@@ -1142,6 +1196,9 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     if (isLocked.present) {
       map['is_locked'] = Variable<bool>(isLocked.value);
     }
+    if (lockVerifier.present) {
+      map['lock_verifier'] = Variable<String>(lockVerifier.value);
+    }
     if (wordCount.present) {
       map['word_count'] = Variable<int>(wordCount.value);
     }
@@ -1176,6 +1233,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
           ..write('checklistJson: $checklistJson, ')
           ..write('coverImagePath: $coverImagePath, ')
           ..write('isLocked: $isLocked, ')
+          ..write('lockVerifier: $lockVerifier, ')
           ..write('wordCount: $wordCount, ')
           ..write('reminderId: $reminderId, ')
           ..write('rowid: $rowid')
@@ -12218,6 +12276,7 @@ typedef $$NotesTableCreateCompanionBuilder =
       Value<String> checklistJson,
       Value<String?> coverImagePath,
       Value<bool> isLocked,
+      Value<String?> lockVerifier,
       Value<int> wordCount,
       Value<String?> reminderId,
       Value<int> rowid,
@@ -12243,6 +12302,7 @@ typedef $$NotesTableUpdateCompanionBuilder =
       Value<String> checklistJson,
       Value<String?> coverImagePath,
       Value<bool> isLocked,
+      Value<String?> lockVerifier,
       Value<int> wordCount,
       Value<String?> reminderId,
       Value<int> rowid,
@@ -12348,6 +12408,11 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
 
   ColumnFilters<bool> get isLocked => $composableBuilder(
     column: $table.isLocked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lockVerifier => $composableBuilder(
+    column: $table.lockVerifier,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12466,6 +12531,11 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get lockVerifier => $composableBuilder(
+    column: $table.lockVerifier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get wordCount => $composableBuilder(
     column: $table.wordCount,
     builder: (column) => ColumnOrderings(column),
@@ -12557,6 +12627,11 @@ class $$NotesTableAnnotationComposer
   GeneratedColumn<bool> get isLocked =>
       $composableBuilder(column: $table.isLocked, builder: (column) => column);
 
+  GeneratedColumn<String> get lockVerifier => $composableBuilder(
+    column: $table.lockVerifier,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get wordCount =>
       $composableBuilder(column: $table.wordCount, builder: (column) => column);
 
@@ -12613,6 +12688,7 @@ class $$NotesTableTableManager
                 Value<String> checklistJson = const Value.absent(),
                 Value<String?> coverImagePath = const Value.absent(),
                 Value<bool> isLocked = const Value.absent(),
+                Value<String?> lockVerifier = const Value.absent(),
                 Value<int> wordCount = const Value.absent(),
                 Value<String?> reminderId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -12636,6 +12712,7 @@ class $$NotesTableTableManager
                 checklistJson: checklistJson,
                 coverImagePath: coverImagePath,
                 isLocked: isLocked,
+                lockVerifier: lockVerifier,
                 wordCount: wordCount,
                 reminderId: reminderId,
                 rowid: rowid,
@@ -12661,6 +12738,7 @@ class $$NotesTableTableManager
                 Value<String> checklistJson = const Value.absent(),
                 Value<String?> coverImagePath = const Value.absent(),
                 Value<bool> isLocked = const Value.absent(),
+                Value<String?> lockVerifier = const Value.absent(),
                 Value<int> wordCount = const Value.absent(),
                 Value<String?> reminderId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -12684,6 +12762,7 @@ class $$NotesTableTableManager
                 checklistJson: checklistJson,
                 coverImagePath: coverImagePath,
                 isLocked: isLocked,
+                lockVerifier: lockVerifier,
                 wordCount: wordCount,
                 reminderId: reminderId,
                 rowid: rowid,

@@ -240,6 +240,8 @@ class VaultSessionController extends Notifier<VaultSessionState> {
       await _guard.reset(); // not the user's fault
       if (!_disposed) state = state.copyWith(phase: VaultPhase.unreadable);
       return UnlockResult.unavailable;
+    } on Object {
+      return _couldNotCheck(before, now);
     }
     if (key == null) return _failed(attempts);
     await _guard.reset();
@@ -263,12 +265,29 @@ class VaultSessionController extends Notifier<VaultSessionState> {
     } on VaultKeyUnreadableException {
       await _guard.reset();
       return UnlockResult.unavailable;
+    } on Object {
+      return _couldNotCheck(before, now);
     }
     if (!ok) return _failed(attempts);
     await _guard.reset();
     state = state.copyWith(attempts: PinAttemptState.initial);
     return UnlockResult.success;
   });
+
+  /// The PIN could not be checked at all (key store / KDF failure, not
+  /// enough memory, too slow): hands the counted attempt back and reports
+  /// [UnlockResult.failed] — never a wrong PIN, never a lock-out step.
+  Future<UnlockResult> _couldNotCheck(
+    PinAttemptState before,
+    DateTime now,
+  ) async {
+    try {
+      await _guard.refund(before, now);
+    } on Object {
+      // Storage unavailable too: the counter stays as it is.
+    }
+    return UnlockResult.failed;
+  }
 
   /// The attempt (already counted) failed.
   Future<UnlockResult> _failed(PinAttemptState attempts) async {
@@ -300,13 +319,10 @@ class VaultSessionController extends Notifier<VaultSessionState> {
           !await _bio.authenticate(reason)) {
         return UnlockResult.cancelled;
       }
-      final read = await _keys
-          .readBiometricCopy()
-          .timeout(
-            const Duration(seconds: 25),
-            onTimeout: () =>
-                const BiometricCopyRead(BiometricCopyStatus.cancelled),
-          );
+      final read = await _keys.readBiometricCopy().timeout(
+        const Duration(seconds: 25),
+        onTimeout: () => const BiometricCopyRead(BiometricCopyStatus.cancelled),
+      );
       if (_disposed) {
         read.key?.destroy();
         return UnlockResult.unavailable;

@@ -54,8 +54,9 @@ class BackupActions {
     return engine.inspect(bytes);
   }
 
-  /// Restores [archive]. Throws [WrongBackupPin] (wrong / missing PIN) or
-  /// [FormatException] before anything is written.
+  /// Restores [archive]. Throws [WrongBackupPin] (wrong / missing PIN),
+  /// `Argon2Failure` (this phone could not derive the key: too slow / out of
+  /// memory) or [FormatException] before anything is written.
   Future<RestoreResult> restore(
     BackupArchive archive, {
     required RestoreMode mode,
@@ -63,10 +64,10 @@ class BackupActions {
   }) async {
     final engine = ref.read(backupEngineProvider);
     final key = pin == null ? null : await engine.keyFor(archive.manifest, pin);
-    // Verify the PIN first (cheap) so a wrong one never starts a restore.
-    if (archive.manifest.isEncrypted) {
-      await engine.openSnapshot(archive, key: key);
-    }
+    // No separate "check the PIN first" pass: [BackupEngine.restore] opens
+    // (decrypts + verifies) the snapshot before it touches anything, so a
+    // wrong PIN already fails with nothing changed. A second pass here only
+    // decrypted the whole backup twice.
     final result = await engine.restore(archive, mode: mode, key: key);
     // Settings written straight to SharedPreferences are read once when
     // their provider is built: rebuild them so the screens show the restore.

@@ -45,6 +45,10 @@ enum UnlockResult {
 
   /// The user dismissed the biometric prompt.
   cancelled,
+
+  /// The check itself could not run (key store error, the phone was too
+  /// slow or out of memory). Not a wrong PIN: the attempt is not counted.
+  failed,
 }
 
 /// Thrown when vault crypto is requested while the vault is locked.

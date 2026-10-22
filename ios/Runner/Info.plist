@@ -68,6 +68,43 @@
 	<string>FocusFlow lets you add photos from your library to notes and scan text from them.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>FocusFlow turns your speech into text for notes and quick capture.</string>
+	<!-- App-icon long-press quick actions. The type strings are the keys of
+	     lib/core/platform/launcher_shortcuts.dart. -->
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeMessage</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Notifications</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>notifications</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCompose</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>New note</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>new_note</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeAlarm</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>New reminder</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>new_reminder</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeTaskCompleted</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Habits</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>habits</string>
+		</dict>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

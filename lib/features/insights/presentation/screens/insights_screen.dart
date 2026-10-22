@@ -4,7 +4,8 @@
 ///
 /// What: large header "Insights" + share button, range chips, then the
 /// live [InsightsContent] of the selected range (skeleton on first load,
-/// retry on error). Share renders the whole page (not just the visible
+/// retry on error; the previous range stays visible, dimmed, while the next
+/// one loads). Share renders the whole page (not just the visible
 /// part) to a PNG through a RepaintBoundary around the scroll content and
 /// hands it to the share sheet.
 /// Why: a SingleChildScrollView lays the full page out, so the boundary
@@ -25,6 +26,7 @@ import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/data/share/insights_share_service.dart';
+import 'package:focusflow/features/insights/domain/entities/insights_snapshot.dart';
 import 'package:focusflow/features/insights/presentation/insights_tokens.dart';
 import 'package:focusflow/features/insights/presentation/providers/insights_providers.dart';
 import 'package:focusflow/features/insights/presentation/widgets/insights_content.dart';
@@ -46,6 +48,10 @@ class InsightsScreen extends ConsumerStatefulWidget {
 class _InsightsScreenState extends ConsumerState<InsightsScreen> {
   final _boundary = GlobalKey();
   bool _sharing = false;
+
+  /// The last snapshot shown: while another range loads it stays on screen
+  /// (dimmed) instead of flashing the skeleton and resetting the scroll.
+  InsightsSnapshot? _last;
 
   Future<void> _share() async {
     final box = _boundary.currentContext?.findRenderObject();
@@ -75,9 +81,12 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     final ff = context.ff;
     const pad = EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.screen);
 
-    final Widget body = switch (async) {
-      AsyncValue(:final value?) => InsightsContent(snapshot: value),
-      AsyncError() => FFEmptyState.compact(
+    final fresh = async.valueOrNull;
+    if (fresh != null) _last = fresh;
+    final shown = fresh ?? _last;
+    final Widget body;
+    if (async.hasError && fresh == null) {
+      body = FFEmptyState.compact(
         colors: ModuleStyle.notes.colors,
         icon: FontAwesomeIcons.chartPie,
         title: "Couldn't load insights",
@@ -85,9 +94,18 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         ctaLabel: 'Try again',
         ctaIcon: FontAwesomeIcons.arrowRotateRight,
         onCta: () => ref.invalidate(insightsProvider(range)),
-      ),
-      _ => const InsightsSkeleton(),
-    };
+      );
+    } else if (shown != null) {
+      // One element for fresh and stale data, so switching ranges keeps the
+      // cards (and their animations) instead of rebuilding them.
+      body = AnimatedOpacity(
+        opacity: fresh == null ? InsightsDimens.staleOpacity : 1,
+        duration: context.motion(AppMotion.fast),
+        child: InsightsContent(snapshot: shown),
+      );
+    } else {
+      body = const InsightsSkeleton();
+    }
 
     return MinuteTicker(
       child: FFScaffold(
@@ -122,6 +140,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       children: [
                         const SizedBox(height: InsightsDimens.chipsGap),
                         const InsightsRangeBar(),
+                        const SizedBox(height: AppSpacing.sm),
+                        const InsightsRangeCaption(),
                         const SizedBox(height: InsightsDimens.chipsGap),
                         Padding(
                           padding: pad.add(

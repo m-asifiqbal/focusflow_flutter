@@ -43,6 +43,76 @@ import workmanager_apple
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "SecureClipboardPlugin") {
       SecureClipboardPlugin.register(with: registrar)
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "LauncherShortcutsPlugin") {
+      LauncherShortcutsPlugin.register(with: registrar)
+    }
+  }
+}
+
+/// `focusflow/shortcuts` (Dart: core/platform/launcher_shortcuts.dart) — the
+/// Home Screen quick actions of the app icon (Info.plist ›
+/// UIApplicationShortcutItems; the item *type* is the shortcut key).
+/// The one that cold-started the app arrives in the scene's connection
+/// options and is parked until Dart asks (`getInitial`); later ones are
+/// pushed as `onShortcut`. Android implements the same channel in
+/// MainActivity.kt.
+final class LauncherShortcutsPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
+  private var channel: FlutterMethodChannel?
+  private var pending: String?
+  private var listening = false
+
+  static func register(with registrar: FlutterPluginRegistrar) {
+    let instance = LauncherShortcutsPlugin()
+    let channel = FlutterMethodChannel(
+      name: "focusflow/shortcuts",
+      binaryMessenger: registrar.messenger()
+    )
+    instance.channel = channel
+    registrar.addMethodCallDelegate(instance, channel: channel)
+    registrar.addSceneDelegate(instance)
+  }
+
+  func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    switch call.method {
+    case "getInitial":
+      // Dart is listening from now on: later shortcuts are pushed.
+      listening = true
+      result(pending)
+      pending = nil
+    default:
+      result(FlutterMethodNotImplemented)
+    }
+  }
+
+  private func deliver(_ type: String) {
+    if listening, let channel = channel {
+      channel.invokeMethod("onShortcut", arguments: type)
+    } else {
+      pending = type
+    }
+  }
+
+  // Cold start: the chosen shortcut is in the connection options. Not
+  // claimed as handled, so Flutter's own connection work (deep links, state
+  // restoration) still runs.
+  func scene(
+    _ scene: UIScene,
+    willConnectTo session: UISceneSession,
+    options connectionOptions: UIScene.ConnectionOptions?
+  ) -> Bool {
+    if let item = connectionOptions?.shortcutItem { deliver(item.type) }
+    return false
+  }
+
+  // The app was already running (or suspended).
+  func windowScene(
+    _ windowScene: UIWindowScene,
+    performActionFor shortcutItem: UIApplicationShortcutItem,
+    completionHandler: @escaping (Bool) -> Void
+  ) -> Bool {
+    deliver(shortcutItem.type)
+    completionHandler(true)
+    return true
   }
 }
 

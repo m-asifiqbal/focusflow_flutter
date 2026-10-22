@@ -1,10 +1,15 @@
 /// ============================================================
-/// INBOX GROUP — "TODAY" / "EARLIER" label + a card of rows
+/// INBOX GROUP — one day: a pinned "TODAY ··· Clear all" bar + a card of rows
 /// ============================================================
 ///
-/// What: one section of screen 27: an uppercase label and a rounded card
-/// whose rows are separated by inset hairlines. Each row swipes away
-/// (end → start) to dismiss; screen readers get a "Dismiss" action.
+/// What: one section of screen 27 as a sliver. The uppercase day label and
+/// its "Clear all" button stay pinned to the top of the list while the
+/// day's rows scroll beneath; when the next day arrives its bar pushes the
+/// previous one away, so the label always names the day in view. The rows
+/// sit in a rounded card separated by inset hairlines; each swipes away
+/// (end → start) to dismiss, and screen readers get a "Dismiss" action.
+/// Why: [SliverMainAxisGroup] scopes a pinned header to its own group, which
+/// is exactly the "sticky section header" behaviour.
 /// ============================================================
 library;
 
@@ -22,45 +27,56 @@ class InboxGroup extends StatelessWidget {
     required this.entries,
     required this.rowBuilder,
     required this.onDismiss,
+    required this.onClear,
     super.key,
   });
 
+  /// Pinned bar height (a 44-pt tap target plus breathing room).
+  static const double headerExtent = AppSizes.minTap + AppSpacing.sm;
+
+  /// "Today", "Yesterday", "Monday", "Oct 12".
   final String label;
   final List<InboxEntry> entries;
   final Widget Function(InboxEntry entry) rowBuilder;
   final ValueChanged<InboxEntry> onDismiss;
 
+  /// "Clear all" of this day's [entries].
+  final VoidCallback onClear;
+
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsetsDirectional.only(
-            start: AppSpacing.xs,
-            bottom: AppSpacing.md,
-          ),
-          child: Semantics(
-            header: true,
-            child: Text(label.toUpperCase(), style: context.text.sectionLabel),
-          ),
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _DayBarDelegate(label: label, onClear: onClear),
         ),
-        FFCard(
-          padding: EdgeInsetsDirectional.zero,
-          child: Column(
-            children: [
-              for (var i = 0; i < entries.length; i++) ...[
-                if (i > 0)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(
-                      start: AppSpacing.dividerInset,
-                    ),
-                    child: Container(height: 1, color: ff.divider),
-                  ),
-                _swipe(context, entries[i]),
-              ],
-            ],
+        SliverPadding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.grouped,
+            0,
+            AppSpacing.grouped,
+            AppSpacing.lg,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: FFCard(
+              padding: EdgeInsetsDirectional.zero,
+              child: Column(
+                children: [
+                  for (var i = 0; i < entries.length; i++) ...[
+                    if (i > 0)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: AppSpacing.dividerInset,
+                        ),
+                        child: Container(height: 1, color: ff.divider),
+                      ),
+                    _swipe(context, entries[i]),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -102,4 +118,72 @@ class InboxGroup extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DayBarDelegate extends SliverPersistentHeaderDelegate {
+  const _DayBarDelegate({required this.label, required this.onClear});
+
+  final String label;
+  final VoidCallback onClear;
+
+  @override
+  double get minExtent => InboxGroup.headerExtent;
+
+  @override
+  double get maxExtent => InboxGroup.headerExtent;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    final ff = context.ff;
+    return DecoratedBox(
+      // Opaque, so rows scrolling underneath never show through the label.
+      decoration: BoxDecoration(
+        color: ff.canvas,
+        border: Border(
+          bottom: BorderSide(
+            color: overlapsContent ? ff.divider : const Color(0x00000000),
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(
+          start: AppSpacing.grouped + AppSpacing.xs,
+          end: AppSpacing.grouped,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                header: true,
+                child: Text(
+                  label.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.sectionLabel,
+                ),
+              ),
+            ),
+            FFTextButton(
+              label: 'Clear all',
+              semanticLabel: 'Clear all notifications from $label',
+              onPressed: onClear,
+              padding: const EdgeInsetsDirectional.only(start: AppSpacing.md),
+              style: context.text.buttonSmall.copyWith(
+                fontSize: 14,
+                color: ff.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _DayBarDelegate old) =>
+      old.label != label || old.onClear != onClear;
 }

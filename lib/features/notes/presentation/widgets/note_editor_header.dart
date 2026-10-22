@@ -4,7 +4,8 @@
 ///
 /// Screen 08 top bar: round back button, centred folder name over the
 /// auto-save status ("AUTO-SAVED" with a cloud, "SAVING…", "NOT SAVED"),
-/// and the Pin + More round buttons. Pure presentation: callbacks only.
+/// and the Lock + Pin + More round buttons. Pure presentation: callbacks
+/// only.
 /// ============================================================
 library;
 
@@ -21,6 +22,8 @@ class NoteEditorHeader extends StatelessWidget {
     required this.status,
     required this.onBack,
     this.pinned = false,
+    this.locked = false,
+    this.onLock,
     this.onPin,
     this.onMore,
     this.showStatus = true,
@@ -32,6 +35,13 @@ class NoteEditorHeader extends StatelessWidget {
   final NoteSaveStatus status;
   final VoidCallback onBack;
   final bool pinned;
+
+  /// The note has its own PIN (the icon shows a closed padlock).
+  final bool locked;
+
+  /// The lock button: lock the note with a PIN, or (locked) Change / Remove.
+  /// Null hides it (read-only notes).
+  final VoidCallback? onLock;
 
   /// Null hides the button (locked / read-only notes).
   final VoidCallback? onPin;
@@ -69,6 +79,22 @@ class NoteEditorHeader extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (onLock != null) ...[
+                  _Halo(
+                    child: FFRoundIconButton(
+                      icon: locked
+                          ? FontAwesomeIcons.lock
+                          : FontAwesomeIcons.lockOpen,
+                      semanticLabel: locked
+                          ? 'Note is locked. Change or remove the PIN'
+                          : 'Lock note with a PIN',
+                      iconColor: locked ? null : context.ff.inkFaint,
+                      onPressed: onLock,
+                    ),
+                  ),
+                  if (onPin != null || onMore != null)
+                    const SizedBox(width: 10),
+                ],
                 if (onPin != null)
                   _Halo(
                     child: FFRoundIconButton(

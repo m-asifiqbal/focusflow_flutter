@@ -87,10 +87,10 @@ class InsightsSources {
 }
 
 class InsightsAggregator {
-  const InsightsAggregator({this.maxStreakRows = 3});
+  const InsightsAggregator({this.maxStreakRows});
 
-  /// Rows in "Habit streaks".
-  final int maxStreakRows;
+  /// Optional cap on rows in "Habit streaks" (null = all habits).
+  final int? maxStreakRows;
 
   /// Ranges longer than this are plotted per week.
   static const int dailyBucketMaxDays = 31;
@@ -330,7 +330,9 @@ class InsightsAggregator {
         if (best != 0) return best;
         return a.habit.name.toLowerCase().compareTo(b.habit.name.toLowerCase());
       });
-    final top = sorted.take(maxStreakRows).toList();
+    final top = maxStreakRows == null
+        ? sorted
+        : sorted.take(maxStreakRows!).toList();
     final max = top.isEmpty
         ? 0
         : weight(top.first.streak, top.first.streak.current);

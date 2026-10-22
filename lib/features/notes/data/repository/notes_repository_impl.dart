@@ -202,8 +202,29 @@ class NotesRepositoryImpl extends RepositoryBase implements NotesRepository {
       _update(id, NotesCompanion(isFavorite: Value(favorite)));
 
   @override
-  Future<void> setLocked(String id, bool locked) =>
-      _update(id, NotesCompanion(isLocked: Value(locked)));
+  Future<void> setLocked(String id, bool locked) => _update(
+    id,
+    NotesCompanion(
+      isLocked: Value(locked),
+      // Unlocking forgets the PIN; locking keeps whatever verifier is there.
+      lockVerifier: locked ? const Value.absent() : const Value(null),
+    ),
+  );
+
+  @override
+  Future<void> lockWithPin(String id, String verifier) => _update(
+    id,
+    NotesCompanion(isLocked: const Value(true), lockVerifier: Value(verifier)),
+  );
+
+  @override
+  Future<String?> lockVerifier(String id) async {
+    final query = db.selectOnly(db.notes)
+      ..addColumns([db.notes.lockVerifier])
+      ..where(db.notes.id.equals(id));
+    final row = await query.getSingleOrNull();
+    return row?.read(db.notes.lockVerifier);
+  }
 
   @override
   Future<void> setFolder(String id, String? folderId) =>

@@ -4,7 +4,7 @@
 ///
 /// Opens (or creates) the note through `noteEditorControllerProvider` and
 /// shows, in order: a skeleton while loading, an error with retry, the
-/// vault lock for locked notes (Vault PIN via [ensureVaultUnlocked]), then
+/// PIN lock for locked notes (the note's own PIN, [verifyNotePin]), then
 /// the editor itself ([NoteEditorView]). Leaving the screen — back button,
 /// swipe, or any navigation — saves pending edits and discards a new note
 /// that is still empty (`NoteEditorController.close`). If the open note is
@@ -23,11 +23,11 @@ import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
+import 'package:focusflow/features/notes/presentation/note_lock_flows.dart';
 import 'package:focusflow/features/notes/presentation/notifiers/note_editor_controller.dart';
 import 'package:focusflow/features/notes/presentation/providers/notes_providers.dart';
 import 'package:focusflow/features/notes/presentation/state/note_editor_state.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_editor_view.dart';
-import 'package:focusflow/features/vault/presentation/vault_gate.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_metrics.dart';
 import 'package:go_router/go_router.dart';
 
@@ -88,8 +88,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
-  Future<void> _unlock(NoteEditorController controller) async {
-    final ok = await ensureVaultUnlocked(context);
+  Future<void> _unlock(NoteEditorController controller, Note note) async {
+    final ok = await verifyNotePin(
+      context,
+      ref,
+      note,
+      subtitle: "Enter this note's PIN to read and edit it.",
+    );
     if (ok && mounted) controller.markUnlocked();
   }
 
@@ -140,17 +145,19 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
     _openedActive ??= note.isActive;
 
-    final unlocked =
-        state.unlocked ||
-        ref.watch(vaultStatusProvider) == VaultStatus.unlocked;
-    if (note.isLocked && !unlocked) {
+    // Each note opens with its own PIN: another note being open, or the
+    // Vault being unlocked, says nothing about this one.
+    if (note.isLocked && !state.unlocked) {
       if (!_askedUnlock) {
         _askedUnlock = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) unawaited(_unlock(controller));
+          if (mounted) unawaited(_unlock(controller, note));
         });
       }
-      return _NoteLocked(onBack: _back, onUnlock: () => _unlock(controller));
+      return _NoteLocked(
+        onBack: _back,
+        onUnlock: () => _unlock(controller, note),
+      );
     }
     return NoteEditorView(
       note: note,
@@ -264,7 +271,7 @@ class _NoteLocked extends StatelessWidget {
       colors: ModuleStyle.vault.colors,
       icon: FontAwesomeIcons.lock,
       title: 'This note is locked',
-      body: 'Unlock with your Vault PIN to read and edit it.',
+      body: 'Enter its PIN to read and edit it.',
       ctaLabel: 'Unlock',
       ctaIcon: FontAwesomeIcons.lockOpen,
       onCta: onUnlock,

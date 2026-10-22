@@ -18,6 +18,7 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/presentation/insights_tokens.dart';
+import 'package:focusflow/features/insights/presentation/widgets/insights_motion.dart';
 
 /// A change against the previous window; [value] 0 shows a neutral dash.
 @immutable
@@ -34,6 +35,8 @@ class InsightsKpiCard extends StatelessWidget {
   const InsightsKpiCard({
     required this.label,
     required this.value,
+    this.number,
+    this.format,
     this.delta,
     this.onTap,
     this.semanticHint,
@@ -42,11 +45,23 @@ class InsightsKpiCard extends StatelessWidget {
 
   final String label;
   final String value;
+
+  /// When both are given the value counts up to [number] ([format] must
+  /// give [value] for it); otherwise [value] is shown as is ("—").
+  final double? number;
+  final String Function(double v)? format;
   final KpiDelta? delta;
   final VoidCallback? onTap;
 
   /// Extra screen-reader text ("Double tap to start a focus session").
   final String? semanticHint;
+
+  Widget _value(TextStyle style) {
+    final n = number;
+    final f = format;
+    if (n == null || f == null) return Text(value, maxLines: 1, style: style);
+    return AnimatedCount(value: n, format: f, style: style);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,16 +102,31 @@ class InsightsKpiCard extends StatelessWidget {
             children: [
               // One line like the mockup; a long label ("HABIT
               // CONSISTENCY") shrinks to fit rather than wrapping.
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  label.toUpperCase(),
-                  maxLines: 1,
-                  style: context.text.sectionLabel.copyWith(
-                    letterSpacing: InsightsDimens.kpiLabelTracking,
+              Row(
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        label.toUpperCase(),
+                        maxLines: 1,
+                        style: context.text.sectionLabel.copyWith(
+                          letterSpacing: InsightsDimens.kpiLabelTracking,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  // A tappable card says so (Focus hours starts a session).
+                  if (onTap != null) ...[
+                    const SizedBox(width: AppSpacing.xs),
+                    Icon(
+                      FontAwesomeIcons.play,
+                      size: InsightsDimens.kpiDeltaIcon - 2,
+                      color: ff.primary,
+                    ),
+                  ],
+                ],
               ),
               const SizedBox(height: AppSpacing.md),
               Wrap(
@@ -104,10 +134,8 @@ class InsightsKpiCard extends StatelessWidget {
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.xxs,
                 children: [
-                  Text(
-                    value,
-                    maxLines: 1,
-                    style: context.text.bigStat.copyWith(
+                  _value(
+                    context.text.bigStat.copyWith(
                       fontSize: InsightsDimens.kpiValue,
                     ),
                   ),

@@ -76,6 +76,11 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- App-icon long-press quick actions: Notifications, New note,
+                 New reminder, Habits (res/xml/shortcuts.xml). -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
             <!-- focusflow://item/{type}/{id} (notification taps, widgets). -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

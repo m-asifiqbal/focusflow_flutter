@@ -42,15 +42,20 @@ void main() {
     () => h.read(inboxRepositoryProvider).watchUnreadCount().first,
   ))!;
 
+  // Rows below the viewport are built lazily; a tall surface shows them all.
+  const tall = Size(390, 1500);
+
   testWidgets('renders the mockup data (light)', (tester) async {
     await boot(tester);
-    await pumpApp(tester, h, AppRoutes.notificationCenter);
+    await pumpApp(tester, h, AppRoutes.notificationCenter, size: tall);
     await captureScreen(tester, '27_notification_center');
 
     expect(find.text('Notifications'), findsOneWidget);
     expect(find.text('Read all'), findsOneWidget);
     expect(find.text('TODAY'), findsOneWidget);
-    expect(find.text('EARLIER'), findsOneWidget);
+    expect(find.text('YESTERDAY'), findsOneWidget);
+    expect(find.text('MONDAY'), findsOneWidget);
+    expect(find.text('Clear all'), findsNWidgets(3));
     expect(find.text('Call the bank about card'), findsOneWidget);
     expect(find.text('now'), findsOneWidget);
     expect(find.text('8:00'), findsOneWidget);
@@ -66,7 +71,13 @@ void main() {
 
   testWidgets('dark mode capture', (tester) async {
     await boot(tester);
-    await pumpApp(tester, h, AppRoutes.notificationCenter, dark: true);
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.notificationCenter,
+      dark: true,
+      size: tall,
+    );
     expect(find.byType(InboxRow), findsNWidgets(6));
     await captureScreen(tester, '27_notification_center_dark');
   });
@@ -87,6 +98,58 @@ void main() {
     await tester.tap(find.text('Read all'));
     await settle(tester);
     expect(await unread(tester), 0);
+  });
+
+  testWidgets('Clear all clears one day with Undo', (tester) async {
+    await boot(tester);
+    await pumpApp(tester, h, AppRoutes.notificationCenter);
+    // TODAY has three rows; its Clear all is the first on screen.
+    expect(find.text('Clear all'), findsWidgets);
+    await tester.tap(find.text('Clear all').first);
+    await settle(tester);
+    expect(find.text('Call the bank about card'), findsNothing);
+    expect(find.text('Drink Water — 6/8'), findsNothing);
+    expect(find.text('3 notifications cleared'), findsOneWidget);
+    // Yesterday's rows are untouched.
+    expect(find.text('Weak password detected'), findsOneWidget);
+    final left = await tester.runAsync(
+      () => h.read(inboxRepositoryProvider).watch().first,
+    );
+    expect(left, hasLength(3));
+
+    await tester.tap(find.text('UNDO'));
+    await settle(tester);
+    expect(find.text('Call the bank about card'), findsOneWidget);
+    final back = await tester.runAsync(
+      () => h.read(inboxRepositoryProvider).watch().first,
+    );
+    expect(back, hasLength(6));
+  });
+
+  testWidgets('the day label stays pinned and follows the scroll', (
+    tester,
+  ) async {
+    await boot(tester);
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.notificationCenter,
+      size: const Size(390, 520),
+    );
+    expect(find.text('TODAY'), findsOneWidget);
+    final top = tester.getTopLeft(find.text('TODAY')).dy;
+    final row = find.text('Drink Water — 6/8');
+    final rowTop = tester.getTopLeft(row).dy;
+    // Scrolled a little: the rows moved, the label stayed.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -120));
+    await settle(tester);
+    expect(tester.getTopLeft(row).dy, lessThan(rowTop));
+    expect(tester.getTopLeft(find.text('TODAY')).dy, top);
+    // Scrolled past TODAY's rows: the next day's label took over.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
+    await settle(tester);
+    expect(find.text('TODAY'), findsNothing);
+    expect(find.text('MONDAY'), findsOneWidget);
   });
 
   testWidgets('Done completes the reminder with Undo', (tester) async {

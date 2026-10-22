@@ -81,8 +81,13 @@ class Notes extends Table with ItemColumns {
   /// Relative path (under app documents) of the cover image, if any.
   TextColumn get coverImagePath => text().nullable()();
 
-  /// Locked notes require the vault PIN to open; previews are blurred.
+  /// Locked notes need their own PIN to open; previews are hidden.
   BoolColumn get isLocked => boolean().withDefault(const Constant(false))();
+
+  /// Argon2id verifier of the note's own PIN (`v1:m:t:salt:hash`, see
+  /// NotePinService) — never the PIN. Null on a locked note = a legacy lock
+  /// made with the vault PIN, which still opens with it.
+  TextColumn get lockVerifier => text().nullable()();
   IntColumn get wordCount => integer().withDefault(const Constant(0))();
 
   /// Linked reminder ("Reminder Fri" in the editor meta line).

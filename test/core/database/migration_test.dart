@@ -1,10 +1,11 @@
-/// Schema migration v1 → v2: `tombstones` + the hard-delete triggers.
+/// Schema migrations: v1 → v2 (`tombstones` + the hard-delete triggers) and
+/// v2 → v3 (`notes.lock_verifier`, a note's own PIN).
 ///
-/// There is no stored v1 snapshot, so the test builds one the way a v1
-/// install looks on disk: a current database with everything v2 added
-/// removed again (the tombstones table and its triggers) and
-/// `user_version = 1`. Re-opening it with [AppDatabase] must run the
-/// `from < 2` step, keep existing rows and leave working triggers.
+/// There are no stored old snapshots, so the test builds one the way an old
+/// install looks on disk: a current database with everything the later
+/// versions added removed again and `user_version` set back. Re-opening it
+/// with [AppDatabase] must run the upgrade steps, keep existing rows and
+/// leave working triggers.
 library;
 
 import 'dart:io';
@@ -23,11 +24,25 @@ AppDatabase _open(File file) => AppDatabase(
   NativeDatabase(file, setup: (raw) => EncryptedDatabase.applyKey(raw, _key)),
 );
 
-/// Rewrites [file] into its v1 shape.
+/// Rewrites [file] into its v2 shape (no `notes.lock_verifier`).
+void _downgradeToV2(File file) {
+  final raw = sqlite3.open(file.path);
+  try {
+    EncryptedDatabase.applyKey(raw, _key);
+    raw
+      ..execute('ALTER TABLE notes DROP COLUMN lock_verifier')
+      ..execute('PRAGMA user_version = 2');
+  } finally {
+    raw.close();
+  }
+}
+
+/// Rewrites [file] into its v1 shape (v2's tombstones and v3's column gone).
 void _downgradeToV1(File file) {
   final raw = sqlite3.open(file.path);
   try {
     EncryptedDatabase.applyKey(raw, _key);
+    raw.execute('ALTER TABLE notes DROP COLUMN lock_verifier');
     final triggers = raw
         .select(
           "SELECT name FROM sqlite_master WHERE type = 'trigger' "
@@ -145,7 +160,38 @@ void main() {
     expect(tombs.map((t) => t.entity), ['tag']);
   });
 
-  test('a fresh install creates the v2 schema directly', () async {
+  test('v2 database gains notes.lock_verifier and keeps its notes', () async {
+    final now = DateTime(2026, 3, 1, 9);
+    var db = _open(file);
+    await db
+        .into(db.notes)
+        .insert(
+          NotesCompanion.insert(
+            id: 'n1',
+            createdAt: now,
+            updatedAt: now,
+            isLocked: const Value(true),
+          ),
+        );
+    await db.close();
+    _downgradeToV2(file);
+
+    db = _open(file);
+    addTearDown(db.close);
+    final columns = await db.customSelect('PRAGMA table_info(notes)').get();
+    expect(
+      columns.map((c) => c.read<String>('name')),
+      contains('lock_verifier'),
+    );
+    // The old lock survives as a "legacy" lock: locked, no verifier.
+    final note = await db.select(db.notes).getSingle();
+    expect(note.isLocked, isTrue);
+    expect(note.lockVerifier, isNull);
+    final version = await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.data.values.first, 3);
+  });
+
+  test('a fresh install creates the current schema directly', () async {
     final db = _open(file);
     addTearDown(db.close);
     expect(await _names(db, 'table'), contains('tombstones'));

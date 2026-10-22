@@ -196,7 +196,7 @@ void main() {
       expect(s.habitConsistency.current, const RatioMetric(done: 3, total: 3));
     });
 
-    test('streak rows: longest first, weeks weigh 7 days, top 3', () {
+    test('streak rows: longest first, weeks weigh 7 days, all habits', () {
       final a = habit(name: 'Reading');
       final b = habit(name: 'Gym');
       final c = habit(name: 'Hydration');
@@ -216,11 +216,17 @@ void main() {
           ],
         ),
       );
-      expect(s.streaks.map((r) => r.name), ['Hydration', 'Gym', 'Reading']);
+      expect(s.streaks.map((r) => r.name), [
+        'Hydration',
+        'Gym',
+        'Reading',
+        'Stretch',
+      ]);
       expect(s.streaks[0].progress, 1);
       expect(s.streaks[1].progress, closeTo(21 / 42, 1e-9));
       expect(s.streaks[1].streak.unit, StreakUnit.weeks);
       expect(s.streaks[2].progress, closeTo(12 / 42, 1e-9));
+      expect(s.streaks[3].progress, closeTo(1 / 42, 1e-9));
     });
   });
 

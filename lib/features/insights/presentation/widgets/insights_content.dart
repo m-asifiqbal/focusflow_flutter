@@ -12,13 +12,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
-import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_snapshot.dart';
 import 'package:focusflow/features/insights/presentation/insights_tokens.dart';
 import 'package:focusflow/features/insights/presentation/widgets/focus_timer_sheet.dart';
 import 'package:focusflow/features/insights/presentation/widgets/habit_streaks_card.dart';
 import 'package:focusflow/features/insights/presentation/widgets/insights_kpi_card.dart';
+import 'package:focusflow/features/insights/presentation/widgets/insights_motion.dart';
 import 'package:focusflow/features/insights/presentation/widgets/productivity_chart_card.dart';
 import 'package:focusflow/features/insights/presentation/widgets/time_split_card.dart';
 import 'package:focusflow/features/insights/presentation/widgets/weekly_tip_card.dart';
@@ -36,6 +36,11 @@ class InsightsContent extends StatelessWidget {
     return KpiDelta((a * 100).round() - (b * 100).round(), '%');
   }
 
+  /// A rate as a count-up target (84.0 for 84%); null keeps the "—".
+  static double? _pct(double? rate) => rate == null ? null : rate * 100;
+
+  static String _fmtPct(double v) => '${v.round()}%';
+
   @override
   Widget build(BuildContext context) {
     final s = snapshot;
@@ -46,57 +51,63 @@ class InsightsContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        InsightsKpiGrid(
-          cards: [
-            InsightsKpiCard(
-              label: 'Task completion',
-              value: InsightsFormat.percent(s.taskCompletion.current.rate),
-              delta: _rateDelta(s.taskCompletion),
-            ),
-            InsightsKpiCard(
-              label: 'Focus hours',
-              value: InsightsFormat.hours(focus.current),
-              delta: noFocus
-                  ? null
-                  // Hours with one decimal, like the value.
-                  : KpiDelta(
-                      ((focus.current - focus.previous) / 6).round() / 10,
-                      'h',
-                    ),
-              onTap: startFocus,
-              semanticHint: 'Starts a focus session',
-            ),
-            InsightsKpiCard(
-              label: 'Habit consistency',
-              value: InsightsFormat.percent(s.habitConsistency.current.rate),
-              delta: _rateDelta(s.habitConsistency),
-            ),
-            InsightsKpiCard(
-              label: 'Notes created',
-              value: '${s.notesCreated.current}',
-              delta: KpiDelta(
-                s.notesCreated.current - s.notesCreated.previous,
-                '',
+        InsightsReveal(
+          index: 0,
+          child: InsightsKpiGrid(
+            cards: [
+              InsightsKpiCard(
+                label: 'Task completion',
+                value: InsightsFormat.percent(s.taskCompletion.current.rate),
+                number: _pct(s.taskCompletion.current.rate),
+                format: _fmtPct,
+                delta: _rateDelta(s.taskCompletion),
               ),
-            ),
-          ],
-        ),
-        if (noFocus) ...[
-          const SizedBox(height: AppSpacing.md),
-          FFSecondaryButton(
-            label: 'Start a focus session',
-            icon: FontAwesomeIcons.stopwatch,
-            onPressed: startFocus,
+              InsightsKpiCard(
+                label: 'Focus hours',
+                value: InsightsFormat.hours(focus.current),
+                number: focus.current.toDouble(),
+                format: (v) => InsightsFormat.hours(v.round()),
+                delta: noFocus
+                    ? null
+                    // Hours with one decimal, like the value.
+                    : KpiDelta(
+                        ((focus.current - focus.previous) / 6).round() / 10,
+                        'h',
+                      ),
+                onTap: startFocus,
+                semanticHint: 'Starts a focus session',
+              ),
+              InsightsKpiCard(
+                label: 'Habit consistency',
+                value: InsightsFormat.percent(s.habitConsistency.current.rate),
+                number: _pct(s.habitConsistency.current.rate),
+                format: _fmtPct,
+                delta: _rateDelta(s.habitConsistency),
+              ),
+              InsightsKpiCard(
+                label: 'Notes created',
+                value: '${s.notesCreated.current}',
+                number: s.notesCreated.current.toDouble(),
+                format: (v) => '${v.round()}',
+                delta: KpiDelta(
+                  s.notesCreated.current - s.notesCreated.previous,
+                  '',
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
         const SizedBox(height: AppSpacing.xxl),
-        ProductivityChartCard(snapshot: s),
+        InsightsReveal(index: 1, child: ProductivityChartCard(snapshot: s)),
         const SizedBox(height: AppSpacing.xxl),
-        TimeSplitCard(split: s.split),
+        InsightsReveal(index: 2, child: TimeSplitCard(split: s.split)),
         const SizedBox(height: AppSpacing.xxl),
-        HabitStreaksCard(rows: s.streaks, hasHabits: s.hasHabits),
+        InsightsReveal(
+          index: 3,
+          child: HabitStreaksCard(rows: s.streaks, hasHabits: s.hasHabits),
+        ),
         const SizedBox(height: AppSpacing.xxl),
-        WeeklyTipCard(tip: s.tip),
+        InsightsReveal(index: 4, child: WeeklyTipCard(tip: s.tip)),
       ],
     );
   }

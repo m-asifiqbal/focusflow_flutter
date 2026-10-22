@@ -78,6 +78,7 @@ void main() {
       expect(find.text(v), findsOneWidget);
     }
     expect(find.text('Auto-deletes after 30 days'), findsOneWidget);
+    expect(find.text('Start a focus session'), findsOneWidget);
     expect(find.text('#work'), findsOneWidget);
     expect(find.text('#ideas'), findsOneWidget);
     expect(find.bySemanticsLabel('Search'), findsOneWidget);

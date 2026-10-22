@@ -15,6 +15,9 @@
 /// [VaultPinPadState.errorTick] so the dots shake; lock-outs come from the
 /// session's persisted attempt counter. The digits live only in this
 /// state and are cleared after every attempt; nothing is logged.
+/// Whatever happens to a check — an exception, a stalled key store, a phone
+/// too slow for the stored KDF cost — the pad leaves "busy" and says so
+/// ([UnlockResult.failed]); it never stays on "Checking…" for ever.
 /// ============================================================
 library;
 
@@ -219,16 +222,28 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
           return;
         }
         state = state.copyWith(busy: true, length: VaultPinPadState.pinLength);
-        await _session.setUp(pin);
+        try {
+          await _session.setUp(pin);
+        } on Object {
+          _firstPin = null;
+          state = VaultPinPadState(
+            step: VaultPadStep.create,
+            errorTick: state.errorTick + 1,
+            message: "Couldn't set up the vault · try again",
+          );
+          return;
+        }
         _firstPin = null;
       case VaultPadStep.verify:
         state = state.copyWith(busy: true);
         // Changing the PIN needs the key: if the vault locked meanwhile,
         // entering the current PIN unlocks it again.
         final locked = !ref.read(vaultSessionProvider).isUnlocked;
-        final result = _changePin && locked
-            ? await _session.unlockWithPin(pin)
-            : await _session.verifyPin(pin);
+        final result = await _checked(
+          () => _changePin && locked
+              ? _session.unlockWithPin(pin)
+              : _session.verifyPin(pin),
+        );
         if (result == UnlockResult.success) {
           state = _changePin
               ? const VaultPinPadState(step: VaultPadStep.changeNew)
@@ -262,7 +277,15 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
           } else {
             await _session.resetPin(pin);
           }
-        } on VaultLockedException {
+        } on Object catch (e) {
+          if (e is! VaultLockedException) {
+            state = VaultPinPadState(
+              step: _resetMode ? VaultPadStep.changeNew : VaultPadStep.verify,
+              errorTick: state.errorTick + 1,
+              message: "Couldn't change the PIN · try again",
+            );
+            return;
+          }
           if (_resetMode) {
             // Locked meanwhile: the recovery code is needed again.
             state = VaultPinPadState(
@@ -283,9 +306,26 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
         state = state.copyWith(busy: false, done: true);
       case VaultPadStep.unlock:
         state = state.copyWith(busy: true);
-        final result = await _session.unlockWithPin(pin);
+        final result = await _checked(() => _session.unlockWithPin(pin));
         if (result == UnlockResult.success) return; // view switches / closes
         _reject(result);
+    }
+  }
+
+  /// The longest a PIN check may keep the pad busy. The KDF has its own,
+  /// shorter limit; this one also covers a stalled key store.
+  static const Duration checkCeiling = Duration(seconds: 75);
+
+  /// Runs a PIN check so that it always ends: an exception or the ceiling
+  /// become [UnlockResult.failed] instead of leaving the pad busy.
+  Future<UnlockResult> _checked(Future<UnlockResult> Function() check) async {
+    try {
+      return await check().timeout(
+        checkCeiling,
+        onTimeout: () => UnlockResult.failed,
+      );
+    } on Object {
+      return UnlockResult.failed;
     }
   }
 
@@ -304,6 +344,9 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
     return switch (result) {
       UnlockResult.wiped => 'Too many attempts · the vault was erased',
       UnlockResult.lockedOut => null, // the lock-out line takes over
+      UnlockResult.failed =>
+        "Couldn't check the PIN on this phone · close other apps and try "
+            'again',
       _ when wipe && failed >= PinAttemptGuard.wipeThreshold - 3 =>
         'Wrong PIN · ${PinAttemptGuard.wipeThreshold - failed} tries before '
             'the vault is erased',

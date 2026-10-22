@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App-icon long-press quick actions (Android 7.1+). Launchers show up to
+     four, the first listed nearest the icon. Each launches MainActivity with
+     the SHORTCUT action and a "shortcut" extra; MainActivity hands the key to
+     Dart over the focusflow/shortcuts channel (lib/core/platform/
+     launcher_shortcuts.dart owns the keys). -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="notifications"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_notifications"
+        android:shortcutShortLabel="@string/shortcut_notifications_short"
+        android:shortcutLongLabel="@string/shortcut_notifications_long">
+        <intent
+            android:action="com.iqballab.focusflow.action.SHORTCUT"
+            android:targetPackage="com.iqballab.focusflow"
+            android:targetClass="com.iqballab.focusflow.MainActivity">
+            <extra android:name="shortcut" android:value="notifications" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="new_note"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_note"
+        android:shortcutShortLabel="@string/shortcut_new_note_short"
+        android:shortcutLongLabel="@string/shortcut_new_note_long">
+        <intent
+            android:action="com.iqballab.focusflow.action.SHORTCUT"
+            android:targetPackage="com.iqballab.focusflow"
+            android:targetClass="com.iqballab.focusflow.MainActivity">
+            <extra android:name="shortcut" android:value="new_note" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="new_reminder"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_reminder"
+        android:shortcutShortLabel="@string/shortcut_new_reminder_short"
+        android:shortcutLongLabel="@string/shortcut_new_reminder_long">
+        <intent
+            android:action="com.iqballab.focusflow.action.SHORTCUT"
+            android:targetPackage="com.iqballab.focusflow"
+            android:targetClass="com.iqballab.focusflow.MainActivity">
+            <extra android:name="shortcut" android:value="new_reminder" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="habits"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_habits"
+        android:shortcutShortLabel="@string/shortcut_habits_short"
+        android:shortcutLongLabel="@string/shortcut_habits_long">
+        <intent
+            android:action="com.iqballab.focusflow.action.SHORTCUT"
+            android:targetPackage="com.iqballab.focusflow"
+            android:targetClass="com.iqballab.focusflow.MainActivity">
+            <extra android:name="shortcut" android:value="habits" />
+        </intent>
+    </shortcut>
+</shortcuts>

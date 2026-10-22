@@ -103,7 +103,7 @@ class Note {
   /// Relative path (app documents) of the cover image.
   final String? coverImagePath;
 
-  /// Requires the vault PIN to open; previews hidden.
+  /// Requires the note's own PIN to open; previews hidden.
   final bool isLocked;
   final int wordCount;
 

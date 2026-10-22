@@ -355,7 +355,9 @@ void main() {
     expect(all.single.plainText, 'Buy milk');
   });
 
-  testWidgets('locked notes ask for the vault first', (tester) async {
+  testWidgets('a note locked the old way still asks for the Vault PIN', (
+    tester,
+  ) async {
     final h = await harness(tester);
     final id = (await tester.runAsync(() => seedMockupNote(h, locked: true)))!;
     await pumpApp(tester, h, AppRoutes.note(id));
@@ -415,7 +417,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('More note actions'));
     await settle(tester);
     expect(find.text('Share / export (PDF, TXT, MD)'), findsOneWidget);
-    expect(find.text('Lock with Vault PIN'), findsOneWidget);
+    expect(find.text('Lock with a PIN'), findsOneWidget);
     await tester.tap(find.text('Word count'));
     await settle(tester);
     expect(find.text('Reading time'), findsOneWidget);
@@ -446,7 +448,7 @@ void main() {
       expect(inSheet(row), findsOneWidget, reason: row);
     }
     for (final row in [
-      'Lock with Vault PIN',
+      'Lock with a PIN',
       'Unpin',
       'Pin to top',
       'Change colour',

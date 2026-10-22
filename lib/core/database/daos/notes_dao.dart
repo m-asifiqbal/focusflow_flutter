@@ -56,6 +56,8 @@ class NotesDao extends DatabaseAccessor<AppDatabase> with _$NotesDaoMixin {
       'n.sync_version, n.last_synced_at, n.device_id, n.title, '
       "'[]' AS content_delta, substr(n.plain_text, 1, 160) AS plain_text, "
       "'[]' AS checklist_json, n.cover_image_path, n.is_locked, "
+      // The PIN verifier never rides along with list rows.
+      'NULL AS lock_verifier, '
       'n.word_count, n.reminder_id, $_joins';
 
   NoteListRow _map(QueryRow r) => (

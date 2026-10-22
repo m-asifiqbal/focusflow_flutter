@@ -48,7 +48,8 @@ class ItemSummary {
   final String? folderId;
   final String? folderName;
 
-  /// Locked note or vault item — opening requires the vault PIN.
+  /// Locked note (its own PIN) or vault item (the vault PIN) — opening asks
+  /// for it.
   final bool isLocked;
 
   /// Task completed / one-time reminder done.

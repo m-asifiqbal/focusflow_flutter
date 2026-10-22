@@ -45,15 +45,19 @@ bool isShellPage(GoRouter router, String location) {
   return matches.isNotEmpty && matches.last is ShellRouteMatch;
 }
 
+/// [OpenLocation.openLocation] for code that has the router but no
+/// [BuildContext] (launcher shortcuts).
+void openLocationOn(GoRouter router, String location) {
+  if (isShellPage(router, location) && !tabShellIsTopmost(router)) {
+    router.go(location);
+  } else {
+    unawaited(router.push<void>(location));
+  }
+}
+
 extension OpenLocation on BuildContext {
   /// Opens [location] as a drill-in where that is possible (see the library
   /// comment), otherwise switches to its tab.
-  void openLocation(String location) {
-    final router = GoRouter.of(this);
-    if (isShellPage(router, location) && !tabShellIsTopmost(router)) {
-      router.go(location);
-    } else {
-      unawaited(router.push<void>(location));
-    }
-  }
+  void openLocation(String location) =>
+      openLocationOn(GoRouter.of(this), location);
 }

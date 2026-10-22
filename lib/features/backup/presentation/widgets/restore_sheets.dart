@@ -17,6 +17,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/crypto/argon2_runner.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
@@ -287,6 +288,13 @@ Future<String?> runRestoreFlow(
     } on WrongBackupPin {
       nav.pop();
       error = 'Wrong PIN. Try again.';
+    } on Argon2Failure {
+      // The PIN could not even be checked: this phone ran out of memory or
+      // was too slow for the backup's key settings. Nothing was changed.
+      nav.pop();
+      error =
+          "This phone couldn't check the PIN (low memory). Close other apps "
+          'and try again.';
     } on FormatException catch (e) {
       // Damaged / newer-version backups fail before anything changes.
       nav.pop();

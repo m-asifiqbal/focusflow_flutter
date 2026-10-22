@@ -7,7 +7,9 @@ library;
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' show CustomPaint;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_reveal.dart';
 import 'package:focusflow/core/crypto/totp.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/router/app_router.dart';
@@ -162,6 +164,45 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Show password').last);
     await settle(tester);
     expect(find.textContaining('old-password-'), findsOneWidget);
+    await tearDownVault(tester, b);
+  });
+
+  testWidgets('19 a revealed password hides itself after 4 s', (tester) async {
+    final (b, id) = await bed(tester);
+    await pumpApp(tester, b.h, AppRoutes.vaultItem(id), size: tall);
+    await tester.tap(find.bySemanticsLabel('Show password'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('k8#mP!2sX9@Lq7vR'), findsOneWidget);
+    // The eye turns into "Hide" and a ring counts down around it.
+    expect(find.bySemanticsLabel('Hide password'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(VaultRevealButton),
+        matching: find.byType(CustomPaint),
+      ),
+      findsWidgets,
+    );
+
+    // Still there just before the end, gone (faded out) just after.
+    await tester.pump(const Duration(milliseconds: 3000));
+    expect(find.text('k8#mP!2sX9@Lq7vR'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('k8#mP!2sX9@Lq7vR'), findsNothing);
+    expect(find.text('•' * 12), findsOneWidget);
+    expect(find.bySemanticsLabel('Show password'), findsOneWidget);
+
+    // Hiding early by hand works, and showing again restarts the 4 s.
+    await tester.tap(find.bySemanticsLabel('Show password'));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.bySemanticsLabel('Hide password'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
+    expect(find.text('k8#mP!2sX9@Lq7vR'), findsNothing);
+    await tester.tap(find.bySemanticsLabel('Show password'));
+    await tester.pump(const Duration(milliseconds: 3900));
+    expect(find.text('k8#mP!2sX9@Lq7vR'), findsOneWidget);
     await tearDownVault(tester, b);
   });
 

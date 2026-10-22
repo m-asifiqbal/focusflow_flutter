@@ -41,16 +41,16 @@
 /// secure storage (or the user's own encrypted backup) and that in-app
 /// guessing is rate-limited (exponential back-off, optional wipe).
 ///
-/// The derivation runs on a background isolate ([Isolate.run]) so the UI
-/// keeps animating the PIN dots while it works.
+/// The derivation runs on a background isolate ([Argon2Runner]: single
+/// threaded, validated cost, time limit, every failure an [Argon2Failure])
+/// so the UI keeps animating the PIN dots while it works and a slow or
+/// memory-starved phone fails cleanly instead of hanging or crashing.
 /// ============================================================
 library;
 
-import 'dart:isolate';
-
 import 'package:cryptography/cryptography.dart';
-import 'package:cryptography/dart.dart';
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/crypto/argon2_runner.dart';
 
 /// Argon2id cost parameters, persisted with the wrapped key.
 @immutable
@@ -99,15 +99,26 @@ class KdfParams {
     'p': parallelism,
   };
 
+  /// Reads stored parameters. A cost this app would never have written
+  /// (a damaged or crafted bundle) is a [FormatException], so it surfaces as
+  /// an unreadable key instead of an attempt to allocate it.
   factory KdfParams.fromJson(Map<String, Object?> json) {
     if (json['alg'] != algorithm) {
       throw FormatException('Unsupported KDF ${json['alg']}');
     }
-    return KdfParams(
+    final p = KdfParams(
       memoryKiB: (json['m'] as num).toInt(),
       iterations: (json['t'] as num).toInt(),
       parallelism: (json['p'] as num?)?.toInt() ?? 1,
     );
+    if (!Argon2Runner.accept(
+      memoryKiB: p.memoryKiB,
+      iterations: p.iterations,
+      parallelism: p.parallelism,
+    )) {
+      throw FormatException('Unsupported KDF cost $p');
+    }
+    return p;
   }
 
   @override
@@ -130,11 +141,12 @@ abstract interface class PinKdf {
   Future<SecretKey> deriveKek(String pin, Uint8List salt, KdfParams params);
 }
 
-/// Argon2id on a background isolate.
+/// Argon2id through [Argon2Runner].
 class Argon2PinKdf implements PinKdf {
   const Argon2PinKdf({this.useIsolate = true});
 
-  /// Off only in tests that run inside a fake-async zone.
+  /// Off only in tests that run inside a fake-async zone (the derivation
+  /// then runs inline; the cost is cheap there).
   final bool useIsolate;
 
   @override
@@ -143,28 +155,15 @@ class Argon2PinKdf implements PinKdf {
     Uint8List salt,
     KdfParams params,
   ) async {
-    final pinBytes = Uint8List.fromList(pin.codeUnits);
-    final saltCopy = Uint8List.fromList(salt);
-    final bytes = useIsolate
-        ? await Isolate.run(() => _derive(pinBytes, saltCopy, params))
-        : await _derive(pinBytes, saltCopy, params);
-    pinBytes.fillRange(0, pinBytes.length, 0);
-    return SecretKeyData(bytes);
-  }
-
-  static Future<Uint8List> _derive(
-    Uint8List pin,
-    Uint8List salt,
-    KdfParams params,
-  ) async {
-    final algo = DartArgon2id(
-      parallelism: params.parallelism,
-      memory: params.memoryKiB,
+    final bytes = await Argon2Runner.derive(
+      password: pin.codeUnits,
+      salt: salt,
+      memoryKiB: params.memoryKiB,
       iterations: params.iterations,
-      hashLength: 32,
+      parallelism: params.parallelism,
+      inline: useIsolate ? null : true,
     );
-    final key = await algo.deriveKey(secretKey: SecretKey(pin), nonce: salt);
-    return Uint8List.fromList(await key.extractBytes());
+    return SecretKeyData(bytes);
   }
 }
 

@@ -20,7 +20,10 @@ class FocusFlowApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         AlarmRingingLiveData.instance.observeForever { ringing ->
-            if (ringing == true) AlarmActivity.bringToFront(this)
+            if (ringing == true) {
+                AlarmActivity.wakeScreen(this)
+                AlarmActivity.bringToFront(this)
+            }
         }
     }
 }

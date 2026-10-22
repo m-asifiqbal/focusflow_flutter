@@ -16,10 +16,12 @@
 library;
 
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/crypto/argon2_runner.dart';
 import 'package:focusflow/core/storage/secure_store.dart';
 
 /// The PIN did not open the backup (GCM authentication failed).
@@ -70,16 +72,28 @@ class BackupKdfParams {
     'parallelism': parallelism,
   };
 
+  /// Reads the manifest's `encryption` block. The cost comes from the
+  /// FILE, so anything this app would never have written (a damaged or
+  /// crafted backup asking for gigabytes) is refused up front instead of
+  /// being attempted.
   static BackupKdfParams fromJson(Map<String, Object?> j) {
     if (j['kdf'] != 'argon2id' || j['cipher'] != 'AES-256-GCM') {
       throw const FormatException('Unsupported backup encryption');
     }
-    return BackupKdfParams(
+    final params = BackupKdfParams(
       salt: base64Decode(j['salt']! as String),
       memoryKiB: (j['memoryKiB']! as num).toInt(),
       iterations: (j['iterations']! as num).toInt(),
       parallelism: (j['parallelism'] as num?)?.toInt() ?? 1,
     );
+    if (!Argon2Runner.accept(
+      memoryKiB: params.memoryKiB,
+      iterations: params.iterations,
+      parallelism: params.parallelism,
+    )) {
+      throw const FormatException('Unsupported backup encryption');
+    }
+    return params;
   }
 
   @override
@@ -107,19 +121,19 @@ class BackupKey {
 abstract final class BackupCipher {
   static final AesGcm _aes = AesGcm.with256bits();
 
-  /// Argon2id(PIN, salt) → 32-byte key.
+  /// Argon2id(PIN, salt) → 32-byte key, computed by [Argon2Runner] (own
+  /// isolate, validated cost, time limit). Throws [Argon2Failure] when the
+  /// phone cannot finish it — never [WrongBackupPin]: whether the PIN is
+  /// right is only known when the key opens the data.
   static Future<BackupKey> deriveKey(String pin, BackupKdfParams params) async {
-    final kdf = Argon2id(
-      parallelism: params.parallelism,
-      memory: params.memoryKiB,
+    final bytes = await Argon2Runner.derive(
+      password: utf8.encode(pin),
+      salt: params.salt,
+      memoryKiB: params.memoryKiB,
       iterations: params.iterations,
-      hashLength: 32,
+      parallelism: params.parallelism,
     );
-    final key = await kdf.deriveKey(
-      secretKey: SecretKey(utf8.encode(pin)),
-      nonce: params.salt,
-    );
-    return BackupKey(params, Uint8List.fromList(await key.extractBytes()));
+    return BackupKey(params, bytes);
   }
 
   /// nonce(12) ‖ ciphertext ‖ tag(16).
@@ -132,9 +146,27 @@ abstract final class BackupCipher {
     return box.concatenation();
   }
 
+  /// Payloads from this size on are decrypted on a background isolate:
+  /// pure-Dart AES-GCM does a few MB per second, and a restore decrypts the
+  /// whole database plus every attachment — on the UI isolate that froze the
+  /// "Restoring…" dialog (and an ANR if the user touched the screen).
+  static const int isolateThreshold = 256 * 1024;
+
   /// Opens [sealed]; throws [WrongBackupPin] when the key is wrong or the
   /// data was tampered with.
   static Future<Uint8List> open(List<int> sealed, BackupKey key) async {
+    if (sealed.length >= isolateThreshold) {
+      final bytes = Uint8List.fromList(sealed);
+      final keyBytes = key.keyBytes;
+      return Isolate.run(() => _openSync(bytes, keyBytes));
+    }
+    return _openSync(sealed, key.keyBytes);
+  }
+
+  static Future<Uint8List> _openSync(
+    List<int> sealed,
+    List<int> keyBytes,
+  ) async {
     try {
       final box = SecretBox.fromConcatenation(
         sealed,
@@ -142,7 +174,7 @@ abstract final class BackupCipher {
         macLength: _aes.macAlgorithm.macLength,
         copy: false,
       );
-      final plain = await _aes.decrypt(box, secretKey: SecretKey(key.keyBytes));
+      final plain = await _aes.decrypt(box, secretKey: SecretKey(keyBytes));
       return Uint8List.fromList(plain);
     } on SecretBoxAuthenticationError {
       throw const WrongBackupPin();

@@ -52,9 +52,14 @@ void main() {
 
   Finder text(String s) => find.text(s, skipOffstage: false);
 
+  /// The sections reveal, count up and sweep in over ~1.2 s.
+  Future<void> intro(WidgetTester tester) =>
+      tester.pump(const Duration(seconds: 2));
+
   testWidgets('renders the seeded week (light)', (tester) async {
     await boot(tester);
     await pumpScreen(tester, h, const InsightsScreen());
+    await intro(tester);
     await captureScreen(tester, '25_insights');
 
     expect(find.text('Insights'), findsOneWidget);
@@ -90,6 +95,7 @@ void main() {
   testWidgets('dark mode capture', (tester) async {
     await boot(tester);
     await pumpScreen(tester, h, const InsightsScreen(), dark: true);
+    await intro(tester);
     expect(find.text('84%'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await captureScreen(tester, '25_insights_dark');
@@ -98,8 +104,10 @@ void main() {
   testWidgets('switching ranges recomputes', (tester) async {
     await boot(tester);
     await pumpScreen(tester, h, const InsightsScreen());
+    await intro(tester);
     await tester.tap(find.text('30 Days'));
     await settle(tester);
+    await intro(tester);
     expect(h.read(insightsRangeProvider).preset, InsightsPreset.month);
     // Notes: 10 in 30 days, none in the 30 days before.
     expect(find.bySemanticsLabel('Notes created: 10, up 10'), findsOneWidget);
@@ -116,9 +124,9 @@ void main() {
   testWidgets('empty data shows "Not enough data" per chart', (tester) async {
     await boot(tester, withData: false);
     await pumpScreen(tester, h, const InsightsScreen());
+    await intro(tester);
     expect(text('Not enough data'), findsNWidgets(2));
     expect(text('No habits yet'), findsOneWidget);
-    expect(text('Start a focus session'), findsOneWidget);
     expect(find.text('—'), findsNWidgets(2)); // no task / habit rates
     expect(tester.takeException(), isNull);
     await captureScreen(tester, '25_insights_empty');
@@ -129,6 +137,7 @@ void main() {
   ) async {
     await boot(tester, withData: false);
     await pumpScreen(tester, h, const InsightsScreen());
+    await intro(tester);
     await tester.tap(find.bySemanticsLabel(RegExp('^Focus hours')));
     await settle(tester);
     expect(find.byType(FocusTimerSheet), findsOneWidget);
@@ -159,6 +168,7 @@ void main() {
   testWidgets('share renders the page to a PNG', (tester) async {
     await boot(tester);
     await pumpScreen(tester, h, const InsightsScreen());
+    await intro(tester);
     await tester.runAsync(() async {
       await tester.tap(find.bySemanticsLabel('Share insights'));
       await Future<void>.delayed(const Duration(milliseconds: 500));

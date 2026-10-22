@@ -2,9 +2,10 @@
 /// HABIT STREAKS CARD — longest current streaks (mockup 25)
 /// ============================================================
 ///
-/// What: up to three rows (habit icon tile, name, bar, "45 d" / "3 w")
+/// What: a row per habit (habit icon tile, name, bar, "45 d" / "3 w")
 /// plus "VIEW ALL" → the habits list. Bars are relative to the longest
-/// streak shown (weekly habits weigh 7 days per week). Without habits, a
+/// streak shown (weekly habits weigh 7 days per week) and grow in when the
+/// card appears or the range changes. Without habits, a
 /// compact empty state invites creating one.
 /// Why: units come from HabitStreak, so N× per week habits never show
 /// weeks as days.
@@ -181,10 +182,21 @@ class _StreakTile extends StatelessWidget {
                               Positioned.fill(
                                 child: ColoredBox(color: ff.divider),
                               ),
-                              FractionallySizedBox(
-                                widthFactor: row.progress.clamp(0.0, 1.0),
-                                heightFactor: 1,
-                                child: ColoredBox(color: colors.solid),
+                              TweenAnimationBuilder<double>(
+                                tween: Tween<double>(
+                                  begin: 0,
+                                  end: row.progress.clamp(0.0, 1.0),
+                                ),
+                                duration: context.motion(
+                                  const Duration(milliseconds: 700),
+                                ),
+                                curve: AppMotion.curve,
+                                builder: (context, w, _) =>
+                                    FractionallySizedBox(
+                                      widthFactor: w,
+                                      heightFactor: 1,
+                                      child: ColoredBox(color: colors.solid),
+                                    ),
                               ),
                             ],
                           ),

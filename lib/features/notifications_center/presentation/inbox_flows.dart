@@ -3,7 +3,7 @@
 /// ============================================================
 ///
 /// What: open (row tap / View / Open / Fix), Done, Snooze, Reschedule,
-/// Log, swipe-dismiss and Read all — each marks the entry read, runs the
+/// Log, swipe-dismiss, Clear all and Read all — each marks the entry read, runs the
 /// write through [InboxActionsController] (or the owning module's flow)
 /// and shows the 5 s Undo snackbar.
 /// Why: CLAUDE.md rule 3 (Undo on every destructive action) and rule 5
@@ -129,6 +129,32 @@ Future<void> dismissInboxEntry(
   showUndoSnackbar(
     context,
     message: 'Notification dismissed',
+    icon: FontAwesomeIcons.solidBellSlash,
+    onUndo: () async {
+      await undo();
+      onUndo?.call();
+    },
+  );
+}
+
+/// "Clear all" of one day: dismisses every entry of [entries] at once with
+/// one "N notifications cleared · UNDO". [onUndo] runs after they are
+/// restored (the screen un-hides the rows).
+Future<void> clearInboxEntries(
+  BuildContext context,
+  WidgetRef ref,
+  List<InboxEntry> entries, {
+  VoidCallback? onUndo,
+}) async {
+  if (entries.isEmpty) return;
+  final undo = await ref
+      .read(inboxActionsControllerProvider)
+      .dismissAll(entries);
+  if (!context.mounted) return;
+  final n = entries.length;
+  showUndoSnackbar(
+    context,
+    message: n == 1 ? 'Notification cleared' : '$n notifications cleared',
     icon: FontAwesomeIcons.solidBellSlash,
     onUndo: () async {
       await undo();

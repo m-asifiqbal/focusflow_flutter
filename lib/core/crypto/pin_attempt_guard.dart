@@ -140,6 +140,19 @@ class PinAttemptGuard {
     );
   }
 
+  /// Gives back the attempt [recordAttempt] counted when the check itself
+  /// could not run (storage / KDF failure, out of memory): that was not a
+  /// wrong PIN and must not move the user towards a lock-out or a wipe.
+  /// [before] is the state read before counting (not locked out then).
+  Future<void> refund(PinAttemptState before, DateTime now) async {
+    _mark = null;
+    if (before.failed <= 0) {
+      await _store.delete(storageKey);
+    } else {
+      await _write(before.failed, now, 0, 0);
+    }
+  }
+
   /// Alias kept for callers that count after the check.
   Future<PinAttemptState> recordFailure(DateTime now) => recordAttempt(now);
 

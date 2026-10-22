@@ -47,20 +47,49 @@ import org.json.JSONObject
  * the user unlocks, or the activity is opened any other way.
  *
  * Also hosts `focusflow/notifications` (canUseFullScreenIntent, Android 14+).
+ *
+ * App-icon long-press shortcuts (res/xml/shortcuts.xml) arrive as a
+ * SHORTCUT intent with a "shortcut" extra. The one that started the activity
+ * is parked until Dart asks for it (`focusflow/shortcuts` > getInitial);
+ * after that, shortcuts tapped while the app runs are pushed to Dart as
+ * `onShortcut`. Keys: lib/core/platform/launcher_shortcuts.dart.
  */
 class MainActivity : FlutterFragmentActivity() {
     private var overLockScreen = false
     private val armedWorker = Executors.newSingleThreadExecutor()
     private var lockReceiver: BroadcastReceiver? = null
+    private var shortcutChannel: MethodChannel? = null
+    private var pendingShortcut: String? = null
+    private var shortcutListening = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyLockScreenPolicy(intent)
+        takeShortcut(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         applyLockScreenPolicy(intent)
+        takeShortcut(intent)
+    }
+
+    /**
+     * Picks a launcher shortcut out of [intent] (once: the extra is removed so
+     * a recreated activity cannot replay it, and a relaunch from Recents is
+     * not a shortcut tap) and delivers it to Dart, or parks it until Dart
+     * asks.
+     */
+    private fun takeShortcut(intent: Intent?) {
+        if (intent?.action != SHORTCUT_ACTION) return
+        val key = intent.getStringExtra(SHORTCUT_EXTRA) ?: return
+        intent.removeExtra(SHORTCUT_EXTRA)
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
+        if (shortcutListening) {
+            shortcutChannel?.invokeMethod("onShortcut", key)
+        } else {
+            pendingShortcut = key
+        }
     }
 
     override fun onDestroy() {
@@ -134,6 +163,19 @@ class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         configureSecureClipboard(flutterEngine)
+        shortcutChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focusflow/shortcuts").also { channel ->
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getInitial" -> {
+                        // Dart is listening from now on: later shortcuts are pushed.
+                        shortcutListening = true
+                        result.success(pendingShortcut)
+                        pendingShortcut = null
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focusflow/notifications")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -260,6 +302,10 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private companion object {
+        /** Intent action + extra of res/xml/shortcuts.xml. */
+        const val SHORTCUT_ACTION = "com.iqballab.focusflow.action.SHORTCUT"
+        const val SHORTCUT_EXTRA = "shortcut"
+
         val OEM_AUTOSTART_SCREENS = listOf(
             // Xiaomi / Redmi / POCO (MIUI, HyperOS)
             "com.miui.securitycenter" to "com.miui.permcenter.autostart.AutoStartManagementActivity",

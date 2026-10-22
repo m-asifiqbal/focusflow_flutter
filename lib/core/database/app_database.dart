@@ -57,8 +57,9 @@ class AppDatabase extends _$AppDatabase {
 
   /// v1 — initial schema (all modules + FTS5 search + indexes).
   /// v2 — `tombstones` + delete/insert triggers (sync merge, core/sync).
+  /// v3 — `notes.lock_verifier` (a note locked with its own PIN).
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Item tables that carry the shared lifecycle columns, by `ItemType.key`.
   static const Map<String, String> itemTables = {
@@ -81,6 +82,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(tombstones);
         await _createTombstoneTriggers();
+      }
+      if (from < 3) {
+        await m.addColumn(notes, notes.lockVerifier);
       }
     },
     beforeOpen: (details) async {
