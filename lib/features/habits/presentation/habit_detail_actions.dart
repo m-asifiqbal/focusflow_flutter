@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -22,6 +23,7 @@ import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
 import 'package:focusflow/features/habits/domain/services/habit_check_in.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/habits/presentation/habit_check_in_actions.dart';
 import 'package:focusflow/features/habits/presentation/habit_icons.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
@@ -49,7 +51,7 @@ Future<void> logFromDetail(
   if (outcome == HabitLogOutcome.slipped && context.mounted) {
     showUndoSnackbar(
       context,
-      message: 'Slip logged · "${habit.name}" streak reset',
+      message: tr('Slip logged · "{name}" streak reset', {'name': habit.name}),
       icon: FontAwesomeIcons.rotateLeft,
       onUndo: () => logger.undo(habit, todayLog),
     );
@@ -73,7 +75,7 @@ Future<void> skipFromDetail(
   if (!context.mounted) return;
   showUndoSnackbar(
     context,
-    message: '"${habit.name}" skipped today',
+    message: tr('"{name}" skipped today', {'name': habit.name}),
     icon: FontAwesomeIcons.forward,
     onUndo: () => logger.undo(habit, todayLog),
   );
@@ -121,8 +123,12 @@ Future<void> saveHabitDay(
   showUndoSnackbar(
     context,
     message: clear
-        ? 'Log removed · ${DateFormat.MMMd().format(day)}'
-        : 'Log updated · ${DateFormat.MMMd().format(day)}',
+        ? tr('Log removed · {format}', {
+            'format': DateFormat.MMMd().format(day),
+          })
+        : tr('Log updated · {format}', {
+            'format': DateFormat.MMMd().format(day),
+          }),
     icon: FontAwesomeIcons.rotateLeft,
     onUndo: () => logger.restoreDay(habit.id, day, before),
   );
@@ -145,10 +151,12 @@ Future<void> showHabitDetailMore(
     icon: HabitIcons.of(habit.iconKey),
     colors: habit.colors,
     meta: habit.isDeleted
-        ? 'Habit · Recently deleted'
+        ? tr('Habit · Recently deleted')
         : habit.isArchived
-        ? 'Habit · Archived'
-        : 'Habit · ${habit.category}',
+        ? tr('Habit · Archived')
+        : tr('Habit · {category}', {
+            'category': HabitWords.shown(habit.category),
+          }),
   );
 
   // Opened from Recently Deleted or a deep link: only the trash actions.
@@ -160,13 +168,13 @@ Future<void> showHabitDetailMore(
         actions: [
           FFActionItem(
             icon: FontAwesomeIcons.rotateLeft,
-            label: 'Restore',
+            label: tr('Restore'),
             colors: habit.colors,
             onTap: () =>
                 restoreFromTrash(context, ref, refs, title: habit.name),
           ),
         ],
-        deleteLabel: 'Delete forever',
+        deleteLabel: tr('Delete forever'),
         onDelete: () async {
           if (await deleteItemsForever(context, ref, refs, title: habit.name)) {
             leave();
@@ -186,7 +194,7 @@ Future<void> showHabitDetailMore(
             icon: habit.isPaused
                 ? FontAwesomeIcons.play
                 : FontAwesomeIcons.pause,
-            label: habit.isPaused ? 'Resume habit' : 'Pause habit',
+            label: habit.isPaused ? tr('Resume habit') : tr('Pause habit'),
             colors: ActionTints.lock,
             onTap: () async {
               final logger = ref.read(habitLoggerProvider);
@@ -195,8 +203,8 @@ Future<void> showHabitDetailMore(
               showUndoSnackbar(
                 context,
                 message: habit.isPaused
-                    ? '"${habit.name}" resumed'
-                    : '"${habit.name}" paused',
+                    ? tr('"{name}" resumed', {'name': habit.name})
+                    : tr('"{name}" paused', {'name': habit.name}),
                 icon: habit.isPaused
                     ? FontAwesomeIcons.play
                     : FontAwesomeIcons.pause,
@@ -206,7 +214,7 @@ Future<void> showHabitDetailMore(
           ),
         FFActionItem(
           icon: FontAwesomeIcons.fileCsv,
-          label: 'Export CSV',
+          label: tr('Export CSV'),
           colors: ActionTints.share,
           onTap: () async {
             try {
@@ -215,7 +223,7 @@ Future<void> showHabitDetailMore(
               if (context.mounted) {
                 showFFToast(
                   context,
-                  'Couldn\'t export the history',
+                  tr("Couldn't export the history"),
                   icon: FontAwesomeIcons.triangleExclamation,
                 );
               }
@@ -225,7 +233,7 @@ Future<void> showHabitDetailMore(
         if (habit.isArchived)
           FFActionItem(
             icon: FontAwesomeIcons.boxOpen,
-            label: 'Restore from archive',
+            label: tr('Restore from archive'),
             colors: habit.colors,
             onTap: () => restoreFromArchive(context, ref, refs),
           ),

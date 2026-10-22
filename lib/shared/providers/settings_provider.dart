@@ -77,6 +77,10 @@ class SettingsController extends Notifier<AppSettings> {
       accountMode: s.accountMode,
       displayName: s.displayName,
       dailyFocusGoal: s.dailyFocusGoal,
+      // The language in use stays (its pack is loaded; a reset must not
+      // leave the screen in one language and the setting in another).
+      languageCode: s.languageCode,
+      enabledLanguages: s.enabledLanguages,
       timeZone: () => s.timeZone,
       tasksDefaultListId: () => s.tasksDefaultListId,
       // Security & privacy.

@@ -1,0 +1,26 @@
+# settings — literals under lib/features/settings that are NOT user-facing text
+# (path<TAB>text; the text is the literal's value as tool/l10n/audit.dart prints it)
+
+# Proper names / licence identifiers of the bundled fonts and icons (About page)
+lib/features/settings/data/bundled_licenses.dart	Font Awesome Free 6
+lib/features/settings/data/bundled_licenses.dart	CC BY 4.0 · SIL OFL 1.1 · MIT
+lib/features/settings/data/bundled_licenses.dart	Lexend Deca
+lib/features/settings/data/bundled_licenses.dart	SIL OFL 1.1
+lib/features/settings/data/bundled_licenses.dart	Nunito Sans
+
+# Hidden English search synonyms of the Settings search index (never displayed;
+# titles and page names of the index are translated, keywords stay English)
+lib/features/settings/domain/services/settings_index.dart	do not disturb
+lib/features/settings/domain/services/settings_index.dart	alarm not ringing
+lib/features/settings/domain/services/settings_index.dart	home screen icon
+lib/features/settings/domain/services/settings_index.dart	tasks per day
+
+# intl date patterns offered in General (stored as the pattern; the row shows a formatted sample)
+lib/features/settings/presentation/screens/general_settings_screen.dart	MM/dd/yyyy
+
+# Language picker data (Settings > Language): native language names; the picker is rebuilt separately
+lib/features/settings/presentation/settings_style.dart	English
+
+# E-mail subjects composed for the support inbox (read by the developer, kept in English)
+lib/features/settings/presentation/widgets/root/settings_root_actions.dart	{} feedback {}
+lib/features/settings/presentation/widgets/root/settings_root_actions.dart	{} help

@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
 
@@ -85,13 +86,13 @@ class ReminderTimeline {
       if (shownMissed.isNotEmpty)
         ReminderSection(
           key: 'missed',
-          label: 'MISSED',
+          label: tr('MISSED'),
           items: shownMissed,
           tone: ReminderSectionTone.missed,
         ),
       ReminderSection(
         key: 'morning',
-        label: 'MORNING',
+        label: tr('MORNING'),
         items: [
           for (final o in today)
             if (o.at.hour < 12) o,
@@ -99,7 +100,7 @@ class ReminderTimeline {
       ),
       ReminderSection(
         key: 'evening',
-        label: 'AFTERNOON & EVENING',
+        label: tr('AFTERNOON & EVENING'),
         items: [
           for (final o in today)
             if (o.at.hour >= 12) o,

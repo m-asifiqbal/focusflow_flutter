@@ -15,6 +15,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -41,7 +42,7 @@ Future<void> showVaultLargeType(BuildContext context, String value) {
       final ff = ctx.ff;
       final chars = value.characters.toList();
       return FFDialog(
-        title: 'Large type',
+        title: tr('Large type'),
         content: Wrap(
           alignment: WrapAlignment.center,
           spacing: AppSpacing.xs,
@@ -79,7 +80,7 @@ Future<void> showVaultLargeType(BuildContext context, String value) {
         ),
         actions: [
           FFPrimaryButton(
-            label: 'Done',
+            label: tr('Done'),
             onPressed: () => Navigator.of(ctx).pop(),
           ),
         ],
@@ -117,13 +118,13 @@ Future<void> showVaultWifiQr(BuildContext context, VaultPayload p) =>
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Join ${p.wifiSsid}',
+              tr('Join {wifiSsid}', {'wifiSsid': p.wifiSsid}),
               textAlign: TextAlign.center,
               style: ctx.text.sectionTitle.copyWith(color: ctx.ff.vaultInk),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Scan with a phone camera to connect',
+              tr('Scan with a phone camera to connect'),
               textAlign: TextAlign.center,
               style: ctx.text.bodySmall.copyWith(
                 color: ctx.ff.vaultSubtitleMuted,
@@ -132,7 +133,7 @@ Future<void> showVaultWifiQr(BuildContext context, VaultPayload p) =>
             const SizedBox(height: AppSpacing.xl),
             Semantics(
               image: true,
-              label: 'QR code for ${p.wifiSsid}',
+              label: tr('QR code for {wifiSsid}', {'wifiSsid': p.wifiSsid}),
               child: Container(
                 padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                 decoration: BoxDecoration(
@@ -249,12 +250,12 @@ class _HistorySheetState extends ConsumerState<_HistorySheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Password history',
+            tr('Password history'),
             style: context.text.sectionTitle.copyWith(color: ff.vaultInk),
           ),
           const SizedBox(height: AppSpacing.xxs),
           Text(
-            'Older passwords of this item, kept encrypted.',
+            tr('Older passwords of this item, kept encrypted.'),
             style: context.text.bodySmall.copyWith(
               color: ff.vaultSubtitleMuted,
             ),
@@ -269,7 +270,7 @@ class _HistorySheetState extends ConsumerState<_HistorySheet> {
               }
               if (items.isEmpty) {
                 return Text(
-                  'No previous passwords.',
+                  tr('No previous passwords.'),
                   style: context.text.body.copyWith(color: ff.vaultInkSoft),
                 );
               }
@@ -277,7 +278,7 @@ class _HistorySheetState extends ConsumerState<_HistorySheet> {
                 children: [
                   for (final (i, (at, pw)) in items.indexed)
                     VaultFieldRow(
-                      label: 'Changed ${fmt.format(at)}',
+                      label: tr('Changed {date}', {'date': fmt.format(at)}),
                       value: VaultSecretSwitcher(
                         open: _auto.isShown(i),
                         revealed: VaultSecretText(pw, colour: true),
@@ -286,15 +287,15 @@ class _HistorySheetState extends ConsumerState<_HistorySheet> {
                       actions: [
                         VaultRevealButton(
                           open: _auto.isShown(i),
-                          what: 'password',
+                          what: tr('password'),
                           cycle: _auto.cycleOf(i),
                           onTap: () => unawaited(_toggle(i)),
                         ),
                         VaultRoundButton(
                           icon: FontAwesomeIcons.solidCopy,
-                          semanticLabel: 'Copy password',
+                          semanticLabel: tr('Copy password'),
                           onTap: () => unawaited(
-                            copyVaultValue(context, ref, pw, 'Password'),
+                            copyVaultValue(context, ref, pw, tr('Password')),
                           ),
                         ),
                       ],

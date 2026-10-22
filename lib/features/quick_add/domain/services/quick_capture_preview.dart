@@ -9,6 +9,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/utils/recurrence.dart';
 import 'package:focusflow/features/quick_add/domain/entities/quick_capture.dart';
@@ -19,7 +20,12 @@ enum QuickCapturePartKind { kind, when, repeat, priority, tag }
 typedef QuickCapturePart = ({QuickCapturePartKind kind, String label});
 
 abstract final class QuickCapturePreview {
-  static const _priorities = ['', 'Low', 'Medium', 'High'];
+  /// Label of task priority [p] (1 low · 2 medium · 3 high).
+  static String _priorityLabel(int p) => switch (p) {
+    1 => tr('Low'),
+    2 => tr('Medium'),
+    _ => tr('High'),
+  };
 
   /// Preview parts for [c] relative to [now].
   static List<QuickCapturePart> parts(
@@ -46,8 +52,8 @@ abstract final class QuickCapturePreview {
         ),
       // Reminders have no priority or tags, so those aren't promised.
       if (c.kind != QuickCaptureKind.reminder) ...[
-        if (c.priority case final p? when p > 0 && p < _priorities.length)
-          (kind: QuickCapturePartKind.priority, label: _priorities[p]),
+        if (c.priority case final p? when p > 0 && p <= 3)
+          (kind: QuickCapturePartKind.priority, label: _priorityLabel(p)),
         // Only what the editor will save (see QuickCapture.savedTag).
         if (c.savedTag case final t?)
           (kind: QuickCapturePartKind.tag, label: '#$t'),

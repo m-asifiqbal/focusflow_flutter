@@ -15,6 +15,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
@@ -66,7 +67,9 @@ Future<void> copyVaultValue(
   if (!context.mounted) return;
   showFFToast(
     context,
-    clears ? '$what copied · clears in ${seconds}s' : '$what copied',
+    clears
+        ? tr('{what} copied · clears in {s}s', {'what': what, 's': seconds})
+        : tr('{what} copied', {'what': what}),
     icon: FontAwesomeIcons.solidCircleCheck,
   );
 }

@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -66,11 +67,13 @@ class _HabitCustomizeSheetState extends ConsumerState<HabitCustomizeSheet> {
               radius: AppRadii.tileLg,
             ),
             const SizedBox(width: AppSpacing.md),
-            Expanded(child: Text('Customize Habit', style: context.text.title)),
+            Expanded(
+              child: Text(tr('Customize Habit'), style: context.text.title),
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-        const FFSectionLabel('Colour'),
+        FFSectionLabel(tr('Colour')),
         Wrap(
           children: [
             for (final c in HabitPalette.colors)
@@ -83,9 +86,9 @@ class _HabitCustomizeSheetState extends ConsumerState<HabitCustomizeSheet> {
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        const FFSectionLabel('Icon'),
+        FFSectionLabel(tr('Icon')),
         FFSearchField(
-          hint: 'Search icons',
+          hint: tr('Search icons'),
           onChanged: (q) => setState(() => _query = q),
           onClear: () => setState(() => _query = ''),
         ),
@@ -94,7 +97,7 @@ class _HabitCustomizeSheetState extends ConsumerState<HabitCustomizeSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
             child: Text(
-              'No icons match "$_query"',
+              tr('No icons match "{v}"', {'v': _query}),
               textAlign: TextAlign.center,
               style: context.text.meta,
             ),
@@ -139,7 +142,9 @@ class _IconCell extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${entry.key.replaceAll('-', ' ')} icon',
+      label: tr('{replaceAll} icon', {
+        'replaceAll': entry.key.replaceAll('-', ' '),
+      }),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

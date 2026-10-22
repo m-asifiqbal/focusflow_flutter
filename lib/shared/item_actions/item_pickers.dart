@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -66,13 +67,13 @@ Future<void> editItemTagsAndFolder(
       actions: [
         FFActionItem(
           icon: FontAwesomeIcons.tag,
-          label: 'Add tags',
+          label: tr('Add tags'),
           colors: ModuleStyle.notes.colors,
           onTap: () => addTagsToItems(context, ref, [item.ref]),
         ),
         FFActionItem(
           icon: FontAwesomeIcons.solidFolder,
-          label: list ? 'Move to list' : 'Move to folder',
+          label: list ? tr('Move to list') : tr('Move to folder'),
           colors: ModuleStyle.tasks.colors,
           onTap: () => moveItemsToFolder(context, ref, item.type, [
             item.ref,
@@ -126,7 +127,9 @@ Future<bool> moveItemsToFolder(
     builder: (_) => FolderPickerSheet(
       module: module,
       current: current,
-      title: module == ItemType.task ? 'Move to list' : 'Move to folder',
+      title: module == ItemType.task
+          ? tr('Move to list')
+          : tr('Move to folder'),
     ),
   );
   if (choice == null) return false;
@@ -180,7 +183,7 @@ Future<void> setItemReminder(
       if (context.mounted) {
         showFFToast(
           context,
-          'Reminder removed',
+          tr('Reminder removed'),
           icon: FontAwesomeIcons.bellSlash,
         );
       }
@@ -195,7 +198,9 @@ Future<void> setItemReminder(
   if (!context.mounted) return;
   showFFToast(
     context,
-    'Reminder set for ${reminderWhenLabel(at, now, use24h: use24h)}',
+    tr('Reminder set for {when}', {
+      'when': reminderWhenLabel(at, now, use24h: use24h),
+    }),
     icon: FontAwesomeIcons.solidBell,
   );
 }

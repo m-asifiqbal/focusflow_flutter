@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -27,8 +28,8 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 class QuietHoursRow extends ConsumerWidget {
   const QuietHoursRow({super.key});
 
-  static const String _hint =
-      'Non-alarm notifications wait until quiet hours end';
+  static String get _hint =>
+      tr('Non-alarm notifications wait until quiet hours end');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,11 +44,11 @@ class QuietHoursRow extends ConsumerWidget {
     Future<void> pick({required bool start}) async {
       final choice = await showNotificationTimeSheet(
         context,
-        title: start ? 'Quiet hours start' : 'Quiet hours end',
+        title: start ? tr('Quiet hours start') : tr('Quiet hours end'),
         subtitle: _hint,
         minutes: start ? s.quietStartMinutes : s.quietEndMinutes,
         use24h: use24h,
-        offLabel: s.quietHours ? 'Turn off quiet hours' : null,
+        offLabel: s.quietHours ? tr('Turn off quiet hours') : null,
       );
       if (choice == null) return;
       final m = choice.value;
@@ -60,8 +61,8 @@ class QuietHoursRow extends ConsumerWidget {
     if (!s.quietHours) {
       return FFListRow(
         leading: tile,
-        title: 'Quiet hours',
-        value: 'Off',
+        title: tr('Quiet hours'),
+        value: tr('Off'),
         onTap: () => pick(start: true),
       );
     }
@@ -73,13 +74,13 @@ class QuietHoursRow extends ConsumerWidget {
       children: [
         _TimePill(
           label: from,
-          semanticLabel: 'Quiet hours start, $from',
+          semanticLabel: tr('Quiet hours start, {from}', {'from': from}),
           onTap: () => pick(start: true),
         ),
         const _Dash(),
         _TimePill(
           label: to,
-          semanticLabel: 'Quiet hours end, $to',
+          semanticLabel: tr('Quiet hours end, {to}', {'to': to}),
           onTap: () => pick(start: false),
         ),
       ],
@@ -88,7 +89,7 @@ class QuietHoursRow extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final title = Text(
-          'Quiet hours',
+          tr('Quiet hours'),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: context.text.rowTitle,
@@ -148,17 +149,20 @@ class QuietHoursRow extends ConsumerWidget {
       AppSpacing.sm;
 
   /// Room the two-line title needs beside the pills ("Quiet / hours"):
-  /// its widest word.
+  /// its widest word (of the title in the active language).
   static double _minTitleWidth(BuildContext context) {
-    final p = TextPainter(
-      text: TextSpan(text: 'hours', style: context.text.rowTitle),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-      maxLines: 1,
-    )..layout();
-    final width = p.width;
-    p.dispose();
-    return width + AppSpacing.xxs;
+    var widest = 0.0;
+    for (final word in tr('Quiet hours').split(' ')) {
+      final p = TextPainter(
+        text: TextSpan(text: word, style: context.text.rowTitle),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+      if (p.width > widest) widest = p.width;
+      p.dispose();
+    }
+    return widest + AppSpacing.xxs;
   }
 
   static double _pillsWidth(BuildContext context, String from, String to) {

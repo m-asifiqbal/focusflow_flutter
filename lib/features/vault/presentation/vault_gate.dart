@@ -17,6 +17,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -56,9 +57,9 @@ Future<bool> ensureVaultUnlocked(BuildContext context) async {
   if (!notSetUp) return showVaultUnlockSheet(context);
   showUndoSnackbar(
     context,
-    message: 'Set up your vault first',
+    message: tr('Set up your vault first'),
     icon: FontAwesomeIcons.shieldHalved,
-    undoLabel: 'OPEN VAULT',
+    undoLabel: tr('OPEN VAULT'),
     onUndo: () {
       if (context.mounted) unawaited(context.push(AppRoutes.vault));
     },

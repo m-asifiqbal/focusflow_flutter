@@ -11,18 +11,22 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// Result order of the "Sort:" toggle.
 enum SearchSort {
   /// bm25 blended with recency and pinned boosts.
-  relevance('Relevance'),
+  relevance,
 
   /// Most recently edited first.
-  recent('Recent');
+  recent;
 
-  const SearchSort(this.label);
-
-  final String label;
+  /// Toggle text in the active language (a getter: it follows a language
+  /// switch).
+  String get label => switch (this) {
+    relevance => tr('Relevance'),
+    recent => tr('Recent'),
+  };
 }
 
 /// The optional filters under "SEARCH FILTERS".

@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/planning/planner_input.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
@@ -47,36 +48,36 @@ class NotificationDigestSection extends ConsumerWidget {
     final controller = ref.read(notificationSettingsControllerProvider);
     final use24h = s.use24HourTime;
     String timeOrOff(bool on, int minutes) =>
-        on ? NotificationLabels.time(minutes, use24h: use24h) : 'Off';
+        on ? NotificationLabels.time(minutes, use24h: use24h) : tr('Off');
 
     Future<void> pickTime(DigestKind kind, bool on, int minutes) async {
       final morning = kind == DigestKind.morning;
       final choice = await showNotificationTimeSheet(
         context,
-        title: morning ? 'Morning briefing' : 'Evening review',
+        title: morning ? tr('Morning briefing') : tr('Evening review'),
         subtitle: morning
-            ? "Today's plan: tasks, reminders and habits"
-            : "What's done, what's left and tomorrow's first items",
+            ? tr('Today\'s plan: tasks, reminders and habits')
+            : tr('What\'s done, what\'s left and tomorrow\'s first items'),
         minutes: minutes,
         use24h: use24h,
         offLabel: !on
             ? null
             : morning
-            ? 'Turn off morning briefing'
-            : 'Turn off evening review',
+            ? tr('Turn off morning briefing')
+            : tr('Turn off evening review'),
       );
       if (choice != null) await controller.setDigest(kind, choice.value);
     }
 
     return FFGroupedList(
-      label: 'DAILY DIGEST',
+      label: tr('DAILY DIGEST'),
       children: [
         FFListRow(
           leading: const NotificationRowTile(
             FontAwesomeIcons.solidSun,
             NotificationTints.morning,
           ),
-          title: 'Morning briefing',
+          title: tr('Morning briefing'),
           value: timeOrOff(s.morningBriefing, s.morningBriefingMinutes),
           onTap: () => pickTime(
             DigestKind.morning,
@@ -89,7 +90,7 @@ class NotificationDigestSection extends ConsumerWidget {
             FontAwesomeIcons.solidMoon,
             NotificationTints.night,
           ),
-          title: 'Evening review',
+          title: tr('Evening review'),
           value: timeOrOff(s.eveningReview, s.eveningReviewMinutes),
           onTap: () => pickTime(
             DigestKind.evening,
@@ -102,10 +103,10 @@ class NotificationDigestSection extends ConsumerWidget {
             FontAwesomeIcons.solidCalendar,
             NotificationTints.sky,
           ),
-          title: 'Weekly report',
+          title: tr('Weekly report'),
           value: s.weeklyReport
               ? NotificationLabels.weekdayShort(s.weeklyReportWeekday)
-              : 'Off',
+              : tr('Off'),
           onTap: () => _pickWeekday(context, s, controller),
         ),
       ],
@@ -119,10 +120,13 @@ class NotificationDigestSection extends ConsumerWidget {
   ) async {
     final choice = await showNotificationOptionSheet<int>(
       context,
-      title: 'Weekly report',
-      subtitle:
-          'A summary of your week, sent at '
-          '${NotificationLabels.time(PlannerTimes.weeklyReportMinutes, use24h: s.use24HourTime)}',
+      title: tr('Weekly report'),
+      subtitle: tr('A summary of your week, sent at {time}', {
+        'time': NotificationLabels.time(
+          PlannerTimes.weeklyReportMinutes,
+          use24h: s.use24HourTime,
+        ),
+      }),
       selected: s.weeklyReport ? s.weeklyReportWeekday : null,
       options: [
         for (final d in NotificationLabels.orderedWeekdays(s.weekStartsOn))
@@ -130,7 +134,7 @@ class NotificationDigestSection extends ConsumerWidget {
             value: d,
             label: NotificationLabels.weekdayLong(d),
           ),
-        const NotificationOption(value: null, label: 'Off'),
+        NotificationOption(value: null, label: tr('Off')),
       ],
     );
     if (choice != null) await controller.setWeeklyReport(choice.value);

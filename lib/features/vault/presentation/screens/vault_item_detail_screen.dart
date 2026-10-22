@@ -15,6 +15,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -66,9 +67,9 @@ class _DetailShell extends ConsumerWidget {
         child: FFEmptyState.compact(
           colors: colors,
           icon: FontAwesomeIcons.lock,
-          title: 'Vault locked',
-          body: 'Unlock the vault to see this item.',
-          ctaLabel: 'Unlock',
+          title: tr('Vault locked'),
+          body: tr('Unlock the vault to see this item.'),
+          ctaLabel: tr('Unlock'),
           ctaIcon: FontAwesomeIcons.unlockKeyhole,
           onCta: () => unawaited(ensureVaultUnlocked(context)),
         ),
@@ -80,9 +81,9 @@ class _DetailShell extends ConsumerWidget {
           child: FFEmptyState.compact(
             colors: colors,
             icon: FontAwesomeIcons.circleExclamation,
-            title: "Couldn't load this item",
-            body: 'Something went wrong while reading the vault.',
-            ctaLabel: 'Retry',
+            title: tr('Couldn\'t load this item'),
+            body: tr('Something went wrong while reading the vault.'),
+            ctaLabel: tr('Retry'),
             ctaIcon: FontAwesomeIcons.arrowRotateRight,
             onCta: () => ref.invalidate(vaultItemRecordProvider(id)),
           ),
@@ -92,8 +93,8 @@ class _DetailShell extends ConsumerWidget {
                 child: FFEmptyState.compact(
                   colors: colors,
                   icon: FontAwesomeIcons.key,
-                  title: 'Item not found',
-                  body: 'It may have been deleted on another device.',
+                  title: tr('Item not found'),
+                  body: tr('It may have been deleted on another device.'),
                 ),
               )
             : _Loaded(record: r),
@@ -173,8 +174,9 @@ class _Content extends ConsumerWidget {
                   historyCount: history.length,
                   onHistory: () =>
                       unawaited(showVaultPasswordHistory(context, history)),
-                  onCopy: () =>
-                      unawaited(copyVaultValue(context, ref, notes, 'Notes')),
+                  onCopy: () => unawaited(
+                    copyVaultValue(context, ref, notes, tr('Notes')),
+                  ),
                 ),
               ],
               const SizedBox(height: AppSpacing.lg + 2),
@@ -199,9 +201,9 @@ class _LifecycleButtons extends ConsumerWidget {
     final title = record.title;
     if (record.isDeleted) {
       return VaultDetailActions(
-        archiveLabel: 'Restore',
+        archiveLabel: tr('Restore'),
         archiveIcon: FontAwesomeIcons.arrowRotateLeft,
-        deleteLabel: 'Delete forever',
+        deleteLabel: tr('Delete forever'),
         onArchive: () =>
             unawaited(restoreFromTrash(context, ref, refs, title: title)),
         onDelete: () => unawaited(_deleteForever(context, ref)),
@@ -209,7 +211,7 @@ class _LifecycleButtons extends ConsumerWidget {
     }
     if (record.isArchived) {
       return VaultDetailActions(
-        archiveLabel: 'Unarchive',
+        archiveLabel: tr('Unarchive'),
         archiveIcon: FontAwesomeIcons.boxOpen,
         onArchive: () =>
             unawaited(restoreFromArchive(context, ref, refs, title: title)),
@@ -254,8 +256,8 @@ class _Undecryptable extends StatelessWidget {
     child: FFEmptyState.compact(
       colors: ModuleStyle.vault.colors,
       icon: FontAwesomeIcons.triangleExclamation,
-      title: "Couldn't decrypt this item",
-      body: 'It was encrypted with a different vault key.',
+      title: tr('Couldn\'t decrypt this item'),
+      body: tr('It was encrypted with a different vault key.'),
     ),
   );
 }
@@ -269,7 +271,7 @@ class _Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListView(
     children: [
-      const Padding(
+      Padding(
         padding: EdgeInsetsDirectional.fromSTEB(
           AppSpacing.lg - 4,
           AppSpacing.xxs,
@@ -278,7 +280,7 @@ class _Message extends StatelessWidget {
         ),
         child: Align(
           alignment: AlignmentDirectional.centerStart,
-          child: FFBackButton(label: 'Vault'),
+          child: FFBackButton(label: tr('Vault')),
         ),
       ),
       SizedBox(

@@ -10,17 +10,20 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
+
 /// One alert sound.
 typedef ReminderSound = ({String key, String label});
 
 abstract final class ReminderAlertOptions {
-  /// Sounds, default first. Unknown stored keys show capitalised.
-  static const List<ReminderSound> sounds = [
-    (key: 'chime', label: 'Chime'),
-    (key: 'bell', label: 'Bell'),
-    (key: 'gentle', label: 'Gentle'),
-    (key: 'pulse', label: 'Pulse'),
-    (key: 'silent', label: 'Silent'),
+  /// Sounds, default first. Unknown stored keys show capitalised. A getter
+  /// so the labels follow the active language.
+  static List<ReminderSound> get sounds => [
+    (key: 'chime', label: tr('Chime')),
+    (key: 'bell', label: tr('Bell')),
+    (key: 'gentle', label: tr('Gentle')),
+    (key: 'pulse', label: tr('Pulse')),
+    (key: 'silent', label: tr('Silent')),
   ];
 
   /// Snooze lengths (minutes).
@@ -37,8 +40,10 @@ abstract final class ReminderAlertOptions {
 
   /// "10 min", "1 hour".
   static String snoozeLabel(int minutes) => switch (minutes) {
-    60 => '1 hour',
-    final m when m > 60 && m % 60 == 0 => '${m ~/ 60} hours',
-    final m => '$m min',
+    final m when m >= 60 && m % 60 == 0 => tr(
+      '{count, plural, one {# hour} other {# hours}}',
+      {'count': m ~/ 60},
+    ),
+    final m => tr('{m} min', {'m': m}),
   };
 }

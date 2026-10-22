@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -35,11 +36,11 @@ class NotesFolderChips extends ConsumerWidget {
     return FFChipBar<String?>(
       selected: selected,
       items: [
-        const FFChipItem(value: null, label: 'All'),
+        FFChipItem(value: null, label: tr('All')),
         for (final f in folders) FFChipItem(value: f.id, label: f.name),
-        const FFChipItem(
+        FFChipItem(
           value: _newFolder,
-          label: 'New folder',
+          label: tr('New folder'),
           icon: FontAwesomeIcons.plus,
         ),
       ],
@@ -76,7 +77,7 @@ class NotesSortRow extends ConsumerWidget {
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: _RowButton(
-                semanticLabel: 'Sort: ${sort.label}',
+                semanticLabel: tr('Sort: {label}', {'label': sort.label}),
                 onTap: () => pickNotesSort(context, ref),
                 icon: Icon(
                   FontAwesomeIcons.arrowDownWideShort,
@@ -94,7 +95,7 @@ class NotesSortRow extends ConsumerWidget {
           ),
           const SizedBox(width: AppSpacing.md),
           _RowButton(
-            semanticLabel: 'Select notes',
+            semanticLabel: tr('Select notes'),
             onTap: () => ref
                 .read(itemSelectionProvider(notesSelectionScope).notifier)
                 .start(),
@@ -104,7 +105,7 @@ class NotesSortRow extends ConsumerWidget {
               color: ff.primary,
             ),
             label: Text(
-              'Select',
+              tr('Select'),
               style: style.copyWith(
                 color: ff.primary,
                 fontWeight: FontWeight.w700,

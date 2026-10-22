@@ -3,11 +3,11 @@
     <!-- App-icon long-press shortcuts (res/xml/shortcuts.xml). Keep the short
          label under ~10 characters: launchers truncate it. -->
     <string name="shortcut_notifications_short">Notifications</string>
-    <string name="shortcut_notifications_long">Open notifications</string>
-    <string name="shortcut_new_note_short">New note</string>
-    <string name="shortcut_new_note_long">Create a new note</string>
-    <string name="shortcut_new_reminder_short">New reminder</string>
-    <string name="shortcut_new_reminder_long">Create a new reminder</string>
+    <string name="shortcut_notifications_long">Notifications</string>
+    <string name="shortcut_new_note_short">New Note</string>
+    <string name="shortcut_new_note_long">New Note</string>
+    <string name="shortcut_new_reminder_short">New Reminder</string>
+    <string name="shortcut_new_reminder_long">New Reminder</string>
     <string name="shortcut_habits_short">Habits</string>
-    <string name="shortcut_habits_long">Open the habit tracker</string>
+    <string name="shortcut_habits_long">Habits</string>
 </resources>

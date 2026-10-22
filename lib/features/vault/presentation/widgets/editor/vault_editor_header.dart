@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -74,7 +75,7 @@ class VaultEditorTopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          button('Cancel', onCancel),
+          button(tr('Cancel'), onCancel),
           Expanded(
             child: Semantics(
               header: true,
@@ -106,7 +107,7 @@ class VaultEditorTopBar extends StatelessWidget {
               ),
             )
           else
-            button('Save', onSave),
+            button(tr('Save'), onSave),
         ],
       ),
     );

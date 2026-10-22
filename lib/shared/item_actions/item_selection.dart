@@ -19,6 +19,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -137,13 +138,13 @@ class ItemSelectionBar extends ConsumerWidget {
               children: [
                 _BarButton(
                   icon: FontAwesomeIcons.boxArchive,
-                  label: 'Archive',
+                  label: tr('Archive'),
                   enabled: enabled,
                   onTap: () => run(() => archiveItems(context, ref, refs)),
                 ),
                 _BarButton(
                   icon: FontAwesomeIcons.trashCan,
-                  label: 'Delete',
+                  label: tr('Delete'),
                   color: ff.danger,
                   enabled: enabled,
                   onTap: () => run(() => deleteItems(context, ref, refs)),
@@ -151,7 +152,7 @@ class ItemSelectionBar extends ConsumerWidget {
                 if (canMove)
                   _BarButton(
                     icon: FontAwesomeIcons.solidFolder,
-                    label: 'Move',
+                    label: tr('Move'),
                     enabled: enabled,
                     onTap: () => run(
                       () => moveItemsToFolder(context, ref, module!, refs),
@@ -159,14 +160,14 @@ class ItemSelectionBar extends ConsumerWidget {
                   ),
                 _BarButton(
                   icon: FontAwesomeIcons.tag,
-                  label: 'Tag',
+                  label: tr('Tag'),
                   enabled: enabled,
                   onTap: () => run(() => addTagsToItems(context, ref, refs)),
                 ),
                 if (showPin && module != ItemType.vault)
                   _BarButton(
                     icon: FontAwesomeIcons.thumbtack,
-                    label: allPinned ? 'Unpin' : 'Pin',
+                    label: allPinned ? tr('Unpin') : tr('Pin'),
                     enabled: enabled,
                     onTap: () => run(() => togglePinItems(context, ref, refs)),
                   ),

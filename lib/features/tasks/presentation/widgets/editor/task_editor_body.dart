@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/tasks/presentation/notifiers/task_editor_controller.dart';
@@ -80,13 +81,13 @@ class TaskEditorBody extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         TaskSubtasksSection(args: args, subtasks: state.subtasks),
         gap,
-        const FFSectionLabel('Schedule', padding: labelPadding),
+        FFSectionLabel(tr('Schedule'), padding: labelPadding),
         TaskScheduleCard(args: args, task: task),
         gap,
-        const FFSectionLabel('Priority', padding: labelPadding),
+        FFSectionLabel(tr('Priority'), padding: labelPadding),
         TaskPrioritySelector(value: task.priority, onChanged: form.setPriority),
         gap,
-        const FFSectionLabel('Organise', padding: labelPadding),
+        FFSectionLabel(tr('Organise'), padding: labelPadding),
         TaskOrganiseCard(args: args, task: task),
         if (!state.isNew) ...[
           const SizedBox(height: AppSpacing.xxl),

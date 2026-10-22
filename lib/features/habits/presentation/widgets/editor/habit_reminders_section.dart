@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -55,19 +56,19 @@ class HabitRemindersSection extends ConsumerWidget {
     }
 
     return FFGroupedList(
-      label: 'Reminders',
+      label: tr('Reminders'),
       children: [
         FFListRow.toggle(
           leading: HabitRowTile(FontAwesomeIcons.solidBell, colors: orange),
-          title: 'Remind me',
+          title: tr('Remind me'),
           value: draft.reminderEnabled,
           onChanged: c.setReminderEnabled,
         ),
         FFListRow(
           leading: HabitRowTile(FontAwesomeIcons.solidClock, colors: orange),
-          title: 'Times',
+          title: tr('Times'),
           value: draft.reminderTimes.isEmpty
-              ? 'Add a time'
+              ? tr('Add a time')
               : HabitFormat.times(draft.reminderTimes),
           enabled: draft.reminderEnabled,
           onTap: () => showHabitTimesSheet(context, args),
@@ -77,7 +78,7 @@ class HabitRemindersSection extends ConsumerWidget {
             FontAwesomeIcons.solidCalendarCheck,
             colors: ModuleStyle.habits.colors,
           ),
-          title: 'Start date',
+          title: tr('Start date'),
           value: DateUtilsX.relativeDay(draft.startDate, today),
           onTap: pickStart,
         ),
@@ -102,15 +103,15 @@ class HabitManageSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FFGroupedList(
-      label: 'Manage',
+      label: tr('Manage'),
       children: [
         FFListRow(
           leading: const HabitRowTile(
             FontAwesomeIcons.rotateLeft,
             colors: ActionTints.lock,
           ),
-          title: 'Reset history',
-          subtitle: 'Deletes every check-in, keeps the habit',
+          title: tr('Reset history'),
+          subtitle: tr('Deletes every check-in, keeps the habit'),
           onTap: onReset,
         ),
         FFListRow(
@@ -118,7 +119,7 @@ class HabitManageSection extends StatelessWidget {
             FontAwesomeIcons.boxArchive,
             colors: ModuleStyle.vault.colors,
           ),
-          title: 'Archive habit',
+          title: tr('Archive habit'),
           onTap: onArchive,
         ),
         FFListRow(
@@ -126,7 +127,7 @@ class HabitManageSection extends StatelessWidget {
             FontAwesomeIcons.trashCan,
             colors: TagPalette.high,
           ),
-          title: 'Delete habit',
+          title: tr('Delete habit'),
           destructive: true,
           onTap: onDelete,
         ),

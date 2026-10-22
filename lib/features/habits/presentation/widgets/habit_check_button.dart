@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -42,7 +43,7 @@ class HabitCheckButton extends StatelessWidget {
       button: true,
       toggled: done,
       label: semanticLabel,
-      onLongPressHint: onLongPress == null ? null : 'Custom amount or skip',
+      onLongPressHint: onLongPress == null ? null : tr('Custom amount or skip'),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

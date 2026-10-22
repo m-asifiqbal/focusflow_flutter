@@ -12,6 +12,7 @@
 library;
 
 import 'package:focusflow/core/items/library_counts.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 
@@ -52,10 +53,10 @@ class HomeFocus {
 
   /// The dynamic encouragement line under the title.
   String get encouragement {
-    if (percent >= 100) return 'Goal reached — amazing work!';
-    if (percent >= 50) return "You're doing great — keep it up!";
-    if (tasksDone > 0) return 'Nice start — keep the momentum!';
-    return "Let's make today count.";
+    if (percent >= 100) return tr('Goal reached — amazing work!');
+    if (percent >= 50) return tr("You're doing great — keep it up!");
+    if (tasksDone > 0) return tr('Nice start — keep the momentum!');
+    return tr("Let's make today count.");
   }
 }
 
@@ -113,13 +114,22 @@ abstract final class HomeRules {
   /// "Good morning" (5–11), "Good afternoon" (12–16), "Good evening".
   static String greeting(DateTime now, String name) {
     final h = now.hour;
-    final part = h >= 5 && h < 12
-        ? 'morning'
-        : h >= 12 && h < 17
-        ? 'afternoon'
-        : 'evening';
     final first = firstName(name);
-    return first.isEmpty ? 'Good $part' : 'Good $part, $first';
+    final args = {'name': first};
+    // Whole sentences, so each language orders the name its own way.
+    if (h >= 5 && h < 12) {
+      return first.isEmpty
+          ? tr('Good morning')
+          : tr('Good morning, {name}', args);
+    }
+    if (h >= 12 && h < 17) {
+      return first.isEmpty
+          ? tr('Good afternoon')
+          : tr('Good afternoon, {name}', args);
+    }
+    return first.isEmpty
+        ? tr('Good evening')
+        : tr('Good evening, {name}', args);
   }
 
   /// First word of a display name ("Asif Iqbal" → "Asif").

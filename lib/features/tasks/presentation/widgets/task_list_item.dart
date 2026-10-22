@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/widgets/ff_open_origin.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -95,7 +96,7 @@ class TaskListItem extends ConsumerWidget {
       isFavorite: task.isFavorite,
       radius: AppRadii.row,
       enabled: !selecting,
-      completeLabel: task.isCompleted ? 'Undo' : 'Complete',
+      completeLabel: task.isCompleted ? tr('Undo') : tr('Complete'),
       onComplete: () => task.isCompleted
           ? reopenTask(ref, task.id)
           : completeTask(context, ref, task.id, title: task.title),

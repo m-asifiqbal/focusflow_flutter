@@ -29,6 +29,7 @@ import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 
 /// The selected range; kept while the app runs (switching tabs keeps it).
 class InsightsRangeController extends Notifier<InsightsRange> {
@@ -46,6 +47,9 @@ final insightsRangeProvider =
 /// Live snapshot of [range] (deltas against the previous equal window).
 final insightsProvider = StreamProvider.autoDispose
     .family<InsightsSnapshot, InsightsRange>((ref, range) {
+      // The tip sentences are written into the snapshot, so a language
+      // switch must rebuild it.
+      ref.watch(settingsProvider.select((s) => s.languageCode));
       final today = ref.watch(todayProvider);
       final clock = ref.watch(clockProvider);
       final window = range.resolve(today);

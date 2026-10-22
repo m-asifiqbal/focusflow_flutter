@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/ff_bottom_nav.dart';
@@ -45,10 +46,10 @@ class AppShell extends StatelessWidget {
     }
     final exit = await showFFConfirm(
       context,
-      title: 'Exit ${AppInfo.name}?',
-      message: 'Do you want to close the app?',
-      confirmLabel: 'Exit',
-      cancelLabel: 'Stay',
+      title: tr('Exit {name}?', {'name': AppInfo.name}),
+      message: tr('Do you want to close the app?'),
+      confirmLabel: tr('Exit'),
+      cancelLabel: tr('Stay'),
       icon: FontAwesomeIcons.rightFromBracket,
     );
     if (exit) await SystemNavigator.pop();

@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -36,7 +37,7 @@ class AboutSettingsScreen extends ConsumerWidget {
     final version = ref.watch(appVersionProvider).valueOrNull;
     void run(SettingsRootAction a) => runRootAction(context, ref, a);
     return SettingsPage(
-      title: 'About',
+      title: tr('About'),
       children: [
         _AboutHeader(version: version),
         FFGroupedList(
@@ -47,7 +48,7 @@ class AboutSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.circleInfo,
                 SettingsTints.slate,
               ),
-              title: 'Version',
+              title: tr('Version'),
               value: version ?? '…',
               chevron: false,
             ),
@@ -56,7 +57,7 @@ class AboutSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.shieldHalved,
                 SettingsTints.emerald,
               ),
-              title: 'Privacy policy',
+              title: tr('Privacy policy'),
               onTap: () => _open(context, AppInfo.privacyUrl),
             ),
             FFListRow(
@@ -64,7 +65,7 @@ class AboutSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.fileLines,
                 SettingsTints.blue,
               ),
-              title: 'Terms of use',
+              title: tr('Terms of use'),
               onTap: () => _open(context, AppInfo.termsUrl),
             ),
             FFListRow(
@@ -72,7 +73,7 @@ class AboutSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.solidCommentDots,
                 SettingsTints.blue,
               ),
-              title: 'Send feedback',
+              title: tr('Send feedback'),
               onTap: () => run(SettingsRootAction.feedback),
             ),
             FFListRow(
@@ -80,20 +81,18 @@ class AboutSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.solidStar,
                 SettingsTints.amber,
               ),
-              title: 'Rate ${AppInfo.name}',
+              title: tr('Rate {name}', {'name': AppInfo.name}),
               onTap: () => run(SettingsRootAction.rate),
             ),
           ],
         ),
         FFGroupedList(
-          label: 'Acknowledgements',
+          label: tr('Acknowledgements'),
           children: [
             for (final l in bundledLicenses)
               FFListRow(
                 leading: settingsTile(
-                  l.use == 'Icons'
-                      ? FontAwesomeIcons.icons
-                      : FontAwesomeIcons.font,
+                  l.icons ? FontAwesomeIcons.icons : FontAwesomeIcons.font,
                   SettingsTints.violet,
                 ),
                 title: l.name,
@@ -102,14 +101,16 @@ class AboutSettingsScreen extends ConsumerWidget {
               ),
             FFListRow(
               leading: settingsTile(FontAwesomeIcons.code, SettingsTints.teal),
-              title: 'Open-source licences',
+              title: tr('Open-source licences'),
               onTap: () => _showLicences(context, version),
             ),
           ],
         ),
         SettingsFootnote(
-          '${AppInfo.name} works fully offline. No ads, no analytics — '
-          'your data stays yours.',
+          tr(
+            '{name} works fully offline. No ads, no analytics — your data stays yours.',
+            {'name': AppInfo.name},
+          ),
         ),
       ],
     );
@@ -136,7 +137,11 @@ class AboutSettingsScreen extends ConsumerWidget {
       opened = false;
     }
     if (!opened && context.mounted) {
-      showFFToast(context, 'Couldn’t open $url', icon: FontAwesomeIcons.link);
+      showFFToast(
+        context,
+        tr('Couldn’t open {url}', {'url': url}),
+        icon: FontAwesomeIcons.link,
+      );
     }
   }
 }

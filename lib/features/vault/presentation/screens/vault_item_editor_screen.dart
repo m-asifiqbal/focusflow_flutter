@@ -17,6 +17,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -92,10 +93,10 @@ class _EditorShellState extends ConsumerState<_EditorShell> {
     if (dirty) {
       final discard = await showFFConfirm(
         context,
-        title: 'Discard changes?',
-        message: 'Your edits to this item will be lost.',
-        confirmLabel: 'Discard',
-        cancelLabel: 'Keep editing',
+        title: tr('Discard changes?'),
+        message: tr('Your edits to this item will be lost.'),
+        confirmLabel: tr('Discard'),
+        cancelLabel: tr('Keep editing'),
         destructive: true,
         icon: FontAwesomeIcons.triangleExclamation,
       );
@@ -119,14 +120,16 @@ class _EditorShellState extends ConsumerState<_EditorShell> {
     try {
       id = await ref.read(vaultEditorProvider(_args).notifier).save();
     } on VaultLockedException {
-      if (mounted) showFFToast(context, 'The vault locked — unlock to save');
+      if (mounted) {
+        showFFToast(context, tr('The vault locked — unlock to save'));
+      }
       return;
     } on Object {
-      if (mounted) showFFToast(context, "Couldn't save this item");
+      if (mounted) showFFToast(context, tr("Couldn't save this item"));
       return;
     }
     if (id == null || !mounted) return;
-    showFFToast(context, 'Saved', icon: FontAwesomeIcons.circleCheck);
+    showFFToast(context, tr('Saved'), icon: FontAwesomeIcons.circleCheck);
     _close();
   }
 
@@ -151,7 +154,7 @@ class _EditorShellState extends ConsumerState<_EditorShell> {
     });
     final editor = ref.watch(vaultEditorProvider(_args));
     final s = editor.valueOrNull;
-    final title = _args.id == null ? 'New Item' : 'Edit Item';
+    final title = _args.id == null ? tr('New Item') : tr('Edit Item');
     final Widget body = switch (editor) {
       AsyncData(:final value) => _content(value),
       AsyncError(:final error) => _message(error),
@@ -236,30 +239,30 @@ class _EditorShellState extends ConsumerState<_EditorShell> {
       VaultLockedException() => FFEmptyState.compact(
         colors: colors,
         icon: FontAwesomeIcons.lock,
-        title: 'Vault locked',
-        body: 'Unlock the vault to edit this item.',
-        ctaLabel: 'Unlock',
+        title: tr('Vault locked'),
+        body: tr('Unlock the vault to edit this item.'),
+        ctaLabel: tr('Unlock'),
         ctaIcon: FontAwesomeIcons.unlockKeyhole,
         onCta: () => unawaited(ensureVaultUnlocked(context)),
       ),
       VaultItemNotFound() => FFEmptyState.compact(
         colors: colors,
         icon: FontAwesomeIcons.key,
-        title: 'Item not found',
-        body: 'It may have been deleted on another device.',
+        title: tr('Item not found'),
+        body: tr('It may have been deleted on another device.'),
       ),
       VaultItemUndecryptable() => FFEmptyState.compact(
         colors: colors,
         icon: FontAwesomeIcons.triangleExclamation,
-        title: "Couldn't decrypt this item",
-        body: 'It was encrypted with a different vault key.',
+        title: tr('Couldn\'t decrypt this item'),
+        body: tr('It was encrypted with a different vault key.'),
       ),
       _ => FFEmptyState.compact(
         colors: colors,
         icon: FontAwesomeIcons.circleExclamation,
-        title: "Couldn't load this item",
-        body: 'Something went wrong while reading the vault.',
-        ctaLabel: 'Retry',
+        title: tr('Couldn\'t load this item'),
+        body: tr('Something went wrong while reading the vault.'),
+        ctaLabel: tr('Retry'),
         ctaIcon: FontAwesomeIcons.arrowRotateRight,
         onCta: () => ref.invalidate(vaultEditorProvider(_args)),
       ),

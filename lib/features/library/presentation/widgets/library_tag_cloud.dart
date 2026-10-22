@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -74,7 +75,7 @@ class LibraryTagPill extends StatelessWidget {
       label:
           '${tag.label}, ${tag.usageCount} '
           '${tag.usageCount == 1 ? 'item' : 'items'}',
-      onLongPressHint: 'Rename, recolour or delete',
+      onLongPressHint: tr('Rename, recolour or delete'),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

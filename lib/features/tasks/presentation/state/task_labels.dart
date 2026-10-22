@@ -10,6 +10,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 
@@ -19,23 +20,25 @@ abstract final class TaskLabels {
 
   /// "15 min before", "1 hour before", "At time of task", "None".
   static String remindOffset(int? minutes) {
-    if (minutes == null) return 'None';
-    if (minutes == 0) return 'At time of task';
-    if (minutes < 60) return '$minutes min before';
+    if (minutes == null) return tr('None');
+    if (minutes == 0) return tr('At time of task');
+    if (minutes < 60) return tr('{m} min before', {'m': minutes});
     if (minutes % 1440 == 0) {
-      final d = minutes ~/ 1440;
-      return d == 1 ? '1 day before' : '$d days before';
+      return tr('{count, plural, one {# day before} other {# days before}}', {
+        'count': minutes ~/ 1440,
+      });
     }
     if (minutes % 60 == 0) {
-      final h = minutes ~/ 60;
-      return h == 1 ? '1 hour before' : '$h hours before';
+      return tr('{count, plural, one {# hour before} other {# hours before}}', {
+        'count': minutes ~/ 60,
+      });
     }
-    return '$minutes min before';
+    return tr('{m} min before', {'m': minutes});
   }
 
   /// Editor date value: "Tue, Jun 13" (year added when not this year).
   static String editorDate(DateTime? day, DateTime now) {
-    if (day == null) return 'No date';
+    if (day == null) return tr('No date');
     return day.year == now.year
         ? DateFormats.of('EEE, MMM d').format(day)
         : DateFormats.of('EEE, MMM d, y').format(day);
@@ -44,7 +47,7 @@ abstract final class TaskLabels {
   /// Editor time value: "09:00 AM" or "All day".
   static String editorTime(int? minutes, {bool use24h = false}) =>
       minutes == null
-      ? 'All day'
+      ? tr('All day')
       : DateUtilsX.minutesToTime(minutes, use24h: use24h);
 
   /// The date/time part of a task row's meta line:
@@ -57,7 +60,7 @@ abstract final class TaskLabels {
         ? null
         : DateUtilsX.minutesToTime(t.dueTimeMinutes!, use24h: use24h);
     final today = DateUtilsX.isSameDay(due, now);
-    if (today) return time ?? 'Today';
+    if (today) return time ?? tr('Today');
     final day = DateUtilsX.relativeDay(due, now);
     if (t.isOverdue(now) || time == null) return day;
     return '$day · $time';
@@ -72,21 +75,21 @@ abstract final class TaskLabels {
 
   /// Section header for a [TaskSections] key.
   static String section(String key) => switch (key) {
-    'overdue' => 'Overdue',
-    'today' => 'Today',
-    'upcoming' => 'Upcoming',
-    'noDate' => 'No date',
-    'completed' => 'Completed',
+    'overdue' => tr('Overdue'),
+    'today' => tr('Today'),
+    'upcoming' => tr('Upcoming'),
+    'noDate' => tr('No date'),
+    'completed' => tr('Completed'),
     _ => key,
   };
 
   /// Header subtitle: "7 due today · 2 overdue" / "All clear for today".
   static String headerSubtitle({required int dueToday, required int overdue}) {
     final parts = [
-      if (dueToday > 0) '$dueToday due today',
-      if (overdue > 0) '$overdue overdue',
+      if (dueToday > 0) tr('{n} due today', {'n': dueToday}),
+      if (overdue > 0) tr('{n} overdue', {'n': overdue}),
     ];
-    return parts.isEmpty ? 'All clear for today' : parts.join(' · ');
+    return parts.isEmpty ? tr('All clear for today') : parts.join(' · ');
   }
 
   /// Screen-reader description of a task row.
@@ -94,14 +97,18 @@ abstract final class TaskLabels {
     final due = rowDue(t, now, use24h: use24h);
     return [
       t.title,
-      if (t.isCompleted) 'completed',
-      if (t.isOverdue(now)) 'overdue',
+      if (t.isCompleted) tr('completed'),
+      if (t.isOverdue(now)) tr('overdue'),
       ?due,
-      if (t.priority != TaskPriority.none) '${t.priority.label} priority',
+      if (t.priority != TaskPriority.none)
+        tr('{label} priority', {'label': t.priority.label}),
       if (t.subtasks.isNotEmpty)
-        '${t.subtaskDone} of ${t.subtaskTotal} subtasks',
-      if (t.isRepeating) 'repeats ${t.repeatLabel}',
-      if (t.hasReminder) 'reminder set',
+        tr('{done} of {total} subtasks', {
+          'done': t.subtaskDone,
+          'total': t.subtaskTotal,
+        }),
+      if (t.isRepeating) tr('repeats {rule}', {'rule': t.repeatLabel}),
+      if (t.hasReminder) tr('reminder set'),
     ].join(', ');
   }
 }

@@ -20,6 +20,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// Raw swatches (light-mode hex values from the design system).
 abstract final class AppPalette {
@@ -106,7 +107,6 @@ abstract final class AppPalette {
 /// `primary` token family; canvas, module colours and status colours stay.
 enum AccentColor {
   emerald(
-    label: 'Emerald',
     primary: AppPalette.emerald600,
     primaryDark: AppPalette.emerald400,
     soft: AppPalette.emerald100,
@@ -118,7 +118,6 @@ enum AccentColor {
     strong: AppPalette.emerald700,
   ),
   blue(
-    label: 'Blue',
     primary: AppPalette.blue600,
     primaryDark: AppPalette.blue400,
     soft: AppPalette.blue100,
@@ -126,7 +125,6 @@ enum AccentColor {
     strong: AppPalette.blue700,
   ),
   indigo(
-    label: 'Indigo',
     primary: AppPalette.indigo600,
     primaryDark: AppPalette.indigo400,
     soft: AppPalette.indigo100,
@@ -138,7 +136,6 @@ enum AccentColor {
     strong: AppPalette.indigo700,
   ),
   pink(
-    label: 'Pink',
     primary: AppPalette.pink600,
     primaryDark: AppPalette.pink400,
     soft: AppPalette.pink100,
@@ -146,7 +143,6 @@ enum AccentColor {
     strong: AppPalette.pink700,
   ),
   orange(
-    label: 'Orange',
     primary: AppPalette.orange600,
     primaryDark: AppPalette.orange400,
     soft: AppPalette.orange100,
@@ -158,7 +154,6 @@ enum AccentColor {
     strong: AppPalette.orange700,
   ),
   slate(
-    label: 'Slate',
     primary: AppPalette.slate600,
     primaryDark: AppPalette.slate400,
     soft: AppPalette.slate200,
@@ -167,7 +162,6 @@ enum AccentColor {
   );
 
   const AccentColor({
-    required this.label,
     required this.primary,
     required this.primaryDark,
     required this.soft,
@@ -175,7 +169,15 @@ enum AccentColor {
     required this.strong,
   });
 
-  final String label;
+  /// Name shown in the accent picker, in the active language.
+  String get label => switch (this) {
+    emerald => tr('Emerald'),
+    blue => tr('Blue'),
+    indigo => tr('Indigo'),
+    pink => tr('Pink'),
+    orange => tr('Orange'),
+    slate => tr('Slate'),
+  };
 
   /// Buttons, active tab, links, switches (light mode).
   final Color primary;

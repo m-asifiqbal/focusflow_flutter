@@ -21,6 +21,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/recurrence.dart';
 
 /// 0 notification · 1 alarm (full-screen intent / time-sensitive).
@@ -49,8 +50,10 @@ class ReminderLocation {
 
   /// "When I leave office" / "When I arrive at Home".
   String get description {
-    final place = label.isEmpty ? 'location' : label;
-    return onEnter ? 'When I arrive at $place' : 'When I leave $place';
+    final place = label.isEmpty ? tr('location') : label;
+    return onEnter
+        ? tr('When I arrive at {place}', {'place': place})
+        : tr('When I leave {place}', {'place': place});
   }
 
   Map<String, Object?> toJson() => {

@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -101,7 +102,7 @@ class _ThemeOption extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '$label theme',
+      label: tr('{label} theme', {'label': label}),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

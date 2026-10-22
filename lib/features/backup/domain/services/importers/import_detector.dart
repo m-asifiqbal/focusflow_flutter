@@ -12,6 +12,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/domain/services/csv_codec.dart';
 import 'package:focusflow/features/backup/domain/services/importers/focusflow_importer.dart';
@@ -93,8 +94,8 @@ abstract final class ImportDetector {
           for (final c in csvs) _csv(ImportParsing.text(c.value.content)),
         ]);
       }
-      throw const ImportFormatException(
-        "This zip doesn't contain anything FocusFlow can import.",
+      throw ImportFormatException(
+        tr("This zip doesn't contain anything FocusFlow can import."),
       );
     }
     final text = ImportParsing.text(bytes);
@@ -107,7 +108,7 @@ abstract final class ImportDetector {
       try {
         json = jsonDecode(text);
       } on FormatException {
-        throw const ImportFormatException('This JSON file is damaged.');
+        throw ImportFormatException(tr('This JSON file is damaged.'));
       }
       if (KeepImporter.isKeepNote(json)) return KeepImporter.parse(bytes);
       return FocusFlowImporter.fromJson(text);
@@ -116,18 +117,20 @@ abstract final class ImportDetector {
       return _csv(text);
     }
     if (name.endsWith('.1pux')) {
-      throw const ImportFormatException(
-        '1Password .1pux files are not supported yet. Export a CSV from '
-        '1Password instead.',
+      throw ImportFormatException(
+        tr(
+          '1Password .1pux files are not supported yet. Export a CSV from '
+          '1Password instead.',
+        ),
       );
     }
-    throw const ImportFormatException('FocusFlow can’t read this file type.');
+    throw ImportFormatException(tr('FocusFlow can’t read this file type.'));
   }
 
   static ImportBundle _csv(String text) {
     final rows = CsvCodec.decode(text);
     if (rows.isEmpty) {
-      throw const ImportFormatException('This CSV file is empty.');
+      throw ImportFormatException(tr('This CSV file is empty.'));
     }
     final h = {for (final c in rows.first) c.trim().toLowerCase()};
     if (PasswordImporters.isBitwarden(h)) {

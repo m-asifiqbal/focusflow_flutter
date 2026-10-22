@@ -16,6 +16,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -32,7 +33,7 @@ class ItemSwipe extends ConsumerWidget {
     this.isPinned = false,
     this.isFavorite = false,
     this.onComplete,
-    this.completeLabel = 'Complete',
+    this.completeLabel,
     this.onSnooze,
     this.radius = AppRadii.card,
     this.enabled = true,
@@ -47,7 +48,7 @@ class ItemSwipe extends ConsumerWidget {
 
   /// Complete / Done / Log (null = the module has no completion).
   final VoidCallback? onComplete;
-  final String completeLabel;
+  final String? completeLabel;
 
   /// Snooze (reminders only).
   final VoidCallback? onSnooze;
@@ -82,14 +83,14 @@ class ItemSwipe extends ConsumerWidget {
         item.type == ItemType.vault
             ? null
             : FFSwipeAction.pin(
-                label: isPinned ? 'Unpin' : 'Pin',
+                label: isPinned ? tr('Unpin') : tr('Pin'),
                 onTap: () => ref
                     .read(itemsRepositoryProvider)
                     .setPinned(refs, !isPinned),
               ),
       SwipeAction.favourite => FFSwipeAction(
         icon: FontAwesomeIcons.solidStar,
-        label: isFavorite ? 'Unstar' : 'Favourite',
+        label: isFavorite ? tr('Unstar') : tr('Favourite'),
         color: ModuleStyle.vault.solid,
         onTap: () =>
             ref.read(itemsRepositoryProvider).setFavorite(refs, !isFavorite),
@@ -99,7 +100,7 @@ class ItemSwipe extends ConsumerWidget {
             ? null
             : FFSwipeAction(
                 icon: FontAwesomeIcons.clockRotateLeft,
-                label: 'Snooze',
+                label: tr('Snooze'),
                 color: ModuleStyle.reminders.solid,
                 onTap: onSnooze!,
               ),

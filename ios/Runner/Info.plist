@@ -84,7 +84,7 @@
 			<key>UIApplicationShortcutItemIconType</key>
 			<string>UIApplicationShortcutIconTypeCompose</string>
 			<key>UIApplicationShortcutItemTitle</key>
-			<string>New note</string>
+			<string>New Note</string>
 			<key>UIApplicationShortcutItemType</key>
 			<string>new_note</string>
 		</dict>
@@ -92,7 +92,7 @@
 			<key>UIApplicationShortcutItemIconType</key>
 			<string>UIApplicationShortcutIconTypeAlarm</string>
 			<key>UIApplicationShortcutItemTitle</key>
-			<string>New reminder</string>
+			<string>New Reminder</string>
 			<key>UIApplicationShortcutItemType</key>
 			<string>new_reminder</string>
 		</dict>

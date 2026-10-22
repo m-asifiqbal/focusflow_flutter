@@ -1,0 +1,52 @@
+# Vault area: literals that look like text but are NOT shown to the user
+# (path<TAB>text; see tool/l10n/audit.dart).
+
+# SQL fragments
+lib/features/vault/data/repository/vault_repository_impl.dart	v.title COLLATE NOCASE ASC
+lib/features/vault/data/repository/vault_repository_impl.dart	v.item_type = ?
+lib/features/vault/data/repository/vault_repository_impl.dart	v.folder_id = ?
+lib/features/vault/data/repository/vault_repository_impl.dart	v.is_favorite = 1
+lib/features/vault/data/repository/vault_repository_impl.dart	v.title LIKE ? ESCAPE '\'
+lib/features/vault/data/repository/vault_repository_impl.dart	v.id = ?
+lib/features/vault/data/repository/vault_repository_impl.dart	sync_version + 1
+
+# toString() / exception debug text (never displayed)
+lib/features/vault/presentation/state/vault_editor_state.dart	VaultItemNotFound
+lib/features/vault/presentation/state/vault_editor_state.dart	VaultItemUndecryptable
+lib/features/vault/presentation/state/vault_session_state.dart	VaultLockedException: the vault is locked
+
+# StateError message, caught by the PIN pad (which shows its own translated text)
+lib/features/vault/presentation/notifiers/vault_session_controller.dart	A vault already exists on this device
+
+# Brand / site names: proper nouns and also matched against item titles
+lib/features/vault/presentation/vault_brands.dart	Google
+lib/features/vault/presentation/vault_brands.dart	GitHub
+lib/features/vault/presentation/vault_brands.dart	GitLab
+lib/features/vault/presentation/vault_brands.dart	LinkedIn
+lib/features/vault/presentation/vault_brands.dart	Netflix
+lib/features/vault/presentation/vault_brands.dart	Figma
+lib/features/vault/presentation/vault_brands.dart	Bank
+lib/features/vault/presentation/vault_brands.dart	Facebook
+lib/features/vault/presentation/vault_brands.dart	Apple
+lib/features/vault/presentation/vault_brands.dart	Microsoft
+lib/features/vault/presentation/vault_brands.dart	Amazon
+lib/features/vault/presentation/vault_brands.dart	Instagram
+lib/features/vault/presentation/vault_brands.dart	Dropbox
+lib/features/vault/presentation/vault_brands.dart	Slack
+lib/features/vault/presentation/vault_brands.dart	Spotify
+lib/features/vault/presentation/vault_brands.dart	PayPal
+lib/features/vault/presentation/vault_brands.dart	Reddit
+lib/features/vault/presentation/vault_brands.dart	YouTube
+lib/features/vault/presentation/vault_brands.dart	WhatsApp
+lib/features/vault/presentation/vault_brands.dart	Discord
+
+# Example item titles in the editor's hint: brand / product names
+lib/features/vault/presentation/widgets/editor/vault_editor_credentials.dart	Figma
+lib/features/vault/presentation/widgets/editor/vault_editor_credentials.dart	Visa Platinum
+
+# Wi-Fi QR payload (WIFI:T:WPA;S:name;P:pass;;)
+lib/features/vault/presentation/widgets/detail/vault_detail_sheets.dart	WIFI:T:{};S:{};{};
+
+# Stored Wi-Fi security value "None" (data compared in code; the label shown is tr('None'))
+lib/features/vault/presentation/widgets/editor/vault_editor_credentials.dart	None
+lib/features/vault/presentation/widgets/vault_fields.dart	None

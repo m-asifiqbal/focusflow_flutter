@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -48,10 +49,12 @@ class HabitConsistencyCard extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FFSectionHeader(
-          title: 'Consistency',
+          title: tr('Consistency'),
           trailing: FFTextButton(
             label: range.label,
-            semanticLabel: 'Heatmap range, ${range.label}. Tap to change',
+            semanticLabel: tr('Heatmap range, {label}. Tap to change', {
+              'label': range.label,
+            }),
             onPressed: ref
                 .read(habitHeatmapRangeProvider(habit.id).notifier)
                 .toggle,
@@ -84,7 +87,9 @@ class HabitConsistencyCard extends ConsumerWidget {
                 color: color,
                 weekStart: weekStart,
                 gap: year ? HabitDimens.heatmapGapYear : AppSpacing.xs,
-                semanticLabel: 'Consistency, ${range.label.toLowerCase()}',
+                semanticLabel: tr('Consistency, {toLowerCase}', {
+                  'toLowerCase': range.label.toLowerCase(),
+                }),
                 onTap: (day) {
                   final d = DateTime(day.year, day.month, day.day);
                   if (d.isAfter(today) || d.isBefore(habit.startDate)) return;

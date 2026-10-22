@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -58,7 +59,7 @@ class HabitHistoryCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('History', style: sheet.text.title),
+          Text(tr('History'), style: sheet.text.title),
           const SizedBox(height: AppSpacing.md),
           Flexible(
             child: ListView.builder(
@@ -87,8 +88,8 @@ class HabitHistoryCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FFSectionHeader(
-          title: 'History',
-          actionLabel: entries.length > limit ? 'See all' : null,
+          title: tr('History'),
+          actionLabel: entries.length > limit ? tr('See all') : null,
           onAction: () => _seeAll(context),
         ),
         SizedBox(
@@ -107,7 +108,9 @@ class HabitHistoryCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                   child: Text(
                     // A quit habit's clean days need no log.
-                    habit.isQuit ? 'No slips logged yet' : 'No check-ins yet',
+                    habit.isQuit
+                        ? tr('No slips logged yet')
+                        : tr('No check-ins yet'),
                     textAlign: TextAlign.center,
                     style: context.text.meta,
                   ),

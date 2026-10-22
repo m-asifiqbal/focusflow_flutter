@@ -48,6 +48,7 @@ import 'package:focusflow/core/crypto/pin_attempt_guard.dart';
 import 'package:focusflow/core/crypto/vault_key.dart';
 import 'package:focusflow/core/crypto/vault_key_manager.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/features/vault/data/datasource/recovery_kit_pdf.dart';
 import 'package:focusflow/features/vault/presentation/providers/vault_crypto_providers.dart';
@@ -303,9 +304,7 @@ class VaultSessionController extends Notifier<VaultSessionState> {
   /// Face ID / fingerprint → biometric key copy. For the OS-gated copy the
   /// read itself shows the system prompt; a legacy (app-gated) copy is
   /// only read after local_auth and is migrated by [_open].
-  Future<UnlockResult> unlockWithBiometrics({
-    String reason = 'Unlock your vault',
-  }) async {
+  Future<UnlockResult> unlockWithBiometrics({String? reason}) async {
     if (state.isUnlocked) return UnlockResult.success;
     if (!state.biometricsReady || _busy || _pinBusy) {
       return UnlockResult.unavailable;
@@ -316,7 +315,7 @@ class VaultSessionController extends Notifier<VaultSessionState> {
     _busy = true;
     try {
       if (await _keys.biometricReadNeedsAppGate() &&
-          !await _bio.authenticate(reason)) {
+          !await _bio.authenticate(reason ?? tr('Unlock your vault'))) {
         return UnlockResult.cancelled;
       }
       final read = await _keys.readBiometricCopy().timeout(

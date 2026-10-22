@@ -9,7 +9,12 @@
 /// ============================================================
 library;
 
+// A nullable preset label resolves to tr() when read (it must follow the
+// language), and a private field cannot be a named initializing formal.
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -85,14 +90,17 @@ class FFErrorBanner extends StatelessWidget {
   const FFErrorBanner({
     required this.message,
     this.onRetry,
-    this.retryLabel = 'Retry',
+    String? retryLabel,
     this.icon = FontAwesomeIcons.triangleExclamation,
     super.key,
-  });
+  }) : _retryLabel = retryLabel;
 
   final String message;
   final VoidCallback? onRetry;
-  final String retryLabel;
+  final String? _retryLabel;
+
+  /// The given label, else "Retry" in the active language.
+  String get retryLabel => _retryLabel ?? tr('Retry');
   final IconData icon;
 
   @override
@@ -187,7 +195,7 @@ class FFLoadingView extends StatelessWidget {
     final ff = context.ff;
     return Center(
       child: Semantics(
-        label: message ?? 'Loading',
+        label: message ?? tr('Loading'),
         liveRegion: true,
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -12,6 +12,7 @@ library;
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -61,13 +62,15 @@ class VaultCustomFieldsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const VaultSectionLabel('Custom fields'),
+        VaultSectionLabel(tr('Custom fields')),
         if (fields.isNotEmpty) ...[
           VaultCard(
             children: [
               for (var i = 0; i < fields.length; i++)
                 VaultValueRow(
-                  label: fields[i].label.isEmpty ? 'Field' : fields[i].label,
+                  label: fields[i].label.isEmpty
+                      ? tr('Field')
+                      : fields[i].label,
                   value: fields[i].hidden
                       ? '•' * fields[i].value.length.clamp(4, 12)
                       : fields[i].value,
@@ -79,7 +82,7 @@ class VaultCustomFieldsSection extends ConsumerWidget {
         ],
         Semantics(
           button: true,
-          label: 'Add custom field',
+          label: tr('Add custom field'),
           excludeSemantics: true,
           child: FFPressable(
             onTap: () => unawaited(edit(null)),
@@ -106,7 +109,7 @@ class VaultCustomFieldsSection extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.sm),
                         Flexible(
                           child: Text(
-                            'Add field (PIN, security question…)',
+                            tr('Add field (PIN, security question…)'),
                             textAlign: TextAlign.center,
                             style: context.text.rowTitle.copyWith(
                               fontSize: VaultType.row,
@@ -145,11 +148,13 @@ class _CustomFieldSheetState extends State<_CustomFieldSheet> {
   late final _value = TextEditingController(text: widget.initial?.value);
   late bool _hidden = widget.initial?.hidden ?? false;
 
-  static const _suggestions = [
-    'PIN',
-    'Security question',
-    'Recovery email',
-    'Account number',
+  // A getter, not a const list: the labels follow the active language, and
+  // "hidden" is data (never compared against the label text).
+  List<({String label, bool hidden})> get _suggestions => [
+    (label: tr('PIN'), hidden: true),
+    (label: tr('Security question'), hidden: false),
+    (label: tr('Recovery email'), hidden: false),
+    (label: tr('Account number'), hidden: false),
   ];
 
   @override
@@ -181,7 +186,7 @@ class _CustomFieldSheetState extends State<_CustomFieldSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          widget.initial == null ? 'Add field' : 'Edit field',
+          widget.initial == null ? tr('Add field') : tr('Edit field'),
           style: context.text.sectionTitle.copyWith(color: ff.vaultInk),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -191,7 +196,7 @@ class _CustomFieldSheetState extends State<_CustomFieldSheet> {
           children: [
             for (final s in _suggestions)
               ActionChip(
-                label: Text(s),
+                label: Text(s.label),
                 labelStyle: context.text.caption.copyWith(
                   fontWeight: FontWeight.w700,
                   color: ff.vaultAccent,
@@ -200,8 +205,8 @@ class _CustomFieldSheetState extends State<_CustomFieldSheet> {
                 side: BorderSide.none,
                 shape: const StadiumBorder(),
                 onPressed: () => setState(() {
-                  _label.text = s;
-                  if (s == 'PIN') _hidden = true;
+                  _label.text = s.label;
+                  if (s.hidden) _hidden = true;
                 }),
               ),
           ],
@@ -210,13 +215,13 @@ class _CustomFieldSheetState extends State<_CustomFieldSheet> {
         VaultCard(
           children: [
             VaultTextRow(
-              label: 'Label',
+              label: tr('Label'),
               controller: _label,
               onChanged: (_) {},
               textCapitalization: TextCapitalization.sentences,
             ),
             VaultTextRow(
-              label: 'Value',
+              label: tr('Value'),
               controller: _value,
               onChanged: (_) {},
               obscure: _hidden,
@@ -224,18 +229,18 @@ class _CustomFieldSheetState extends State<_CustomFieldSheet> {
           ],
         ),
         VaultSwitchLine(
-          label: 'Hide value',
+          label: tr('Hide value'),
           value: _hidden,
           onChanged: (v) => setState(() => _hidden = v),
         ),
         const SizedBox(height: AppSpacing.md),
-        VaultPrimaryButton(label: 'Save field', onPressed: _save),
+        VaultPrimaryButton(label: tr('Save field'), onPressed: _save),
         if (widget.initial != null)
           TextButton(
             onPressed: () =>
                 Navigator.of(context).pop<_FieldResult>((field: null)),
             child: Text(
-              'Remove field',
+              tr('Remove field'),
               style: context.text.button.copyWith(color: ff.vaultDanger.fg),
             ),
           ),

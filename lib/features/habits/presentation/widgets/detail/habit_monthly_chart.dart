@@ -10,6 +10,7 @@ library;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -63,7 +64,7 @@ class HabitMonthlyChart extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const FFSectionHeader(title: 'Monthly completion'),
+        FFSectionHeader(title: tr('Monthly completion')),
         const SizedBox(height: AppSpacing.md + AppSpacing.xxs),
         FFCard(
           padding: const EdgeInsetsDirectional.fromSTEB(
@@ -73,7 +74,7 @@ class HabitMonthlyChart extends StatelessWidget {
             AppSpacing.md,
           ),
           child: Semantics(
-            label: 'Monthly completion: $label',
+            label: tr('Monthly completion: {label}', {'label': label}),
             excludeSemantics: true,
             child: SizedBox(
               height: chartHeight,

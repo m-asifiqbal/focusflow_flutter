@@ -19,6 +19,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/notifications/planning/planner_input.dart';
 import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
@@ -114,7 +115,7 @@ abstract final class HabitPlanner {
 
   static String _title(HabitDayStatus s, bool isToday) {
     final h = s.habit;
-    final name = h.name.trim().isEmpty ? 'Habit' : h.name.trim();
+    final name = h.name.trim().isEmpty ? tr('Habit') : h.name.trim();
     if (h.isQuit || h.isYesNo) return name;
     final count = isToday ? s.count : 0;
     return '$name — $count/${h.targetCount}';
@@ -125,14 +126,22 @@ abstract final class HabitPlanner {
     final streak = isToday ? s.currentStreak : 0;
     if (h.isQuit) {
       return streak > 0
-          ? 'Stay strong — $streak ${streak == 1 ? 'day' : 'days'} clean.'
-          : 'Stay on track today.';
+          ? tr(
+              'Stay strong — {count, plural, one {# day} other {# days}} clean.',
+              {'count': streak},
+            )
+          : tr('Stay on track today.');
     }
     final left = h.targetCount - (isToday ? s.count : 0);
     final lead = h.isYesNo || left <= 0
-        ? 'Time to check in.'
-        : '$left ${h.unit} to go.';
-    return streak > 1 ? "$lead You're on a $streak-day streak!" : lead;
+        ? tr('Time to check in.')
+        : tr('{left} {unit} to go.', {'left': left, 'unit': h.unit});
+    return streak > 1
+        ? tr("{lead} You're on a {streak}-day streak!", {
+            'lead': lead,
+            'streak': streak,
+          })
+        : lead;
   }
 
   static List<PlannedNotification> _streakRisk(
@@ -215,11 +224,14 @@ abstract final class HabitPlanner {
       fireAt: fireAt,
       category: NotificationCategory.streak,
       title: single != null
-          ? 'Your ${single.$2}-day ${habit!.name.trim()} streak is at risk'
-          : '${atRisk.length} streaks at risk',
+          ? tr('Your {v}-day {trim} streak is at risk', {
+              'v': single.$2,
+              'trim': habit!.name.trim(),
+            })
+          : tr('{length} streaks at risk', {'length': atRisk.length}),
       body: single != null
-          ? 'Check in before the day ends to keep it going.'
-          : '$names — check in before the day ends.',
+          ? tr('Check in before the day ends to keep it going.')
+          : tr('{names} — check in before the day ends.', {'names': names}),
       payload: NotificationPayload(
         key: key,
         category: NotificationCategory.streak,

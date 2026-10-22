@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/library_counts.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -115,7 +116,7 @@ class LibraryModuleGrid extends ConsumerWidget {
             : card(small[i]),
       if (modules.contains(ItemType.vault)) card(ItemType.vault),
       FFSecondaryButton(
-        label: 'Start a focus session',
+        label: tr('Start a focus session'),
         icon: FontAwesomeIcons.stopwatch,
         onPressed: () => showFocusTimer(context),
       ),
@@ -173,43 +174,43 @@ class LibraryCollections extends ConsumerWidget {
     }
 
     return FFGroupedList(
-      label: 'Collections',
+      label: tr('Collections'),
       children: [
         row(
-          'Pinned',
+          tr('Pinned'),
           FontAwesomeIcons.thumbtack,
           TagPalette.ideas,
           AppRoutes.pinned,
           (c) => c.pinned,
         ),
         row(
-          'Favourites',
+          tr('Favourites'),
           FontAwesomeIcons.solidStar,
           TagPalette.finance,
           AppRoutes.favourites,
           (c) => c.favourites,
         ),
         row(
-          'Tags & Folders',
+          tr('Tags & Folders'),
           FontAwesomeIcons.tags,
           TagPalette.design,
           AppRoutes.tags,
           (c) => c.tagsAndFolders,
         ),
         row(
-          'Archive',
+          tr('Archive'),
           FontAwesomeIcons.boxArchive,
           ActionTints.lock,
           AppRoutes.archive,
           (c) => c.archived,
         ),
         row(
-          'Recently Deleted',
+          tr('Recently Deleted'),
           FontAwesomeIcons.solidTrashCan,
           ModuleStyle.scan.colors,
           AppRoutes.trash,
           (c) => c.trash,
-          subtitle: 'Auto-deletes after 30 days',
+          subtitle: tr('Auto-deletes after 30 days'),
         ),
       ],
     );
@@ -227,7 +228,7 @@ class LibraryTagsSection extends ConsumerWidget {
     if (tags == null) {
       body = async.hasError
           ? FFTextButton(
-              label: "Couldn't load tags · Retry",
+              label: tr('Couldn\'t load tags · Retry'),
               onPressed: () => ref.invalidate(libraryTagsProvider),
               padding: EdgeInsetsDirectional.zero,
             )
@@ -245,7 +246,7 @@ class LibraryTagsSection extends ConsumerWidget {
             );
     } else if (tags.isEmpty) {
       body = Text(
-        'Tags you add to notes, tasks and more show up here.',
+        tr('Tags you add to notes, tasks and more show up here.'),
         style: context.text.bodySmall,
       );
     } else {
@@ -258,8 +259,8 @@ class LibraryTagsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const FFSectionLabel(
-          'Tags',
+        FFSectionLabel(
+          tr('Tags'),
           padding: EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
         ),
         body,

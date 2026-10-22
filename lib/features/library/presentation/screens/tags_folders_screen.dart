@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/folder.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -34,9 +35,9 @@ class TagsFoldersScreen extends ConsumerWidget {
 
   /// Section title of each module's folders.
   static String folderSection(ItemType t) => switch (t) {
-    ItemType.task => 'Task lists',
-    ItemType.vault => 'Vault folders',
-    _ => '${t.label} folders',
+    ItemType.task => tr('Task lists'),
+    ItemType.vault => tr('Vault folders'),
+    _ => tr('{type} folders', {'type': t.label}),
   };
 
   @override
@@ -68,9 +69,9 @@ class TagsFoldersScreen extends ConsumerWidget {
         FFEmptyState.compact(
           colors: TagPalette.high,
           icon: FontAwesomeIcons.triangleExclamation,
-          title: "Couldn't load tags",
-          body: 'Your items are safe. Try again.',
-          ctaLabel: 'Retry',
+          title: tr('Couldn\'t load tags'),
+          body: tr('Your items are safe. Try again.'),
+          ctaLabel: tr('Retry'),
           ctaIcon: FontAwesomeIcons.arrowsRotate,
           onCta: () => ref.invalidate(libraryTagsProvider),
         ),
@@ -79,15 +80,15 @@ class TagsFoldersScreen extends ConsumerWidget {
       add(const FFSkeletonList(kind: FFSkeletonKind.row, count: 6));
     } else if (tags.isEmpty && folderCount == 0) {
       add(
-        const Padding(
+        Padding(
           padding: EdgeInsetsDirectional.only(top: AppSpacing.xxxl),
           child: FFEmptyState(
             colors: TagPalette.design,
             icon: FontAwesomeIcons.tags,
-            title: 'No tags or folders yet',
-            body:
-                'Add #tags to notes, tasks, reminders and more, or create '
-                'folders in Notes and lists in Tasks.',
+            title: tr('No tags or folders yet'),
+            body: tr(
+              'Add #tags to notes, tasks, reminders and more, or create folders in Notes and lists in Tasks.',
+            ),
           ),
         ),
       );
@@ -95,7 +96,7 @@ class TagsFoldersScreen extends ConsumerWidget {
       if (tags.isNotEmpty) {
         add(
           FFGroupedList(
-            label: 'Tags',
+            label: tr('Tags'),
             children: [for (final t in tags) _TagRow(tag: t)],
           ),
         );
@@ -117,8 +118,8 @@ class TagsFoldersScreen extends ConsumerWidget {
         padding: EdgeInsetsDirectional.only(bottom: bottom + AppSpacing.xxxl),
         children: [
           FFNavHeader(
-            leading: const FFBackButton(label: 'Library'),
-            title: 'Tags & Folders',
+            leading: FFBackButton(label: tr('Library')),
+            title: tr('Tags & Folders'),
             subtitle: loading
                 ? null
                 : '${tags.length} ${tags.length == 1 ? 'tag' : 'tags'} · '
@@ -194,8 +195,8 @@ class _FolderRow extends ConsumerWidget {
         final name = await showTextInputSheet(
           context,
           title: folder.module == ItemType.task
-              ? 'Rename list'
-              : 'Rename folder',
+              ? tr('Rename list')
+              : tr('Rename folder'),
           initial: folder.name,
         );
         if (name == null) return;

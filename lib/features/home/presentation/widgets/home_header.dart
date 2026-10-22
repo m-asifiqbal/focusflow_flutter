@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -51,7 +52,9 @@ class HomeHeader extends ConsumerWidget {
           ProfileAvatar(
             initial: first.isEmpty ? null : first,
             size: HomeDimens.avatar,
-            semanticLabel: first.isEmpty ? 'Profile' : 'Profile, $first',
+            semanticLabel: first.isEmpty
+                ? tr('Profile')
+                : tr('Profile, {first}', {'first': first}),
             onTap: () => context.push(AppRoutes.settingsAccount),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -92,15 +95,15 @@ class HomeHeader extends ConsumerWidget {
           const SizedBox(width: AppSpacing.xs),
           FFRoundIconButton(
             icon: FontAwesomeIcons.magnifyingGlass,
-            semanticLabel: 'Search',
+            semanticLabel: tr('Search'),
             onPressed: () => context.push(AppRoutes.search),
           ),
           const SizedBox(width: HomeDimens.headerButtonGap),
           FFRoundIconButton(
             icon: FontAwesomeIcons.solidBell,
             semanticLabel: unread > 0
-                ? 'Notifications, $unread unread'
-                : 'Notifications',
+                ? tr('Notifications, {unread} unread', {'unread': unread})
+                : tr('Notifications'),
             badge: unread > 0,
             onPressed: () => context.push(AppRoutes.notificationCenter),
           ),

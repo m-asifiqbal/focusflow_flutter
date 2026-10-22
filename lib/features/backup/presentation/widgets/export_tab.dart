@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -77,8 +78,8 @@ class ExportTab extends ConsumerWidget {
         ? f.subtitle
         : switch (sealed) {
             true => f.subtitle,
-            false => 'Full · not encrypted',
-            null => 'Full backup',
+            false => tr('Full · not encrypted'),
+            null => tr('Full backup'),
           };
     const gap = SizedBox(height: AppSpacing.section);
     const tileGap = SizedBox(width: AppSpacing.sm);
@@ -86,7 +87,7 @@ class ExportTab extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const FFSectionLabel('Format'),
+        FFSectionLabel(tr('Format')),
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,10 +108,10 @@ class ExportTab extends ConsumerWidget {
           ),
         ),
         gap,
-        const FFSectionLabel('Include'),
+        FFSectionLabel(tr('Include')),
         if (counts.hasError)
           FFErrorBanner(
-            message: "Couldn't count your items",
+            message: tr('Couldn\'t count your items'),
             onRetry: () => ref.invalidate(exportCountsProvider),
           )
         else
@@ -139,7 +140,7 @@ class ExportTab extends ConsumerWidget {
                 colors: BackupTints.archived,
                 size: AppSizes.iconTileSm,
               ),
-              title: 'Include archived items',
+              title: tr('Include archived items'),
               value: o.includeArchived,
               onChanged: c.setArchived,
             ),
@@ -149,10 +150,10 @@ class ExportTab extends ConsumerWidget {
                 colors: BackupTints.attachments,
                 size: AppSizes.iconTileSm,
               ),
-              title: 'Include attachments',
+              title: tr('Include attachments'),
               subtitle: o.format == ExportFormat.ffbackup
                   ? null
-                  : 'Only in .ffbackup files',
+                  : tr('Only in .ffbackup files'),
               value: o.includeAttachments,
               enabled: o.format == ExportFormat.ffbackup,
               onChanged: c.setAttachments,
@@ -163,10 +164,10 @@ class ExportTab extends ConsumerWidget {
                 colors: BackupTints.settings,
                 size: AppSizes.iconTileSm,
               ),
-              title: 'Include app settings',
+              title: tr('Include app settings'),
               subtitle: o.format == ExportFormat.ffbackup
-                  ? 'Theme, notifications and layout'
-                  : 'Only in .ffbackup files',
+                  ? tr('Theme, notifications and layout')
+                  : tr('Only in .ffbackup files'),
               value: o.includeSettings,
               enabled: o.format == ExportFormat.ffbackup,
               onChanged: c.setSettings,
@@ -177,19 +178,19 @@ class ExportTab extends ConsumerWidget {
         FFInfoBanner(
           icon: FontAwesomeIcons.triangleExclamation,
           colors: ModuleStyle.vault.colors,
-          text:
-              'Vault items are only exported inside an encrypted '
-              '.ffbackup file — never as plain CSV.',
+          text: tr(
+            'Vault items are only exported inside an encrypted .ffbackup file — never as plain CSV.',
+          ),
         ),
         gap,
-        const FFSectionLabel('Save to'),
+        FFSectionLabel(tr('Save to')),
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: ExportChoiceTile(
-                  label: 'Google Drive',
+                  label: tr('Google Drive'),
                   iconWidget: const DriveLogo(size: 24),
                   style: ExportTileStyle.ring,
                   enabled: drive && o.format == ExportFormat.ffbackup,
@@ -200,7 +201,7 @@ class ExportTab extends ConsumerWidget {
               tileGap,
               Expanded(
                 child: ExportChoiceTile(
-                  label: 'This device',
+                  label: tr('This device'),
                   icon: FontAwesomeIcons.mobileScreenButton,
                   iconColor: context.ff.primary,
                   style: ExportTileStyle.ring,
@@ -211,7 +212,7 @@ class ExportTab extends ConsumerWidget {
               tileGap,
               Expanded(
                 child: ExportChoiceTile(
-                  label: 'Share…',
+                  label: tr('Share…'),
                   icon: FontAwesomeIcons.arrowUpFromBracket,
                   iconColor: BackupTints.drive.solid,
                   style: ExportTileStyle.ring,
@@ -224,7 +225,9 @@ class ExportTab extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xxl),
         FFPrimaryButton(
-          label: 'Export $total ${total == 1 ? 'item' : 'items'}',
+          label: tr('Export {count, plural, one {# item} other {# items}}', {
+            'count': total,
+          }),
           icon: FontAwesomeIcons.fileExport,
           loading: state.busy,
           onPressed:
@@ -235,7 +238,7 @@ class ExportTab extends ConsumerWidget {
               : () => _export(context, ref),
         ),
         gap,
-        const FFSectionLabel('Import from other apps'),
+        FFSectionLabel(tr('Import from other apps')),
         Wrap(
           spacing: AppSpacing.sm + 2,
           runSpacing: AppSpacing.sm + 2,
@@ -272,7 +275,7 @@ class _IncludeRow extends StatelessWidget {
     return Semantics(
       checked: checked,
       enabled: enabled,
-      label: '${module.label}, ${count ?? 0} items',
+      label: tr('{label}, {v} items', {'label': module.label, 'v': count ?? 0}),
       excludeSemantics: true,
       child: FFListRow(
         leading: FFIconTile(
@@ -311,7 +314,7 @@ class _AppPill extends StatelessWidget {
     final ff = context.ff;
     return Semantics(
       button: true,
-      label: 'Import from $label',
+      label: tr('Import from {label}', {'label': label}),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

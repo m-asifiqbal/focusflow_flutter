@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -40,41 +41,44 @@ const _p3 = Offset(10, 200);
 const _p4 = Offset(216, 195);
 const _p5 = Offset(121, 280);
 
-final onboardingPages = [
+/// A getter, not a top-level final: the copy is translated when it is read,
+/// so it follows the language the user picks (a final would freeze it).
+List<OnboardingPageData> get onboardingPages => [
   OnboardingPageData(
-    titleLead: 'Everything you need,',
-    titleAccent: 'in one calm place.',
-    body:
-        'Notes, tasks, reminders, habits and a secure password vault — '
-        'organised, synced and private.',
+    titleLead: tr('Everything you need,'),
+    titleAccent: tr('in one calm place.'),
+    body: tr(
+      'Notes, tasks, reminders, habits and a secure password vault — '
+      'organised, synced and private.',
+    ),
     icon: FontAwesomeIcons.bolt,
     chips: [
       HeroChip(
-        label: 'Notes',
+        label: tr('Notes'),
         icon: ModuleStyle.notes.icon,
         colors: ModuleStyle.notes.colors,
         position: _p1,
       ),
       HeroChip(
-        label: 'Tasks',
+        label: tr('Tasks'),
         icon: ModuleStyle.tasks.icon,
         colors: ModuleStyle.tasks.colors,
         position: _p2,
       ),
       HeroChip(
-        label: 'Habits',
+        label: tr('Habits'),
         icon: ModuleStyle.habits.icon,
         colors: ModuleStyle.habits.colors,
         position: _p3,
       ),
       HeroChip(
-        label: 'Reminders',
+        label: tr('Reminders'),
         icon: ModuleStyle.reminders.icon,
         colors: ModuleStyle.reminders.colors,
         position: _p4,
       ),
       HeroChip(
-        label: 'Vault',
+        label: tr('Vault'),
         icon: ModuleStyle.vault.icon,
         colors: ModuleStyle.vault.colors,
         position: _p5,
@@ -82,39 +86,40 @@ final onboardingPages = [
     ],
   ),
   OnboardingPageData(
-    titleLead: 'Private by design,',
-    titleAccent: 'yours alone.',
-    body:
-        'Your data is encrypted on this device and the vault adds AES-256 on '
-        'top. No ads, no tracking, no account required.',
+    titleLead: tr('Private by design,'),
+    titleAccent: tr('yours alone.'),
+    body: tr(
+      'Your data is encrypted on this device and the vault adds AES-256 on '
+      'top. No ads, no tracking, no account required.',
+    ),
     icon: FontAwesomeIcons.shieldHalved,
     chips: [
       HeroChip(
-        label: 'AES-256',
+        label: tr('AES-256'),
         icon: FontAwesomeIcons.lock,
         colors: ModuleStyle.vault.colors,
         position: _p1,
       ),
       HeroChip(
-        label: 'Biometric',
+        label: tr('Biometric'),
         icon: FontAwesomeIcons.fingerprint,
         colors: ModuleStyle.habits.colors,
         position: _p2,
       ),
       HeroChip(
-        label: 'Offline',
+        label: tr('Offline'),
         icon: FontAwesomeIcons.mobileScreen,
         colors: ModuleStyle.notes.colors,
         position: _p3,
       ),
       HeroChip(
-        label: 'No tracking',
+        label: tr('No tracking'),
         icon: FontAwesomeIcons.solidEyeSlash,
         colors: ModuleStyle.reminders.colors,
         position: const Offset(206, 195),
       ),
       HeroChip(
-        label: 'Your keys',
+        label: tr('Your keys'),
         icon: FontAwesomeIcons.key,
         colors: ModuleStyle.tasks.colors,
         position: const Offset(112, 280),
@@ -122,39 +127,40 @@ final onboardingPages = [
     ],
   ),
   OnboardingPageData(
-    titleLead: 'Sync everywhere,',
-    titleAccent: 'back up safely.',
-    body:
-        'Optional Google Drive backup keeps everything safe and in sync '
-        'across your devices — or stay fully offline.',
+    titleLead: tr('Sync everywhere,'),
+    titleAccent: tr('back up safely.'),
+    body: tr(
+      'Optional Google Drive backup keeps everything safe and in sync '
+      'across your devices — or stay fully offline.',
+    ),
     icon: FontAwesomeIcons.cloudArrowUp,
     chips: [
       HeroChip(
-        label: 'Drive',
+        label: tr('Drive'),
         icon: FontAwesomeIcons.googleDrive,
         colors: ModuleStyle.tasks.colors,
         position: _p1,
       ),
       HeroChip(
-        label: 'Daily',
+        label: tr('Daily'),
         icon: FontAwesomeIcons.solidClock,
         colors: ModuleStyle.notes.colors,
         position: _p2,
       ),
       HeroChip(
-        label: 'Encrypted',
+        label: tr('Encrypted'),
         icon: FontAwesomeIcons.lock,
         colors: ModuleStyle.vault.colors,
         position: const Offset(0, 200),
       ),
       HeroChip(
-        label: 'Restore',
+        label: tr('Restore'),
         icon: FontAwesomeIcons.arrowsRotate,
         colors: ModuleStyle.reminders.colors,
         position: const Offset(222, 195),
       ),
       HeroChip(
-        label: 'Devices',
+        label: tr('Devices'),
         icon: FontAwesomeIcons.mobileScreen,
         colors: ModuleStyle.habits.colors,
         position: const Offset(116, 280),

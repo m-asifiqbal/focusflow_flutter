@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/folder.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -34,7 +35,19 @@ ModuleColors folderColors(Folder f) {
   return f.module.style.colors;
 }
 
-String _items(int n) => '$n ${n == 1 ? 'item' : 'items'}';
+/// Display name of a [libraryTagColours] key, in the active language.
+String _colourName(String key) => switch (key) {
+  'Emerald' => tr('Emerald'),
+  'Blue' => tr('Blue'),
+  'Pink' => tr('Pink'),
+  'Amber' => tr('Amber'),
+  'Violet' => tr('Violet'),
+  'Sky' => tr('Sky'),
+  _ => key,
+};
+
+String _items(int n) =>
+    tr('{count, plural, one {# item} other {# items}}', {'count': n});
 
 Future<String?> _pickColour(
   BuildContext context, {
@@ -49,14 +62,14 @@ Future<String?> _pickColour(
     options: [
       ChoiceOption(
         value: null,
-        label: 'Automatic',
+        label: tr('Automatic'),
         icon: FontAwesomeIcons.wandMagicSparkles,
         colors: automatic,
       ),
       for (final e in libraryTagColours.entries)
         ChoiceOption(
           value: libraryHex(e.value),
-          label: e.key,
+          label: _colourName(e.key),
           icon: FontAwesomeIcons.solidCircle,
           colors: e.value,
         ),
@@ -90,13 +103,13 @@ Future<void> showTagManageSheet(
       actions: [
         FFActionItem(
           icon: FontAwesomeIcons.pen,
-          label: 'Rename tag',
+          label: tr('Rename tag'),
           colors: TagPalette.work,
           onTap: () async {
             final name = await showTextInputSheet(
               context,
-              title: 'Rename tag',
-              hint: 'Tag name',
+              title: tr('Rename tag'),
+              hint: tr('Tag name'),
               initial: tag.name,
             );
             if (name == null || Tag.normalize(name).isEmpty) return;
@@ -105,12 +118,12 @@ Future<void> showTagManageSheet(
         ),
         FFActionItem(
           icon: FontAwesomeIcons.palette,
-          label: 'Change colour',
+          label: tr('Change colour'),
           colors: TagPalette.design,
           onTap: () async {
             final hex = await _pickColour(
               context,
-              title: 'Tag colour',
+              title: tr('Tag colour'),
               selected: tag.colorHex,
               automatic: TagPalette.forName(tag.name),
             );
@@ -120,13 +133,13 @@ Future<void> showTagManageSheet(
         if (others.isNotEmpty)
           FFActionItem(
             icon: FontAwesomeIcons.codeMerge,
-            label: 'Merge into…',
+            label: tr('Merge into…'),
             colors: TagPalette.finance,
             onTap: () => _mergeTag(context, ref, tag, others),
           ),
         FFActionItem(
           icon: FontAwesomeIcons.solidTrashCan,
-          label: 'Delete tag',
+          label: tr('Delete tag'),
           colors: ModuleStyle.scan.colors,
           destructive: true,
           onTap: () => _deleteTag(context, ref, tag),
@@ -144,7 +157,7 @@ Future<void> _mergeTag(
 ) async {
   final picked = await showChoiceSheet<Tag>(
     context,
-    title: 'Merge ${source.label} into',
+    title: tr('Merge {label} into', {'label': source.label}),
     options: [
       for (final t in others)
         ChoiceOption(
@@ -160,11 +173,15 @@ Future<void> _mergeTag(
   final target = picked.value;
   final ok = await showFFConfirm(
     context,
-    title: 'Merge ${source.label} into ${target.label}?',
-    message:
-        'Items tagged ${source.label} get ${target.label} instead, and '
-        '${source.label} is removed.',
-    confirmLabel: 'Merge',
+    title: tr('Merge {label} into {label2}?', {
+      'label': source.label,
+      'label2': target.label,
+    }),
+    message: tr(
+      'Items tagged {label} get {label2} instead, and {label} is removed.',
+      {'label': source.label, 'label2': target.label},
+    ),
+    confirmLabel: tr('Merge'),
     icon: FontAwesomeIcons.codeMerge,
   );
   if (!ok) return;
@@ -174,7 +191,10 @@ Future<void> _mergeTag(
   if (!context.mounted) return;
   showUndoSnackbar(
     context,
-    message: '${source.label} merged into ${target.label}',
+    message: tr('{label} merged into {label2}', {
+      'label': source.label,
+      'label2': target.label,
+    }),
     icon: FontAwesomeIcons.codeMerge,
     onUndo: undo,
   );
@@ -183,9 +203,9 @@ Future<void> _mergeTag(
 Future<void> _deleteTag(BuildContext context, WidgetRef ref, Tag tag) async {
   final ok = await showFFConfirm(
     context,
-    title: 'Delete ${tag.label}?',
-    message: 'The tag is removed from every item. The items are kept.',
-    confirmLabel: 'Delete tag',
+    title: tr('Delete {label}?', {'label': tag.label}),
+    message: tr('The tag is removed from every item. The items are kept.'),
+    confirmLabel: tr('Delete tag'),
     destructive: true,
     icon: FontAwesomeIcons.solidTrashCan,
   );
@@ -194,7 +214,7 @@ Future<void> _deleteTag(BuildContext context, WidgetRef ref, Tag tag) async {
   if (!context.mounted) return;
   showUndoSnackbar(
     context,
-    message: '${tag.label} deleted',
+    message: tr('{label} deleted', {'label': tag.label}),
     icon: FontAwesomeIcons.solidTrashCan,
     onUndo: undo,
   );
@@ -219,13 +239,13 @@ Future<void> showFolderManageSheet(
       actions: [
         FFActionItem(
           icon: FontAwesomeIcons.pen,
-          label: 'Rename',
+          label: tr('Rename'),
           colors: TagPalette.work,
           onTap: () async {
             final name = await showTextInputSheet(
               context,
-              title: 'Rename folder',
-              hint: 'Folder name',
+              title: tr('Rename folder'),
+              hint: tr('Folder name'),
               initial: folder.name,
             );
             if (name != null) await c.renameFolder(folder, name);
@@ -233,12 +253,12 @@ Future<void> showFolderManageSheet(
         ),
         FFActionItem(
           icon: FontAwesomeIcons.palette,
-          label: 'Change colour',
+          label: tr('Change colour'),
           colors: TagPalette.design,
           onTap: () async {
             final hex = await _pickColour(
               context,
-              title: 'Folder colour',
+              title: tr('Folder colour'),
               selected: folder.colorHex,
               automatic: folder.module.style.colors,
             );
@@ -247,7 +267,7 @@ Future<void> showFolderManageSheet(
         ),
         FFActionItem(
           icon: FontAwesomeIcons.solidTrashCan,
-          label: 'Delete folder',
+          label: tr('Delete folder'),
           colors: ModuleStyle.scan.colors,
           destructive: true,
           onTap: () => _deleteFolder(context, ref, folder),
@@ -264,12 +284,14 @@ Future<void> _deleteFolder(
 ) async {
   final ok = await showFFConfirm(
     context,
-    title: 'Delete “${folder.name}”?',
+    title: tr('Delete “{name}”?', {'name': folder.name}),
     message: folder.itemCount == 0
-        ? 'The folder is empty.'
-        : 'Its ${_items(folder.itemCount)} are kept and moved out of the '
-              'folder.',
-    confirmLabel: 'Delete folder',
+        ? tr('The folder is empty.')
+        : tr(
+            '{count, plural, one {Its # item is kept and moved out of the folder.} other {Its # items are kept and moved out of the folder.}}',
+            {'count': folder.itemCount},
+          ),
+    confirmLabel: tr('Delete folder'),
     destructive: true,
     icon: FontAwesomeIcons.solidTrashCan,
   );
@@ -280,7 +302,7 @@ Future<void> _deleteFolder(
   if (!context.mounted) return;
   showUndoSnackbar(
     context,
-    message: '“${folder.name}” deleted',
+    message: tr('“{name}” deleted', {'name': folder.name}),
     icon: FontAwesomeIcons.solidTrashCan,
     onUndo: undo,
   );
@@ -292,12 +314,12 @@ Future<void> createFolderFlow(
   WidgetRef ref,
   ItemType module,
 ) async {
-  final noun = module == ItemType.task ? 'list' : 'folder';
+  final isList = module == ItemType.task;
   final name = await showTextInputSheet(
     context,
-    title: 'New $noun',
-    hint: '${noun[0].toUpperCase()}${noun.substring(1)} name',
-    confirmLabel: 'Create',
+    title: isList ? tr('New list') : tr('New folder'),
+    hint: isList ? tr('List name') : tr('Folder name'),
+    confirmLabel: tr('Create'),
   );
   if (name == null) return;
   await ref.read(tagsFoldersControllerProvider).createFolder(module, name);

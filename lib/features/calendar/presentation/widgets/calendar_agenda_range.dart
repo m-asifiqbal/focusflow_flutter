@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -48,7 +49,7 @@ class CalendarAgendaRange extends StatelessWidget {
               icon: rtl
                   ? FontAwesomeIcons.chevronRight
                   : FontAwesomeIcons.chevronLeft,
-              semanticLabel: 'Previous week',
+              semanticLabel: tr('Previous week'),
               onPressed: () => onShift(-1),
             ),
             Expanded(
@@ -64,7 +65,7 @@ class CalendarAgendaRange extends StatelessWidget {
               icon: rtl
                   ? FontAwesomeIcons.chevronLeft
                   : FontAwesomeIcons.chevronRight,
-              semanticLabel: 'Next week',
+              semanticLabel: tr('Next week'),
               onPressed: () => onShift(1),
             ),
           ],

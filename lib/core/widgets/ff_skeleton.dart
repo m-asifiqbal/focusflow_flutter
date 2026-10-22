@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/ff_card.dart';
@@ -261,7 +262,7 @@ class FFSkeletonList extends StatelessWidget {
       list = FFCard(padding: EdgeInsetsDirectional.zero, child: list);
     }
     return Semantics(
-      label: 'Loading',
+      label: tr('Loading'),
       liveRegion: true,
       child: Padding(
         padding: padding,

@@ -13,6 +13,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -32,7 +33,7 @@ class NotePinDots extends StatelessWidget {
   Widget build(BuildContext context) {
     final ff = context.ff;
     return Semantics(
-      label: 'PIN, $length digits entered',
+      label: tr('PIN, {length} digits entered', {'length': length}),
       liveRegion: true,
       child: AnimatedBuilder(
         animation: shake,
@@ -113,14 +114,14 @@ class NotePinKeypad extends StatelessWidget {
         ],
         row([
           _Key(
-            semanticLabel: 'Submit PIN',
+            semanticLabel: tr('Submit PIN'),
             icon: FontAwesomeIcons.check,
             emphasized: true,
             onTap: canConfirm ? onConfirm : null,
           ),
           digit('0'),
           _Key(
-            semanticLabel: 'Delete last digit',
+            semanticLabel: tr('Delete last digit'),
             icon: FontAwesomeIcons.deleteLeft,
             onTap: onBackspace,
           ),

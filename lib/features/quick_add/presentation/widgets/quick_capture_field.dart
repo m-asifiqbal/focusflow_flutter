@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -135,8 +136,8 @@ class _QuickCaptureFieldState extends ConsumerState<QuickCaptureField> {
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 hintText: listening
-                    ? 'Listening…'
-                    : 'Try “Pay rent tomorrow 9am”',
+                    ? tr('Listening…')
+                    : tr('Try “Pay rent tomorrow 9am”'),
                 hintMaxLines: 1,
                 hintStyle: textStyle.copyWith(color: ff.inkFaint),
               ),
@@ -161,8 +162,9 @@ class _QuickCaptureFieldState extends ConsumerState<QuickCaptureField> {
               start: AppSpacing.xs,
             ),
             child: Text(
-              'Speech recognition isn’t available. Check microphone '
-              'permission in Settings.',
+              tr(
+                'Speech recognition isn’t available. Check microphone permission in Settings.',
+              ),
               style: context.text.meta.copyWith(color: ff.danger),
             ),
           ),
@@ -235,7 +237,7 @@ class _MicButtonState extends State<_MicButton>
     return Semantics(
       button: true,
       toggled: widget.listening,
-      label: widget.listening ? 'Stop dictation' : 'Dictate',
+      label: widget.listening ? tr('Stop dictation') : tr('Dictate'),
       excludeSemantics: true,
       child: FFPressable(
         onTap: widget.onTap,
@@ -279,7 +281,9 @@ class _SubmitButton extends StatelessWidget {
     final ff = context.ff;
     return Semantics(
       button: true,
-      label: 'Create ${kind.label.toLowerCase()}',
+      label: tr('Create {toLowerCase}', {
+        'toLowerCase': kind.label.toLowerCase(),
+      }),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

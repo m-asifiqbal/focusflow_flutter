@@ -10,10 +10,12 @@ library;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/habits/domain/services/streak_calculator.dart';
 
 /// One weekday square in a habit card footer.
@@ -109,13 +111,21 @@ class HabitDayStatus {
   /// "6 / 8 glasses", "Completed", "Quit habit · day 9", "Paused",
   /// "Week goal met", "Rest day".
   String get progressLabel {
-    if (habit.isQuit) return 'Quit habit · day ${streak.current}';
-    if (isSkipped) return 'Skipped';
-    if (isDone) return 'Completed';
-    if (habit.isPaused) return 'Paused';
-    if (!isScheduled) return isWeekGoalMet ? 'Week goal met' : 'Rest day';
+    if (habit.isQuit) {
+      return tr('Quit habit · day {day}', {'day': streak.current});
+    }
+    if (isSkipped) return tr('Skipped');
+    if (isDone) return tr('Completed');
+    if (habit.isPaused) return tr('Paused');
+    if (!isScheduled) {
+      return isWeekGoalMet ? tr('Week goal met') : tr('Rest day');
+    }
     if (habit.isYesNo) return habit.frequency.label;
-    return '$count / ${habit.targetCount} ${habit.unit}';
+    return tr('{count} / {target} {unit}', {
+      'count': count,
+      'target': habit.targetCount,
+      'unit': HabitWords.shown(habit.unit),
+    });
   }
 
   static const _cellsEq = ListEquality<HabitDayCell>();

@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/backup_key_policy.dart';
 import 'package:focusflow/core/sync/local_backups.dart';
@@ -44,18 +45,18 @@ class AutomaticBackupSection extends ConsumerWidget {
     final s = ref.read(settingsProvider);
     final f = await pickSetting<BackupFrequency>(
       context,
-      title: 'Backup frequency',
+      title: tr('Backup frequency'),
       selected: s.backupFrequency,
       options: [
-        option(BackupFrequency.daily, 'Daily'),
-        option(BackupFrequency.weekly, 'Weekly'),
+        option(BackupFrequency.daily, tr('Daily')),
+        option(BackupFrequency.weekly, tr('Weekly')),
       ],
     );
     if (f == null || !context.mounted) return;
     final t = await showNotificationTimeSheet(
       context,
-      title: 'Backup time',
-      subtitle: 'Runs when your phone is idle around this time',
+      title: tr('Backup time'),
+      subtitle: tr('Runs when your phone is idle around this time'),
       minutes: s.backupMinutes,
       use24h: s.use24HourTime,
     );
@@ -73,11 +74,12 @@ class AutomaticBackupSection extends ConsumerWidget {
     final s = ref.read(settingsProvider);
     final n = await pickSetting<int>(
       context,
-      title: 'Keep last',
-      subtitle: 'Older backups are deleted automatically',
+      title: tr('Keep last'),
+      subtitle: tr('Older backups are deleted automatically'),
       selected: s.keepBackups,
       options: [
-        for (final n in const [3, 5, 10, 20, 30]) option(n, '$n backups'),
+        for (final n in const [3, 5, 10, 20, 30])
+          option(n, tr('{n} backups', {'n': n})),
       ],
     );
     if (n == null) return;
@@ -95,7 +97,7 @@ class AutomaticBackupSection extends ConsumerWidget {
     if (!context.mounted) return;
     final pin = await showBackupPinSheet(
       context,
-      title: 'Set a backup PIN',
+      title: tr('Set a backup PIN'),
       message: kBackupPinMessage,
       confirm: true,
     );
@@ -106,7 +108,7 @@ class AutomaticBackupSection extends ConsumerWidget {
       if (context.mounted) {
         showFFToast(
           context,
-          "Couldn't save the backup PIN on this device. Try again.",
+          tr("Couldn't save the backup PIN on this device. Try again."),
           icon: FontAwesomeIcons.triangleExclamation,
         );
       }
@@ -120,12 +122,12 @@ class AutomaticBackupSection extends ConsumerWidget {
     final edit = ref.read(settingsProvider.notifier);
     final encrypted = s.encryptBackups && hasKey;
     return FFGroupedList(
-      label: 'Automatic backup',
+      label: tr('Automatic backup'),
       children: [
         if (connected) ...[
           FFListRow.toggle(
             leading: _tile(FontAwesomeIcons.cloudArrowUp, BackupTints.drive),
-            title: 'Auto backup to Drive',
+            title: tr('Auto backup to Drive'),
             value: s.autoBackupDrive,
             onChanged: (v) =>
                 edit.update((s) => s.copyWith(autoBackupDrive: v)),
@@ -135,40 +137,40 @@ class AutomaticBackupSection extends ConsumerWidget {
               FontAwesomeIcons.solidCalendar,
               BackupTints.frequency,
             ),
-            title: 'Frequency',
+            title: tr('Frequency'),
             value: BackupLabels.frequency(s),
             enabled: s.autoBackupDrive,
             onTap: () => _frequency(context, ref),
           ),
           FFListRow.toggle(
             leading: _tile(FontAwesomeIcons.arrowsRotate, BackupTints.openSync),
-            title: 'Sync when app opens',
-            subtitle: 'Gets changes from your other devices',
+            title: tr('Sync when app opens'),
+            subtitle: tr('Gets changes from your other devices'),
             value: s.syncOnOpen,
             onChanged: (v) => edit.update((s) => s.copyWith(syncOnOpen: v)),
           ),
           FFListRow.toggle(
             leading: _tile(FontAwesomeIcons.wifi, BackupTints.wifi),
-            title: 'Wi-Fi only',
+            title: tr('Wi-Fi only'),
             value: s.backupWifiOnly,
             onChanged: (v) => edit.update((s) => s.copyWith(backupWifiOnly: v)),
           ),
         ],
         FFListRow.toggle(
           leading: _tile(FontAwesomeIcons.lock, BackupTints.encrypt),
-          title: 'Encrypt backups',
+          title: tr('Encrypt backups'),
           subtitle: encrypted
-              ? 'Protected with your backup PIN'
+              ? tr('Protected with your backup PIN')
               : s.encryptBackups
-              ? 'Set a backup PIN to keep backing up'
-              : 'Backups can be opened without a PIN',
+              ? tr('Set a backup PIN to keep backing up')
+              : tr('Backups can be opened without a PIN'),
           value: encrypted,
           onChanged: (v) => _encrypt(context, ref, v),
         ),
         FFListRow(
           leading: _tile(FontAwesomeIcons.layerGroup, BackupTints.keep),
-          title: 'Keep last',
-          value: '${s.keepBackups} backups',
+          title: tr('Keep last'),
+          value: tr('{n} backups', {'n': s.keepBackups}),
           onTap: () => _keep(context, ref),
         ),
       ],
@@ -200,8 +202,13 @@ class _LocalBackupSectionState extends ConsumerState<LocalBackupSection> {
       if (mounted) {
         showFFToast(
           context,
-          'Backed up ${r.itemCount} items · ${BackupLabels.size(r.sizeBytes)}'
-          '${r.isEncrypted ? ' · encrypted' : ' · not encrypted'}',
+          tr('Backed up {count} items · {size}', {
+                'count': r.itemCount,
+                'size': BackupLabels.size(r.sizeBytes),
+              }) +
+              (r.isEncrypted
+                  ? ' · ${tr('encrypted')}'
+                  : ' · ${tr('not encrypted')}'),
           icon: FontAwesomeIcons.check,
         );
       }
@@ -225,7 +232,7 @@ class _LocalBackupSectionState extends ConsumerState<LocalBackupSection> {
       if (mounted) {
         showFFToast(
           context,
-          "Couldn't write the backup. Check free space.",
+          tr("Couldn't write the backup. Check free space."),
           icon: FontAwesomeIcons.triangleExclamation,
         );
       }
@@ -238,7 +245,7 @@ class _LocalBackupSectionState extends ConsumerState<LocalBackupSection> {
     final s = ref.read(settingsProvider);
     final f = await pickSetting<LocalBackupFrequency>(
       context,
-      title: 'Auto local backup',
+      title: tr('Auto local backup'),
       selected: s.localBackupFrequency,
       options: [
         for (final f in LocalBackupFrequency.values)
@@ -255,11 +262,11 @@ class _LocalBackupSectionState extends ConsumerState<LocalBackupSection> {
   Widget build(BuildContext context) {
     final s = ref.watch(settingsProvider);
     return FFGroupedList(
-      label: 'Local backup',
+      label: tr('Local backup'),
       children: [
         FFListRow(
           leading: _tile(FontAwesomeIcons.hardDrive, BackupTints.deviceNow),
-          title: 'Back up to device now',
+          title: tr('Back up to device now'),
           trailing: _busy
               ? const SizedBox.square(
                   dimension: 18,
@@ -274,16 +281,16 @@ class _LocalBackupSectionState extends ConsumerState<LocalBackupSection> {
             FontAwesomeIcons.solidFolderOpen,
             BackupTints.location,
           ),
-          title: 'Backup location',
+          title: tr('Backup location'),
           value: 'Documents/${LocalBackups.folder}',
           onTap: () => showFFConfirm(
             context,
-            title: 'Backup location',
-            message:
-                'Local backups are kept in Documents/${LocalBackups.folder} '
-                "in FocusFlow's storage. Use Download on a backup below to "
-                'save a copy anywhere else.',
-            confirmLabel: 'OK',
+            title: tr('Backup location'),
+            message: tr(
+              'Local backups are kept in Documents/{folder} in FocusFlow\'s storage. Use Download on a backup below to save a copy anywhere else.',
+              {'folder': LocalBackups.folder},
+            ),
+            confirmLabel: tr('OK'),
             icon: FontAwesomeIcons.solidFolderOpen,
           ),
         ),
@@ -292,7 +299,7 @@ class _LocalBackupSectionState extends ConsumerState<LocalBackupSection> {
             FontAwesomeIcons.mobileScreenButton,
             BackupTints.autoLocal,
           ),
-          title: 'Auto local backup',
+          title: tr('Auto local backup'),
           value: BackupLabels.localFrequency(s.localBackupFrequency),
           onTap: _frequency,
         ),

@@ -8,19 +8,27 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
+
 /// The strongest biometric the OS offers this app.
 enum BiometricKind {
-  faceId('Face ID'),
-  touchId('Touch ID'),
-  face('Face unlock'),
-  fingerprint('Fingerprint'),
-  biometrics('Biometrics'),
-  none('Passcode');
-
-  const BiometricKind(this.label);
+  faceId,
+  touchId,
+  face,
+  fingerprint,
+  biometrics,
+  none;
 
   /// "Face ID", "Fingerprint" … ("Passcode" when there is no biometric).
-  final String label;
+  /// A getter, so it follows the active language.
+  String get label => switch (this) {
+    BiometricKind.faceId => tr('Face ID'),
+    BiometricKind.touchId => tr('Touch ID'),
+    BiometricKind.face => tr('Face unlock'),
+    BiometricKind.fingerprint => tr('Fingerprint'),
+    BiometricKind.biometrics => tr('Biometrics'),
+    BiometricKind.none => tr('Passcode'),
+  };
 }
 
 /// Outcome of [DeviceAuthenticator.authenticate].

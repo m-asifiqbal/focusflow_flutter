@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -37,9 +38,9 @@ class AppearanceSettingsScreen extends ConsumerWidget {
     return FFScaffold(
       body: Column(
         children: [
-          const FFNavHeader(
-            leading: FFBackButton(label: 'Settings'),
-            title: 'Appearance',
+          FFNavHeader(
+            leading: FFBackButton(label: tr('Settings')),
+            title: tr('Appearance'),
           ),
           Expanded(
             child: ListView(
@@ -50,17 +51,17 @@ class AppearanceSettingsScreen extends ConsumerWidget {
                 AppSpacing.xxl,
               ),
               children: [
-                const FFSectionLabel('Theme'),
+                FFSectionLabel(tr('Theme')),
                 ThemePicker(
                   selected: s.themeMode,
                   accent: s.accent,
                   onSelected: editor.setThemeMode,
                 ),
                 gap,
-                const FFSectionLabel('Accent colour'),
+                FFSectionLabel(tr('Accent colour')),
                 AccentPicker(selected: s.accent, onSelected: editor.setAccent),
                 gap,
-                const FFSectionLabel('Text size'),
+                FFSectionLabel(tr('Text size')),
                 TextSizeCard(
                   index: SettingsEditor.stopIndexOf(s.textScale),
                   scales: SettingsEditor.textScaleStops,
@@ -68,11 +69,11 @@ class AppearanceSettingsScreen extends ConsumerWidget {
                       editor.setTextScale(SettingsEditor.textScaleStops[i]),
                 ),
                 gap,
-                const FFSectionLabel('App icon'),
+                FFSectionLabel(tr('App icon')),
                 AppIconPicker(
                   onUnavailable: (label) => showFFToast(
                     context,
-                    '$label icon is coming soon',
+                    tr('{label} icon is coming soon', {'label': label}),
                     icon: FontAwesomeIcons.wandMagicSparkles,
                   ),
                 ),
@@ -95,19 +96,19 @@ class _LayoutSection extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final editor = ref.read(settingsEditorProvider);
     return FFGroupedList(
-      label: 'Layout',
+      label: tr('Layout'),
       children: [
         FFListRow(
           leading: settingsTile(
             FontAwesomeIcons.tableCellsLarge,
             SettingsTints.teal,
           ),
-          title: 'Notes default view',
+          title: tr('Notes default view'),
           value: SettingsLabels.notesView(s.notesView),
           onTap: () async {
             final c = await showNotificationOptionSheet<NotesView>(
               context,
-              title: 'Notes default view',
+              title: tr('Notes default view'),
               selected: s.notesView,
               options: [
                 for (final v in NotesView.values)
@@ -122,15 +123,15 @@ class _LayoutSection extends ConsumerWidget {
         ),
         FFListRow(
           leading: settingsTile(FontAwesomeIcons.bars, SettingsTints.blue),
-          title: 'List density',
+          title: tr('List density'),
           // Saved now; FFListRow doesn't read a density token yet.
-          subtitle: 'Coming soon',
+          subtitle: tr('Coming soon'),
           value: SettingsLabels.density(s.listDensity),
           onTap: () async {
             final c = await showNotificationOptionSheet<ListDensity>(
               context,
-              title: 'List density',
-              subtitle: 'Compact fits more rows on screen.',
+              title: tr('List density'),
+              subtitle: tr('Compact fits more rows on screen.'),
               selected: s.listDensity,
               options: [
                 for (final v in ListDensity.values)
@@ -145,13 +146,15 @@ class _LayoutSection extends ConsumerWidget {
         ),
         FFListRow(
           leading: settingsTile(FontAwesomeIcons.gaugeHigh, SettingsTints.teal),
-          title: 'Visual effects',
-          subtitle: 'Choose Reduced if scrolling or opening screens feels slow',
+          title: tr('Visual effects'),
+          subtitle: tr(
+            'Choose Reduced if scrolling or opening screens feels slow',
+          ),
           value: SettingsLabels.performance(s.performanceMode),
           onTap: () async {
             final c = await showNotificationOptionSheet<PerformanceMode>(
               context,
-              title: 'Visual effects',
+              title: tr('Visual effects'),
               selected: s.performanceMode,
               options: [
                 for (final m in PerformanceMode.values)
@@ -170,13 +173,13 @@ class _LayoutSection extends ConsumerWidget {
             FontAwesomeIcons.wandMagicSparkles,
             SettingsTints.violet,
           ),
-          title: 'Reduce motion',
+          title: tr('Reduce motion'),
           value: s.reduceMotion,
           onChanged: editor.setReduceMotion,
         ),
         FFListRow.toggle(
           leading: settingsTile(FontAwesomeIcons.font, SettingsTints.slate),
-          title: 'Use system font',
+          title: tr('Use system font'),
           // AppTheme drops the bundled families (San Francisco / Roboto).
           value: s.useSystemFont,
           onChanged: editor.setUseSystemFont,

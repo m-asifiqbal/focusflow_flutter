@@ -15,9 +15,12 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
+import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
 
 class HabitWeekSquares extends StatelessWidget {
@@ -25,9 +28,6 @@ class HabitWeekSquares extends StatelessWidget {
 
   final List<HabitDayCell> week;
   final ModuleColors colors;
-
-  static const _letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  static const _names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   /// The look of one cell.
   static HabitSquareKind kindOf(HabitDayCell c) {
@@ -42,16 +42,23 @@ class HabitWeekSquares extends StatelessWidget {
   static String semanticsFor(List<HabitDayCell> week) {
     final done = [
       for (final c in week)
-        if (kindOf(c) == HabitSquareKind.done) _names[c.day.weekday - 1],
+        if (kindOf(c) == HabitSquareKind.done)
+          HabitFrequency.shortName(c.day.weekday),
     ];
     final rest = [
       for (final c in week)
-        if (kindOf(c) == HabitSquareKind.rest) _names[c.day.weekday - 1],
+        if (kindOf(c) == HabitSquareKind.rest)
+          HabitFrequency.shortName(c.day.weekday),
     ];
     final base = done.isEmpty
-        ? 'This week: nothing done yet'
-        : 'This week: done ${done.join(', ')}';
-    return rest.isEmpty ? base : '$base; rest days ${rest.join(', ')}';
+        ? tr('This week: nothing done yet')
+        : tr('This week: done {days}', {'days': done.join(', ')});
+    return rest.isEmpty
+        ? base
+        : tr('{base}; rest days {days}', {
+            'base': base,
+            'days': rest.join(', '),
+          });
   }
 
   @override
@@ -76,7 +83,9 @@ class HabitWeekSquares extends StatelessWidget {
   }
 
   Widget _square(FFColors ff, Brightness brightness, HabitDayCell cell) {
-    final letter = _letters[cell.day.weekday - 1];
+    // The narrow weekday of the active language ("M", "周一"…): one letter
+    // cannot be a `tr` key — "T" would be both Tuesday and Thursday.
+    final letter = DateFormats.of('EEEEE').format(cell.day);
     return switch (kindOf(cell)) {
       HabitSquareKind.done => _Square(
         letter: letter,

@@ -13,11 +13,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
 import 'package:focusflow/features/habits/presentation/providers/habit_logger_provider.dart';
 
@@ -82,9 +84,17 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
     final s = widget.status;
     final name = s.habit.name;
     if (s.habit.isQuit) {
-      return _count > s.count ? 'Slip logged · "$name" streak reset' : null;
+      return _count > s.count
+          ? tr('Slip logged · "{name}" streak reset', {'name': name})
+          : null;
     }
-    return _count < s.count ? '"$name" set to $_count ${s.habit.unit}' : null;
+    return _count < s.count
+        ? tr('"{name}" set to {count} {unit}', {
+            'name': name,
+            'count': _count,
+            'unit': HabitWords.shown(s.habit.unit),
+          })
+        : null;
   }
 
   @override
@@ -93,7 +103,7 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
     final text = context.text;
     final habit = widget.status.habit;
     final colors = habit.colors;
-    final unit = habit.isQuit ? 'slips' : habit.unit;
+    final unit = habit.isQuit ? tr('slips') : HabitWords.shown(habit.unit);
 
     Widget stepButton(IconData icon, String label, VoidCallback? onTap) =>
         FFRoundIconButton(
@@ -117,8 +127,8 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
         const SizedBox(height: AppSpacing.xs),
         Text(
           habit.isQuit
-              ? 'Slips logged today'
-              : 'Today · goal ${habit.goalLabel}',
+              ? tr('Slips logged today')
+              : tr('Today · goal {goalLabel}', {'goalLabel': habit.goalLabel}),
           textAlign: TextAlign.center,
           style: text.bodySmall.copyWith(color: ff.inkMuted),
         ),
@@ -128,7 +138,7 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
           children: [
             stepButton(
               FontAwesomeIcons.minus,
-              'Decrease',
+              tr('Decrease'),
               _count > 0 ? () => setState(() => _count--) : null,
             ),
             const SizedBox(width: AppSpacing.xxl),
@@ -152,14 +162,14 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
             const SizedBox(width: AppSpacing.xxl),
             stepButton(
               FontAwesomeIcons.plus,
-              'Increase',
+              tr('Increase'),
               _count < _max ? () => setState(() => _count++) : null,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xxl),
         FFPrimaryButton(
-          label: 'Save',
+          label: tr('Save'),
           onPressed: () => _run(
             (l) => l.setAmount(widget.status, _count),
             undo: _saveUndo(),
@@ -170,25 +180,25 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
           children: [
             Expanded(
               child: FFSecondaryButton(
-                label: 'Skip today',
+                label: tr('Skip today'),
                 icon: FontAwesomeIcons.forward,
                 onPressed: () => _run(
                   (l) => l.skip(widget.status),
-                  undo: 'Skipped today · "${habit.name}"',
+                  undo: tr('Skipped today · "{name}"', {'name': habit.name}),
                 ),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: FFSecondaryButton(
-                label: 'Clear today',
+                label: tr('Clear today'),
                 icon: FontAwesomeIcons.eraser,
                 variant: FFSecondaryVariant.outlined,
                 onPressed: () => _run(
                   (l) => l.clear(widget.status),
                   undo: widget.status.log == null
                       ? null
-                      : 'Cleared today · "${habit.name}"',
+                      : tr('Cleared today · "{name}"', {'name': habit.name}),
                 ),
               ),
             ),

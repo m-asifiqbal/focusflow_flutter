@@ -17,6 +17,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
 import 'package:focusflow/features/reminders/domain/repository/reminders_repository.dart';
@@ -25,13 +26,14 @@ import 'package:focusflow/features/reminders/presentation/state/reminder_timelin
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
-/// Chips of screen 12, in order, with their labels.
-const List<(RemindersScope, String)> reminderFilters = [
-  (RemindersScope.today, 'Today'),
-  (RemindersScope.upcoming, 'Upcoming'),
-  (RemindersScope.recurring, 'Recurring'),
-  (RemindersScope.location, 'Location'),
-  (RemindersScope.snoozed, 'Snoozed'),
+/// Chips of screen 12, in order, with their labels (a getter so the labels
+/// follow the active language).
+List<(RemindersScope, String)> get reminderFilters => [
+  (RemindersScope.today, tr('Today')),
+  (RemindersScope.upcoming, tr('Upcoming')),
+  (RemindersScope.recurring, tr('Recurring')),
+  (RemindersScope.location, tr('Location')),
+  (RemindersScope.snoozed, tr('Snoozed')),
 ];
 
 class ReminderFilterNotifier extends AutoDisposeNotifier<RemindersScope> {

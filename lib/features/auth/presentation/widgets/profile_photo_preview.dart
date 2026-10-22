@@ -9,9 +9,9 @@
 /// ============================================================
 library;
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/ff_round_icon_button.dart';
@@ -20,7 +20,7 @@ Future<void> showProfilePhotoPreview(BuildContext context, Uint8List bytes) {
   return showGeneralDialog<void>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: 'Close photo',
+    barrierLabel: tr('Close photo'),
     barrierColor: const Color(0xF2000000),
     transitionDuration: MediaQuery.disableAnimationsOf(context)
         ? Duration.zero
@@ -90,7 +90,7 @@ class _PhotoViewerState extends State<_PhotoViewer>
                   onDoubleTap: _toggleZoom,
                   child: Semantics(
                     image: true,
-                    label: 'Profile photo, full view',
+                    label: tr('Profile photo, full view'),
                     child: InteractiveViewer(
                       transformationController: _controller,
                       minScale: 1,
@@ -113,7 +113,7 @@ class _PhotoViewerState extends State<_PhotoViewer>
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: FFRoundIconButton(
                     icon: FontAwesomeIcons.xmark,
-                    semanticLabel: 'Close photo',
+                    semanticLabel: tr('Close photo'),
                     variant: FFRoundIconButtonVariant.dark,
                     onPressed: () => Navigator.of(context).maybePop(),
                   ),

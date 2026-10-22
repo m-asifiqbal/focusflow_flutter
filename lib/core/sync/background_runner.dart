@@ -15,6 +15,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/language_service.dart';
 import 'package:focusflow/core/database/app_database.dart';
 import 'package:focusflow/core/database/encrypted_database.dart';
 import 'package:focusflow/core/notifications/engine/background_reconcile.dart';
@@ -64,6 +65,8 @@ Future<bool> runBackgroundTask(String task) async {
   ProviderContainer? container;
   try {
     final prefs = await SharedPreferences.getInstance();
+    // Text the task writes (notifications) is in the app's language.
+    await activateLanguageFromPrefs(prefs);
     final secure = SecureStore();
     final key = await secure.read(SecureStore.databaseKey);
     final deviceId = prefs.getString(_deviceIdKey);

@@ -14,6 +14,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -172,7 +173,7 @@ class NoteCheckboxBuilder implements QuillCheckboxBuilder {
     const size = NoteBodyMetrics.checkbox;
     return Semantics(
       checked: isChecked,
-      label: 'Checklist item',
+      label: tr('Checklist item'),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => onChanged(!isChecked),
@@ -222,7 +223,7 @@ class NoteImageEmbedBuilder extends EmbedBuilder {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Semantics(
         image: true,
-        label: 'Note image',
+        label: tr('Note image'),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppRadii.button),
           child: file == null

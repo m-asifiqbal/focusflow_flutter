@@ -15,6 +15,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:focusflow/core/l10n/tr.dart';
 
 class NotesPdfExport {
   const NotesPdfExport();
@@ -33,7 +34,7 @@ class NotesPdfExport {
     final bold = await _font('assets/fonts/NunitoSans-Bold.ttf');
     final heading = await _font('assets/fonts/LexendDeca-Bold.ttf');
     final doc = pw.Document(
-      title: 'FocusFlow notes',
+      title: trPrint('FocusFlow notes'),
       theme: pw.ThemeData.withFont(base: body, bold: bold),
     );
     for (final n in notes) {
@@ -62,7 +63,7 @@ class NotesPdfExport {
       );
     }
     if (notes.isEmpty) {
-      doc.addPage(pw.Page(build: (_) => pw.Text('No notes')));
+      doc.addPage(pw.Page(build: (_) => pw.Text(trPrint('No notes'))));
     }
     return doc.save();
   }

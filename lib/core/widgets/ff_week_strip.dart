@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -100,7 +101,7 @@ class _FFWeekStripState extends State<FFWeekStrip> {
 
   String _semantic(DateTime d, bool items) {
     final label = DateFormats.of('EEEE, MMMM d').format(d);
-    return items ? '$label, has items' : label;
+    return items ? tr('{label}, has items', {'label': label}) : label;
   }
 
   @override
@@ -191,7 +192,9 @@ class _FFWeekStripState extends State<FFWeekStrip> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                DateFormat.E().format(d).substring(0, 1),
+                // The narrow name: the first character of "周一" or "الاثنين"
+                // would be the same for every day.
+                DateFormat.EEEEE().format(d),
                 maxLines: 1,
                 softWrap: false,
                 overflow: TextOverflow.clip,

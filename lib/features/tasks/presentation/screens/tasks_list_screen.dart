@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -70,12 +71,12 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
         ),
         child: FFSearchField(
           controller: _search,
-          hint: 'Search tasks...',
+          hint: tr('Search tasks...'),
           onChanged: ref.read(taskSearchProvider.notifier).set,
           onClear: () => ref.read(taskSearchProvider.notifier).set(''),
           onFilter: () => pickTaskTagFilter(context, ref),
           filterActive: tagActive,
-          filterSemanticLabel: 'Filter by tag',
+          filterSemanticLabel: tr('Filter by tag'),
         ),
       ),
       const TaskStatTiles(),

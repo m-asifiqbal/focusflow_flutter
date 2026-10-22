@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 @immutable
 class ItemSummary {
@@ -69,8 +70,15 @@ class ItemSummary {
   bool get isActive => archivedAt == null && deletedAt == null;
 
   /// [title], or a module fallback ("Untitled note") when empty.
-  String get displayTitle =>
-      title.trim().isEmpty ? 'Untitled ${type.label.toLowerCase()}' : title;
+  String get displayTitle => title.trim().isEmpty
+      ? switch (type) {
+          ItemType.note => tr('Untitled note'),
+          ItemType.task => tr('Untitled task'),
+          ItemType.reminder => tr('Untitled reminder'),
+          ItemType.habit => tr('Untitled habit'),
+          ItemType.vault => tr('Untitled password'),
+        }
+      : title;
 
   /// Whole days left before the 30-day purge removes this trashed item
   /// (rounded up; 0 when due). Null when the item is not in the trash.

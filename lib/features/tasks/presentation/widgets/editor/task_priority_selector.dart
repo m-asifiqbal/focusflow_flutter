@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -84,7 +85,7 @@ class _PriorityPill extends StatelessWidget {
       button: true,
       selected: selected,
       inMutuallyExclusiveGroup: true,
-      label: '${priority.label} priority',
+      label: tr('{label} priority', {'label': priority.label}),
       onTap: onTap,
       excludeSemantics: true,
       child: FFPressable(

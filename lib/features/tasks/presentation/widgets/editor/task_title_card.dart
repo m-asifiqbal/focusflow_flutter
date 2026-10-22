@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -85,7 +86,7 @@ class _TaskTitleCardState extends State<TaskTitleCard> {
               onSubmitted: (_) => _notesFocus.requestFocus(),
               style: context.text.editorTitle.copyWith(color: ff.ink),
               decoration: bare.copyWith(
-                hintText: 'Task title',
+                hintText: tr('Task title'),
                 hintStyle: context.text.editorTitle.copyWith(
                   color: ff.inkFaint,
                 ),
@@ -110,7 +111,7 @@ class _TaskTitleCardState extends State<TaskTitleCard> {
               onChanged: widget.onNotesChanged,
               style: context.text.editorNotes.copyWith(color: ff.inkMuted),
               decoration: bare.copyWith(
-                hintText: 'Add notes',
+                hintText: tr('Add notes'),
                 hintStyle: context.text.editorNotes.copyWith(
                   color: ff.inkFaint,
                 ),

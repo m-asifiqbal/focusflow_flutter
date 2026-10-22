@@ -21,6 +21,7 @@
 library;
 
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/calendar/domain/entities/calendar_entry.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
@@ -159,7 +160,7 @@ abstract final class CalendarRules {
   static CalendarEntry taskEntry(TaskItem t) {
     final String? detail;
     if (t.isCompleted) {
-      detail = 'done';
+      detail = tr('done');
     } else if (t.priority == TaskPriority.high) {
       detail = t.priority.label;
     } else {
@@ -167,7 +168,7 @@ abstract final class CalendarRules {
     }
     return CalendarEntry(
       ref: t.ref,
-      title: t.title.trim().isEmpty ? 'Untitled task' : t.title.trim(),
+      title: t.title.trim().isEmpty ? tr('Untitled task') : t.title.trim(),
       time: t.hasDueTime ? t.dueAt : null,
       meta: _meta(ItemType.task, detail),
       done: t.isCompleted,
@@ -177,19 +178,19 @@ abstract final class CalendarRules {
   static CalendarEntry reminderEntry(ReminderOccurrence o) => CalendarEntry(
     ref: o.reminder.ref,
     title: o.reminder.title.trim().isEmpty
-        ? 'Reminder'
+        ? tr('Reminder')
         : o.reminder.title.trim(),
     time: o.at,
-    meta: _meta(ItemType.reminder, o.isDone ? 'done' : null),
+    meta: _meta(ItemType.reminder, o.isDone ? tr('done') : null),
     done: o.isDone,
   );
 
   static CalendarEntry habitEntry(HabitDayStatus s) {
     final String? detail;
     if (s.isDone) {
-      detail = 'done';
+      detail = tr('done');
     } else if (s.isSkipped) {
-      detail = 'skipped';
+      detail = tr('skipped');
     } else if (s.count > 0 && !s.habit.isYesNo) {
       detail = s.progressLabel;
     } else {

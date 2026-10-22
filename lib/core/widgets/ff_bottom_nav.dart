@@ -39,10 +39,15 @@
 /// ============================================================
 library;
 
+// A nullable preset label resolves to tr() when read (it must follow the
+// language), and a private field cannot be a named initializing formal.
+// ignore_for_file: prefer_initializing_formals
+
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -65,10 +70,11 @@ class FFBottomNav extends StatefulWidget {
     required this.currentIndex,
     required this.onTap,
     required this.onFab,
-    this.items = defaultItems,
-    this.fabSemanticLabel = 'Quick add',
+    List<FFNavItem>? items,
+    String? fabSemanticLabel,
     super.key,
-  });
+  }) : _items = items,
+       _fabSemanticLabel = fabSemanticLabel;
 
   /// Active tab (0..3).
   final int currentIndex;
@@ -78,14 +84,21 @@ class FFBottomNav extends StatefulWidget {
   final VoidCallback onFab;
 
   /// Exactly 4 tabs.
-  final List<FFNavItem> items;
-  final String fabSemanticLabel;
+  final List<FFNavItem>? _items;
+  final String? _fabSemanticLabel;
 
-  static const List<FFNavItem> defaultItems = [
-    FFNavItem(icon: FontAwesomeIcons.house, label: 'Home'),
-    FFNavItem(icon: FontAwesomeIcons.layerGroup, label: 'Library'),
-    FFNavItem(icon: FontAwesomeIcons.chartPie, label: 'Insights'),
-    FFNavItem(icon: FontAwesomeIcons.gear, label: 'Settings'),
+  /// The given tabs, else [defaultItems].
+  List<FFNavItem> get items => _items ?? defaultItems;
+
+  /// The given label, else "Quick add" in the active language.
+  String get fabSemanticLabel => _fabSemanticLabel ?? tr('Quick add');
+
+  /// A getter (not a const list) so the labels follow the language.
+  static List<FFNavItem> get defaultItems => [
+    FFNavItem(icon: FontAwesomeIcons.house, label: tr('Home')),
+    FFNavItem(icon: FontAwesomeIcons.layerGroup, label: tr('Library')),
+    FFNavItem(icon: FontAwesomeIcons.chartPie, label: tr('Insights')),
+    FFNavItem(icon: FontAwesomeIcons.gear, label: tr('Settings')),
   ];
 
   /// Height of the glass pill.

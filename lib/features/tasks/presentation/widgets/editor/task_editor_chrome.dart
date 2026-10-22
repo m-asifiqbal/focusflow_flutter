@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -52,7 +53,7 @@ class TaskEditorHeader extends StatelessWidget {
           height: AppSizes.minTap,
           child: NavigationToolbar(
             leading: FFTextButton(
-              label: 'Cancel',
+              label: tr('Cancel'),
               onPressed: onCancel,
               padding: EdgeInsetsDirectional.zero,
               style: action,
@@ -67,7 +68,7 @@ class TaskEditorHeader extends StatelessWidget {
               ),
             ),
             trailing: FFTextButton(
-              label: 'Save',
+              label: tr('Save'),
               onPressed: canSave ? onSave : null,
               padding: EdgeInsetsDirectional.zero,
               style: action.copyWith(fontWeight: FontWeight.w600),
@@ -103,7 +104,7 @@ class TaskEditorFooter extends StatelessWidget {
         if (onArchive != null) ...[
           Expanded(
             child: FFSecondaryButton(
-              label: 'Archive',
+              label: tr('Archive'),
               icon: FontAwesomeIcons.boxArchive,
               background: slate,
               foreground: ff.isDark ? ff.ink : ActionTints.lock.inkFor(b),
@@ -115,7 +116,7 @@ class TaskEditorFooter extends StatelessWidget {
         ],
         Expanded(
           child: FFSoftDangerButton(
-            label: 'Delete',
+            label: tr('Delete'),
             icon: FontAwesomeIcons.solidTrashCan,
             height: height,
             onPressed: onDelete,

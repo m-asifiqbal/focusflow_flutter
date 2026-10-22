@@ -14,6 +14,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/snapshot.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/backup/domain/entities/export_options.dart';
@@ -145,7 +146,7 @@ abstract final class ExportWriters {
       used.add(name.toLowerCase());
       final tags = (n['tags'] as List).map((t) => '#$t').join(' ');
       out['notes/$name.md'] = [
-        '# ${title.isEmpty ? 'Untitled' : title}',
+        '# ${title.isEmpty ? tr('Untitled') : title}',
         '',
         if (tags.isNotEmpty) ...[tags, ''],
         '${n['text']}'.trimRight(),

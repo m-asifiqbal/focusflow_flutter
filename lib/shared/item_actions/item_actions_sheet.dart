@@ -20,6 +20,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -89,27 +90,29 @@ Future<void> showItemActions(
     if (type != ItemType.vault)
       FFActionItem(
         icon: FontAwesomeIcons.thumbtack,
-        label: item.isPinned ? 'Unpin' : 'Pin to top',
+        label: item.isPinned ? tr('Unpin') : tr('Pin to top'),
         colors: ModuleStyle.notes.colors,
         onTap: () => items.setPinned(refs, !item.isPinned),
       ),
     FFActionItem(
       icon: FontAwesomeIcons.solidStar,
-      label: item.isFavorite ? 'Remove from favourites' : 'Add to favourites',
+      label: item.isFavorite
+          ? tr('Remove from favourites')
+          : tr('Add to favourites'),
       colors: ModuleStyle.vault.colors,
       onTap: () => items.setFavorite(refs, !item.isFavorite),
     ),
     if (type != ItemType.vault)
       FFActionItem(
         icon: FontAwesomeIcons.solidCopy,
-        label: 'Duplicate',
+        label: tr('Duplicate'),
         colors: ModuleStyle.tasks.colors,
         onTap: () async {
           await items.duplicate(item.ref);
           if (!context.mounted) return;
           showFFToast(
             context,
-            '${type.label} duplicated',
+            tr('{type} duplicated', {'type': type.label}),
             icon: FontAwesomeIcons.solidCopy,
           );
         },
@@ -117,16 +120,16 @@ Future<void> showItemActions(
     if (type == ItemType.note || type == ItemType.habit)
       FFActionItem(
         icon: FontAwesomeIcons.palette,
-        label: 'Change colour',
+        label: tr('Change colour'),
         colors: TagPalette.design,
         onTap: () => pickItemColour(context, ref, refs, current: item.colorHex),
       ),
     FFActionItem(
       icon: FontAwesomeIcons.tag,
       label: switch (type) {
-        ItemType.task => 'Edit tags / move to list',
-        ItemType.habit || ItemType.reminder => 'Edit tags',
-        _ => 'Edit tags / move to folder',
+        ItemType.task => tr('Edit tags / move to list'),
+        ItemType.habit || ItemType.reminder => tr('Edit tags'),
+        _ => tr('Edit tags / move to folder'),
       },
       colors: TagPalette.travel,
       onTap: () => editItemTagsAndFolder(context, ref, item),
@@ -134,7 +137,7 @@ Future<void> showItemActions(
     if (type == ItemType.note)
       FFActionItem(
         icon: FontAwesomeIcons.solidBell,
-        label: 'Set reminder',
+        label: tr('Set reminder'),
         colors: ModuleStyle.reminders.colors,
         onTap: () => setItemReminder(context, ref, item),
       ),
@@ -178,7 +181,7 @@ Future<void> _showInactiveItemActions(
       actions: [
         FFActionItem(
           icon: FontAwesomeIcons.rotateLeft,
-          label: trashed ? 'Recover' : 'Restore',
+          label: trashed ? tr('Recover') : tr('Restore'),
           colors: ModuleStyle.notes.colors,
           onTap: () => trashed
               ? restoreFromTrash(context, ref, refs, title: title)
@@ -187,21 +190,21 @@ Future<void> _showInactiveItemActions(
         if (item.type != ItemType.vault)
           FFActionItem(
             icon: FontAwesomeIcons.solidCopy,
-            label: 'Duplicate',
+            label: tr('Duplicate'),
             colors: ModuleStyle.tasks.colors,
             onTap: () async {
               await ref.read(itemsRepositoryProvider).duplicate(item.ref);
               if (!context.mounted) return;
               showFFToast(
                 context,
-                '${item.type.label} duplicated',
+                tr('{type} duplicated', {'type': item.type.label}),
                 icon: FontAwesomeIcons.solidCopy,
               );
             },
           ),
         ...actions,
       ],
-      deleteLabel: trashed ? 'Delete forever' : 'Delete',
+      deleteLabel: trashed ? tr('Delete forever') : tr('Delete'),
       onDelete: () => trashed
           ? deleteItemsForever(context, ref, refs, title: title)
           : deleteItems(context, ref, refs, offerArchive: false, title: title),
@@ -240,19 +243,19 @@ Future<void> showSelectionActions(
     FFActionSheetData(
       header: FFActionSheetHeader.selection(
         itemRefs.length,
-        noun: single?.label.toLowerCase() ?? 'item',
+        selectedTitle: _selectedTitle(single, itemRefs.length),
       ),
       actions: [
         if (single != ItemType.vault)
           FFActionItem(
             icon: FontAwesomeIcons.thumbtack,
-            label: allPinned ? 'Unpin' : 'Pin to top',
+            label: allPinned ? tr('Unpin') : tr('Pin to top'),
             colors: ModuleStyle.notes.colors,
             onTap: () => run(() => togglePinItems(context, ref, itemRefs)),
           ),
         FFActionItem(
           icon: FontAwesomeIcons.solidStar,
-          label: 'Add to favourites',
+          label: tr('Add to favourites'),
           colors: ModuleStyle.vault.colors,
           onTap: () => run(() async {
             await items.setFavorite(itemRefs, true);
@@ -261,7 +264,7 @@ Future<void> showSelectionActions(
         ),
         FFActionItem(
           icon: FontAwesomeIcons.tag,
-          label: 'Add tags',
+          label: tr('Add tags'),
           colors: TagPalette.travel,
           onTap: () => run(() => addTagsToItems(context, ref, itemRefs)),
         ),
@@ -270,7 +273,9 @@ Future<void> showSelectionActions(
             single == ItemType.vault)
           FFActionItem(
             icon: FontAwesomeIcons.solidFolder,
-            label: single == ItemType.task ? 'Move to list' : 'Move to folder',
+            label: single == ItemType.task
+                ? tr('Move to list')
+                : tr('Move to folder'),
             colors: TagPalette.work,
             onTap: () =>
                 run(() => moveItemsToFolder(context, ref, single!, itemRefs)),
@@ -292,4 +297,33 @@ Future<ModuleItemActions> _moduleActions(
   ItemType.reminder => reminderItemActions(context, ref, item),
   ItemType.habit => habitItemActions(context, ref, item),
   ItemType.vault => vaultItemActions(context, ref, item),
+};
+
+/// "3 notes selected" — one whole text per type (the noun is not a suffix
+/// in every language); "N items selected" for a mix.
+String _selectedTitle(ItemType? type, int count) => switch (type) {
+  ItemType.note => tr(
+    '{count, plural, one {# note selected} other {# notes selected}}',
+    {'count': count},
+  ),
+  ItemType.task => tr(
+    '{count, plural, one {# task selected} other {# tasks selected}}',
+    {'count': count},
+  ),
+  ItemType.reminder => tr(
+    '{count, plural, one {# reminder selected} other {# reminders selected}}',
+    {'count': count},
+  ),
+  ItemType.habit => tr(
+    '{count, plural, one {# habit selected} other {# habits selected}}',
+    {'count': count},
+  ),
+  ItemType.vault => tr(
+    '{count, plural, one {# password selected} other {# passwords selected}}',
+    {'count': count},
+  ),
+  null => tr(
+    '{count, plural, one {# item selected} other {# items selected}}',
+    {'count': count},
+  ),
 };

@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -39,28 +40,30 @@ class HabitStatGrid extends StatelessWidget {
     final streak = stats.streak;
     final tiles = [
       _StatCard(
-        label: 'Current streak',
+        label: tr('Current streak'),
         value: v('${streak.current}'),
         unit: streak.unitWord(streak.current),
         color: HabitAccents.streak,
         fire: streak.current > 0,
       ),
       _StatCard(
-        label: 'Best streak',
+        label: tr('Best streak'),
         value: v('${streak.best}'),
         unit: streak.unitWord(streak.best),
         color: HabitPalette.indigo.solid,
       ),
       _StatCard(
-        label: 'Completion',
+        label: tr('Completion'),
         value: v(HabitFormat.percent(stats.completionRate)),
-        unit: 'last ${stats.completionDays} days',
+        unit: tr('{days, plural, one {last # day} other {last # days}}', {
+          'days': stats.completionDays,
+        }),
         color: HabitPalette.emerald.solid,
       ),
       _StatCard(
-        label: 'Total',
+        label: tr('Total'),
         value: v('${stats.totalCheckIns}'),
-        unit: habit.isQuit ? 'clean days' : 'check-ins',
+        unit: habit.isQuit ? tr('clean days') : tr('check-ins'),
         color: HabitPalette.blue.solid,
       ),
     ];

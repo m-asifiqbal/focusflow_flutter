@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -54,7 +55,7 @@ class TaskScheduleCard extends ConsumerWidget {
         today: readFreshToday(ref),
         weekStartsOn: settings.weekStartsOn,
         current: task.dueDate,
-        title: 'Date',
+        title: tr('Date'),
       );
       if (picked != null) form.setDate(picked.value);
     }
@@ -85,16 +86,16 @@ class TaskScheduleCard extends ConsumerWidget {
     Future<void> pickRemind() async {
       final picked = await showOptionSheet<int?>(
         context,
-        title: 'Remind me',
+        title: tr('Remind me'),
         subtitle: task.dueDate == null
-            ? 'The task will be scheduled for today'
+            ? tr('The task will be scheduled for today')
             : task.dueTimeMinutes == null
-            ? 'All-day tasks remind relative to 9:00 AM'
+            ? tr('All-day tasks remind relative to 9:00 AM')
             : null,
         options: [
           OptionItem<int?>(
             value: null,
-            label: 'None',
+            label: tr('None'),
             icon: FontAwesomeIcons.bellSlash,
             colors: ActionTints.lock,
           ),
@@ -119,7 +120,7 @@ class TaskScheduleCard extends ConsumerWidget {
         TaskEditorRow(
           icon: FontAwesomeIcons.solidCalendar,
           colors: ModuleStyle.notes.colors,
-          title: 'Date',
+          title: tr('Date'),
           value: TaskLabels.editorDate(task.dueDate, today),
           valueColor: hasDate ? accent : null,
           onTap: pickDate,
@@ -127,24 +128,24 @@ class TaskScheduleCard extends ConsumerWidget {
         TaskEditorRow(
           icon: FontAwesomeIcons.solidClock,
           colors: ModuleStyle.notes.colors,
-          title: 'Time',
+          title: tr('Time'),
           value: hasDate
               ? TaskLabels.editorTime(task.dueTimeMinutes, use24h: use24h)
-              : 'No time',
+              : tr('No time'),
           valueColor: task.hasDueTime ? accent : null,
           onTap: pickTime,
         ),
         TaskEditorRow(
           icon: FontAwesomeIcons.arrowsRotate,
           colors: ModuleStyle.tasks.colors,
-          title: 'Repeat',
-          value: task.isRepeating ? task.repeatLabel : 'Never',
+          title: tr('Repeat'),
+          value: task.isRepeating ? task.repeatLabel : tr('Never'),
           onTap: pickRepeat,
         ),
         TaskEditorRow(
           icon: FontAwesomeIcons.solidBell,
           colors: ModuleStyle.reminders.colors,
-          title: 'Remind me',
+          title: tr('Remind me'),
           value: TaskLabels.remindOffset(
             hasDate ? task.remindOffsetMinutes : null,
           ),

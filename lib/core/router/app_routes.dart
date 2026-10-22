@@ -83,6 +83,7 @@ abstract final class AppRoutes {
   static const settingsImportExport = '/settings/import-export';
   static const settingsAccount = '/settings/account';
   static const settingsGeneral = '/settings/general';
+  static const settingsLanguage = '/settings/language';
   static const settingsHomeLayout = '/settings/home-layout';
   static const settingsGestures = '/settings/gestures';
   static const settingsSoundsHaptics = '/settings/sounds-haptics';

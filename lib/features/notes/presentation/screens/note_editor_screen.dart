@@ -16,6 +16,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -93,7 +94,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       context,
       ref,
       note,
-      subtitle: "Enter this note's PIN to read and edit it.",
+      subtitle: tr('Enter this note\'s PIN to read and edit it.'),
     );
     if (ok && mounted) controller.markUnlocked();
   }
@@ -110,7 +111,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       error: (error, _) => _NoteEditorError(
         message: error is NoteNotFoundException
             ? error.toString()
-            : 'Something went wrong while opening it.',
+            : tr('Something went wrong while opening it.'),
         onBack: _back,
         onRetry: error is NoteNotFoundException
             ? null
@@ -137,7 +138,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (note == null) {
       return async.hasError
           ? _NoteEditorError(
-              message: 'Something went wrong while opening it.',
+              message: tr('Something went wrong while opening it.'),
               onBack: _back,
               onRetry: () => ref.invalidate(noteProv),
             )
@@ -247,9 +248,9 @@ class _NoteEditorError extends StatelessWidget {
     child: FFEmptyState(
       colors: ModuleStyle.notes.colors,
       icon: FontAwesomeIcons.triangleExclamation,
-      title: "Couldn't open this note",
+      title: tr('Couldn\'t open this note'),
       body: message,
-      ctaLabel: onRetry == null ? 'Back to notes' : 'Try again',
+      ctaLabel: onRetry == null ? tr('Back to notes') : tr('Try again'),
       ctaIcon: onRetry == null
           ? FontAwesomeIcons.arrowLeft
           : FontAwesomeIcons.arrowsRotate,
@@ -270,9 +271,9 @@ class _NoteLocked extends StatelessWidget {
     child: FFEmptyState(
       colors: ModuleStyle.vault.colors,
       icon: FontAwesomeIcons.lock,
-      title: 'This note is locked',
-      body: 'Enter its PIN to read and edit it.',
-      ctaLabel: 'Unlock',
+      title: tr('This note is locked'),
+      body: tr('Enter its PIN to read and edit it.'),
+      ctaLabel: tr('Unlock'),
       ctaIcon: FontAwesomeIcons.lockOpen,
       onCta: onUnlock,
     ),

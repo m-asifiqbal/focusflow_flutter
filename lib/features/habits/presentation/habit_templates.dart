@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
@@ -68,10 +69,10 @@ class HabitTemplate {
 
 abstract final class HabitTemplates {
   /// Mockup order first (Meditate, Read, Exercise, Sleep), then extras.
-  static final List<HabitTemplate> all = [
+  static List<HabitTemplate> get all => [
     HabitTemplate(
-      label: 'Meditate',
-      name: 'Meditate',
+      label: tr('Meditate'),
+      name: tr('Meditate'),
       iconKey: 'spa',
       colors: HabitPalette.amber,
       category: 'Mind',
@@ -81,8 +82,8 @@ abstract final class HabitTemplates {
       reminderTimes: const ['07:00'],
     ),
     HabitTemplate(
-      label: 'Read',
-      name: 'Read 20 pages',
+      label: tr('Read'),
+      name: tr('Read 20 pages'),
       iconKey: 'book-open',
       colors: HabitPalette.emerald,
       category: 'Learning',
@@ -90,8 +91,8 @@ abstract final class HabitTemplates {
       reminderTimes: const ['21:00'],
     ),
     HabitTemplate(
-      label: 'Exercise',
-      name: 'Exercise',
+      label: tr('Exercise'),
+      name: tr('Exercise'),
       iconKey: 'person-running',
       colors: HabitPalette.red,
       category: 'Fitness',
@@ -102,8 +103,8 @@ abstract final class HabitTemplates {
       reminderTimes: const ['18:00'],
     ),
     HabitTemplate(
-      label: 'Sleep',
-      name: 'Sleep 8 hours',
+      label: tr('Sleep'),
+      name: tr('Sleep 8 hours'),
       iconKey: 'moon',
       colors: HabitPalette.indigo,
       category: 'Health',
@@ -113,8 +114,8 @@ abstract final class HabitTemplates {
       reminderTimes: const ['22:30'],
     ),
     HabitTemplate(
-      label: 'Drink water',
-      name: 'Drink Water',
+      label: tr('Drink water'),
+      name: tr('Drink Water'),
       iconKey: 'droplet',
       colors: HabitPalette.blue,
       category: 'Health',
@@ -125,8 +126,8 @@ abstract final class HabitTemplates {
       reminderTimes: const ['09:00', '13:00', '17:00'],
     ),
     HabitTemplate(
-      label: 'Walk',
-      name: 'Walk',
+      label: tr('Walk'),
+      name: tr('Walk'),
       iconKey: 'person-walking',
       colors: HabitPalette.sky,
       category: 'Fitness',
@@ -134,8 +135,8 @@ abstract final class HabitTemplates {
       unit: 'min',
     ),
     HabitTemplate(
-      label: 'Journal',
-      name: 'Journal',
+      label: tr('Journal'),
+      name: tr('Journal'),
       iconKey: 'pen',
       colors: HabitPalette.violet,
       category: 'Mind',
@@ -143,8 +144,8 @@ abstract final class HabitTemplates {
       reminderTimes: const ['21:30'],
     ),
     HabitTemplate(
-      label: 'No sugar',
-      name: 'No sugar',
+      label: tr('No sugar'),
+      name: tr('No sugar'),
       iconKey: 'ban',
       colors: HabitPalette.rose,
       category: 'Health',

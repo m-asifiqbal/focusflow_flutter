@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -115,7 +116,6 @@ class SearchPill extends StatelessWidget {
          icon: FontAwesomeIcons.clockRotateLeft,
          onTap: onTap,
          recent: true,
-         semanticLabel: 'Search again for $term',
          key: key,
        );
 
@@ -142,7 +142,9 @@ class SearchPill extends StatelessWidget {
     return Semantics(
       button: true,
       selected: recent ? null : active,
-      label: semanticLabel ?? label,
+      label:
+          semanticLabel ??
+          (recent ? tr('Search again for {term}', {'term': label}) : label),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

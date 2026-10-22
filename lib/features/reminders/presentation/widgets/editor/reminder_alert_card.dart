@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/features/reminders/presentation/reminder_tokens.dart';
@@ -48,7 +49,7 @@ class ReminderAlertCard extends ConsumerWidget {
     Future<void> pickSound() async {
       final picked = await showOptionSheet<String>(
         context,
-        title: 'Sound',
+        title: tr('Sound'),
         options: [
           for (final s in ReminderAlertOptions.sounds)
             OptionItem(
@@ -69,8 +70,8 @@ class ReminderAlertCard extends ConsumerWidget {
     Future<void> pickSnooze() async {
       final picked = await showOptionSheet<int>(
         context,
-        title: 'Default snooze',
-        subtitle: 'Used by the Snooze button on the notification',
+        title: tr('Default snooze'),
+        subtitle: tr('Used by the Snooze button on the notification'),
         options: [
           for (final m in ReminderAlertOptions.snoozeMinutes)
             OptionItem(
@@ -92,31 +93,31 @@ class ReminderAlertCard extends ConsumerWidget {
         TaskEditorRow(
           icon: FontAwesomeIcons.volumeHigh,
           colors: orange,
-          title: 'Sound',
+          title: tr('Sound'),
           value: ReminderAlertOptions.soundLabel(reminder.sound),
           onTap: pickSound,
         ),
         _SwitchRow(
           icon: FontAwesomeIcons.bellConcierge,
           colors: TagPalette.high,
-          title: 'Alarm-style (full screen)',
+          title: tr('Alarm-style (full screen)'),
           value: alarm,
           onChanged: form.setAlarm,
         ),
         TaskEditorRow(
           icon: FontAwesomeIcons.clockRotateLeft,
           colors: TagPalette.work,
-          title: 'Default snooze',
+          title: tr('Default snooze'),
           value: ReminderAlertOptions.snoozeLabel(reminder.snoozeMinutes),
           onTap: pickSnooze,
         ),
         TaskEditorRow(
           icon: FontAwesomeIcons.locationDot,
           colors: TagPalette.design,
-          title: 'Location trigger',
+          title: tr('Location trigger'),
           value: reminder.location?.label.isNotEmpty ?? false
               ? reminder.location!.label
-              : 'Off',
+              : tr('Off'),
           onTap: () => showLocationTriggerSheet(context),
         ),
       ],
@@ -156,13 +157,13 @@ class ReminderLinkCard extends ConsumerWidget {
           icon: style.icon,
           colors: style.colors,
           title: link == null
-              ? 'Task or note'
+              ? tr('Task or note')
               : link.type == ItemType.note
-              ? 'Note'
-              : 'Task',
+              ? tr('Note')
+              : tr('Task'),
           value: link == null
-              ? 'None'
-              : (title == null || title.isEmpty ? 'Untitled' : title),
+              ? tr('None')
+              : (title == null || title.isEmpty ? tr('Untitled') : title),
           onTap: pick,
         ),
       ],

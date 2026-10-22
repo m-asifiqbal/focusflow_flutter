@@ -12,6 +12,7 @@ library;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/ff_snackbar.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
@@ -31,7 +32,9 @@ Future<void> checkInHabit(
   if (outcome == HabitLogOutcome.slipped && context.mounted) {
     showUndoSnackbar(
       context,
-      message: 'Slip logged · "${status.habit.name}" streak reset',
+      message: tr('Slip logged · "{name}" streak reset', {
+        'name': status.habit.name,
+      }),
       icon: FontAwesomeIcons.rotateLeft,
       onUndo: () => logger.undo(status.habit, before),
     );
@@ -51,7 +54,7 @@ Future<void> logHabitToday(
   if (outcome == HabitLogOutcome.unchanged) {
     showFFToast(
       context,
-      'Already done today',
+      tr('Already done today'),
       icon: FontAwesomeIcons.solidCircleCheck,
     );
   }

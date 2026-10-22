@@ -16,6 +16,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -52,7 +53,7 @@ class VaultDetailFields extends ConsumerWidget {
     Widget copy(String value, String what, {bool secret = true}) =>
         VaultRoundButton(
           icon: FontAwesomeIcons.solidCopy,
-          semanticLabel: 'Copy ${what.toLowerCase()}',
+          semanticLabel: tr('Copy {what}', {'what': what.toLowerCase()}),
           onTap: () => unawaited(
             copyVaultValue(context, ref, value, what, secret: secret),
           ),
@@ -85,7 +86,7 @@ class VaultDetailFields extends ConsumerWidget {
           masked: Text(
             _mask(value),
             style: context.vaultMonoStyle,
-            semanticsLabel: '$label hidden',
+            semanticsLabel: tr('{label} hidden', {'label': label}),
           ),
         ),
         actions: [reveal(field, what), copy(value, label)],
@@ -109,34 +110,34 @@ class VaultDetailFields extends ConsumerWidget {
     final rows = <Widget>[
       ...switch (record.type) {
         VaultItemType.login => [
-          if (p.username.isNotEmpty) plain('Username', p.username),
+          if (p.username.isNotEmpty) plain(tr('Username'), p.username),
           if (p.password.isNotEmpty)
-            secret('Password', 'password', p.password, colour: true),
+            secret(tr('Password'), 'password', p.password, colour: true),
           if (record.hasTotp) _TotpRow(id: id),
           if (p.url.isNotEmpty) _WebsiteRow(record: record, url: p.url),
         ],
         VaultItemType.card => [
-          if (p.cardholder.isNotEmpty) plain('Cardholder', p.cardholder),
+          if (p.cardholder.isNotEmpty) plain(tr('Cardholder'), p.cardholder),
           if (p.cardNumber.isNotEmpty)
             secret(
-              'Card number',
+              tr('Card number'),
               'number',
               p.cardNumber.replaceAll(' ', ''),
               format: _groupCard,
             ),
-          if (p.cardExpiry.isNotEmpty) plain('Expiry', p.cardExpiry),
-          if (p.cardCvv.isNotEmpty) secret('CVV', 'cvv', p.cardCvv),
-          if (p.cardPin.isNotEmpty) secret('PIN', 'pin', p.cardPin),
+          if (p.cardExpiry.isNotEmpty) plain(tr('Expiry'), p.cardExpiry),
+          if (p.cardCvv.isNotEmpty) secret(tr('CVV'), 'cvv', p.cardCvv),
+          if (p.cardPin.isNotEmpty) secret(tr('PIN'), 'pin', p.cardPin),
         ],
         VaultItemType.wifi => [
           if (p.wifiSsid.isNotEmpty)
             VaultFieldRow(
-              label: 'Network',
+              label: tr('Network'),
               value: Text(p.wifiSsid, style: context.vaultValueStyle),
               actions: [
                 VaultRoundButton(
                   icon: FontAwesomeIcons.qrcode,
-                  semanticLabel: 'Share network as QR code',
+                  semanticLabel: tr('Share network as QR code'),
                   // The QR encodes the password: same gate as revealing it.
                   onTap: () => unawaited(() async {
                     if (!await confirmVaultReveal(context, ref)) return;
@@ -144,34 +145,37 @@ class VaultDetailFields extends ConsumerWidget {
                     await showVaultWifiQr(context, p);
                   }()),
                 ),
-                copy(p.wifiSsid, 'Network', secret: false),
+                copy(p.wifiSsid, tr('Network'), secret: false),
               ],
             ),
           if (p.password.isNotEmpty)
-            secret('Password', 'password', p.password, colour: true),
+            secret(tr('Password'), 'password', p.password, colour: true),
           if (p.wifiSecurity.isNotEmpty)
             VaultFieldRow(
-              label: 'Security',
-              value: Text(p.wifiSecurity, style: context.vaultValueStyle),
+              label: tr('Security'),
+              value: Text(
+                vaultWifiSecurityName(p.wifiSecurity),
+                style: context.vaultValueStyle,
+              ),
             ),
         ],
         VaultItemType.secureNote => [
           if (p.notes.isNotEmpty)
             VaultFieldRow(
-              label: 'Note',
+              label: tr('Note'),
               value: Text(
                 p.notes,
                 style: context.vaultValueStyle.copyWith(height: 1.5),
               ),
-              actions: [copy(p.notes, 'Note')],
+              actions: [copy(p.notes, tr('Note'))],
             ),
         ],
       },
       for (final (i, f) in p.customFields.indexed)
         if (f.hidden)
-          secret(f.label.isEmpty ? 'Field' : f.label, 'cf$i', f.value)
+          secret(f.label.isEmpty ? tr('Field') : f.label, 'cf$i', f.value)
         else
-          plain(f.label.isEmpty ? 'Field' : f.label, f.value),
+          plain(f.label.isEmpty ? tr('Field') : f.label, f.value),
     ];
     if (rows.isEmpty) return const SizedBox.shrink();
     return VaultCard(children: rows);
@@ -264,18 +268,24 @@ class _TotpRowState extends ConsumerState<_TotpRow> {
     return Semantics(
       button: totp != null,
       label: totp == null
-          ? 'One-time code unavailable'
-          : 'One-time code ${totp.digits.split('').join(' ')}, '
-                '${totp.secondsLeft} seconds left. Double tap to copy',
+          ? tr('One-time code unavailable')
+          : tr(
+              'One-time code {code}, {secondsLeft} seconds left. Double tap to copy',
+              {
+                'code': totp.digits.split('').join(' '),
+                'secondsLeft': totp.secondsLeft,
+              },
+            ),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: totp == null
             ? null
-            : () =>
-                  unawaited(copyVaultValue(context, ref, totp.digits, 'Code')),
+            : () => unawaited(
+                copyVaultValue(context, ref, totp.digits, tr('Code')),
+              ),
         child: VaultFieldRow(
-          label: 'One-time code (2FA)',
+          label: tr('One-time code (2FA)'),
           minHeight: VaultSizes.totpCard,
           value: Padding(
             padding: const EdgeInsetsDirectional.only(top: AppSpacing.xs),
@@ -334,7 +344,7 @@ class _WebsiteRow extends ConsumerWidget {
     final display = url.replaceFirst(RegExp(r'^https?://'), '');
     void open() => unawaited(openVaultWebsite(context, ref, record));
     return VaultFieldRow(
-      label: 'Website',
+      label: tr('Website'),
       value: Semantics(
         link: uri != null,
         child: GestureDetector(
@@ -354,15 +364,15 @@ class _WebsiteRow extends ConsumerWidget {
       actions: [
         VaultRoundButton(
           icon: FontAwesomeIcons.solidCopy,
-          semanticLabel: 'Copy website',
+          semanticLabel: tr('Copy website'),
           onTap: () => unawaited(
-            copyVaultValue(context, ref, url, 'Website', secret: false),
+            copyVaultValue(context, ref, url, tr('Website'), secret: false),
           ),
         ),
         if (uri != null)
           VaultRoundButton(
             icon: FontAwesomeIcons.arrowUpRightFromSquare,
-            semanticLabel: 'Open website',
+            semanticLabel: tr('Open website'),
             onTap: open,
           ),
       ],

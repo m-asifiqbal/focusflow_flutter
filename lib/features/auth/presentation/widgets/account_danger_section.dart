@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
@@ -50,20 +51,20 @@ class AccountDangerSection extends ConsumerWidget {
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
     final ok = await showFFConfirm(
       context,
-      title: 'Sign out?',
-      message:
-          'Your notes, tasks and vault stay on this device. Drive backups '
-          'are kept — sign in again any time to sync.',
-      confirmLabel: 'Sign out',
+      title: tr('Sign out?'),
+      message: tr(
+        'Your notes, tasks and vault stay on this device. Drive backups are kept — sign in again any time to sync.',
+      ),
+      confirmLabel: tr('Sign out'),
       icon: FontAwesomeIcons.arrowRightFromBracket,
     );
     if (!ok || !context.mounted) return;
     try {
       await ref.read(accountActionsProvider.notifier).signOut();
-      if (context.mounted) _toast(context, 'Signed out');
+      if (context.mounted) _toast(context, tr('Signed out'));
     } on Object {
       if (context.mounted) {
-        _toast(context, "Couldn't sign out. Try again.", error: true);
+        _toast(context, tr("Couldn't sign out. Try again."), error: true);
       }
     }
   }
@@ -79,15 +80,16 @@ class AccountDangerSection extends ConsumerWidget {
     final ok = await showDangerConfirm(
       context,
       title: deleteAccount
-          ? 'Delete account & Drive data?'
-          : 'Erase local data?',
+          ? tr('Delete account & Drive data?')
+          : tr('Erase local data?'),
       message: deleteAccount
-          ? 'This permanently deletes every backup and sync file in your '
-                "Google Drive app folder, then erases this device's data. "
-                'This can’t be undone.'
-          : 'Everything on this device — items, vault, files and settings — '
-                'is erased. Backups in Google Drive are kept.',
-      confirmLabel: deleteAccount ? 'Delete everything' : 'Erase',
+          ? tr(
+              'This permanently deletes every backup and sync file in your Google Drive app folder, then erases this device\'s data. This can’t be undone.',
+            )
+          : tr(
+              'Everything on this device — items, vault, files and settings — is erased. Backups in Google Drive are kept.',
+            ),
+      confirmLabel: deleteAccount ? tr('Delete everything') : tr('Erase'),
       askPin: askPin,
       verifyPin: actions.verifyVaultPin,
       icon: deleteAccount
@@ -108,7 +110,11 @@ class AccountDangerSection extends ConsumerWidget {
       if (context.mounted) _toast(context, e.message, error: true);
     } on Object {
       if (context.mounted) {
-        _toast(context, "Couldn't erase everything. Try again.", error: true);
+        _toast(
+          context,
+          tr("Couldn't erase everything. Try again."),
+          error: true,
+        );
       }
     }
   }
@@ -122,7 +128,7 @@ class AccountDangerSection extends ConsumerWidget {
     VoidCallback? idle(VoidCallback f) => busy == null ? f : null;
 
     return FFGroupedList(
-      label: 'Danger zone',
+      label: tr('Danger zone'),
       dividerIndent:
           AppSpacing.lg + AppSizes.iconTileSm + AppSpacing.rowLeadingGap,
       children: [
@@ -130,7 +136,7 @@ class AccountDangerSection extends ConsumerWidget {
           _DangerRow(
             icon: FontAwesomeIcons.arrowRightFromBracket,
             tint: ActionTints.lock,
-            title: 'Sign out',
+            title: tr('Sign out'),
             color: ff.ink,
             busy: busy == AccountAction.signOut,
             onTap: idle(() => _signOut(context, ref)),
@@ -138,7 +144,7 @@ class AccountDangerSection extends ConsumerWidget {
         _DangerRow(
           icon: FontAwesomeIcons.eraser,
           tint: _eraseTint,
-          title: 'Erase local data',
+          title: tr('Erase local data'),
           color: _eraseTint.inkFor(b),
           busy: busy == AccountAction.erase,
           onTap: idle(() => _erase(context, ref, deleteAccount: false)),
@@ -147,7 +153,7 @@ class AccountDangerSection extends ConsumerWidget {
           _DangerRow(
             icon: FontAwesomeIcons.userXmark,
             tint: ModuleStyle.scan.colors,
-            title: 'Delete account & Drive data',
+            title: tr('Delete account & Drive data'),
             color: ff.dangerStrong,
             busy: busy == AccountAction.deleteAccount,
             onTap: idle(() => _erase(context, ref, deleteAccount: true)),

@@ -23,6 +23,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -74,7 +75,7 @@ Future<bool> lockNoteWithPin(
   if (!context.mounted) return true;
   showFFToast(
     context,
-    'Note locked with its own PIN',
+    tr('Note locked with its own PIN'),
     icon: FontAwesomeIcons.lock,
   );
   return true;
@@ -90,8 +91,8 @@ Future<void> changeNotePin(
     context,
     ref,
     note,
-    title: 'Enter current PIN',
-    subtitle: 'To change the PIN of this note.',
+    title: tr('Enter current PIN'),
+    subtitle: tr('To change the PIN of this note.'),
   )) {
     return;
   }
@@ -99,13 +100,13 @@ Future<void> changeNotePin(
   final pin = await showNotePinSheet(
     context,
     mode: NotePinMode.create,
-    title: 'Set a new PIN',
+    title: tr('Set a new PIN'),
   );
   if (pin == null || !context.mounted) return;
   final verifier = await ref.read(notePinServiceProvider).createVerifier(pin);
   await ref.read(notesRepositoryProvider).lockWithPin(note.id, verifier);
   if (!context.mounted) return;
-  showFFToast(context, 'Note PIN changed', icon: FontAwesomeIcons.lock);
+  showFFToast(context, tr('Note PIN changed'), icon: FontAwesomeIcons.lock);
 }
 
 /// Verify the PIN, then unlock the note for good.
@@ -118,14 +119,18 @@ Future<void> removeNoteLock(
     context,
     ref,
     note,
-    title: 'Enter PIN to remove the lock',
-    subtitle: 'The note will open without a PIN.',
+    title: tr('Enter PIN to remove the lock'),
+    subtitle: tr('The note will open without a PIN.'),
   )) {
     return;
   }
   await ref.read(notesRepositoryProvider).setLocked(note.id, false);
   if (!context.mounted) return;
-  showFFToast(context, 'Note lock removed', icon: FontAwesomeIcons.lockOpen);
+  showFFToast(
+    context,
+    tr('Note lock removed'),
+    icon: FontAwesomeIcons.lockOpen,
+  );
 }
 
 /// The editor's lock icon on a locked note: Change PIN · Remove lock.
@@ -139,7 +144,7 @@ Future<void> showNoteLockOptions(
     context,
     FFActionSheetData(
       header: FFActionSheetHeader(
-        title: 'Note lock',
+        title: tr('Note lock'),
         icon: FontAwesomeIcons.lock,
         colors: ActionTints.lock,
         meta: note.displayTitle,
@@ -147,14 +152,14 @@ Future<void> showNoteLockOptions(
       actions: [
         FFActionItem(
           icon: FontAwesomeIcons.lock,
-          label: 'Change note PIN',
+          label: tr('Change note PIN'),
           colors: ActionTints.lock,
           onTap: () =>
               picked = () => unawaited(changeNotePin(context, ref, note)),
         ),
         FFActionItem(
           icon: FontAwesomeIcons.lockOpen,
-          label: 'Remove note lock',
+          label: tr('Remove note lock'),
           colors: ActionTints.lock,
           onTap: () =>
               picked = () => unawaited(removeNoteLock(context, ref, note)),

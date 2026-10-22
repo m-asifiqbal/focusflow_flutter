@@ -26,6 +26,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/items_repository.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/ff_dialog.dart';
 import 'package:focusflow/core/widgets/ff_snackbar.dart';
@@ -33,24 +34,68 @@ import 'package:focusflow/features/vault/presentation/vault_gate.dart';
 import 'package:focusflow/shared/item_actions/restore_reschedule.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
+/// What happened to the items — the verb of the snackbar message.
+enum LifecycleVerb {
+  archived,
+  deleted,
+  restored,
+  deletedForever,
+  pinned,
+  unpinned,
+}
+
 /// "\"Shopping List\" archived" (single item with a [title]), "Note
-/// archived", "3 notes archived", "3 items archived".
-String lifecycleMessage(List<ItemRef> refs, String verb, {String? title}) {
+/// archived", "3 notes archived", "3 items archived". One whole text per
+/// verb and shape: word order differs between languages.
+String lifecycleMessage(
+  List<ItemRef> refs,
+  LifecycleVerb verb, {
+  String? title,
+}) {
   if (refs.length == 1) {
     final t = title?.trim() ?? '';
-    return t.isEmpty ? '${refs.first.type.label} $verb' : '"$t" $verb';
+    if (t.isNotEmpty) {
+      final a = {'title': t};
+      return switch (verb) {
+        LifecycleVerb.archived => tr('"{title}" archived', a),
+        LifecycleVerb.deleted => tr('"{title}" deleted', a),
+        LifecycleVerb.restored => tr('"{title}" restored', a),
+        LifecycleVerb.deletedForever => tr('"{title}" deleted forever', a),
+        LifecycleVerb.pinned => tr('"{title}" pinned', a),
+        LifecycleVerb.unpinned => tr('"{title}" unpinned', a),
+      };
+    }
+    final a = {'type': refs.first.type.label};
+    return switch (verb) {
+      LifecycleVerb.archived => tr('{type} archived', a),
+      LifecycleVerb.deleted => tr('{type} deleted', a),
+      LifecycleVerb.restored => tr('{type} restored', a),
+      LifecycleVerb.deletedForever => tr('{type} deleted forever', a),
+      LifecycleVerb.pinned => tr('{type} pinned', a),
+      LifecycleVerb.unpinned => tr('{type} unpinned', a),
+    };
   }
   final types = refs.map((r) => r.type).toSet();
-  final noun = types.length == 1 ? types.first.plural.toLowerCase() : 'items';
-  return '${refs.length} $noun $verb';
+  final a = {
+    'count': refs.length,
+    'things': types.length == 1 ? types.first.nouns : tr('items'),
+  };
+  return switch (verb) {
+    LifecycleVerb.archived => tr('{count} {things} archived', a),
+    LifecycleVerb.deleted => tr('{count} {things} deleted', a),
+    LifecycleVerb.restored => tr('{count} {things} restored', a),
+    LifecycleVerb.deletedForever => tr('{count} {things} deleted forever', a),
+    LifecycleVerb.pinned => tr('{count} {things} pinned', a),
+    LifecycleVerb.unpinned => tr('{count} {things} unpinned', a),
+  };
 }
 
 /// Singular / plural nouns for the delete dialog ("note"/"notes").
 (String, String) _nouns(List<ItemRef> refs) {
   final types = refs.map((r) => r.type).toSet();
-  if (types.length != 1) return ('item', 'items');
+  if (types.length != 1) return (tr('item'), tr('items'));
   final t = types.first;
-  return (t.label.toLowerCase(), t.plural.toLowerCase());
+  return (t.noun, t.nouns);
 }
 
 void _undoSnack(
@@ -77,7 +122,7 @@ Future<bool> archiveItems(
   if (!context.mounted) return true;
   _undoSnack(
     context,
-    message: lifecycleMessage(refs, 'archived', title: title),
+    message: lifecycleMessage(refs, LifecycleVerb.archived, title: title),
     icon: FontAwesomeIcons.boxArchive,
     undo: () => items.unarchive(refs),
   );
@@ -115,7 +160,7 @@ Future<bool> deleteItems(
       if (!context.mounted) return true;
       _undoSnack(
         context,
-        message: lifecycleMessage(refs, 'deleted', title: title),
+        message: lifecycleMessage(refs, LifecycleVerb.deleted, title: title),
         icon: FontAwesomeIcons.trashCan,
         undo: () => items.restoreFromTrash(refs),
       );
@@ -140,7 +185,7 @@ Future<bool> restoreFromArchive(
   if (!context.mounted) return true;
   _undoSnack(
     context,
-    message: lifecycleMessage(refs, 'restored', title: title),
+    message: lifecycleMessage(refs, LifecycleVerb.restored, title: title),
     icon: FontAwesomeIcons.rotateLeft,
     undo: () async {
       for (final e in before.entries) {
@@ -170,7 +215,7 @@ Future<bool> restoreFromTrash(
   if (!context.mounted) return true;
   _undoSnack(
     context,
-    message: lifecycleMessage(refs, 'restored', title: title),
+    message: lifecycleMessage(refs, LifecycleVerb.restored, title: title),
     icon: FontAwesomeIcons.rotateLeft,
     undo: () async {
       for (final e in before.entries) {
@@ -205,7 +250,7 @@ Future<bool> deleteItemsForever(
   if (context.mounted) {
     showFFToast(
       context,
-      lifecycleMessage(refs, 'deleted forever', title: title),
+      lifecycleMessage(refs, LifecycleVerb.deletedForever, title: title),
       icon: FontAwesomeIcons.trashCan,
     );
   }
@@ -236,7 +281,10 @@ Future<bool> togglePinItems(
   if (!context.mounted) return true;
   _undoSnack(
     context,
-    message: lifecycleMessage(changed, pin ? 'pinned' : 'unpinned'),
+    message: lifecycleMessage(
+      changed,
+      pin ? LifecycleVerb.pinned : LifecycleVerb.unpinned,
+    ),
     icon: FontAwesomeIcons.thumbtack,
     undo: () => items.setPinned(changed, !pin),
   );

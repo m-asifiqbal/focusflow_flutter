@@ -14,6 +14,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_range.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_snapshot.dart';
 
@@ -22,19 +23,22 @@ abstract final class InsightsTips {
   static const int minWeekdayActions = 10;
   static const double leadRatio = 1.5;
 
-  static const String generic =
-      'Pick your top three tasks the evening before. Small wins early '
-      'build momentum for the whole day.';
+  /// The data-free tip (a getter: it follows the active language).
+  static String get generic => tr(
+    'Pick your top three tasks the evening before. Small wins early '
+    'build momentum for the whole day.',
+  );
 
-  static const List<String> _weekdays = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
+  /// Weekday [i] (0 = Monday … 6 = Sunday) in the active language.
+  static String _weekdayName(int i) => switch (i) {
+    0 => tr('Monday'),
+    1 => tr('Tuesday'),
+    2 => tr('Wednesday'),
+    3 => tr('Thursday'),
+    4 => tr('Friday'),
+    5 => tr('Saturday'),
+    _ => tr('Sunday'),
+  };
 
   /// The tip for a window. [completedAt]: completion instants of tasks in
   /// the window; [daily]: one point per day of the window.
@@ -49,7 +53,7 @@ abstract final class InsightsTips {
       _weekday(window, daily) ??
       _habits(consistency) ??
       _focus(completedAt.length, focusMinutes) ??
-      const InsightsTip(kind: TipKind.generic, body: generic);
+      InsightsTip(kind: TipKind.generic, body: generic);
 
   static InsightsTip? _timeOfDay(List<DateTime> completedAt) {
     if (completedAt.length < minTimedTasks) return null;
@@ -61,26 +65,34 @@ abstract final class InsightsTips {
       return InsightsTip(
         kind: TipKind.morning,
         body: later == 0
-            ? 'You complete all your tasks before noon. Schedule '
-                  'high-priority work in the morning.'
-            : 'You complete ${_ratio(morning / later)} more tasks before '
-                  'noon. Schedule high-priority work in the morning.',
+            ? tr(
+                'You complete all your tasks before noon. Schedule high-priority work in the morning.',
+              )
+            : tr(
+                'You complete {v} more tasks before noon. Schedule high-priority work in the morning.',
+                {'v': _ratio(morning / later)},
+              ),
       );
     }
     if (later >= morning * leadRatio) {
       final lead = morning == 0
-          ? 'You complete all your tasks after noon.'
-          : 'You complete ${_ratio(later / morning)} more tasks after noon.';
+          ? tr('You complete all your tasks after noon.')
+          : tr('You complete {v} more tasks after noon.', {
+              'v': _ratio(later / morning),
+            });
       return evening > afternoon
           ? InsightsTip(
               kind: TipKind.evening,
-              body:
-                  '$lead Evenings are your peak: protect them for '
-                  'focused work.',
+              body: tr(
+                '{lead} Evenings are your peak: protect them for focused work.',
+                {'lead': lead},
+              ),
             )
           : InsightsTip(
               kind: TipKind.afternoon,
-              body: '$lead Save deep work for the afternoon.',
+              body: tr('{lead} Save deep work for the afternoon.', {
+                'lead': lead,
+              }),
             );
     }
     return null;
@@ -104,12 +116,13 @@ abstract final class InsightsTips {
     }
     final tied = byWeekday.where((v) => v == byWeekday[best]).length > 1;
     if (tied) return null;
-    final name = _weekdays[best];
+    final name = _weekdayName(best);
     return InsightsTip(
       kind: TipKind.weekday,
-      body:
-          '$name is your most productive day. Plan your toughest tasks '
-          'for ${name}s.',
+      body: tr(
+        '{name} is your most productive day. Plan your toughest tasks for {name}s.',
+        {'name': name},
+      ),
     );
   }
 
@@ -118,19 +131,20 @@ abstract final class InsightsTips {
     if (rate == null || consistency.total < 5 || rate >= 0.5) return null;
     return InsightsTip(
       kind: TipKind.habits,
-      body:
-          'You kept ${(rate * 100).round()}% of your scheduled habit '
-          'days. Fewer habits, each with a reminder time, are easier to keep.',
+      body: tr(
+        'You kept {round}% of your scheduled habit days. Fewer habits, each with a reminder time, are easier to keep.',
+        {'round': (rate * 100).round()},
+      ),
     );
   }
 
   static InsightsTip? _focus(int tasksDone, int focusMinutes) {
     if (tasksDone < 3 || focusMinutes > 0) return null;
-    return const InsightsTip(
+    return InsightsTip(
       kind: TipKind.focus,
-      body:
-          'Try a 25-minute focus session before your next task. Tap Focus '
-          'hours to start one.',
+      body: tr(
+        'Try a 25-minute focus session before your next task. Tap Focus hours to start one.',
+      ),
     );
   }
 

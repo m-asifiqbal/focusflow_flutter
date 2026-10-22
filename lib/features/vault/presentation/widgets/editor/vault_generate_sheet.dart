@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/password_generator.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -75,7 +76,7 @@ class _GenerateSheetState extends ConsumerState<_GenerateSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _title(context, 'Generate password'),
+        _title(context, tr('Generate password')),
         Container(
           padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
           decoration: BoxDecoration(
@@ -91,7 +92,7 @@ class _GenerateSheetState extends ConsumerState<_GenerateSheet> {
               ),
               VaultRoundButton(
                 icon: FontAwesomeIcons.arrowsRotate,
-                semanticLabel: 'Regenerate',
+                semanticLabel: tr('Regenerate'),
                 onTap: () => setState(() => _value = _make()),
               ),
             ],
@@ -101,7 +102,7 @@ class _GenerateSheetState extends ConsumerState<_GenerateSheet> {
         Row(
           children: [
             Text(
-              'Length',
+              tr('Length'),
               style: context.vaultValueStyle.copyWith(
                 fontSize: VaultType.field,
               ),
@@ -116,7 +117,8 @@ class _GenerateSheetState extends ConsumerState<_GenerateSheet> {
                 activeColor: ff.vaultAccent,
                 inactiveColor: ff.vaultTrack,
                 label: '${_o.length}',
-                semanticFormatterCallback: (v) => '${v.round()} characters',
+                semanticFormatterCallback: (v) =>
+                    tr('{n} characters', {'n': v.round()}),
                 onChanged: (v) => _update(_o.copyWith(length: v.round())),
               ),
             ),
@@ -132,13 +134,13 @@ class _GenerateSheetState extends ConsumerState<_GenerateSheet> {
             ),
           ],
         ),
-        toggle('Uppercase (A–Z)', _o.upper, (v) => _o.copyWith(upper: v)),
-        toggle('Lowercase (a–z)', _o.lower, (v) => _o.copyWith(lower: v)),
-        toggle('Numbers (0–9)', _o.digits, (v) => _o.copyWith(digits: v)),
-        toggle('Symbols (!@#)', _o.symbols, (v) => _o.copyWith(symbols: v)),
+        toggle(tr('Uppercase (A–Z)'), _o.upper, (v) => _o.copyWith(upper: v)),
+        toggle(tr('Lowercase (a–z)'), _o.lower, (v) => _o.copyWith(lower: v)),
+        toggle(tr('Numbers (0–9)'), _o.digits, (v) => _o.copyWith(digits: v)),
+        toggle(tr('Symbols (!@#)'), _o.symbols, (v) => _o.copyWith(symbols: v)),
         const SizedBox(height: AppSpacing.lg),
         VaultPrimaryButton(
-          label: 'Use password',
+          label: tr('Use password'),
           icon: FontAwesomeIcons.check,
           onPressed: () => Navigator.of(context).pop(_value),
         ),

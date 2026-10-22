@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -25,6 +26,12 @@ const double vaultCardRadius = AppRadii.dialog - 6;
 
 /// Inner horizontal padding of a field row.
 const double vaultFieldInset = AppSpacing.lg;
+
+/// A stored Wi-Fi security type as shown to the user. The protocol names
+/// (WPA3, WPA2, WEP) read the same in every language; "None" is translated.
+/// The stored value stays "None" (the Wi-Fi QR code reads it).
+String vaultWifiSecurityName(String stored) =>
+    stored == 'None' ? tr('None') : stored;
 
 class VaultCard extends StatelessWidget {
   const VaultCard({required this.children, this.dashed = false, super.key});
@@ -222,7 +229,24 @@ class VaultRoundButton extends StatelessWidget {
                 color: ff.vaultAccentSoft,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: iconSize, color: ff.vaultAccentBright),
+              // Not `Icon`: it boxes the glyph in an iconSize square, and a
+              // glyph wider than that (Font Awesome's eye-slash is 1.25 em)
+              // spills out of the right edge, so the revealed state sat
+              // off-centre. A bare Text takes its natural width and `Center`
+              // centres that.
+              child: ExcludeSemantics(
+                child: Text(
+                  String.fromCharCode(icon.codePoint),
+                  textScaler: TextScaler.noScaling,
+                  style: TextStyle(
+                    fontFamily: icon.fontFamily,
+                    package: icon.fontPackage,
+                    fontSize: iconSize,
+                    height: 1,
+                    color: ff.vaultAccentBright,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

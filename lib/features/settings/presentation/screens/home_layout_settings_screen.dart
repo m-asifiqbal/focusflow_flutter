@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -40,38 +41,47 @@ class HomeLayoutSettingsScreen extends ConsumerWidget {
         s.hiddenHomeSections.isEmpty &&
         _sameOrder(s.homeSections, HomeSection.values);
     return SettingsPage(
-      title: 'Home layout',
+      title: tr('Home layout'),
       trailing: [
         if (!isDefault)
-          FFNavAction(label: 'Reset', onPressed: editor.resetHomeLayout),
+          FFNavAction(label: tr('Reset'), onPressed: editor.resetHomeLayout),
       ],
       children: [
         FFGroupedList(
-          label: 'Home sections',
-          footer:
-              'Drag to reorder. Hidden sections come back when you turn '
-              'them on again.',
+          label: tr('Home sections'),
+          footer: tr(
+            'Drag to reorder. Hidden sections come back when you turn them on again.',
+          ),
           children: [_SectionsList(settings: s)],
         ),
         FFGroupedList(
-          label: 'Home',
+          label: tr('Home'),
           children: [
             FFListRow(
               leading: settingsTile(
                 FontAwesomeIcons.bullseye,
                 SettingsTints.emerald,
               ),
-              title: 'Daily focus goal',
-              value: '${s.dailyFocusGoal} tasks',
+              title: tr('Daily focus goal'),
+              value: tr('{count, plural, one {# task} other {# tasks}}', {
+                'count': s.dailyFocusGoal,
+              }),
               onTap: () async {
                 final v = await pickSetting<int>(
                   context,
-                  title: 'Daily focus goal',
-                  subtitle: "Tasks per day that fill Today's focus to 100 %.",
+                  title: tr('Daily focus goal'),
+                  subtitle: tr(
+                    'Tasks per day that fill Today\'s focus to 100 %.',
+                  ),
                   selected: s.dailyFocusGoal,
                   options: [
                     for (final n in const [3, 5, 7, 10, 12, 15])
-                      option(n, '$n tasks'),
+                      option(
+                        n,
+                        tr('{count, plural, one {# task} other {# tasks}}', {
+                          'count': n,
+                        }),
+                      ),
                   ],
                 );
                 if (v != null) await editor.setDailyFocusGoal(v);
@@ -80,14 +90,14 @@ class HomeLayoutSettingsScreen extends ConsumerWidget {
           ],
         ),
         FFGroupedList(
-          label: 'Library',
+          label: tr('Library'),
           children: [
             FFListRow.toggle(
               leading: settingsTile(
                 FontAwesomeIcons.layerGroup,
                 SettingsTints.slate,
               ),
-              title: 'Show item counts',
+              title: tr('Show item counts'),
               value: s.libraryShowCounts,
               onChanged: editor.setLibraryShowCounts,
             ),
@@ -190,8 +200,10 @@ class _SectionRow extends StatelessWidget {
     final title = SettingsLabels.homeSection(section);
     return Semantics(
       customSemanticsActions: {
-        CustomSemanticsAction(label: 'Move $title up'): ?onMoveUp,
-        CustomSemanticsAction(label: 'Move $title down'): ?onMoveDown,
+        CustomSemanticsAction(label: tr('Move {title} up', {'title': title})):
+            ?onMoveUp,
+        CustomSemanticsAction(label: tr('Move {title} down', {'title': title})):
+            ?onMoveDown,
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -202,7 +214,7 @@ class _SectionRow extends StatelessWidget {
               ReorderableDragStartListener(
                 index: index,
                 child: Semantics(
-                  label: 'Reorder $title',
+                  label: tr('Reorder {title}', {'title': title}),
                   button: true,
                   child: SizedBox(
                     width: AppSizes.minTap,
@@ -224,7 +236,7 @@ class _SectionRow extends StatelessWidget {
                     subtitle: SettingsLabels.homeSectionHint(section),
                     value: visible,
                     onChanged: onVisible,
-                    semanticLabel: 'Show $title on Home',
+                    semanticLabel: tr('Show {title} on Home', {'title': title}),
                   ),
                 ),
               ),

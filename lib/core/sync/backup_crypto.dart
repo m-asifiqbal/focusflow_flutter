@@ -22,6 +22,7 @@ import 'dart:math';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/crypto/argon2_runner.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/storage/secure_store.dart';
 
 /// The PIN did not open the backup (GCM authentication failed).
@@ -78,7 +79,7 @@ class BackupKdfParams {
   /// being attempted.
   static BackupKdfParams fromJson(Map<String, Object?> j) {
     if (j['kdf'] != 'argon2id' || j['cipher'] != 'AES-256-GCM') {
-      throw const FormatException('Unsupported backup encryption');
+      throw FormatException(tr('Unsupported backup encryption'));
     }
     final params = BackupKdfParams(
       salt: base64Decode(j['salt']! as String),
@@ -91,7 +92,7 @@ class BackupKdfParams {
       iterations: params.iterations,
       parallelism: params.parallelism,
     )) {
-      throw const FormatException('Unsupported backup encryption');
+      throw FormatException(tr('Unsupported backup encryption'));
     }
     return params;
   }

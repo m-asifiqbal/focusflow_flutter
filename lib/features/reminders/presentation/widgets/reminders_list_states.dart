@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -42,9 +43,9 @@ class RemindersErrorState extends StatelessWidget {
     child: FFEmptyState.compact(
       colors: ModuleStyle.reminders.colors,
       icon: FontAwesomeIcons.triangleExclamation,
-      title: "Couldn't load reminders",
-      body: 'Something went wrong reading your reminders. Try again.',
-      ctaLabel: 'Retry',
+      title: tr('Couldn\'t load reminders'),
+      body: tr('Something went wrong reading your reminders. Try again.'),
+      ctaLabel: tr('Retry'),
       ctaIcon: FontAwesomeIcons.arrowRotateRight,
       onCta: onRetry,
     ),
@@ -78,11 +79,11 @@ class RemindersEmptyState extends StatelessWidget {
         child: FFEmptyState(
           colors: colors,
           icon: FontAwesomeIcons.solidBell,
-          title: 'No reminders yet',
-          body:
-              'Add a reminder and FocusFlow will nudge you at the right '
-              'time — it works offline too.',
-          ctaLabel: 'Add reminder',
+          title: tr('No reminders yet'),
+          body: tr(
+            'Add a reminder and FocusFlow will nudge you at the right time — it works offline too.',
+          ),
+          ctaLabel: tr('Add reminder'),
           ctaIcon: FontAwesomeIcons.plus,
           onCta: onAdd,
         ),
@@ -90,25 +91,26 @@ class RemindersEmptyState extends StatelessWidget {
     }
     final (title, body) = switch (scope) {
       RemindersScope.upcoming => (
-        'Nothing coming up',
-        'Every reminder is done or turned off.',
+        tr('Nothing coming up'),
+        tr('Every reminder is done or turned off.'),
       ),
       RemindersScope.recurring => (
-        'No repeating reminders',
-        'Set Repeat on a reminder to see it here.',
+        tr('No repeating reminders'),
+        tr('Set Repeat on a reminder to see it here.'),
       ),
       RemindersScope.location => (
-        'No location reminders',
-        'Reminders that fire when you arrive or leave a place show here.',
+        tr('No location reminders'),
+        tr('Reminders that fire when you arrive or leave a place show here.'),
       ),
       RemindersScope.snoozed => (
-        'Nothing snoozed',
-        'Snoozed reminders show here until they fire again.',
+        tr('Nothing snoozed'),
+        tr('Snoozed reminders show here until they fire again.'),
       ),
       _ => (
-        'Nothing scheduled',
-        '${dayLabel ?? 'This day'} is clear. Enjoy the free time, or add '
-            'a reminder.',
+        tr('Nothing scheduled'),
+        tr('{day} is clear. Enjoy the free time, or add a reminder.', {
+          'day': dayLabel ?? tr('This day'),
+        }),
       ),
     };
     return Padding(
@@ -118,7 +120,7 @@ class RemindersEmptyState extends StatelessWidget {
         icon: FontAwesomeIcons.solidBell,
         title: title,
         body: body,
-        ctaLabel: 'Add reminder',
+        ctaLabel: tr('Add reminder'),
         ctaIcon: FontAwesomeIcons.plus,
         onCta: onAdd,
       ),

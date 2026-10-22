@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -36,20 +37,22 @@ class StorageSettingsScreen extends ConsumerWidget {
     final counts = ref.watch(libraryCountsProvider).valueOrNull;
     final usage = async.valueOrNull;
     return SettingsPage(
-      title: 'Storage',
+      title: tr('Storage'),
       children: [
         SettingsHero(
           icon: FontAwesomeIcons.database,
           title: usage == null
-              ? (async.hasError ? 'Couldn’t measure' : 'Measuring…')
-              : '${formatBytes(usage.totalBytes)} on this device',
-          body:
-              'Your data lives on this phone, encrypted. Nothing here is '
-              'removed without asking you first.',
+              ? (async.hasError ? tr('Couldn’t measure') : tr('Measuring…'))
+              : tr('{formatBytes} on this device', {
+                  'formatBytes': formatBytes(usage.totalBytes),
+                }),
+          body: tr(
+            'Your data lives on this phone, encrypted. Nothing here is removed without asking you first.',
+          ),
           trailing: usage == null ? null : StorageBar(usage: usage),
         ),
         FFGroupedList(
-          label: 'Breakdown',
+          label: tr('Breakdown'),
           children: async.when(
             loading: () => const [
               FFSkeletonRow(),
@@ -62,8 +65,8 @@ class StorageSettingsScreen extends ConsumerWidget {
                   FontAwesomeIcons.triangleExclamation,
                   SettingsTints.red,
                 ),
-                title: 'Couldn’t measure storage',
-                value: 'Retry',
+                title: tr('Couldn’t measure storage'),
+                value: tr('Retry'),
                 onTap: () => ref.invalidate(storageUsageProvider),
               ),
             ],
@@ -83,18 +86,17 @@ class StorageSettingsScreen extends ConsumerWidget {
           ),
         ),
         FFGroupedList(
-          label: 'Clean up',
-          footer:
-              'Clearing the cache never touches notes, tasks, reminders, '
-              'habits, vault items or backups. Recently deleted items are '
-              'removed for good after 30 days.',
+          label: tr('Clean up'),
+          footer: tr(
+            'Clearing the cache never touches notes, tasks, reminders, habits, vault items or backups. Recently deleted items are removed for good after 30 days.',
+          ),
           children: [
             FFListRow(
               leading: settingsTile(
                 FontAwesomeIcons.broom,
                 SettingsTints.amber,
               ),
-              title: 'Clear cache',
+              title: tr('Clear cache'),
               value: usage == null ? null : formatBytes(usage.cacheBytes),
               chevron: false,
               enabled: (usage?.cacheBytes ?? 0) > 0,
@@ -105,7 +107,7 @@ class StorageSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.solidTrashCan,
                 SettingsTints.rose,
               ),
-              title: 'Recently deleted',
+              title: tr('Recently deleted'),
               value: counts?.trash.toString(),
               onTap: () => context.push(AppRoutes.trash),
             ),
@@ -114,7 +116,7 @@ class StorageSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.boxArchive,
                 SettingsTints.slate,
               ),
-              title: 'Archive',
+              title: tr('Archive'),
               value: counts?.archived.toString(),
               onTap: () => context.push(AppRoutes.archive),
             ),
@@ -127,11 +129,11 @@ class StorageSettingsScreen extends ConsumerWidget {
   Future<void> _clearCache(BuildContext context, WidgetRef ref) async {
     final ok = await showFFConfirm(
       context,
-      title: 'Clear cache?',
-      message:
-          'Removes temporary files only. Your notes, tasks, vault and '
-          'backups stay exactly as they are.',
-      confirmLabel: 'Clear cache',
+      title: tr('Clear cache?'),
+      message: tr(
+        'Removes temporary files only. Your notes, tasks, vault and backups stay exactly as they are.',
+      ),
+      confirmLabel: tr('Clear cache'),
       icon: FontAwesomeIcons.broom,
     );
     if (!ok) return;
@@ -140,7 +142,7 @@ class StorageSettingsScreen extends ConsumerWidget {
     if (context.mounted) {
       showFFToast(
         context,
-        'Freed ${formatBytes(freed)}',
+        tr('Freed {formatBytes}', {'formatBytes': formatBytes(freed)}),
         icon: FontAwesomeIcons.broom,
       );
     }

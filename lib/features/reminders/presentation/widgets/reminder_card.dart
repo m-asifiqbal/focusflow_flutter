@@ -15,6 +15,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -96,7 +97,7 @@ class ReminderCard extends StatelessWidget {
     final r = occurrence.reminder;
     final style = ReminderStyle.of(r);
     final done = occurrence.isDone;
-    final title = r.title.trim().isEmpty ? 'Untitled reminder' : r.title;
+    final title = r.title.trim().isEmpty ? tr('Untitled reminder') : r.title;
     final showActions = actions != ReminderCardActions.none && !done;
     final texts = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +127,9 @@ class ReminderCard extends StatelessWidget {
         : FFSwitch(
             value: r.isEnabled,
             onChanged: onToggle,
-            semanticLabel: r.isEnabled ? 'Turn off $title' : 'Turn on $title',
+            semanticLabel: r.isEnabled
+                ? tr('Turn off {title}', {'title': title})
+                : tr('Turn on {title}', {'title': title}),
           );
     // The pills span under the toggle so both fit on one line.
     final content = Column(
@@ -145,18 +148,20 @@ class ReminderCard extends StatelessWidget {
             children: [
               if (actions == ReminderCardActions.missed)
                 ReminderActionPill(
-                  label: 'RESCHEDULE',
+                  label: tr('RESCHEDULE'),
                   colors: ModuleStyle.reminders.colors,
                   onTap: onReschedule,
                 )
               else
                 ReminderActionPill(
-                  label: 'SNOOZE ${snoozeMinutes}m',
+                  label: tr('SNOOZE {snoozeMinutes}m', {
+                    'snoozeMinutes': snoozeMinutes,
+                  }),
                   colors: ModuleStyle.reminders.colors,
                   onTap: onSnooze,
                 ),
               ReminderActionPill(
-                label: 'MARK DONE',
+                label: tr('MARK DONE'),
                 primary: true,
                 onTap: onDone,
               ),

@@ -18,6 +18,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/utils/recurrence.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
@@ -119,16 +120,22 @@ enum WhenChoice {
 /// The REPEAT chips. [custom] covers every rule the quick chips can't
 /// express (yearly, intervals, end dates, several weekdays …).
 enum RepeatPreset {
-  once('Once'),
-  daily('Daily'),
-  weekdays('Weekdays'),
-  weekly('Weekly'),
-  monthly('Monthly'),
-  custom('Custom');
+  once,
+  daily,
+  weekdays,
+  weekly,
+  monthly,
+  custom;
 
-  const RepeatPreset(this.label);
-
-  final String label;
+  /// Chip text in the active language.
+  String get label => switch (this) {
+    RepeatPreset.once => tr('Once'),
+    RepeatPreset.daily => tr('Daily'),
+    RepeatPreset.weekdays => tr('Weekdays'),
+    RepeatPreset.weekly => tr('Weekly'),
+    RepeatPreset.monthly => tr('Monthly'),
+    RepeatPreset.custom => tr('Custom'),
+  };
 
   /// The chip that matches [rrule] for a reminder starting on [start].
   static RepeatPreset of(String? rrule, DateTime start) {

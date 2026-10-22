@@ -18,6 +18,7 @@ library;
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
@@ -112,7 +113,10 @@ class HabitHeatmap extends StatelessWidget {
     return Semantics(
       label:
           semanticLabel ??
-          'Activity over the last $weeks weeks: $active active days',
+          tr('Activity over the last {weeks} weeks: {active} active days', {
+            'weeks': weeks,
+            'active': active,
+          }),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth.isFinite
@@ -267,7 +271,7 @@ class HabitRestDayKey extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.xs + AppSpacing.xxs),
-          Text('Rest day', style: context.text.caption),
+          Text(tr('Rest day'), style: context.text.caption),
         ],
       ),
     );

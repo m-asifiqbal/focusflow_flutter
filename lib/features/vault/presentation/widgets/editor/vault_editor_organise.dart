@@ -14,6 +14,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -30,7 +31,8 @@ import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 /// Expiry reminder choices in days (null = off).
 const List<int?> vaultExpiryOptions = [null, 30, 60, 90, 180, 365];
 
-String vaultExpiryLabel(int? days) => days == null ? 'Off' : '$days days';
+String vaultExpiryLabel(int? days) =>
+    days == null ? tr('Off') : tr('{days} days', {'days': days});
 
 class VaultOrganiseCard extends ConsumerWidget {
   const VaultOrganiseCard({required this.args, required this.state, super.key});
@@ -48,10 +50,10 @@ class VaultOrganiseCard extends ConsumerWidget {
     Future<void> pickFolder() async {
       final choice = await showVaultChoiceSheet<String?>(
         context,
-        title: 'Folder',
+        title: tr('Folder'),
         current: state.folderId,
         options: [
-          (value: null, label: 'No folder'),
+          (value: null, label: tr('No folder')),
           for (final f in folders) (value: f.id, label: f.name),
         ],
       );
@@ -66,7 +68,7 @@ class VaultOrganiseCard extends ConsumerWidget {
     Future<void> pickExpiry() async {
       final choice = await showVaultChoiceSheet<int?>(
         context,
-        title: 'Password expiry reminder',
+        title: tr('Password expiry reminder'),
         current: state.expiryDays,
         options: [
           for (final d in vaultExpiryOptions)
@@ -79,37 +81,38 @@ class VaultOrganiseCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const VaultSectionLabel('Organise'),
+        VaultSectionLabel(tr('Organise')),
         VaultCard(
           children: [
             VaultValueRow(
-              label: 'Folder',
-              value: folder?.name ?? 'No folder',
+              label: tr('Folder'),
+              value: folder?.name ?? tr('No folder'),
               onTap: () => unawaited(pickFolder()),
             ),
             VaultValueRow(
-              label: 'Tags',
-              value: tags.isEmpty ? 'Add tags' : tags,
+              label: tr('Tags'),
+              value: tags.isEmpty ? tr('Add tags') : tags,
               accent: tags.isNotEmpty,
               chevron: false,
               onTap: () => unawaited(pickTags()),
             ),
             VaultInlineRow(
-              title: 'Add to favourites',
+              title: tr('Add to favourites'),
               minHeight: AppSizes.rowMin,
               trailing: FFSwitch(
                 value: state.isFavorite,
                 vault: true,
-                semanticLabel: 'Add to favourites',
+                semanticLabel: tr('Add to favourites'),
                 onChanged: c.setFavorite,
               ),
             ),
             if (state.hasPassword)
               VaultInlineRow(
-                title: 'Password expiry reminder',
-                semanticLabel:
-                    'Password expiry reminder: '
-                    '${vaultExpiryLabel(state.expiryDays)}',
+                title: tr('Password expiry reminder'),
+                semanticLabel: tr(
+                  'Password expiry reminder: {vaultExpiryLabel}',
+                  {'vaultExpiryLabel': vaultExpiryLabel(state.expiryDays)},
+                ),
                 onTap: () => unawaited(pickExpiry()),
                 trailing: Text(
                   vaultExpiryLabel(state.expiryDays),
@@ -145,7 +148,7 @@ class VaultEditorNotes extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        VaultSectionLabel(note ? 'Note' : 'Notes'),
+        VaultSectionLabel(note ? tr('Note') : tr('Notes')),
         VaultCard(
           children: [
             Padding(
@@ -157,7 +160,7 @@ class VaultEditorNotes extends StatelessWidget {
               ),
               child: Semantics(
                 textField: true,
-                label: note ? 'Note' : 'Notes',
+                label: note ? tr('Note') : tr('Notes'),
                 child: TextField(
                   controller: controller,
                   onChanged: onChanged,
@@ -177,8 +180,8 @@ class VaultEditorNotes extends StatelessWidget {
                   ),
                   decoration: vaultBareDecoration(
                     hintText: note
-                        ? 'Write anything you want to keep private'
-                        : 'Add notes',
+                        ? tr('Write anything you want to keep private')
+                        : tr('Add notes'),
                     hintStyle: context.vaultValueStyle.copyWith(
                       fontSize: VaultType.field,
                       color: ff.vaultFieldLabel,

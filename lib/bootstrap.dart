@@ -19,6 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/app.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/language_service.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/performance/device_performance.dart';
 import 'package:focusflow/core/storage/secure_store.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -92,6 +94,8 @@ Future<Widget> buildRoot({
     return StartupErrorApp(onRetry: onRetry);
   }
   final deviceId = await _deviceId(prefs);
+  // Before the first frame: every string is read through `tr`.
+  await activateLanguageFromPrefs(prefs);
 
   final extra = <Override>[];
   for (final step in steps) {
@@ -174,22 +178,22 @@ class _StartupErrorAppState extends State<StartupErrorApp> {
                   const Icon(Icons.lock_outline, size: 48),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    "Can't unlock your data",
+                    tr('Can\'t unlock your data'),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  const Text(
-                    "${AppInfo.name} couldn't read its encryption key from "
-                    "this device's secure storage. Your data hasn't been "
-                    'changed. Try again, or restart the device and unlock '
-                    'it before opening the app.',
+                  Text(
+                    tr(
+                      '{name} couldn\'t read its encryption key from this device\'s secure storage. Your data hasn\'t been changed. Try again, or restart the device and unlock it before opening the app.',
+                      {'name': AppInfo.name},
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   FilledButton(
                     onPressed: _busy ? null : _retry,
-                    child: Text(_busy ? 'Trying…' : 'Try again'),
+                    child: Text(_busy ? tr('Trying…') : tr('Try again')),
                   ),
                 ],
               ),

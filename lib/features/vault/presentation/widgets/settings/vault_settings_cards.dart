@@ -19,6 +19,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -75,7 +76,7 @@ class VaultEncryptionHero extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Zero-knowledge encryption',
+                    tr('Zero-knowledge encryption'),
                     style: context.text.title.copyWith(
                       fontSize: VaultType.valueLg,
                       fontWeight: FontWeight.w600,
@@ -84,8 +85,9 @@ class VaultEncryptionHero extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    'AES-256-GCM · key derived with Argon2id. We can never '
-                    'see your passwords.',
+                    tr(
+                      'AES-256-GCM · key derived with Argon2id. We can never see your passwords.',
+                    ),
                     style: context.text.meta.copyWith(
                       fontSize: VaultType.secondary,
                       height: 1.4,
@@ -107,19 +109,21 @@ class VaultAutofillSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FFGroupedList(
-    label: 'AUTOFILL',
+    label: tr('AUTOFILL'),
     children: [
       FFListRow(
         leading: const VaultSettingsTile(
           FontAwesomeIcons.solidKeyboard,
           VaultSettingsTints.blue,
         ),
-        title: 'Use ${AppInfo.name} for autofill',
-        subtitle: 'Android Autofill Service · iOS Password AutoFill',
-        value: 'Set up',
+        title: tr('Use {name} for autofill', {'name': AppInfo.name}),
+        subtitle: tr('Android Autofill Service · iOS Password AutoFill'),
+        value: tr('Set up'),
         onTap: () => showFFToast(
           context,
-          'Autofill arrives in version 1.1 · copy from the vault until then',
+          tr(
+            'Autofill arrives in version 1.1 · copy from the vault until then',
+          ),
         ),
       ),
     ],
@@ -131,18 +135,18 @@ class VaultRecoverySection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => FFGroupedList(
-    label: 'RECOVERY',
-    footer:
-        'If you forget your master PIN and lose your recovery kit, vault '
-        'data cannot be recovered — by design.',
+    label: tr('RECOVERY'),
+    footer: tr(
+      'If you forget your master PIN and lose your recovery kit, vault data cannot be recovered — by design.',
+    ),
     children: [
       FFListRow(
         leading: const VaultSettingsTile(
           FontAwesomeIcons.fileShield,
           VaultSettingsTints.emerald,
         ),
-        title: 'Recovery kit (PDF)',
-        value: 'Download',
+        title: tr('Recovery kit (PDF)'),
+        value: tr('Download'),
         onTap: () => unawaited(_recoveryKit(context, ref)),
       ),
       FFListRow(
@@ -150,11 +154,11 @@ class VaultRecoverySection extends ConsumerWidget {
           FontAwesomeIcons.fileExport,
           VaultSettingsTints.amber,
         ),
-        title: 'Export vault (encrypted)',
+        title: tr('Export vault (encrypted)'),
         onTap: () => runWithVaultReauth(
           context,
           ref,
-          'Confirm to export your vault',
+          tr('Confirm to export your vault'),
           () async {
             if (context.mounted) {
               unawaited(context.push(AppRoutes.settingsImportExport));
@@ -168,17 +172,17 @@ class VaultRecoverySection extends ConsumerWidget {
   Future<void> _recoveryKit(BuildContext context, WidgetRef ref) async {
     final ok = await showFFConfirm(
       context,
-      title: 'Create a new recovery kit?',
-      message:
-          'You will save a new recovery code. Once you confirm it is saved, '
-          'any kit you saved before stops working.',
-      confirmLabel: 'Create kit',
+      title: tr('Create a new recovery kit?'),
+      message: tr(
+        'You will save a new recovery code. Once you confirm it is saved, any kit you saved before stops working.',
+      ),
+      confirmLabel: tr('Create kit'),
     );
     if (!ok || !context.mounted) return;
     await withVaultReauth(
       context,
       ref,
-      'Confirm to create a recovery kit',
+      tr('Confirm to create a recovery kit'),
       () async {
         final c = ref.read(vaultSecuritySettingsControllerProvider);
         try {
@@ -188,7 +192,7 @@ class VaultRecoverySection extends ConsumerWidget {
             if (context.mounted) {
               showFFToast(
                 context,
-                'Not saved · your old recovery kit still works',
+                tr('Not saved · your old recovery kit still works'),
               );
             }
             return;
@@ -200,28 +204,28 @@ class VaultRecoverySection extends ConsumerWidget {
           // Phase 2: only now does the new code replace the old one.
           final saved = await showFFConfirm(
             context,
-            title: 'Did you save the new kit?',
-            message:
-                'Confirm only after the PDF is stored or printed. Your old '
-                'recovery code stops working when you confirm.',
-            confirmLabel: 'Yes, it is saved',
-            cancelLabel: 'Not yet',
+            title: tr('Did you save the new kit?'),
+            message: tr(
+              'Confirm only after the PDF is stored or printed. Your old recovery code stops working when you confirm.',
+            ),
+            confirmLabel: tr('Yes, it is saved'),
+            cancelLabel: tr('Not yet'),
           );
           if (saved) {
             await c.commitRecoveryKit();
             if (context.mounted) {
-              showFFToast(context, 'New recovery kit active');
+              showFFToast(context, tr('New recovery kit active'));
             }
           } else {
             c.discardRecoveryKit();
             if (context.mounted) {
-              showFFToast(context, 'Your old recovery kit still works');
+              showFFToast(context, tr('Your old recovery kit still works'));
             }
           }
         } on Object {
           c.discardRecoveryKit();
           if (context.mounted) {
-            showFFToast(context, "Couldn't create the recovery kit");
+            showFFToast(context, tr("Couldn't create the recovery kit"));
           }
         }
       },
@@ -237,11 +241,11 @@ class VaultSetUpCard extends StatelessWidget {
   Widget build(BuildContext context) => FFEmptyState.compact(
     colors: ModuleStyle.vault.colors,
     icon: FontAwesomeIcons.shieldHalved,
-    title: 'Set up your vault',
-    body:
-        'Choose a master PIN to start storing passwords. These options '
-        'appear once the vault exists.',
-    ctaLabel: 'Set up vault',
+    title: tr('Set up your vault'),
+    body: tr(
+      'Choose a master PIN to start storing passwords. These options appear once the vault exists.',
+    ),
+    ctaLabel: tr('Set up vault'),
     ctaIcon: FontAwesomeIcons.lock,
     onCta: () => unawaited(context.push(AppRoutes.vault)),
   );
@@ -255,11 +259,11 @@ class VaultUnreadableCard extends StatelessWidget {
   Widget build(BuildContext context) => FFEmptyState.compact(
     colors: ModuleStyle.vault.colors,
     icon: FontAwesomeIcons.triangleExclamation,
-    title: "Your vault key can't be read",
-    body:
-        'Open the vault to unlock it with your recovery code, or restore a '
-        'backup.',
-    ctaLabel: 'Open vault',
+    title: tr('Your vault key can\'t be read'),
+    body: tr(
+      'Open the vault to unlock it with your recovery code, or restore a backup.',
+    ),
+    ctaLabel: tr('Open vault'),
     ctaIcon: FontAwesomeIcons.key,
     onCta: () => unawaited(context.push(AppRoutes.vault)),
   );

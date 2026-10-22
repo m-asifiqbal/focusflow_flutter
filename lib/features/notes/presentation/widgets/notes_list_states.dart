@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -22,7 +23,7 @@ class NotesLoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Loading notes',
+    label: tr('Loading notes'),
     child: const Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.screen),
       child: Row(
@@ -71,7 +72,7 @@ class NotesEmptyState extends StatelessWidget {
   final VoidCallback? onClearFilter;
 
   /// Example capture of the first-run hint; parses as a note.
-  static const String hintText = 'Gift ideas for Sam #ideas';
+  static String get hintText => tr('Gift ideas for Sam #ideas');
 
   @override
   Widget build(BuildContext context) {
@@ -80,15 +81,15 @@ class NotesEmptyState extends StatelessWidget {
       return FFEmptyState(
         colors: colors,
         icon: ModuleStyle.notes.icon,
-        title: 'Write your first note',
-        body:
-            'Capture ideas, checklists and meeting notes. They stay on this '
-            'device, encrypted.',
-        ctaLabel: 'New note',
+        title: tr('Write your first note'),
+        body: tr(
+          'Capture ideas, checklists and meeting notes. They stay on this device, encrypted.',
+        ),
+        ctaLabel: tr('New note'),
         ctaIcon: FontAwesomeIcons.plus,
         onCta: onCreate,
         // Screen 29: the hint pre-fills quick capture (plain text → note).
-        hint: 'Try: "$hintText"',
+        hint: tr('Try: "{hintText}"', {'hintText': hintText}),
         onHint: () => showQuickAdd(context, text: hintText),
       );
     }
@@ -96,12 +97,12 @@ class NotesEmptyState extends StatelessWidget {
       colors: colors,
       icon: FontAwesomeIcons.magnifyingGlass,
       title: folderName != null
-          ? 'No notes in $folderName'
-          : 'No matching notes',
+          ? tr('No notes in {folderName}', {'folderName': folderName})
+          : tr('No matching notes'),
       body: folderName != null
-          ? 'Notes you add to this folder show up here.'
-          : 'Try another word or clear the filters.',
-      ctaLabel: folderName != null ? 'New note' : 'Clear filters',
+          ? tr('Notes you add to this folder show up here.')
+          : tr('Try another word or clear the filters.'),
+      ctaLabel: folderName != null ? tr('New note') : tr('Clear filters'),
       ctaIcon: folderName != null ? FontAwesomeIcons.plus : null,
       onCta: folderName != null ? onCreate : onClearFilter,
     );
@@ -117,9 +118,9 @@ class NotesErrorState extends StatelessWidget {
   Widget build(BuildContext context) => FFEmptyState.compact(
     colors: ModuleStyle.notes.colors,
     icon: FontAwesomeIcons.triangleExclamation,
-    title: "Couldn't load your notes",
-    body: 'Something went wrong reading the notes on this device.',
-    ctaLabel: 'Retry',
+    title: tr('Couldn\'t load your notes'),
+    body: tr('Something went wrong reading the notes on this device.'),
+    ctaLabel: tr('Retry'),
     ctaIcon: FontAwesomeIcons.arrowsRotate,
     onCta: onRetry,
   );

@@ -24,6 +24,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -69,9 +70,9 @@ class SignInScreen extends ConsumerWidget {
           if (context.mounted) {
             showUndoSnackbar(
               context,
-              message:
-                  "Couldn't reach Google Drive. Choose again in Settings › "
-                  'Backup.',
+              message: tr(
+                'Couldn\'t reach Google Drive. Choose again in Settings › Backup.',
+              ),
               icon: FontAwesomeIcons.circleInfo,
             );
           }
@@ -127,9 +128,9 @@ class SignInScreen extends ConsumerWidget {
         if (appleNoDrive) {
           showUndoSnackbar(
             context,
-            message:
-                'Signed in with Apple. Connect Google later in '
-                'Settings › Backup for Drive backup.',
+            message: tr(
+              'Signed in with Apple. Connect Google later in Settings › Backup for Drive backup.',
+            ),
             icon: FontAwesomeIcons.circleInfo,
           );
         }
@@ -195,17 +196,19 @@ class SignInScreen extends ConsumerWidget {
             Semantics(
               header: true,
               child: Text(
-                'Welcome to ${AppInfo.name}',
+                tr('Welcome to {name}', {'name': AppInfo.name}),
                 style: text.largeTitle.copyWith(fontSize: 31),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               restoreIntent
-                  ? 'Sign in with Google to restore your backup from Drive, '
-                        'or restore from a backup file.'
-                  : 'Sign in to keep your workspace safe and synced. '
-                        'You can also start offline and connect later.',
+                  ? tr(
+                      'Sign in with Google to restore your backup from Drive, or restore from a backup file.',
+                    )
+                  : tr(
+                      'Sign in to keep your workspace safe and synced. You can also start offline and connect later.',
+                    ),
               style: text.body.copyWith(fontSize: 15),
             ),
             const SizedBox(height: AppSpacing.xxxl),
@@ -213,7 +216,7 @@ class SignInScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.xxxl),
             SignInButton(
               kind: SignInButtonKind.google,
-              label: 'Continue with Google',
+              label: tr('Continue with Google'),
               loading: busy == SignInMethod.google,
               onPressed: tap(SignInMethod.google, () => _google(context, ref)),
             ),
@@ -221,7 +224,7 @@ class SignInScreen extends ConsumerWidget {
               const SizedBox(height: 14),
               SignInButton(
                 kind: SignInButtonKind.apple,
-                label: 'Continue with Apple',
+                label: tr('Continue with Apple'),
                 loading: busy == SignInMethod.apple,
                 onPressed: tap(SignInMethod.apple, () => _apple(context, ref)),
               ),
@@ -229,7 +232,7 @@ class SignInScreen extends ConsumerWidget {
             const SizedBox(height: 14),
             SignInButton(
               kind: SignInButtonKind.offline,
-              label: 'Use offline (local only)',
+              label: tr('Use offline (local only)'),
               loading: busy == SignInMethod.offline,
               onPressed: tap(
                 SignInMethod.offline,
@@ -240,7 +243,7 @@ class SignInScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm),
               Center(
                 child: FFTextButton(
-                  label: 'Restore from a backup file',
+                  label: tr('Restore from a backup file'),
                   onPressed: busy == null
                       ? () => _fromFile(context, ref)
                       : null,
@@ -259,6 +262,27 @@ class SignInScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+// Private-use characters that stand in for the links inside the sentence.
+const _termsMark = '\uE000';
+const _privacyMark = '\uE001';
+
+/// [sentence] with each marker character replaced by its span.
+List<InlineSpan> _withLinks(String sentence, Map<String, InlineSpan> links) {
+  final out = <InlineSpan>[];
+  var start = 0;
+  for (var i = 0; i < sentence.length; i++) {
+    final link = links[sentence[i]];
+    if (link == null) continue;
+    if (i > start) out.add(TextSpan(text: sentence.substring(start, i)));
+    out.add(link);
+    start = i + 1;
+  }
+  if (start < sentence.length) {
+    out.add(TextSpan(text: sentence.substring(start)));
+  }
+  return out;
 }
 
 /// "By continuing you agree to our Terms and Privacy Policy. …"
@@ -305,15 +329,26 @@ class _LegalFootnoteState extends State<_LegalFootnote> {
     return Text.rich(
       TextSpan(
         style: style,
-        children: [
-          const TextSpan(text: 'By continuing you agree to our '),
-          TextSpan(text: 'Terms', style: link, recognizer: _terms),
-          const TextSpan(text: ' and '),
-          TextSpan(text: 'Privacy Policy', style: link, recognizer: _privacy),
-          const TextSpan(
-            text: ". We only request access to the app's own Drive folder.",
+        // One sentence (word order differs per language): the two links are
+        // marked inside the translated text and swapped for tappable spans.
+        children: _withLinks(
+          tr(
+            'By continuing you agree to our {terms} and {privacy}. We only request access to the app\'s own Drive folder.',
+            {'terms': _termsMark, 'privacy': _privacyMark},
           ),
-        ],
+          {
+            _termsMark: TextSpan(
+              text: tr('Terms'),
+              style: link,
+              recognizer: _terms,
+            ),
+            _privacyMark: TextSpan(
+              text: tr('Privacy Policy'),
+              style: link,
+              recognizer: _privacy,
+            ),
+          },
+        ),
       ),
       textAlign: TextAlign.center,
     );

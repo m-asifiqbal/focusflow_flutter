@@ -22,6 +22,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/sync/backup_key_policy.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
@@ -192,22 +193,28 @@ class SyncController extends Notifier<SyncStatus> {
   static String summary(SyncOutcome o) {
     final parts = <String>[
       o.uploaded == null
-          ? 'Up to date with Google Drive'
-          : 'Backed up to Google Drive',
+          ? tr('Up to date with Google Drive')
+          : tr('Backed up to Google Drive'),
     ];
     final n = o.report.changes;
     if (n > 0) {
-      parts.add('$n ${n == 1 ? 'item' : 'items'} updated from another device');
+      parts.add(
+        tr(
+          '{count, plural, one {# item} other {# items}} updated from another device',
+          {'count': n},
+        ),
+      );
     }
     if (o.needsPin > 0) {
       parts.add(
-        o.needsPin == 1
-            ? '1 backup from another device needs its backup PIN'
-            : '${o.needsPin} backups from other devices need their backup PIN',
+        tr(
+          '{count, plural, one {# backup from another device needs its backup PIN} other {# backups from other devices need their backup PIN}}',
+          {'count': o.needsPin},
+        ),
       );
     }
     if (o.mergeDeferred) {
-      parts.add('Choose Restore or Start fresh to use your other backups');
+      parts.add(tr('Choose Restore or Start fresh to use your other backups'));
     }
     parts.addAll(o.warnings);
     return parts.join(' · ');

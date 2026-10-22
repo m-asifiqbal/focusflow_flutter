@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -87,7 +88,7 @@ class _TextSheetState extends State<_TextSheet> {
           onSubmitted: (_) => _done(),
         ),
         const SizedBox(height: AppSpacing.md),
-        FFPrimaryButton(label: 'Done', onPressed: _done),
+        FFPrimaryButton(label: tr('Done'), onPressed: _done),
       ],
     );
   }
@@ -127,7 +128,7 @@ Future<T?> showHabitOptionSheet<T>(
                 title: o.label,
                 subtitle: o.subtitle,
                 semanticLabel: o.value == selected
-                    ? '${o.label}, selected'
+                    ? tr('{label}, selected', {'label': o.label})
                     : o.label,
                 trailing: o.value == selected
                     ? Icon(
@@ -178,15 +179,15 @@ class _TimesSheet extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Reminder times', style: context.text.title),
+        Text(tr('Reminder times'), style: context.text.title),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'A reminder fires at each time on scheduled days.',
+          tr('A reminder fires at each time on scheduled days.'),
           style: context.text.bodySmall,
         ),
         const SizedBox(height: AppSpacing.lg),
         if (times.isEmpty)
-          Text('No times yet', style: context.text.meta)
+          Text(tr('No times yet'), style: context.text.meta)
         else
           Wrap(
             spacing: AppSpacing.sm,
@@ -203,20 +204,22 @@ class _TimesSheet extends ConsumerWidget {
                     size: AppSpacing.md,
                     color: ff.primaryStrong,
                   ),
-                  deleteButtonTooltipMessage: 'Remove ${HabitFormat.time(t)}',
+                  deleteButtonTooltipMessage: tr('Remove {time}', {
+                    'time': HabitFormat.time(t),
+                  }),
                   onDeleted: () => controller.removeReminderTime(t),
                 ),
             ],
           ),
         const SizedBox(height: AppSpacing.xl),
         FFSecondaryButton(
-          label: 'Add time',
+          label: tr('Add time'),
           icon: FontAwesomeIcons.plus,
           onPressed: () => _add(context, ref),
         ),
         const SizedBox(height: AppSpacing.md),
         FFPrimaryButton(
-          label: 'Done',
+          label: tr('Done'),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

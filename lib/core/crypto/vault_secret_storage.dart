@@ -23,6 +23,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/storage/secure_store.dart';
 
 abstract interface class VaultSecretStorage {
@@ -85,27 +86,30 @@ class BiometricReadException implements Exception {
 /// Uses new namespaces (`….v2`) so a legacy app-gated copy
 /// ([LegacyBiometricVaultStorage]) can be told apart and migrated.
 class BiometricVaultStorage implements OsGatedVaultStorage {
-  BiometricVaultStorage([FlutterSecureStorage? storage])
-    : _storage =
-          storage ??
-          const FlutterSecureStorage(
-            iOptions: IOSOptions(
-              accessibility: KeychainAccessibility.passcode,
-              accountName: 'focusflow.vault.biometric.v2',
-              accessControlFlags: [AccessControlFlag.biometryCurrentSet],
-            ),
-            aOptions: AndroidOptions.biometric(
-              storageNamespace: 'ff_vault_biometric_v2',
-              enforceBiometrics: true,
-              requireBiometricsPerOperation: true,
-              biometricType: AndroidBiometricType.strongBiometricOnly,
-              biometricPromptTitle: 'Unlock your vault',
-              biometricPromptSubtitle: 'Confirm your fingerprint or face',
-              biometricPromptNegativeButton: 'Use PIN',
-            ),
-          );
+  BiometricVaultStorage([FlutterSecureStorage? storage]) : _injected = storage;
 
-  final FlutterSecureStorage _storage;
+  final FlutterSecureStorage? _injected;
+
+  /// Built on every use (cheap: it only holds options) so the prompt text
+  /// follows the language the user has chosen right now.
+  FlutterSecureStorage get _storage =>
+      _injected ??
+      FlutterSecureStorage(
+        iOptions: const IOSOptions(
+          accessibility: KeychainAccessibility.passcode,
+          accountName: 'focusflow.vault.biometric.v2',
+          accessControlFlags: [AccessControlFlag.biometryCurrentSet],
+        ),
+        aOptions: AndroidOptions.biometric(
+          storageNamespace: 'ff_vault_biometric_v2',
+          enforceBiometrics: true,
+          requireBiometricsPerOperation: true,
+          biometricType: AndroidBiometricType.strongBiometricOnly,
+          biometricPromptTitle: tr('Unlock your vault'),
+          biometricPromptSubtitle: tr('Confirm your fingerprint or face'),
+          biometricPromptNegativeButton: tr('Use PIN'),
+        ),
+      );
 
   @override
   bool get writePrompts => defaultTargetPlatform == TargetPlatform.android;

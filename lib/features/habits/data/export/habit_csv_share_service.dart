@@ -14,6 +14,7 @@ library;
 
 import 'dart:io';
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
 import 'package:focusflow/features/habits/domain/services/habit_csv.dart';
@@ -37,7 +38,7 @@ class HabitCsvShareService {
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path, mimeType: 'text/csv')],
-          subject: '${habit.name} history',
+          subject: tr('{name} history', {'name': habit.name}),
         ),
       );
       return result.status != ShareResultStatus.dismissed;

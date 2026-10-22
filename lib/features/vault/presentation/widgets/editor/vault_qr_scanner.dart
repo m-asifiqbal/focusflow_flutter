@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/totp.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -87,9 +88,12 @@ class _ScannerPageState extends State<_ScannerPage> {
                 padding: const EdgeInsetsDirectional.all(AppSpacing.xxl),
                 child: Text(
                   error.errorCode == MobileScannerErrorCode.permissionDenied
-                      ? 'Camera access is off. Allow it in Settings, or paste '
-                            'the key instead.'
-                      : "The camera isn't available. Paste the key instead.",
+                      ? tr(
+                          'Camera access is off. Allow it in Settings, or paste the key instead.',
+                        )
+                      : tr(
+                          'The camera isn\'t available. Paste the key instead.',
+                        ),
                   textAlign: TextAlign.center,
                   style: caption,
                 ),
@@ -118,7 +122,7 @@ class _ScannerPageState extends State<_ScannerPage> {
                     padding: const EdgeInsetsDirectional.all(AppSpacing.sm),
                     child: VaultRoundButton(
                       icon: FontAwesomeIcons.xmark,
-                      semanticLabel: 'Close scanner',
+                      semanticLabel: tr('Close scanner'),
                       onTap: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -128,9 +132,10 @@ class _ScannerPageState extends State<_ScannerPage> {
                   padding: const EdgeInsetsDirectional.all(AppSpacing.xxl),
                   child: Text(
                     _invalid
-                        ? "That QR code isn't a 2FA setup code."
-                        : 'Point the camera at the 2FA QR code shown by the '
-                              'website.',
+                        ? tr('That QR code isn\'t a 2FA setup code.')
+                        : tr(
+                            'Point the camera at the 2FA QR code shown by the website.',
+                          ),
                     textAlign: TextAlign.center,
                     style: caption,
                   ),

@@ -20,6 +20,7 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_key_policy.dart';
 import 'package:focusflow/core/sync/drive_sync.dart';
@@ -144,7 +145,7 @@ class ExportService {
           for (final n in notes)
             (
               title: '${n['title']}'.trim().isEmpty
-                  ? 'Untitled'
+                  ? tr('Untitled')
                   : '${n['title']}',
               subtitle: _subtitle(n),
               text: '${n['text']}',
@@ -163,7 +164,8 @@ class ExportService {
     final created = DateTime.tryParse('${n['created']}');
     final tags = (n['tags'] as List).map((t) => '#$t').join(' ');
     return [
-      if (created != null) 'Created ${DateUtilsX.dayKey(created)}',
+      if (created != null)
+        tr('Created {day}', {'day': DateUtilsX.dayKey(created)}),
       if (tags.isNotEmpty) tags,
     ].join(' · ');
   }
@@ -196,7 +198,7 @@ class ExportService {
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path, mimeType: f.mimeType)],
-          subject: 'FocusFlow export',
+          subject: tr('FocusFlow export'),
         ),
       );
       return result.status != ShareResultStatus.dismissed;

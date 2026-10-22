@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -20,6 +21,7 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
 import 'package:focusflow/features/habits/presentation/notifiers/habit_editor_controller.dart';
 import 'package:focusflow/features/habits/presentation/providers/habits_providers.dart';
@@ -44,13 +46,14 @@ class HabitGoalSection extends ConsumerWidget {
 
     if (draft.isQuit) {
       return FFGroupedList(
-        label: 'Goal & schedule',
+        label: tr('Goal & schedule'),
         children: [
           Padding(
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: Text(
-              'Quit habits count every day. Log a slip when it happens; '
-              'a day without slips keeps your streak going.',
+              tr(
+                'Quit habits count every day. Log a slip when it happens; a day without slips keeps your streak going.',
+              ),
               style: context.text.body.copyWith(color: ff.inkMuted),
             ),
           ),
@@ -61,9 +64,9 @@ class HabitGoalSection extends ConsumerWidget {
     Future<void> editUnit() async {
       final v = await showHabitTextSheet(
         context,
-        title: 'Unit',
-        initial: draft.unit,
-        hint: 'glasses, min, pages…',
+        title: tr('Unit'),
+        initial: HabitWords.shown(draft.unit),
+        hint: tr('glasses, min, pages…'),
         maxLength: 20,
       );
       if (v != null) c.setUnit(v);
@@ -72,7 +75,7 @@ class HabitGoalSection extends ConsumerWidget {
     Future<void> pickFrequency() async {
       final v = await showHabitOptionSheet<HabitFrequencyKind>(
         context,
-        title: 'Frequency',
+        title: tr('Frequency'),
         selected: HabitFrequencyKind.of(frequency),
         options: [
           for (final k in HabitFrequencyKind.values) HabitOption(k, k.label),
@@ -91,23 +94,23 @@ class HabitGoalSection extends ConsumerWidget {
 
     final schedule = switch (frequency) {
       TimesPerWeekFrequency(:final times) => _StepRow(
-        label: 'Times per week',
+        label: tr('Times per week'),
         stepper: HabitStepper(
           value: times,
           min: 1,
           max: 7,
-          semanticLabel: 'Times per week',
+          semanticLabel: tr('Times per week'),
           onChanged: c.setTimesPerWeek,
         ),
       ),
       EveryNDaysFrequency(:final days) => _StepRow(
-        label: 'Every',
-        trailing: 'days',
+        label: tr('Every'),
+        trailing: tr('days'),
         stepper: HabitStepper(
           value: days,
           min: 2,
           max: 30,
-          semanticLabel: 'Days between check-ins',
+          semanticLabel: tr('Days between check-ins'),
           onChanged: c.setEveryNDays,
         ),
       ),
@@ -122,7 +125,7 @@ class HabitGoalSection extends ConsumerWidget {
     };
 
     return FFGroupedList(
-      label: 'Goal & schedule',
+      label: tr('Goal & schedule'),
       dividerIndent: 0,
       children: [
         pad(
@@ -130,7 +133,7 @@ class HabitGoalSection extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Daily target',
+                  tr('Daily target'),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: title.copyWith(fontWeight: FontWeight.w500),
@@ -140,7 +143,7 @@ class HabitGoalSection extends ConsumerWidget {
                 value: draft.targetCount,
                 min: HabitEditorController.minTarget,
                 max: HabitEditorController.maxTarget,
-                semanticLabel: 'Daily target',
+                semanticLabel: tr('Daily target'),
                 onChanged: c.setTarget,
               ),
               ConstrainedBox(
@@ -149,7 +152,9 @@ class HabitGoalSection extends ConsumerWidget {
                 ),
                 child: Semantics(
                   button: true,
-                  label: 'Unit, ${draft.unit}',
+                  label: tr('Unit, {unit}', {
+                    'unit': HabitWords.shown(draft.unit),
+                  }),
                   excludeSemantics: true,
                   child: FFPressable(
                     onTap: editUnit,
@@ -165,7 +170,7 @@ class HabitGoalSection extends ConsumerWidget {
                           alignment: AlignmentDirectional.centerEnd,
                           widthFactor: 1,
                           child: Text(
-                            draft.unit,
+                            HabitWords.shown(draft.unit),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: context.text.body.copyWith(
@@ -196,7 +201,7 @@ class HabitGoalSection extends ConsumerWidget {
               Row(
                 children: [
                   Text(
-                    'Frequency',
+                    tr('Frequency'),
                     style: title.copyWith(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -206,7 +211,9 @@ class HabitGoalSection extends ConsumerWidget {
                       child: FFTextButton(
                         label: frequency.label,
                         onPressed: pickFrequency,
-                        semanticLabel: 'Frequency, ${frequency.label}',
+                        semanticLabel: tr('Frequency, {label}', {
+                          'label': frequency.label,
+                        }),
                         padding: EdgeInsetsDirectional.zero,
                         style: context.text.button.copyWith(
                           fontSize: HabitDimens.frequencyValue,
@@ -233,7 +240,7 @@ class HabitGoalSection extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsetsDirectional.only(top: AppSpacing.sm),
                   child: Text(
-                    'Pick at least one day',
+                    tr('Pick at least one day'),
                     style: context.text.meta.copyWith(color: ff.danger),
                   ),
                 ),

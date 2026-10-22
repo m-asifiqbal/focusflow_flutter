@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -37,10 +38,12 @@ class HomeTasksSection extends ConsumerWidget {
   /// "Today's Tasks" / "Tomorrow's Tasks" / "Tasks · Wed, Jun 14".
   static String titleFor(DateTime day, DateTime today) {
     final diff = DateUtilsX.daysBetween(today, day);
-    if (diff == 0) return "Today's Tasks";
-    if (diff == 1) return "Tomorrow's Tasks";
-    if (diff == -1) return "Yesterday's Tasks";
-    return 'Tasks · ${DateFormats.of('EEE, MMM d').format(day)}';
+    if (diff == 0) return tr("Today's Tasks");
+    if (diff == 1) return tr("Tomorrow's Tasks");
+    if (diff == -1) return tr("Yesterday's Tasks");
+    return tr('Tasks · {date}', {
+      'date': DateFormats.of('EEE, MMM d').format(day),
+    });
   }
 
   @override
@@ -67,9 +70,9 @@ class HomeTasksSection extends ConsumerWidget {
         return HomeEmptyCard(
           colors: ModuleStyle.tasks.colors,
           icon: ModuleStyle.tasks.icon,
-          title: isToday ? 'No tasks today' : 'No tasks this day',
-          body: 'Enjoy the space, or plan something small.',
-          ctaLabel: 'Add task',
+          title: isToday ? tr('No tasks today') : tr('No tasks this day'),
+          body: tr('Enjoy the space, or plan something small.'),
+          ctaLabel: tr('Add task'),
           onCta: () =>
               context.push(AppRoutes.newTask(date: DateUtilsX.dayKey(day))),
         );
@@ -81,7 +84,9 @@ class HomeTasksSection extends ConsumerWidget {
       children: [
         FFSectionHeader(
           title: titleFor(day, today),
-          trailing: left > 0 ? FFBadge('$left left') : null,
+          trailing: left > 0
+              ? FFBadge(tr('{left} left', {'left': left}))
+              : null,
         ),
         const SizedBox(height: HomeDimens.headerGap),
         body,
@@ -123,7 +128,7 @@ class _TaskList extends ConsumerWidget {
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: FFTextButton(
-              label: 'View all ${tasks.length} tasks',
+              label: tr('View all {length} tasks', {'length': tasks.length}),
               onPressed: () => context.push(AppRoutes.tasks),
             ),
           ),

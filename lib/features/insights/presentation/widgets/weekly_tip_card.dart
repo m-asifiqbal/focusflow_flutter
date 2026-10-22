@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -24,7 +25,7 @@ class WeeklyTipCard extends StatelessWidget {
   Widget build(BuildContext context) {
     const on = InsightsColors.onGradient;
     return Semantics(
-      label: 'Weekly tip. ${tip.body}',
+      label: tr('Weekly tip. {body}', {'body': tip.body}),
       excludeSemantics: true,
       child: FFCard(
         gradient: context.ff.primaryGradient,
@@ -47,7 +48,7 @@ class WeeklyTipCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Weekly tip',
+                    tr('Weekly tip'),
                     style: context.text.sectionTitle.copyWith(
                       fontSize: InsightsDimens.tipTitle,
                       color: on,

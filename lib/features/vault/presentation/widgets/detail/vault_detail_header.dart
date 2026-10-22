@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -43,12 +44,14 @@ class VaultDetailTopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const FFBackButton(label: 'Vault'),
+          FFBackButton(label: tr('Vault')),
           const Spacer(),
           Semantics(
             button: true,
             toggled: isFavorite,
-            label: isFavorite ? 'Remove from favourites' : 'Add to favourites',
+            label: isFavorite
+                ? tr('Remove from favourites')
+                : tr('Add to favourites'),
             excludeSemantics: true,
             child: FFPressable(
               onTap: onFavorite,
@@ -75,7 +78,7 @@ class VaultDetailTopBar extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Semantics(
             button: true,
-            label: 'Edit item',
+            label: tr('Edit item'),
             excludeSemantics: true,
             child: FFPressable(
               onTap: onEdit,
@@ -90,7 +93,7 @@ class VaultDetailTopBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.pill),
                 ),
                 child: Text(
-                  'Edit',
+                  tr('Edit'),
                   style: context.text.rowTitle.copyWith(
                     fontSize: VaultType.value,
                     fontWeight: FontWeight.w600,
@@ -164,20 +167,33 @@ class VaultDetailHero extends StatelessWidget {
 /// "Personal · Updated 3 days ago" (no folder → "Updated …" only).
 String vaultUpdatedSubtitle(VaultItemRecord r, DateTime now) {
   final diff = now.difference(r.updatedAt);
-  final when = diff.inMinutes < 1
-      ? 'just now'
+  // One whole sentence per case (not "Updated " + a time fragment): word
+  // order and plural forms differ between languages.
+  final updated = diff.inMinutes < 1
+      ? tr('Updated just now')
       : diff.inMinutes < 60
-      ? '${diff.inMinutes} min ago'
+      ? tr('Updated {n} min ago', {'n': diff.inMinutes})
       : diff.inHours < 24
-      ? '${diff.inHours} ${diff.inHours == 1 ? 'hour' : 'hours'} ago'
+      ? tr(
+          '{count, plural, one {Updated # hour ago} other {Updated # hours ago}}',
+          {'count': diff.inHours},
+        )
       : diff.inDays == 1
-      ? 'yesterday'
+      ? tr('Updated yesterday')
       : diff.inDays < 30
-      ? '${diff.inDays} days ago'
+      ? tr(
+          '{count, plural, one {Updated # day ago} other {Updated # days ago}}',
+          {'count': diff.inDays},
+        )
       : diff.inDays < 365
-      ? '${diff.inDays ~/ 30} ${diff.inDays < 60 ? 'month' : 'months'} ago'
-      : '${diff.inDays ~/ 365} ${diff.inDays < 730 ? 'year' : 'years'} ago';
+      ? tr(
+          '{count, plural, one {Updated # month ago} other {Updated # months ago}}',
+          {'count': diff.inDays ~/ 30},
+        )
+      : tr(
+          '{count, plural, one {Updated # year ago} other {Updated # years ago}}',
+          {'count': diff.inDays ~/ 365},
+        );
   final folder = r.folderName;
-  final updated = 'Updated $when';
   return folder == null || folder.isEmpty ? updated : '$folder · $updated';
 }

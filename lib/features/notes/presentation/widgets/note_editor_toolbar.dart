@@ -14,6 +14,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -24,16 +25,25 @@ import 'package:focusflow/features/notes/presentation/widgets/note_quill_styles.
 
 /// Formatting buttons of the toolbar (Image / Voice are separate actions).
 enum NoteFormat {
-  heading('Heading', FontAwesomeIcons.heading),
-  bold('Bold', FontAwesomeIcons.bold),
-  italic('Italic', FontAwesomeIcons.italic),
-  bullets('Bullet list', FontAwesomeIcons.listUl),
-  checklist('Checklist', FontAwesomeIcons.listCheck),
-  quote('Quote', FontAwesomeIcons.quoteLeft);
+  heading(FontAwesomeIcons.heading),
+  bold(FontAwesomeIcons.bold),
+  italic(FontAwesomeIcons.italic),
+  bullets(FontAwesomeIcons.listUl),
+  checklist(FontAwesomeIcons.listCheck),
+  quote(FontAwesomeIcons.quoteLeft);
 
-  const NoteFormat(this.label, this.icon);
+  const NoteFormat(this.icon);
 
-  final String label;
+  /// Button label in the active language.
+  String get label => switch (this) {
+    NoteFormat.heading => tr('Heading'),
+    NoteFormat.bold => tr('Bold'),
+    NoteFormat.italic => tr('Italic'),
+    NoteFormat.bullets => tr('Bullet list'),
+    NoteFormat.checklist => tr('Checklist'),
+    NoteFormat.quote => tr('Quote'),
+  };
+
   final IconData icon;
 }
 
@@ -130,12 +140,12 @@ class NoteEditorToolbar extends StatelessWidget {
                 ),
               _ToolButton(
                 icon: FontAwesomeIcons.solidImage,
-                label: 'Add image',
+                label: tr('Add image'),
                 onTap: onImage,
               ),
               _ToolButton(
                 icon: FontAwesomeIcons.microphone,
-                label: listening ? 'Stop dictation' : 'Dictate',
+                label: listening ? tr('Stop dictation') : tr('Dictate'),
                 selected: listening,
                 onTap: onVoice,
               ),
@@ -177,8 +187,8 @@ class _ColourRow extends StatelessWidget {
     final undo = Semantics(
       button: true,
       enabled: canUndo,
-      label: 'Undo',
-      hint: 'Long-press to redo',
+      label: tr('Undo'),
+      hint: tr('Long-press to redo'),
       excludeSemantics: true,
       child: FFPressable(
         onTap: canUndo ? onUndo : null,
@@ -204,7 +214,7 @@ class _ColourRow extends StatelessWidget {
                   ),
                   const SizedBox(width: NoteEditorMetrics.undoGap),
                   Text(
-                    'Undo',
+                    tr('Undo'),
                     style: context.text.rowTitle.copyWith(
                       fontSize: NoteEditorMetrics.undoLabelSize,
                       fontWeight: FontWeight.w800,
@@ -226,7 +236,7 @@ class _ColourRow extends StatelessWidget {
             builder: (context, c) {
               const count = 6;
               final label = Text(
-                'COLOUR',
+                tr('COLOUR'),
                 maxLines: 1,
                 style: context.text.sectionLabel.copyWith(
                   fontSize: NoteEditorMetrics.colourLabelSize,
@@ -288,12 +298,12 @@ class _ColourRow extends StatelessWidget {
   }
 
   static String _colourName(String hex) => switch (hex) {
-    'D1FAE5' => 'Mint',
-    'FEF3C7' => 'Amber',
-    'DBEAFE' => 'Blue',
-    'FCE7F3' => 'Pink',
-    'EDE9FE' => 'Violet',
-    _ => 'White',
+    'D1FAE5' => tr('Mint'),
+    'FEF3C7' => tr('Amber'),
+    'DBEAFE' => tr('Blue'),
+    'FCE7F3' => tr('Pink'),
+    'EDE9FE' => tr('Violet'),
+    _ => tr('White'),
   };
 }
 
@@ -322,7 +332,7 @@ class _Swatch extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '$label note colour',
+      label: tr('{label} note colour', {'label': label}),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,

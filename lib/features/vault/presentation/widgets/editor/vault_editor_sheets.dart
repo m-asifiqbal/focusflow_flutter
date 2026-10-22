@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -99,8 +100,8 @@ Future<VaultIconChoice?> showVaultIconSheet(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _title(context, 'Change icon'),
-        VaultFieldLabel('Letter'),
+        _title(context, tr('Change icon')),
+        VaultFieldLabel(tr('Letter')),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
@@ -108,7 +109,7 @@ Future<VaultIconChoice?> showVaultIconSheet(
           children: [
             for (final hex in vaultLetterColours)
               tile(
-                'Letter avatar',
+                tr('Letter avatar'),
                 VaultAvatar(title: title, type: type, colorHex: hex),
                 iconKey == null && colorHex == hex,
                 () => pick((iconKey: null, colorHex: hex)),
@@ -116,7 +117,7 @@ Future<VaultIconChoice?> showVaultIconSheet(
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
-        VaultFieldLabel('Brands'),
+        VaultFieldLabel(tr('Brands')),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
@@ -124,7 +125,8 @@ Future<VaultIconChoice?> showVaultIconSheet(
           children: [
             for (final b in VaultBrands.all)
               tile(
-                b.name,
+                // Brand names are proper nouns; "Bank" is the one generic word.
+                b.key == 'bank' ? tr('Bank') : b.name,
                 VaultAvatar(title: b.name, type: type, iconKey: b.key),
                 iconKey == b.key,
                 () => pick((iconKey: b.key, colorHex: null)),
@@ -135,7 +137,7 @@ Future<VaultIconChoice?> showVaultIconSheet(
         TextButton(
           onPressed: () => pick((iconKey: null, colorHex: null)),
           child: Text(
-            'Automatic',
+            tr('Automatic'),
             style: context.text.button.copyWith(color: ff.vaultAccent),
           ),
         ),
@@ -254,7 +256,7 @@ class _TagsSheetState extends State<_TagsSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _title(context, 'Tags'),
+        _title(context, tr('Tags')),
         Container(
           padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
           decoration: BoxDecoration(
@@ -272,7 +274,7 @@ class _TagsSheetState extends State<_TagsSheet> {
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _done(),
             decoration: vaultBareDecoration(
-              hintText: '#work #personal',
+              hintText: tr('#work #personal'),
               hintStyle: context.vaultValueStyle.copyWith(
                 color: ff.vaultFieldLabel,
               ),
@@ -281,11 +283,11 @@ class _TagsSheetState extends State<_TagsSheet> {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Separate tags with spaces.',
+          tr('Separate tags with spaces.'),
           style: context.text.caption.copyWith(color: ff.vaultSubtitleMuted),
         ),
         const SizedBox(height: AppSpacing.lg),
-        VaultPrimaryButton(label: 'Done', onPressed: _done),
+        VaultPrimaryButton(label: tr('Done'), onPressed: _done),
       ],
     );
   }

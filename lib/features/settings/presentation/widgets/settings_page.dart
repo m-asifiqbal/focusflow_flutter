@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -21,13 +22,15 @@ class SettingsPage extends StatelessWidget {
   const SettingsPage({
     required this.title,
     required this.children,
-    this.backLabel = 'Settings',
+    this.backLabel,
     this.trailing = const [],
     super.key,
   });
 
   final String title;
-  final String backLabel;
+
+  /// Label of the back button; "Settings" when null.
+  final String? backLabel;
 
   /// Optional nav-bar actions (e.g. "Reset").
   final List<Widget> trailing;
@@ -42,7 +45,7 @@ class SettingsPage extends StatelessWidget {
       body: Column(
         children: [
           FFNavHeader(
-            leading: FFBackButton(label: backLabel),
+            leading: FFBackButton(label: backLabel ?? tr('Settings')),
             title: title,
             trailing: trailing,
           ),

@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -54,7 +55,7 @@ class VaultHealthRing extends StatelessWidget {
       stroke: VaultSizes.scoreStroke,
       color: ff.vaultScoreColor(score),
       trackColor: ff.vaultKey,
-      semanticLabel: 'Health score $score out of 100',
+      semanticLabel: tr('Health score {score} out of 100', {'score': score}),
       child: ExcludeSemantics(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -72,7 +73,7 @@ class VaultHealthRing extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'HEALTH SCORE',
+              tr('HEALTH SCORE'),
               textScaler: TextScaler.noScaling,
               style: context.text.sectionLabel.copyWith(
                 fontSize: VaultType.badge,
@@ -100,8 +101,10 @@ class VaultScoreDelta extends StatelessWidget {
     final up = delta >= 0;
     final fg = up ? ff.vaultAccentBright : ff.vaultFair.fg;
     final text = delta == 0
-        ? 'No change since last week'
-        : '${up ? '+' : '−'}${delta.abs()} since last week';
+        ? tr('No change since last week')
+        : tr('{change} since last week', {
+            'change': '${up ? '+' : '−'}${delta.abs()}',
+          });
     return Container(
       constraints: const BoxConstraints(minHeight: VaultSizes.summaryPill),
       padding: const EdgeInsetsDirectional.symmetric(
@@ -151,10 +154,30 @@ class VaultStatTiles extends StatelessWidget {
   Widget build(BuildContext context) {
     final ff = context.ff;
     final tiles = [
-      (report.breached, 'Breached', ff.vaultBreached.fg),
-      (report.reused, 'Reused', ff.vaultReused.fg),
-      (report.weak, 'Weak', ff.vaultWeak.fg),
-      (report.strong, 'Strong', ff.vaultAccentBright),
+      (
+        report.breached,
+        tr('Breached'),
+        ff.vaultBreached.fg,
+        tr('{count} breached', {'count': report.breached}),
+      ),
+      (
+        report.reused,
+        tr('Reused'),
+        ff.vaultReused.fg,
+        tr('{count} reused', {'count': report.reused}),
+      ),
+      (
+        report.weak,
+        tr('Weak'),
+        ff.vaultWeak.fg,
+        tr('{count} weak', {'count': report.weak}),
+      ),
+      (
+        report.strong,
+        tr('Strong'),
+        ff.vaultAccentBright,
+        tr('{count} strong', {'count': report.strong}),
+      ),
     ];
     return IntrinsicHeight(
       child: Row(
@@ -164,7 +187,7 @@ class VaultStatTiles extends StatelessWidget {
             if (i > 0) const SizedBox(width: VaultSizes.gapTile),
             Expanded(
               child: Semantics(
-                label: '${tiles[i].$1} ${tiles[i].$2.toLowerCase()}',
+                label: tiles[i].$4,
                 excludeSemantics: true,
                 child: Container(
                   constraints: const BoxConstraints(

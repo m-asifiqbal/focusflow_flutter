@@ -16,6 +16,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -52,7 +53,7 @@ class AccountScreen extends ConsumerWidget {
       if (context.mounted) {
         showUndoSnackbar(
           context,
-          message: "Couldn't use that photo.",
+          message: tr('Couldn\'t use that photo.'),
           icon: FontAwesomeIcons.triangleExclamation,
         );
       }
@@ -66,7 +67,7 @@ class AccountScreen extends ConsumerWidget {
       context,
       FFActionSheetData(
         header: FFActionSheetHeader(
-          title: 'Profile',
+          title: tr('Profile'),
           icon: FontAwesomeIcons.solidUser,
           colors: tint,
         ),
@@ -74,7 +75,7 @@ class AccountScreen extends ConsumerWidget {
           if (hasPhoto)
             FFActionItem(
               icon: FontAwesomeIcons.expand,
-              label: 'View photo',
+              label: tr('View photo'),
               colors: ModuleStyle.habits.colors,
               onTap: () {
                 final bytes = ref.read(profilePhotoProvider).valueOrNull;
@@ -83,19 +84,19 @@ class AccountScreen extends ConsumerWidget {
             ),
           FFActionItem(
             icon: FontAwesomeIcons.solidImage,
-            label: 'Choose photo',
+            label: tr('Choose photo'),
             colors: tint,
             onTap: () => _pickPhoto(context, ref, camera: false),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.camera,
-            label: 'Take photo',
+            label: tr('Take photo'),
             colors: tint,
             onTap: () => _pickPhoto(context, ref, camera: true),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.pen,
-            label: 'Edit display name',
+            label: tr('Edit display name'),
             colors: ModuleStyle.tasks.colors,
             onTap: () async {
               final current = ref.read(settingsProvider).displayName;
@@ -110,7 +111,7 @@ class AccountScreen extends ConsumerWidget {
           if (hasPhoto)
             FFActionItem(
               icon: FontAwesomeIcons.trashCan,
-              label: 'Remove photo',
+              label: tr('Remove photo'),
               colors: ModuleStyle.scan.colors,
               destructive: true,
               onTap: () =>
@@ -128,11 +129,11 @@ class AccountScreen extends ConsumerWidget {
       body: Column(
         children: [
           FFNavHeader(
-            leading: const FFBackButton(label: 'Settings'),
-            title: 'Account',
+            leading: FFBackButton(label: tr('Settings')),
+            title: tr('Account'),
             trailing: [
               FFNavAction(
-                label: 'Edit',
+                label: tr('Edit'),
                 onPressed: () => _photoOptions(context, ref),
               ),
             ],
@@ -193,11 +194,12 @@ class _ConnectDriveCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Not signed in', style: text.rowTitle),
+                    Text(tr('Not signed in'), style: text.rowTitle),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      'Connect Google Drive for encrypted backup and sync '
-                      'across your devices.',
+                      tr(
+                        'Connect Google Drive for encrypted backup and sync across your devices.',
+                      ),
                       style: text.bodySmall.copyWith(height: 1.4),
                     ),
                   ],
@@ -207,7 +209,7 @@ class _ConnectDriveCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           FFSecondaryButton(
-            label: 'Connect Google Drive',
+            label: tr('Connect Google Drive'),
             icon: FontAwesomeIcons.google,
             onPressed: () => context.push(AppRoutes.signIn),
           ),

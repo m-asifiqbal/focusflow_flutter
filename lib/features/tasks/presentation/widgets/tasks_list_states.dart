@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -54,9 +55,9 @@ class TasksErrorState extends StatelessWidget {
     child: FFEmptyState.compact(
       colors: ModuleStyle.tasks.colors,
       icon: FontAwesomeIcons.triangleExclamation,
-      title: "Couldn't load tasks",
-      body: 'Something went wrong reading your tasks. Try again.',
-      ctaLabel: 'Retry',
+      title: tr('Couldn\'t load tasks'),
+      body: tr('Something went wrong reading your tasks. Try again.'),
+      ctaLabel: tr('Retry'),
       ctaIcon: FontAwesomeIcons.arrowRotateRight,
       onCta: onRetry,
     ),
@@ -89,37 +90,41 @@ class TasksEmptyState extends StatelessWidget {
         child: FFEmptyState.compact(
           colors: colors,
           icon: FontAwesomeIcons.magnifyingGlass,
-          title: 'No matching tasks',
-          body: 'Try another word or clear the tag filter.',
+          title: tr('No matching tasks'),
+          body: tr('Try another word or clear the tag filter.'),
         ),
       );
     }
     final (title, body) = switch (filter.smart) {
       _ when !hasTasks && !filter.isList => (
-        'No tasks yet',
-        'Capture what you need to do — due dates, priorities and '
-            'subtasks keep it on track.',
+        tr('No tasks yet'),
+        tr(
+          'Capture what you need to do — due dates, priorities and '
+          'subtasks keep it on track.',
+        ),
       ),
       TaskSmartList.today => (
-        'Nothing due today',
-        'Nothing due today. Plan something or enjoy the calm.',
+        tr('Nothing due today'),
+        tr('Nothing due today. Plan something or enjoy the calm.'),
       ),
       TaskSmartList.upcoming => (
-        'Nothing upcoming',
-        'Tasks with a future due date show up here.',
+        tr('Nothing upcoming'),
+        tr('Tasks with a future due date show up here.'),
       ),
       TaskSmartList.overdue => (
-        'Nothing overdue',
-        "You're on top of everything. Nice work!",
+        tr('Nothing overdue'),
+        tr("You're on top of everything. Nice work!"),
       ),
       TaskSmartList.completed => (
-        'No completed tasks',
-        'Tick a task off and it lands here.',
+        tr('No completed tasks'),
+        tr('Tick a task off and it lands here.'),
       ),
       TaskSmartList.all || null => (
-        filter.isList ? 'This list is empty' : 'No tasks yet',
-        'Capture what you need to do — due dates, priorities and '
-            'subtasks keep it on track.',
+        filter.isList ? tr('This list is empty') : tr('No tasks yet'),
+        tr(
+          'Capture what you need to do — due dates, priorities and '
+          'subtasks keep it on track.',
+        ),
       ),
     };
     return Padding(
@@ -129,11 +134,11 @@ class TasksEmptyState extends StatelessWidget {
         icon: ModuleStyle.tasks.icon,
         title: title,
         body: body,
-        ctaLabel: 'Add a task',
+        ctaLabel: tr('Add a task'),
         onCta: onAdd,
-        hint: 'Try: "Pay rent tomorrow 9am !high"',
+        hint: tr('Try: "Pay rent tomorrow 9am !high"'),
         onHint: () =>
-            showQuickAdd(context, text: 'Pay rent tomorrow 9am !high'),
+            showQuickAdd(context, text: tr('Pay rent tomorrow 9am !high')),
       ),
     );
   }
@@ -168,10 +173,13 @@ class TasksAllDoneBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('All done for today 🎉', style: context.text.cardTitle),
+                  Text(
+                    tr('All done for today 🎉'),
+                    style: context.text.cardTitle,
+                  ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    'Every task due today is ticked off.',
+                    tr('Every task due today is ticked off.'),
                     style: context.text.meta,
                   ),
                 ],

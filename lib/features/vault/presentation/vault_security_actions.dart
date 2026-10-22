@@ -17,6 +17,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -32,9 +33,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// The action pill's label for [kind].
 String vaultIssueAction(VaultIssueKind kind) => switch (kind) {
-  VaultIssueKind.breached => 'Change',
-  VaultIssueKind.old => 'Update',
-  _ => 'Fix',
+  VaultIssueKind.breached => tr('Change'),
+  VaultIssueKind.old => tr('Update'),
+  _ => tr('Fix'),
 };
 
 /// Opens the fix flow for [issue]; true when the item was saved.
@@ -80,8 +81,8 @@ Future<void> fixAllVaultIssues(
   showFFToast(
     context,
     fixed == issues.length
-        ? 'All $fixed fixed'
-        : '$fixed of ${issues.length} fixed',
+        ? tr('All {n} fixed', {'n': fixed})
+        : tr('{n} of {total} fixed', {'n': fixed, 'total': issues.length}),
     icon: FontAwesomeIcons.solidCircleCheck,
   );
 }
@@ -92,9 +93,9 @@ Future<void> rescanVault(BuildContext context, WidgetRef ref) async {
   if (!context.mounted) return;
   switch (result) {
     case VaultScanResult.offline:
-      showFFToast(context, "Couldn't reach the breach service · try again");
+      showFFToast(context, tr("Couldn't reach the breach service · try again"));
     case VaultScanResult.locked:
-      showFFToast(context, 'Unlock the vault to scan');
+      showFFToast(context, tr('Unlock the vault to scan'));
     case VaultScanResult.done:
       break;
   }
@@ -110,13 +111,16 @@ Future<void> setBreachMonitoring(
   final confirmed = await vaultReauthenticate(
     context,
     ref,
-    reason: 'Confirm to change breach monitoring',
+    reason: tr('Confirm to change breach monitoring'),
   );
   if (!confirmed) return;
   await ref
       .read(settingsProvider.notifier)
       .update((s) => s.copyWith(breachMonitoring: on));
   if (!on || !context.mounted) return;
-  showFFToast(context, 'Breach monitoring on · only hash prefixes are sent');
+  showFFToast(
+    context,
+    tr('Breach monitoring on · only hash prefixes are sent'),
+  );
   await rescanVault(context, ref);
 }

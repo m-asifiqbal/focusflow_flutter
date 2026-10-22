@@ -10,18 +10,25 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
 import 'package:focusflow/features/notes/domain/services/note_content.dart';
 
 /// Export formats offered by the share sheet.
 enum NoteExportFormat {
-  pdf('PDF', 'pdf', 'application/pdf'),
-  text('Plain text', 'txt', 'text/plain'),
-  markdown('Markdown', 'md', 'text/markdown');
+  pdf('pdf', 'application/pdf'),
+  text('txt', 'text/plain'),
+  markdown('md', 'text/markdown');
 
-  const NoteExportFormat(this.label, this.extension, this.mimeType);
+  const NoteExportFormat(this.extension, this.mimeType);
 
-  final String label;
+  /// Share-sheet text in the active language ("PDF" is the same everywhere).
+  String get label => switch (this) {
+    NoteExportFormat.pdf => 'PDF',
+    NoteExportFormat.text => tr('Plain text'),
+    NoteExportFormat.markdown => tr('Markdown'),
+  };
+
   final String extension;
   final String mimeType;
 }

@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -41,21 +42,22 @@ extension InboxKindStyle on InboxKind {
 
   /// Spoken name of the tile ("Reminder notification").
   String get label => switch (this) {
-    InboxKind.reminder => 'Reminder',
-    InboxKind.task => 'Task',
-    InboxKind.habit => 'Habit',
-    InboxKind.security => 'Security',
-    InboxKind.sync => 'Sync',
+    InboxKind.reminder => tr('Reminder'),
+    InboxKind.task => tr('Task'),
+    InboxKind.habit => tr('Habit'),
+    InboxKind.security => tr('Security'),
+    InboxKind.sync => tr('Sync'),
     InboxKind.system => AppInfo.name,
   };
 }
 
-/// The filter chips in order (null = All).
-const List<(InboxKind?, String)> inboxFilters = [
-  (null, 'All'),
-  (InboxKind.reminder, 'Reminders'),
-  (InboxKind.task, 'Tasks'),
-  (InboxKind.habit, 'Habits'),
-  (InboxKind.security, 'Security'),
-  (InboxKind.sync, 'Sync'),
+/// The filter chips in order (null = All); a getter so the labels follow the
+/// active language.
+List<(InboxKind?, String)> get inboxFilters => [
+  (null, tr('All')),
+  (InboxKind.reminder, tr('Reminders')),
+  (InboxKind.task, tr('Tasks')),
+  (InboxKind.habit, tr('Habits')),
+  (InboxKind.security, tr('Security')),
+  (InboxKind.sync, tr('Sync')),
 ];

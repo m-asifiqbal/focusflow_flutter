@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -42,7 +43,9 @@ Future<void> moveCalendarEntry(
   if (previous == null || !context.mounted) return;
   showUndoSnackbar(
     context,
-    message: 'Moved to ${DateFormats.of('EEE, MMM d').format(day)}',
+    message: tr('Moved to {format}', {
+      'format': DateFormats.of('EEE, MMM d').format(day),
+    }),
     icon: FontAwesomeIcons.calendarDay,
     onUndo: () => rescheduler.restore(entry, previous),
   );

@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -35,17 +36,17 @@ class SettingsGeneralSection extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     void run(SettingsRootAction a) => runRootAction(context, ref, a);
     return FFGroupedList(
-      label: 'General',
+      label: tr('General'),
       children: [
         FFListRow(
           leading: settingsTile(FontAwesomeIcons.globe, SettingsTints.sky),
-          title: 'Language',
+          title: tr('Language'),
           value: SettingsLabels.language(s.languageCode),
           onTap: () => run(SettingsRootAction.language),
         ),
         FFListRow(
           leading: settingsTile(FontAwesomeIcons.house, SettingsTints.emerald),
-          title: 'Start screen',
+          title: tr('Start screen'),
           value: SettingsLabels.startScreen(s.startScreen),
           onTap: () => run(SettingsRootAction.startScreen),
         ),
@@ -54,7 +55,7 @@ class SettingsGeneralSection extends ConsumerWidget {
             FontAwesomeIcons.solidCalendar,
             SettingsTints.violet,
           ),
-          title: 'Week starts on',
+          title: tr('Week starts on'),
           value: SettingsLabels.weekday(s.weekStartsOn),
           onTap: () => run(SettingsRootAction.weekStart),
         ),
@@ -63,7 +64,7 @@ class SettingsGeneralSection extends ConsumerWidget {
             FontAwesomeIcons.solidClock,
             SettingsTints.slate,
           ),
-          title: 'Date & time format',
+          title: tr('Date & time format'),
           value: SettingsLabels.timeFormat(use24h: s.use24HourTime),
           // General holds both the date pattern and the 12/24-hour clock.
           onTap: () => context.push(AppRoutes.settingsGeneral),
@@ -83,11 +84,11 @@ class SettingsPreferencesSection extends ConsumerWidget {
       libraryCountsProvider.select((c) => c.whenData((v) => v.pinned)),
     );
     return FFGroupedList(
-      label: 'Preferences',
+      label: tr('Preferences'),
       children: [
         FFListRow(
           leading: settingsTile(FontAwesomeIcons.solidBell, SettingsTints.red),
-          title: 'Notifications & Reminders',
+          title: tr('Notifications & Reminders'),
           onTap: () => context.push(AppRoutes.settingsNotifications),
         ),
         FFListRow(
@@ -95,13 +96,13 @@ class SettingsPreferencesSection extends ConsumerWidget {
             FontAwesomeIcons.circleHalfStroke,
             SettingsTints.indigo,
           ),
-          title: 'Appearance',
+          title: tr('Appearance'),
           value: SettingsLabels.theme(theme),
           onTap: () => context.push(AppRoutes.settingsAppearance),
         ),
         FFListRow(
           leading: settingsTile(FontAwesomeIcons.thumbtack, SettingsTints.blue),
-          title: 'Pinned items',
+          title: tr('Pinned items'),
           value: pinned.valueOrNull?.toString(),
           onTap: () => context.push(AppRoutes.pinned),
         ),
@@ -110,7 +111,7 @@ class SettingsPreferencesSection extends ConsumerWidget {
             FontAwesomeIcons.tableCellsLarge,
             SettingsTints.teal,
           ),
-          title: 'Home layout & widgets',
+          title: tr('Home layout & widgets'),
           onTap: () => context.push(AppRoutes.settingsHomeLayout),
         ),
         FFListRow(
@@ -118,7 +119,7 @@ class SettingsPreferencesSection extends ConsumerWidget {
             FontAwesomeIcons.solidHandPointer,
             SettingsTints.amber,
           ),
-          title: 'Gestures & swipe actions',
+          title: tr('Gestures & swipe actions'),
           onTap: () => context.push(AppRoutes.settingsGestures),
         ),
         FFListRow(
@@ -126,7 +127,7 @@ class SettingsPreferencesSection extends ConsumerWidget {
             FontAwesomeIcons.volumeHigh,
             SettingsTints.pink,
           ),
-          title: 'Sounds & haptics',
+          title: tr('Sounds & haptics'),
           onTap: () => context.push(AppRoutes.settingsSoundsHaptics),
         ),
       ],
@@ -151,41 +152,46 @@ class SettingsModulesSection extends ConsumerWidget {
           onTap: () => context.push(AppRoutes.settingsModule(key)),
         );
     return FFGroupedList(
-      label: 'Modules',
+      label: tr('Modules'),
       children: [
         module(
           ModuleStyle.notes,
           'notes',
-          'Notes',
+          tr('Notes'),
           '${SettingsLabels.notesView(s.notesView)} · '
               '${SettingsLabels.notesSort(s.notesSort)}',
         ),
         module(
           ModuleStyle.tasks,
           'tasks',
-          'Tasks',
+          tr('Tasks'),
           // Smart lists aren't implemented yet, so show a default that
           // does take effect.
-          s.tasksShowCompleted ? 'Completed shown' : 'Completed hidden',
+          s.tasksShowCompleted ? tr('Completed shown') : tr('Completed hidden'),
         ),
         module(
           ModuleStyle.reminders,
           'reminders',
-          'Reminders',
-          'Snooze ${s.defaultSnoozeMinutes}m',
+          tr('Reminders'),
+          tr('Snooze {minutes}m', {'minutes': s.defaultSnoozeMinutes}),
         ),
         module(
           ModuleStyle.habits,
           'habits',
-          'Habits',
-          'Reset ${SettingsLabels.clockTime(s.habitResetMinutes, use24h: s.use24HourTime)}',
+          tr('Habits'),
+          tr('Reset {time}', {
+            'time': SettingsLabels.clockTime(
+              s.habitResetMinutes,
+              use24h: s.use24HourTime,
+            ),
+          }),
         ),
         FFListRow(
           leading: settingsTile(
             FontAwesomeIcons.layerGroup,
             SettingsTints.slate,
           ),
-          title: 'Tags & folders',
+          title: tr('Tags & folders'),
           value: tagsFolders.valueOrNull?.toString(),
           onTap: () => context.push(AppRoutes.settingsTagsFolders),
         ),

@@ -16,6 +16,7 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -39,8 +40,14 @@ class ProductivityChartCard extends StatelessWidget {
   String _spoken(ProductivityPoint p) {
     final when = p.days == 1
         ? DateFormats.of('EEEE, MMM d').format(p.start)
-        : 'Week of ${DateFormats.of('MMM d').format(p.start)}';
-    return '$when: ${p.tasks} tasks, ${p.habits} habit check-ins';
+        : tr('Week of {date}', {
+            'date': DateFormats.of('MMM d').format(p.start),
+          });
+    return tr('{when}: {tasks} tasks, {habits} habit check-ins', {
+      'when': when,
+      'tasks': p.tasks,
+      'habits': p.habits,
+    });
   }
 
   @override
@@ -64,14 +71,14 @@ class ProductivityChartCard extends StatelessWidget {
               Semantics(
                 header: true,
                 child: Text(
-                  weekly ? 'Weekly productivity' : 'Daily productivity',
+                  weekly ? tr('Weekly productivity') : tr('Daily productivity'),
                   style: context.text.sectionTitle.copyWith(
                     fontSize: InsightsDimens.cardTitle,
                   ),
                 ),
               ),
               Text(
-                'Tasks + habits',
+                tr('Tasks + habits'),
                 style: context.text.meta.copyWith(
                   color: ff.primary,
                   fontWeight: FontWeight.w700,
@@ -83,12 +90,14 @@ class ProductivityChartCard extends StatelessWidget {
           if (!snapshot.hasSeriesData)
             InsightsNoData(
               message: points.length < 2
-                  ? 'Pick a longer range to see a trend.'
-                  : 'Complete tasks or check in habits to see your trend.',
+                  ? tr('Pick a longer range to see a trend.')
+                  : tr('Complete tasks or check in habits to see your trend.'),
             )
           else
             Semantics(
-              label: 'Productivity chart. ${points.map(_spoken).join('. ')}',
+              label: tr('Productivity chart. {join}', {
+                'join': points.map(_spoken).join('. '),
+              }),
               excludeSemantics: true,
               child: _Chart(points: points, labelOf: _label),
             ),
@@ -185,9 +194,10 @@ class _Chart extends StatelessWidget {
                     context.text.caption.copyWith(color: ff.onSnackbar),
                     children: [
                       TextSpan(
-                        text:
-                            '${points[s.spotIndex].tasks} tasks · '
-                            '${points[s.spotIndex].habits} habits',
+                        text: tr('{tasks} tasks · {habits} habits', {
+                          'tasks': points[s.spotIndex].tasks,
+                          'habits': points[s.spotIndex].habits,
+                        }),
                         style: context.text.meta.copyWith(
                           color: ff.onSnackbar,
                           fontWeight: FontWeight.w700,

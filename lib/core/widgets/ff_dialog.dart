@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/ff_buttons.dart';
@@ -262,43 +263,43 @@ Future<DeleteChoice> confirmDelete(
   final plural = pluralNoun ?? '${noun}s';
   final many = count != 1;
   final title = permanent
-      ? 'Delete forever?'
+      ? tr('Delete forever?')
       : many
-      ? 'Delete $count $plural?'
-      : 'Delete this $noun?';
+      ? tr('Delete {count} {things}?', {'count': count, 'things': plural})
+      : tr('Delete this {noun}?', {'noun': noun});
   final choice = await showFFDialog<DeleteChoice>(
     context,
     builder: (ctx) {
       final ff = ctx.ff;
       final bold = TextStyle(fontWeight: FontWeight.w700, color: ff.ink);
+      // Whole sentences, with "Recently Deleted" emphasised inside them.
+      final place = tr('Recently Deleted');
       final message = permanent
-          ? Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: many
-                        ? '$count $plural will be removed from '
-                        : 'This $noun will be removed from ',
-                  ),
-                  TextSpan(text: 'Recently Deleted', style: bold),
-                  const TextSpan(text: ' permanently. This can’t be undone.'),
-                ],
-              ),
-              textAlign: TextAlign.center,
+          ? _emphasised(
+              many
+                  ? tr(
+                      '{count} {things} will be removed from {place} permanently. This can’t be undone.',
+                      {'count': count, 'things': plural, 'place': _slot},
+                    )
+                  : tr(
+                      'This {noun} will be removed from {place} permanently. This can’t be undone.',
+                      {'noun': noun, 'place': _slot},
+                    ),
+              place,
+              bold,
             )
-          : Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(text: many ? 'They’ll move to ' : 'It’ll move to '),
-                  TextSpan(text: 'Recently Deleted', style: bold),
-                  TextSpan(
-                    text:
-                        ' and be removed permanently after '
-                        '$retentionDays days.',
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
+          : _emphasised(
+              many
+                  ? tr(
+                      'They’ll move to {place} and be removed permanently after {days} days.',
+                      {'place': _slot, 'days': retentionDays},
+                    )
+                  : tr(
+                      'It’ll move to {place} and be removed permanently after {days} days.',
+                      {'place': _slot, 'days': retentionDays},
+                    ),
+              place,
+              bold,
             );
       return FFDialog(
         icon: FontAwesomeIcons.trashCan,
@@ -308,16 +309,16 @@ Future<DeleteChoice> confirmDelete(
         messageWidget: message,
         actions: [
           FFDangerButton(
-            label: permanent ? 'Delete forever' : 'Delete',
+            label: permanent ? tr('Delete forever') : tr('Delete'),
             onPressed: () => Navigator.of(ctx).pop(DeleteChoice.delete),
           ),
           if (!permanent && offerArchive)
             FFSecondaryButton(
-              label: 'Archive instead',
+              label: tr('Archive instead'),
               onPressed: () => Navigator.of(ctx).pop(DeleteChoice.archive),
             ),
           _CancelAction(
-            label: 'Cancel',
+            label: tr('Cancel'),
             onPressed: () => Navigator.of(ctx).pop(DeleteChoice.cancel),
           ),
         ],
@@ -332,11 +333,13 @@ Future<bool> showFFConfirm(
   BuildContext context, {
   required String title,
   String? message,
-  String confirmLabel = 'Confirm',
-  String cancelLabel = 'Cancel',
+  String? confirmLabel,
+  String? cancelLabel,
   bool destructive = false,
   IconData? icon,
 }) async {
+  final confirmText = confirmLabel ?? tr('Confirm');
+  final cancelText = cancelLabel ?? tr('Cancel');
   final result = await showFFDialog<bool>(
     context,
     builder: (ctx) {
@@ -350,17 +353,17 @@ Future<bool> showFFConfirm(
         actions: [
           if (destructive)
             FFDangerButton(
-              label: confirmLabel,
+              label: confirmText,
               onPressed: () => Navigator.of(ctx).pop(true),
             )
           else
             FFPrimaryButton(
-              label: confirmLabel,
+              label: confirmText,
               height: AppSizes.secondaryButton,
               onPressed: () => Navigator.of(ctx).pop(true),
             ),
           _CancelAction(
-            label: cancelLabel,
+            label: cancelText,
             onPressed: () => Navigator.of(ctx).pop(false),
           ),
         ],
@@ -377,8 +380,8 @@ Future<bool> showFFTextConfirm(
   required String title,
   String? message,
   String word = 'DELETE',
-  String confirmLabel = 'Delete',
-  String cancelLabel = 'Cancel',
+  String? confirmLabel,
+  String? cancelLabel,
   bool destructive = true,
   IconData? icon = FontAwesomeIcons.triangleExclamation,
 }) async {
@@ -388,8 +391,8 @@ Future<bool> showFFTextConfirm(
       title: title,
       message: message,
       word: word,
-      confirmLabel: confirmLabel,
-      cancelLabel: cancelLabel,
+      confirmLabel: confirmLabel ?? tr('Delete'),
+      cancelLabel: cancelLabel ?? tr('Cancel'),
       destructive: destructive,
       icon: icon,
     ),
@@ -445,7 +448,7 @@ class _TextConfirmDialogState extends State<_TextConfirmDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Type ${widget.word} to confirm',
+            tr('Type {word} to confirm', {'word': widget.word}),
             textAlign: TextAlign.center,
             style: context.text.meta,
           ),
@@ -489,4 +492,25 @@ class _TextConfirmDialogState extends State<_TextConfirmDialog> {
       ],
     );
   }
+}
+
+/// Stands in for the emphasised part while a sentence is translated; the
+/// translator moves `{place}` wherever the sentence needs it.
+const String _slot = '\u0000';
+
+/// [sentence] (containing [_slot] once) as centred rich text with [emphasis]
+/// in [style] at the slot. A pack that dropped the slot shows plain text.
+Widget _emphasised(String sentence, String emphasis, TextStyle style) {
+  final at = sentence.indexOf(_slot);
+  if (at < 0) return Text(sentence, textAlign: TextAlign.center);
+  return Text.rich(
+    TextSpan(
+      children: [
+        TextSpan(text: sentence.substring(0, at)),
+        TextSpan(text: emphasis, style: style),
+        TextSpan(text: sentence.substring(at + _slot.length)),
+      ],
+    ),
+    textAlign: TextAlign.center,
+  );
 }

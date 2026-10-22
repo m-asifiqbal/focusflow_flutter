@@ -12,24 +12,36 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
 
 /// Where a file came from (detected from its name and content).
 enum ImportSource {
-  ffbackup('FocusFlow backup'),
-  focusflowJson('FocusFlow JSON'),
-  focusflowCsv('FocusFlow CSV'),
-  googleKeep('Google Keep'),
-  todoist('Todoist'),
-  bitwarden('Bitwarden CSV'),
-  onePassword('1Password'),
-  loopHabit('Loop Habit'),
-  evernote('Evernote (.enex)'),
-  genericCsv('CSV');
+  ffbackup,
+  focusflowJson,
+  focusflowCsv,
+  googleKeep,
+  todoist,
+  bitwarden,
+  onePassword,
+  loopHabit,
+  evernote,
+  genericCsv;
 
-  const ImportSource(this.label);
-
-  final String label;
+  /// Display name; only the first is a phrase — the rest are file formats
+  /// and product names, which stay as written in every language.
+  String get label => switch (this) {
+    ffbackup => tr('FocusFlow backup'),
+    focusflowJson => 'FocusFlow JSON',
+    focusflowCsv => 'FocusFlow CSV',
+    googleKeep => 'Google Keep',
+    todoist => 'Todoist',
+    bitwarden => 'Bitwarden CSV',
+    onePassword => '1Password',
+    loopHabit => 'Loop Habit',
+    evernote => 'Evernote (.enex)',
+    genericCsv => 'CSV',
+  };
 }
 
 @immutable

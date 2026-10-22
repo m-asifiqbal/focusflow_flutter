@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -59,7 +60,9 @@ Future<_Choice<T>?> _showChoices<T>(
                         color: context.ff.primary,
                       )
                     : null,
-                semanticLabel: value == selected ? '$label, selected' : label,
+                semanticLabel: value == selected
+                    ? tr('{label}, selected', {'label': label})
+                    : label,
                 onTap: () => Navigator.of(sheet).pop(_Choice<T>(value)),
               ),
           ],
@@ -81,15 +84,15 @@ Future<SearchFilters?> pickSearchDateRange(
   final tomorrow = DateUtilsX.addDays(today, 1);
   final picked = await _showChoices<_Range>(
     context,
-    title: 'Date range',
+    title: tr('Date range'),
     selected: filters.hasDateRange ? _Range.custom : null,
-    options: const [
-      (null, 'Any time'),
-      (_Range.today, 'Today'),
-      (_Range.week, 'Last 7 days'),
-      (_Range.month, 'Last 30 days'),
-      (_Range.year, 'This year'),
-      (_Range.custom, 'Custom…'),
+    options: [
+      (null, tr('Any time')),
+      (_Range.today, tr('Today')),
+      (_Range.week, tr('Last 7 days')),
+      (_Range.month, tr('Last 30 days')),
+      (_Range.year, tr('This year')),
+      (_Range.custom, tr('Custom…')),
     ],
   );
   if (picked == null || !context.mounted) return null;
@@ -127,7 +130,7 @@ Future<SearchFilters?> pickSearchDateRange(
 
 /// Label of the date-range pill ("Date range" when unset).
 String searchDateRangeLabel(SearchFilters f) {
-  if (!f.hasDateRange) return 'Date range';
+  if (!f.hasDateRange) return tr('Date range');
   String d(DateTime x) => '${x.month}/${x.day}';
   final from = f.from;
   final last = f.to == null ? null : DateUtilsX.addDays(f.to!, -1);
@@ -147,9 +150,9 @@ Future<SearchFilters?> pickSearchTag(
   if (!context.mounted) return null;
   final picked = await _showChoices<Tag>(
     context,
-    title: 'Tag',
+    title: tr('Tag'),
     selected: tags.where((t) => t.id == filters.tagId).firstOrNull,
-    options: [(null, 'Any tag'), for (final t in tags) (t, '#${t.name}')],
+    options: [(null, tr('Any tag')), for (final t in tags) (t, '#${t.name}')],
   );
   if (picked == null) return null;
   return filters.copyWith(
@@ -165,13 +168,13 @@ Future<SearchFilters?> pickSearchPriority(
 ) async {
   final picked = await _showChoices<int>(
     context,
-    title: 'Priority',
+    title: tr('Priority'),
     selected: filters.minPriority,
     options: [
-      (null, 'Any priority'),
-      (TaskPriority.low.index, 'Low and above'),
-      (TaskPriority.medium.index, 'Medium and above'),
-      (TaskPriority.high.index, 'High only'),
+      (null, tr('Any priority')),
+      (TaskPriority.low.index, tr('Low and above')),
+      (TaskPriority.medium.index, tr('Medium and above')),
+      (TaskPriority.high.index, tr('High only')),
     ],
   );
   if (picked == null) return null;
@@ -180,6 +183,6 @@ Future<SearchFilters?> pickSearchPriority(
 
 /// Label of the priority pill.
 String searchPriorityLabel(SearchFilters f) => switch (f.minPriority) {
-  null => 'Priority',
+  null => tr('Priority'),
   final p => '${TaskPriority.fromValue(p).label}+',
 };

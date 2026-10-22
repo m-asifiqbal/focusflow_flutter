@@ -9,9 +9,14 @@
 /// ============================================================
 library;
 
+// A nullable preset label resolves to tr() when read (it must follow the
+// language), and a private field cannot be a named initializing formal.
+// ignore_for_file: prefer_initializing_formals
+
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 
@@ -74,7 +79,10 @@ class FFHeatmap extends StatelessWidget {
     return Semantics(
       label:
           semanticLabel ??
-          'Activity over the last $weeks weeks: $active active days',
+          tr('Activity over the last {weeks} weeks: {active} active days', {
+            'weeks': weeks,
+            'active': active,
+          }),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth.isFinite
@@ -199,15 +207,22 @@ class _HeatmapPainter extends CustomPainter {
 class FFHeatmapLegend extends StatelessWidget {
   const FFHeatmapLegend({
     this.color,
-    this.lessLabel = 'Less',
-    this.moreLabel = 'More',
+    String? lessLabel,
+    String? moreLabel,
     this.cell = 12,
     super.key,
-  });
+  }) : _lessLabel = lessLabel,
+       _moreLabel = moreLabel;
 
   final Color? color;
-  final String lessLabel;
-  final String moreLabel;
+  final String? _lessLabel;
+  final String? _moreLabel;
+
+  /// The given text, else "Less" in the active language.
+  String get lessLabel => _lessLabel ?? tr('Less');
+
+  /// The given text, else "More" in the active language.
+  String get moreLabel => _moreLabel ?? tr('More');
   final double cell;
 
   @override

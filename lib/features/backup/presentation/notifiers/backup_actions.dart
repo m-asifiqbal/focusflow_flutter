@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
@@ -49,7 +50,7 @@ class BackupActions {
     }
     final bytes = await ref.read(localBackupsProvider).read(c.record!);
     if (bytes == null) {
-      throw const FormatException('This backup file is no longer on device');
+      throw FormatException(tr('This backup file is no longer on device'));
     }
     return engine.inspect(bytes);
   }

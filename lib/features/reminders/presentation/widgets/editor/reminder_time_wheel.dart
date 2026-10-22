@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -95,7 +96,7 @@ class _ReminderTimeWheelState extends State<ReminderTimeWheel> {
               children: [
                 Expanded(
                   child: _WheelColumn(
-                    label: 'Hour',
+                    label: tr('Hour'),
                     items: hourItems,
                     initial: widget.use24h ? _hour : h12 - 1,
                     looping: true,
@@ -109,7 +110,7 @@ class _ReminderTimeWheelState extends State<ReminderTimeWheel> {
                 ),
                 Expanded(
                   child: _WheelColumn(
-                    label: 'Minute',
+                    label: tr('Minute'),
                     items: minuteItems,
                     initial: _minute ~/ _step,
                     looping: true,
@@ -122,8 +123,8 @@ class _ReminderTimeWheelState extends State<ReminderTimeWheel> {
                 if (!widget.use24h)
                   Expanded(
                     child: _WheelColumn(
-                      label: 'AM or PM',
-                      items: const ['AM', 'PM'],
+                      label: tr('AM or PM'),
+                      items: [tr('AM'), tr('PM')],
                       initial: pm ? 1 : 0,
                       looping: false,
                       onSelected: (i) {

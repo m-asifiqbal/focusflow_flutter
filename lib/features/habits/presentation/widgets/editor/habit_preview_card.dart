@@ -10,10 +10,12 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/habits/presentation/habit_icons.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
 import 'package:focusflow/features/habits/presentation/habit_templates.dart';
@@ -40,7 +42,7 @@ class HabitPreviewCard extends StatelessWidget {
         children: [
           Semantics(
             button: true,
-            label: 'Change icon and colour',
+            label: tr('Change icon and colour'),
             excludeSemantics: true,
             child: FFPressable(
               onTap: onCustomize,
@@ -59,7 +61,7 @@ class HabitPreviewCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name.isEmpty ? 'New habit' : name,
+                  name.isEmpty ? tr('New habit') : name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.text.title.copyWith(
@@ -74,7 +76,7 @@ class HabitPreviewCard extends StatelessWidget {
                   runSpacing: AppSpacing.xs,
                   children: [
                     FFTag(
-                      draft.category,
+                      HabitWords.shown(draft.category),
                       colors: HabitCategories.colorsOf(draft.category),
                     ),
                     Row(
@@ -110,6 +112,8 @@ class HabitTemplateStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // `all` is built per call (names follow the language): hold one list.
+    final templates = HabitTemplates.all;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsetsDirectional.symmetric(
@@ -119,9 +123,8 @@ class HabitTemplateStrip extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final t in HabitTemplates.all) ...[
-            if (t != HabitTemplates.all.first)
-              const SizedBox(width: HabitDimens.templateGap),
+          for (final (i, t) in templates.indexed) ...[
+            if (i > 0) const SizedBox(width: HabitDimens.templateGap),
             _TemplateTile(template: t, onTap: () => onTemplate(t)),
           ],
         ],
@@ -142,7 +145,7 @@ class _TemplateTile extends StatelessWidget {
       width: HabitDimens.templateTile,
       child: FFCard(
         onTap: onTap,
-        semanticLabel: 'Use template ${template.label}',
+        semanticLabel: tr('Use template {label}', {'label': template.label}),
         padding: const EdgeInsetsDirectional.fromSTEB(
           AppSpacing.xs,
           AppSpacing.md,

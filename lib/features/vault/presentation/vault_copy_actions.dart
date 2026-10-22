@@ -15,6 +15,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
@@ -64,23 +65,42 @@ Future<bool> copyVaultSecret(
   final payload = await readVaultPayload(ref, record);
   if (!context.mounted) return false;
   if (payload == null) {
-    showFFToast(context, "Couldn't decrypt this item");
+    showFFToast(context, tr("Couldn't decrypt this item"));
     return false;
   }
-  final (value, what) = switch (field) {
-    VaultCopyField.username => (payload.username, 'Username'),
-    VaultCopyField.password => (payload.password, 'Password'),
-    VaultCopyField.primary => (
-      payload.primarySecret(record.type),
-      switch (record.type) {
-        VaultItemType.card => 'Card number',
-        VaultItemType.secureNote => 'Note',
-        _ => 'Password',
-      },
+  // (value, what it is called, the "none saved" toast) — each sentence is its
+  // own key so a language is free to word the noun and the sentence together.
+  final (value, what, none) = switch (field) {
+    VaultCopyField.username => (
+      payload.username,
+      tr('Username'),
+      tr('No username saved'),
     ),
+    VaultCopyField.password => (
+      payload.password,
+      tr('Password'),
+      tr('No password saved'),
+    ),
+    VaultCopyField.primary => switch (record.type) {
+      VaultItemType.card => (
+        payload.primarySecret(record.type),
+        tr('Card number'),
+        tr('No card number saved'),
+      ),
+      VaultItemType.secureNote => (
+        payload.primarySecret(record.type),
+        tr('Note'),
+        tr('No note saved'),
+      ),
+      _ => (
+        payload.primarySecret(record.type),
+        tr('Password'),
+        tr('No password saved'),
+      ),
+    },
   };
   if (value.isEmpty) {
-    showFFToast(context, 'No ${what.toLowerCase()} saved');
+    showFFToast(context, none);
     return false;
   }
   final settings = ref.read(settingsProvider);
@@ -95,7 +115,9 @@ Future<bool> copyVaultSecret(
   if (!context.mounted) return true;
   showFFToast(
     context,
-    clears ? '$what copied · clears in ${seconds}s' : '$what copied',
+    clears
+        ? tr('{what} copied · clears in {s}s', {'what': what, 's': seconds})
+        : tr('{what} copied', {'what': what}),
     icon: FontAwesomeIcons.solidCircleCheck,
   );
   return true;
@@ -123,10 +145,12 @@ Future<void> openVaultWebsite(
   final uri = payload == null ? null : vaultWebsiteUri(payload.url);
   if (!context.mounted) return;
   if (uri == null) {
-    showFFToast(context, 'No website saved');
+    showFFToast(context, tr('No website saved'));
     return;
   }
   ref.read(vaultSessionProvider.notifier).touch();
   final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-  if (!ok && context.mounted) showFFToast(context, "Couldn't open the website");
+  if (!ok && context.mounted) {
+    showFFToast(context, tr("Couldn't open the website"));
+  }
 }

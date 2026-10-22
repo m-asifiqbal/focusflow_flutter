@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -22,42 +23,43 @@ typedef _TileSpec = ({
   String semantics,
 });
 
-const List<_TileSpec> _tiles = [
+/// A function, not a const list: the texts follow the active language.
+List<_TileSpec> _tiles() => [
   (
     module: AppModule.notes,
-    title: 'Note',
-    caption: 'Ideas',
-    semantics: 'New note',
+    title: tr('Note'),
+    caption: tr('Ideas'),
+    semantics: tr('New note'),
   ),
   (
     module: AppModule.tasks,
-    title: 'Task',
-    caption: 'To-dos',
-    semantics: 'New task',
+    title: tr('Task'),
+    caption: tr('To-dos'),
+    semantics: tr('New task'),
   ),
   (
     module: AppModule.reminders,
-    title: 'Reminder',
-    caption: 'Alerts',
-    semantics: 'New reminder',
+    title: tr('Reminder'),
+    caption: tr('Alerts'),
+    semantics: tr('New reminder'),
   ),
   (
     module: AppModule.habits,
-    title: 'Habit',
-    caption: 'Routine',
-    semantics: 'New habit',
+    title: tr('Habit'),
+    caption: tr('Routine'),
+    semantics: tr('New habit'),
   ),
   (
     module: AppModule.vault,
-    title: 'Password',
-    caption: 'Secure',
-    semantics: 'New password',
+    title: tr('Password'),
+    caption: tr('Secure'),
+    semantics: tr('New password'),
   ),
   (
     module: AppModule.scan,
-    title: 'Scan',
-    caption: 'OCR',
-    semantics: 'Scan text into a note',
+    title: tr('Scan'),
+    caption: tr('OCR'),
+    semantics: tr('Scan text into a note'),
   ),
 ];
 
@@ -79,9 +81,10 @@ class QuickAddTileGrid extends StatelessWidget {
             ? 3
             : 2;
         const gap = AppSpacing.rowLeadingGap;
+        final tiles = _tiles();
         return Column(
           children: [
-            for (var row = 0; row * columns < _tiles.length; row++) ...[
+            for (var row = 0; row * columns < tiles.length; row++) ...[
               if (row > 0) const SizedBox(height: gap),
               IntrinsicHeight(
                 child: Row(
@@ -90,9 +93,9 @@ class QuickAddTileGrid extends StatelessWidget {
                     for (var c = 0; c < columns; c++) ...[
                       if (c > 0) const SizedBox(width: gap),
                       Expanded(
-                        child: row * columns + c < _tiles.length
+                        child: row * columns + c < tiles.length
                             ? _QuickAddTile(
-                                spec: _tiles[row * columns + c],
+                                spec: tiles[row * columns + c],
                                 onTap: onTap,
                               )
                             : const SizedBox.shrink(),

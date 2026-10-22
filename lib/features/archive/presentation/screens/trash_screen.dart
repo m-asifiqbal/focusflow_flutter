@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -51,23 +52,23 @@ class TrashScreen extends ConsumerWidget {
           ? FFEmptyState.compact(
               colors: TagPalette.high,
               icon: FontAwesomeIcons.triangleExclamation,
-              title: "Couldn't load Recently Deleted",
-              body: 'Your items are safe. Try again.',
-              ctaLabel: 'Retry',
+              title: tr('Couldn\'t load Recently Deleted'),
+              body: tr('Your items are safe. Try again.'),
+              ctaLabel: tr('Retry'),
               ctaIcon: FontAwesomeIcons.arrowsRotate,
               onCta: () => ref.invalidate(trashProvider),
             )
           : const FFSkeletonList(kind: FFSkeletonKind.row, count: 5);
     } else if (items.isEmpty) {
-      content = const Padding(
+      content = Padding(
         padding: EdgeInsetsDirectional.only(top: AppSpacing.xxl),
         child: FFEmptyState(
           colors: TagPalette.ideas,
           icon: FontAwesomeIcons.trashCan,
-          title: 'Nothing in Recently Deleted',
-          body:
-              'Deleted items stay here for 30 days, so you can recover '
-              'them if you change your mind.',
+          title: tr('Nothing in Recently Deleted'),
+          body: tr(
+            'Deleted items stay here for 30 days, so you can recover them if you change your mind.',
+          ),
         ),
       );
     } else {
@@ -105,8 +106,8 @@ class TrashScreen extends ConsumerWidget {
               start: FFSecondaryButton(
                 icon: compact ? null : FontAwesomeIcons.arrowRotateLeft,
                 label: selecting
-                    ? ArchiveFormat.withCount('Recover', picked.length)
-                    : 'Recover all',
+                    ? ArchiveFormat.withCount(tr('Recover'), picked.length)
+                    : tr('Recover all'),
                 onPressed: selecting && picked.isEmpty
                     ? null
                     : () => actions.restore(selecting ? picked : all),
@@ -114,8 +115,8 @@ class TrashScreen extends ConsumerWidget {
               end: FFDangerButton(
                 icon: compact ? null : FontAwesomeIcons.trashCan,
                 label: selecting
-                    ? ArchiveFormat.withCount('Delete', picked.length)
-                    : 'Empty trash',
+                    ? ArchiveFormat.withCount(tr('Delete'), picked.length)
+                    : tr('Empty trash'),
                 onPressed: selecting && picked.isEmpty
                     ? null
                     : () => actions.delete(selecting ? picked : all),
@@ -128,7 +129,7 @@ class TrashScreen extends ConsumerWidget {
           ),
           children: [
             ArchiveHeader(
-              title: 'Recently Deleted',
+              title: tr('Recently Deleted'),
               selecting: selecting,
               canSelect: all.isNotEmpty,
               allSelected: all.isNotEmpty && picked.length == all.length,
@@ -147,13 +148,13 @@ class TrashScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const ArchiveNotice(
+                  ArchiveNotice(
                     tone: ArchiveNoticeTone.danger,
                     icon: FontAwesomeIcons.solidClock,
-                    title: 'Auto-deletes after 30 days',
-                    body:
-                        'Items here are removed permanently from this '
-                        'device and your Drive backup.',
+                    title: tr('Auto-deletes after 30 days'),
+                    body: tr(
+                      'Items here are removed permanently from this device and your Drive backup.',
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   content,

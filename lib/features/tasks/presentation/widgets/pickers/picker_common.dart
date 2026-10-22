@@ -16,6 +16,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -207,7 +208,7 @@ Future<String?> showTextInputSheet(
   required String title,
   String hint = '',
   String initial = '',
-  String confirmLabel = 'Save',
+  String? confirmLabel,
 }) {
   return showFFBottomSheet<String>(
     context,
@@ -216,7 +217,7 @@ Future<String?> showTextInputSheet(
       title: title,
       hint: hint,
       initial: initial,
-      confirmLabel: confirmLabel,
+      confirmLabel: confirmLabel ?? tr('Save'),
     ),
   );
 }

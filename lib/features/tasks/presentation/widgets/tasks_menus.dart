@@ -14,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -34,16 +35,16 @@ Future<void> showTasksMoreMenu(BuildContext context, WidgetRef ref) {
   return showFFActionSheet(
     context,
     FFActionSheetData(
-      header: const FFActionSheetHeader(
-        title: 'Tasks',
+      header: FFActionSheetHeader(
+        title: tr('Tasks'),
         icon: FontAwesomeIcons.checkDouble,
         colors: TagPalette.work,
-        meta: 'View options',
+        meta: tr('View options'),
       ),
       actions: [
         FFActionItem(
           icon: FontAwesomeIcons.solidSquareCheck,
-          label: 'Select tasks',
+          label: tr('Select tasks'),
           colors: ModuleStyle.tasks.colors,
           onTap: () => ref
               .read(itemSelectionProvider(tasksSelectionScope).notifier)
@@ -53,7 +54,9 @@ Future<void> showTasksMoreMenu(BuildContext context, WidgetRef ref) {
           icon: sort == TaskSort.smart
               ? FontAwesomeIcons.gripVertical
               : FontAwesomeIcons.arrowDownWideShort,
-          label: sort == TaskSort.smart ? 'Sort manually' : 'Sort by due date',
+          label: sort == TaskSort.smart
+              ? tr('Sort manually')
+              : tr('Sort by due date'),
           colors: TagPalette.design,
           onTap: () => ref
               .read(taskSortProvider.notifier)
@@ -63,7 +66,7 @@ Future<void> showTasksMoreMenu(BuildContext context, WidgetRef ref) {
           icon: showCompleted
               ? FontAwesomeIcons.eyeSlash
               : FontAwesomeIcons.eye,
-          label: showCompleted ? 'Hide completed' : 'Show completed',
+          label: showCompleted ? tr('Hide completed') : tr('Show completed'),
           colors: ActionTints.lock,
           onTap: () => ref
               .read(settingsProvider.notifier)
@@ -71,7 +74,7 @@ Future<void> showTasksMoreMenu(BuildContext context, WidgetRef ref) {
         ),
         FFActionItem(
           icon: FontAwesomeIcons.folderPlus,
-          label: 'New list',
+          label: tr('New list'),
           colors: TagPalette.ideas,
           onTap: () => _newList(context, ref),
         ),
@@ -84,9 +87,9 @@ Future<void> _newList(BuildContext context, WidgetRef ref) async {
   if (!context.mounted) return;
   final name = await showTextInputSheet(
     context,
-    title: 'New list',
-    hint: 'List name',
-    confirmLabel: 'Create',
+    title: tr('New list'),
+    hint: tr('List name'),
+    confirmLabel: tr('Create'),
   );
   if (name == null) return;
   final id = await ref
@@ -102,12 +105,12 @@ Future<void> pickTaskTagFilter(BuildContext context, WidgetRef ref) async {
   final current = ref.read(taskTagFilterProvider);
   final picked = await showOptionSheet<String?>(
     context,
-    title: 'Filter by tag',
-    subtitle: tags.isEmpty ? 'No tags yet — add some in the editor' : null,
+    title: tr('Filter by tag'),
+    subtitle: tags.isEmpty ? tr('No tags yet — add some in the editor') : null,
     options: [
-      const OptionItem(
+      OptionItem(
         value: null,
-        label: 'Any tag',
+        label: tr('Any tag'),
         icon: FontAwesomeIcons.tags,
         colors: ActionTints.lock,
       ),

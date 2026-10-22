@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/library_counts.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -64,9 +65,9 @@ class LibraryScreen extends ConsumerWidget {
                         ? FFEmptyState.compact(
                             colors: TagPalette.high,
                             icon: FontAwesomeIcons.triangleExclamation,
-                            title: "Couldn't load your library",
-                            body: 'Your items are safe. Try again.',
-                            ctaLabel: 'Retry',
+                            title: tr('Couldn\'t load your library'),
+                            body: tr('Your items are safe. Try again.'),
+                            ctaLabel: tr('Retry'),
                             ctaIcon: FontAwesomeIcons.arrowsRotate,
                             onCta: () => ref.invalidate(libraryCountsProvider),
                           )
@@ -107,7 +108,7 @@ class _Header extends ConsumerWidget {
     );
     final modules = libraryVisibleModules(hidden);
     return FFLargeHeader(
-      title: 'Library',
+      title: tr('Library'),
       subtitle: counts == null
           ? ' '
           : LibraryFormat.headerSubtitle(
@@ -117,12 +118,12 @@ class _Header extends ConsumerWidget {
       actions: [
         FFRoundIconButton(
           icon: FontAwesomeIcons.magnifyingGlass,
-          semanticLabel: 'Search',
+          semanticLabel: tr('Search'),
           onPressed: () => context.push(AppRoutes.search),
         ),
         FFRoundIconButton(
           icon: FontAwesomeIcons.ellipsis,
-          semanticLabel: 'More options',
+          semanticLabel: tr('More options'),
           onPressed: () => showLibraryMoreMenu(context, ref),
         ),
       ],

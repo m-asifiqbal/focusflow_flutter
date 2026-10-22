@@ -16,6 +16,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -45,7 +46,7 @@ Future<ModuleItemActions> noteItemActions(
   if (note == null || !context.mounted) return ModuleItemActions.none;
   final share = FFActionItem(
     icon: FontAwesomeIcons.shareNodes,
-    label: 'Share / export (PDF, TXT, MD)',
+    label: tr('Share / export (PDF, TXT, MD)'),
     colors: ActionTints.share,
     onTap: () => shareNote(context, ref, note),
   );
@@ -56,20 +57,20 @@ Future<ModuleItemActions> noteItemActions(
       if (note.isLocked) ...[
         FFActionItem(
           icon: FontAwesomeIcons.lock,
-          label: 'Change note PIN',
+          label: tr('Change note PIN'),
           colors: ActionTints.lock,
           onTap: () => unawaited(changeNotePin(context, ref, note)),
         ),
         FFActionItem(
           icon: FontAwesomeIcons.lockOpen,
-          label: 'Remove note lock',
+          label: tr('Remove note lock'),
           colors: ActionTints.lock,
           onTap: () => unawaited(removeNoteLock(context, ref, note)),
         ),
       ] else
         FFActionItem(
           icon: FontAwesomeIcons.lock,
-          label: 'Lock with a PIN',
+          label: tr('Lock with a PIN'),
           colors: ActionTints.lock,
           onTap: () => unawaited(lockNoteWithPin(context, ref, note)),
         ),
@@ -81,7 +82,7 @@ Future<ModuleItemActions> noteItemActions(
 FFActionItem noteWordCountAction(BuildContext context, Note note) =>
     FFActionItem(
       icon: FontAwesomeIcons.fileLines,
-      label: 'Word count',
+      label: tr('Word count'),
       colors: TagPalette.work,
       onTap: () => showNoteWordCount(context, note),
     );
@@ -93,8 +94,8 @@ Future<void> shareNote(BuildContext context, WidgetRef ref, Note note) async {
         context,
         ref,
         note,
-        title: 'Enter PIN to export',
-        subtitle: 'Exports are not encrypted.',
+        title: tr('Enter PIN to export'),
+        subtitle: tr('Exports are not encrypted.'),
       )) {
     return;
   }
@@ -104,7 +105,7 @@ Future<void> shareNote(BuildContext context, WidgetRef ref, Note note) async {
     context,
     FFActionSheetData(
       header: FFActionSheetHeader(
-        title: 'Export note',
+        title: tr('Export note'),
         icon: FontAwesomeIcons.shareNodes,
         colors: ActionTints.share,
         meta: note.displayTitle,
@@ -140,7 +141,7 @@ Future<void> shareNote(BuildContext context, WidgetRef ref, Note note) async {
     if (context.mounted) {
       showFFToast(
         context,
-        "Couldn't export this note",
+        tr("Couldn't export this note"),
         icon: FontAwesomeIcons.triangleExclamation,
       );
     }
@@ -159,18 +160,18 @@ Future<void> showNoteWordCount(BuildContext context, Note note) {
     context,
     builder: (context) => FFDialog(
       icon: FontAwesomeIcons.fileLines,
-      title: 'Word count',
+      title: tr('Word count'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _CountRow('Words', '$words'),
-          _CountRow('Characters', '$chars'),
-          _CountRow('Reading time', '$minutes min'),
+          _CountRow(tr('Words'), '$words'),
+          _CountRow(tr('Characters'), '$chars'),
+          _CountRow(tr('Reading time'), tr('{m} min', {'m': minutes})),
         ],
       ),
       actions: [
         FFPrimaryButton(
-          label: 'Done',
+          label: tr('Done'),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

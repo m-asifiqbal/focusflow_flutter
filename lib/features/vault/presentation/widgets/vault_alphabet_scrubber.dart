@@ -14,6 +14,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
@@ -78,7 +79,7 @@ class _VaultAlphabetScrubberState extends State<VaultAlphabetScrubber> {
     );
     return Semantics(
       container: true,
-      label: 'Alphabet index',
+      label: tr('Alphabet index'),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,

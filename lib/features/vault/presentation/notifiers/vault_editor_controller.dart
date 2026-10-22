@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/totp.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
 import 'package:focusflow/features/vault/domain/services/vault_payload_codec.dart';
@@ -170,7 +171,7 @@ class VaultEditorController
     final s = _s;
     if (s == null || s.saving) return null;
     if (s.title.trim().isEmpty) {
-      state = AsyncData(s.copyWith(titleError: 'Add a title'));
+      state = AsyncData(s.copyWith(titleError: tr('Add a title')));
       return null;
     }
     final key = ref.read(vaultSessionProvider).requireKey();

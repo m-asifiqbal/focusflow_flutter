@@ -14,6 +14,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -36,7 +37,7 @@ class InsightsShareService {
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path, mimeType: 'image/png')],
-          subject: 'My ${AppInfo.name} insights',
+          subject: tr('My {app} insights', {'app': AppInfo.name}),
         ),
       );
       return result.status != ShareResultStatus.dismissed;

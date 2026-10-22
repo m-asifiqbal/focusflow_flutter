@@ -10,27 +10,36 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// The FORMAT tiles.
 enum ExportFormat {
   /// Full FocusFlow backup (encrypted whenever a backup PIN is set; the
   /// Export tab says "not encrypted" otherwise).
-  ffbackup('.ffbackup', 'Full · encrypted', 'ffbackup'),
+  ffbackup('.ffbackup', 'ffbackup'),
 
   /// Readable JSON for developers.
-  json('JSON', 'Developers', 'json'),
+  json('JSON', 'json'),
 
   /// One CSV per module (zipped when more than one).
-  csv('CSV', 'Spreadsheets', 'csv'),
+  csv('CSV', 'csv'),
 
   /// Notes as Markdown files + one PDF.
-  pdfMd('PDF/MD', 'Notes only', 'zip');
+  pdfMd('PDF/MD', 'zip');
 
-  const ExportFormat(this.label, this.subtitle, this.extension);
+  const ExportFormat(this.label, this.extension);
 
+  /// File-format name (not translated).
   final String label;
-  final String subtitle;
   final String extension;
+
+  /// The line under the format tile. A getter so it follows the language.
+  String get subtitle => switch (this) {
+    ffbackup => tr('Full · encrypted'),
+    json => tr('Developers'),
+    csv => tr('Spreadsheets'),
+    pdfMd => tr('Notes only'),
+  };
 
   /// Vault items only ever leave the app inside an encrypted .ffbackup.
   bool get allowsVault => this == ffbackup;
@@ -45,15 +54,22 @@ enum ExportFormat {
 
 /// The INCLUDE checklist rows (snapshot table per module).
 enum ExportModule {
-  notes('Notes', 'notes', 'note'),
-  tasks('Tasks', 'tasks', 'task'),
-  reminders('Reminders', 'reminders', 'reminder'),
-  habits('Habits', 'habits', 'habit'),
-  vault('Vault', 'vault_items', 'vault');
+  notes('notes', 'note'),
+  tasks('tasks', 'task'),
+  reminders('reminders', 'reminder'),
+  habits('habits', 'habit'),
+  vault('vault_items', 'vault');
 
-  const ExportModule(this.label, this.table, this.itemType);
+  const ExportModule(this.table, this.itemType);
 
-  final String label;
+  /// The module's name in the active language.
+  String get label => switch (this) {
+    notes => tr('Notes'),
+    tasks => tr('Tasks'),
+    reminders => tr('Reminders'),
+    habits => tr('Habits'),
+    vault => tr('Vault'),
+  };
 
   /// Snapshot / SQL table name.
   final String table;

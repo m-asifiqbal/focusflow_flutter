@@ -15,6 +15,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -52,12 +53,18 @@ class HabitCard extends StatelessWidget {
   static String checkLabel(HabitDayStatus s) {
     final name = s.habit.name;
     if (s.habit.isQuit) {
-      return s.isDone ? 'Log a slip for $name' : 'Mark $name clean today';
+      return s.isDone
+          ? tr('Log a slip for {name}', {'name': name})
+          : tr('Mark {name} clean today', {'name': name});
     }
     if (s.isDone) {
-      return s.habit.isYesNo ? 'Mark $name not done' : 'Undo a $name check-in';
+      return s.habit.isYesNo
+          ? tr('Mark {name} not done', {'name': name})
+          : tr('Undo a {name} check-in', {'name': name});
     }
-    return s.habit.isYesNo ? 'Mark $name done' : 'Check in $name';
+    return s.habit.isYesNo
+        ? tr('Mark {name} done', {'name': name})
+        : tr('Check in {name}', {'name': name});
   }
 
   @override
@@ -77,7 +84,7 @@ class HabitCard extends StatelessWidget {
           stroke: HabitDimens.cardRingStroke,
           color: colors.solid,
           trackColor: colors.softFor(brightness),
-          semanticLabel: '${habit.name} progress',
+          semanticLabel: tr('{name} progress', {'name': habit.name}),
           child: Icon(
             HabitIcons.of(habit.iconKey),
             size: HabitDimens.cardIcon,
@@ -169,7 +176,7 @@ class _Streak extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = HabitAccents.streak;
     return Semantics(
-      label: 'Streak: ${streak.label}',
+      label: tr('Streak: {label}', {'label': streak.label}),
       excludeSemantics: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,

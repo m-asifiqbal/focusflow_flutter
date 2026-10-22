@@ -43,6 +43,8 @@ final securityReportProvider = FutureProvider.autoDispose<VaultSecurityReport>((
 ) async {
   final records = await ref.watch(vaultActiveRecordsProvider.future);
   final key = ref.watch(vaultSessionProvider.select((s) => s.key));
+  // The weak-password reasons are worded here: recompute on a language switch.
+  ref.watch(settingsProvider.select((s) => s.languageCode));
   final now = ref.read(clockProvider).now();
   final reasons = <String, String>{};
   if (key != null && !key.isDestroyed) {

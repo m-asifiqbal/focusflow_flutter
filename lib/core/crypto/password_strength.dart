@@ -25,6 +25,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/crypto/password_strength_tables.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 @immutable
 class PasswordStrength {
@@ -63,62 +64,104 @@ class PasswordStrength {
   /// Found in (or derived from) the common-password list.
   final bool isCommon;
 
-  static const List<String> labels = [
-    'Very weak',
-    'Weak',
-    'Fair',
-    'Strong',
-    'Very strong',
-  ];
-
-  String get label => labels[score];
+  /// "Very weak" … "Very strong" for [score], in the active language.
+  String get label => switch (score) {
+    0 => tr('Very weak'),
+    1 => tr('Weak'),
+    2 => tr('Fair'),
+    3 => tr('Strong'),
+    _ => tr('Very strong'),
+  };
 
   /// Seconds an offline attacker needs on average.
   double get crackSeconds => math.pow(2, bits) / 2 / 1e10;
+
+  /// Whether [crackTimeLabel] is "instantly". Test this, never the text
+  /// (it is translated).
+  bool get crackedInstantly => crackSeconds < 1;
 
   /// "instantly", "3 hours", "centuries".
   String get crackTimeLabel => crackTimeText(crackSeconds);
 
   /// "Very strong · would take centuries to crack".
   String get summary => length == 0
-      ? 'Enter a password'
-      : crackSeconds < 1
-      ? '$label · could be cracked instantly'
-      : '$label · would take $crackTimeLabel to crack';
+      ? tr('Enter a password')
+      : crackedInstantly
+      ? tr('{label} · could be cracked instantly', {'label': label})
+      : tr('{label} · would take {time} to crack', {
+          'label': label,
+          'time': crackTimeLabel,
+        });
 
   /// Short reason for weak passwords: "Only 8 characters, no symbols".
   String get weakReason {
-    if (length == 0) return 'No password set';
-    if (isCommon) return 'A commonly used password';
+    if (length == 0) return tr('No password set');
+    if (isCommon) return tr('A commonly used password');
     final parts = <String>[];
-    if (length < 12) parts.add('Only $length characters');
-    final missing = [
-      if (!hasSymbol) 'symbols',
-      if (!hasDigit) 'numbers',
-      if (!hasUpper && !hasLower) 'letters',
-    ];
-    if (missing.isNotEmpty) parts.add('no ${missing.join(' or ')}');
-    if (parts.isEmpty) return 'Easy to guess pattern';
-    final text = parts.join(', ');
+    if (length < 12) parts.add(tr('Only {n} characters', {'n': length}));
+    final missing = _missingText();
+    if (missing != null) parts.add(missing);
+    if (parts.isEmpty) return tr('Easy to guess pattern');
+    final text = parts.length == 1
+        ? parts.first
+        : tr('{first}, {second}', {'first': parts[0], 'second': parts[1]});
     return text[0].toUpperCase() + text.substring(1);
   }
 
+  /// "no symbols or numbers" — one text per combination, because the way
+  /// a list is joined ("or") differs between languages.
+  String? _missingText() {
+    final symbols = !hasSymbol;
+    final numbers = !hasDigit;
+    final letters = !hasUpper && !hasLower;
+    if (symbols && numbers && letters) {
+      return tr('no symbols or numbers or letters');
+    }
+    if (symbols && numbers) return tr('no symbols or numbers');
+    if (symbols && letters) return tr('no symbols or letters');
+    if (numbers && letters) return tr('no numbers or letters');
+    if (symbols) return tr('no symbols');
+    if (numbers) return tr('no numbers');
+    if (letters) return tr('no letters');
+    return null;
+  }
+
   static String crackTimeText(double seconds) {
-    if (seconds < 1) return 'instantly';
+    if (seconds < 1) return tr('instantly');
     const minute = 60.0, hour = 3600.0, day = 86400.0;
     const month = day * 31, year = day * 365;
-    String unit(double v, String name) {
-      final n = v.floor();
-      return '$n $name${n == 1 ? '' : 's'}';
-    }
 
-    if (seconds < minute) return unit(seconds, 'second');
-    if (seconds < hour) return unit(seconds / minute, 'minute');
-    if (seconds < day) return unit(seconds / hour, 'hour');
-    if (seconds < month) return unit(seconds / day, 'day');
-    if (seconds < year) return unit(seconds / month, 'month');
-    if (seconds < year * 100) return unit(seconds / year, 'year');
-    return 'centuries';
+    if (seconds < minute) {
+      return tr('{count, plural, one {# second} other {# seconds}}', {
+        'count': seconds.floor(),
+      });
+    }
+    if (seconds < hour) {
+      return tr('{count, plural, one {# minute} other {# minutes}}', {
+        'count': (seconds / minute).floor(),
+      });
+    }
+    if (seconds < day) {
+      return tr('{count, plural, one {# hour} other {# hours}}', {
+        'count': (seconds / hour).floor(),
+      });
+    }
+    if (seconds < month) {
+      return tr('{count, plural, one {# day} other {# days}}', {
+        'count': (seconds / day).floor(),
+      });
+    }
+    if (seconds < year) {
+      return tr('{count, plural, one {# month} other {# months}}', {
+        'count': (seconds / month).floor(),
+      });
+    }
+    if (seconds < year * 100) {
+      return tr('{count, plural, one {# year} other {# years}}', {
+        'count': (seconds / year).floor(),
+      });
+    }
+    return tr('centuries');
   }
 
   /// Score for a known entropy (generator output).

@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -78,11 +79,11 @@ class HomeErrorCard extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
-              "Couldn't load this section",
+              tr('Couldn\'t load this section'),
               style: context.text.bodySmall.copyWith(color: ff.ink),
             ),
           ),
-          FFTextButton(label: 'Retry', onPressed: onRetry),
+          FFTextButton(label: tr('Retry'), onPressed: onRetry),
         ],
       ),
     );
@@ -108,22 +109,22 @@ class HomeGetStartedCard extends StatelessWidget {
     final steps = [
       (
         ModuleStyle.notes,
-        'Write your first note',
-        'Capture ideas before they fade',
+        tr('Write your first note'),
+        tr('Capture ideas before they fade'),
         AppRoutes.newNote,
         progress.hasNote,
       ),
       (
         ModuleStyle.tasks,
-        'Add your first task',
-        'Plan what matters today',
+        tr('Add your first task'),
+        tr('Plan what matters today'),
         AppRoutes.newTaskPath,
         progress.hasTask,
       ),
       (
         ModuleStyle.habits,
-        'Start a habit or reminder',
-        'Small steps, every day',
+        tr('Start a habit or reminder'),
+        tr('Small steps, every day'),
         AppRoutes.newHabitPath,
         progress.hasRoutine,
       ),
@@ -144,12 +145,17 @@ class HomeGetStartedCard extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: Text('Get started', style: context.text.cardTitle),
+                  child: Text(tr('Get started'), style: context.text.cardTitle),
                 ),
                 Text(
                   firstRun
-                      ? '${HomeGetStarted.steps} quick steps'
-                      : '${progress.doneCount} of ${HomeGetStarted.steps} done',
+                      ? tr('{steps} quick steps', {
+                          'steps': HomeGetStarted.steps,
+                        })
+                      : tr('{doneCount} of {steps} done', {
+                          'doneCount': progress.doneCount,
+                          'steps': HomeGetStarted.steps,
+                        }),
                   style: context.text.meta,
                 ),
               ],
@@ -158,7 +164,9 @@ class HomeGetStartedCard extends StatelessWidget {
           for (final (style, title, body, route, done) in steps)
             FFPressable(
               onTap: () => context.push(route),
-              semanticLabel: done ? '$title, done' : title,
+              semanticLabel: done
+                  ? tr('{title}, done', {'title': title})
+                  : title,
               child: Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
                   vertical: AppSpacing.sm,

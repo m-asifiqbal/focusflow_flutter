@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -28,7 +29,7 @@ import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
 String _quoted(String title) =>
-    title.trim().isEmpty ? 'Task' : '"${title.trim()}"';
+    title.trim().isEmpty ? tr('Task') : '"${title.trim()}"';
 
 /// Completes the open task [id] and shows "… completed · UNDO". With
 /// [delayed] the row stays in place for 1.2 s (tap on the check) — skipped
@@ -48,7 +49,7 @@ void completeTask(
   controller.complete(id, after: wait);
   showUndoSnackbar(
     context,
-    message: '${_quoted(title)} completed',
+    message: tr('{v} completed', {'v': _quoted(title)}),
     icon: FontAwesomeIcons.solidCircleCheck,
     onUndo: () => controller.undo(id),
   );
@@ -84,7 +85,7 @@ Future<void> toggleTaskSubtask(
   if (outcome != SubtaskOutcome.completedTask || !context.mounted) return;
   showUndoSnackbar(
     context,
-    message: '${_quoted(task.title)} completed',
+    message: tr('{v} completed', {'v': _quoted(task.title)}),
     icon: FontAwesomeIcons.solidCircleCheck,
     onUndo: () => controller.undo(task.id),
   );
@@ -96,7 +97,7 @@ Future<bool> rescheduleTasks(
   BuildContext context,
   WidgetRef ref,
   List<TaskItem> tasks, {
-  String title = 'Reschedule',
+  String? title,
 }) async {
   if (tasks.isEmpty) return false;
   final settings = ref.read(settingsProvider);
@@ -107,9 +108,11 @@ Future<bool> rescheduleTasks(
     today: now,
     weekStartsOn: settings.weekStartsOn,
     current: single?.dueDate,
-    title: title,
+    title: title ?? tr('Reschedule'),
     subtitle: single == null
-        ? '${tasks.length} tasks'
+        ? tr('{count, plural, one {# task} other {# tasks}}', {
+            'count': tasks.length,
+          })
         : (single.title.isEmpty ? null : single.title),
   );
   if (picked == null || !context.mounted) return false;
@@ -117,10 +120,16 @@ Future<bool> rescheduleTasks(
       .read(taskActionsProvider)
       .reschedule(tasks, picked.value);
   if (!context.mounted) return true;
-  final what = single == null ? '${tasks.length} tasks' : _quoted(single.title);
+  final what = single == null
+      ? tr('{count, plural, one {# task} other {# tasks}}', {
+          'count': tasks.length,
+        })
+      : _quoted(single.title);
   showUndoSnackbar(
     context,
-    message: picked.value == null ? '$what: date removed' : '$what rescheduled',
+    message: picked.value == null
+        ? tr('{what}: date removed', {'what': what})
+        : tr('{what} rescheduled', {'what': what}),
     icon: FontAwesomeIcons.calendarDays,
     onUndo: undo,
   );
@@ -132,7 +141,7 @@ List<OptionItem<TaskPriority>> priorityOptions(BuildContext context) => [
   for (final p in TaskPriority.values.reversed)
     OptionItem(
       value: p,
-      label: p == TaskPriority.none ? 'No priority' : p.label,
+      label: p == TaskPriority.none ? tr('No priority') : p.label,
       dotColor: TaskStyle.priorityColor(p) ?? context.ff.inkFaint,
     ),
 ];
@@ -146,7 +155,7 @@ Future<void> pickTaskPriority(
 ) async {
   final picked = await showOptionSheet<TaskPriority>(
     context,
-    title: 'Priority',
+    title: tr('Priority'),
     options: priorityOptions(context),
     selected: current,
   );

@@ -46,6 +46,7 @@ import 'package:focusflow/core/crypto/pin_kdf.dart';
 import 'package:focusflow/core/crypto/vault_cipher.dart';
 import 'package:focusflow/core/crypto/vault_key.dart';
 import 'package:focusflow/core/crypto/vault_secret_storage.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// The PIN-wrapped data key + everything needed to unwrap it.
 @immutable
@@ -229,9 +230,11 @@ class VaultKeyManager {
   /// most common PINs. Checked when a PIN is chosen (set-up, change,
   /// reset), never when one is entered to unlock.
   static String? weakPinReason(String pin) {
-    if (!isValidPin(pin)) return 'Use exactly $pinLength digits';
+    if (!isValidPin(pin)) {
+      return tr('Use exactly {n} digits', {'n': pinLength});
+    }
     final d = pin.codeUnits.map((c) => c - 48).toList();
-    if (d.every((x) => x == d.first)) return 'Avoid repeating one digit';
+    if (d.every((x) => x == d.first)) return tr('Avoid repeating one digit');
     bool run(int step) {
       for (var i = 1; i < d.length; i++) {
         if ((d[i - 1] + step) % 10 != d[i]) return false;
@@ -239,8 +242,8 @@ class VaultKeyManager {
       return true;
     }
 
-    if (run(1) || run(9)) return 'Avoid digits in sequence';
-    if (_commonPins.contains(pin)) return 'That PIN is too common';
+    if (run(1) || run(9)) return tr('Avoid digits in sequence');
+    if (_commonPins.contains(pin)) return tr('That PIN is too common');
     return null;
   }
 

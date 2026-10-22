@@ -12,7 +12,9 @@
 library;
 
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
+import 'package:focusflow/core/utils/recurrence.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
 
@@ -23,16 +25,20 @@ abstract final class ReminderLabels {
     required DateTime? next,
     required DateTime now,
   }) {
-    final parts = <String>[if (today > 0) '$today today'];
+    final parts = <String>[
+      if (today > 0) tr('{n} today', {'n': today}),
+    ];
     if (next != null) {
       final soon = next.difference(now) < const Duration(hours: 24);
       parts.add(
         soon
-            ? 'next ${DateUtilsX.until(next, now)}'
-            : 'next ${DateUtilsX.relativeDay(next, now).toLowerCase()}',
+            ? tr('next {when}', {'when': DateUtilsX.until(next, now)})
+            : tr('next {when}', {
+                'when': DateUtilsX.relativeDay(next, now).toLowerCase(),
+              }),
       );
     }
-    return parts.isEmpty ? 'Nothing scheduled' : parts.join(' · ');
+    return parts.isEmpty ? tr('Nothing scheduled') : parts.join(' · ');
   }
 
   /// "07:00" / "19:00" (24 h) for the time column.
@@ -66,9 +72,9 @@ abstract final class ReminderLabels {
       return [linkLabel(link.type), if (title.isNotEmpty) title];
     }
     final place = r.location;
-    if (place != null) return [place.description, 'Location'];
+    if (place != null) return [place.description, tr('Location')];
     if (!o.isDone && r.isSnoozed(now) && o.at == r.snoozedUntil) {
-      return ['Snoozed', DateUtilsX.until(o.at, now)];
+      return [tr('Snoozed'), DateUtilsX.until(o.at, now)];
     }
     if (r.isRecurring) return repeat(r);
     return _when(o, now);
@@ -77,20 +83,26 @@ abstract final class ReminderLabels {
   /// "Daily · Repeats every day", "Weekdays · Mon–Fri", "Monthly · 14th".
   static List<String> repeat(Reminder r) {
     final label = r.repeatLabel;
-    return switch (label) {
-      'Daily' => const ['Daily', 'Repeats every day'],
-      'Weekdays' => const ['Weekdays', 'Mon–Fri'],
-      'Weekends' => const ['Weekends', 'Sat–Sun'],
-      _ => [label],
-    };
+    // Matched against the labels of the canonical rules (not against English
+    // words), so it works in every language.
+    if (label == RecurrenceRule.daily().label()) {
+      return [tr('Daily'), tr('Repeats every day')];
+    }
+    if (label == RecurrenceRule.weekdays().label()) {
+      return [tr('Weekdays'), tr('Mon–Fri')];
+    }
+    if (label == RecurrenceRule.weekly(const [6, 7]).label()) {
+      return [tr('Weekends'), tr('Sat–Sun')];
+    }
+    return [label];
   }
 
   static List<String> _when(ReminderOccurrence o, DateTime now) {
     final day = DateUtilsX.relativeDay(o.at, now);
-    if (o.isDone) return [day, 'Done'];
-    if (o.at.isBefore(now)) return [day, 'Missed'];
+    if (o.isDone) return [day, tr('Done')];
+    if (o.at.isBefore(now)) return [day, tr('Missed')];
     final soon = o.at.difference(now) < const Duration(hours: 12);
-    return [day, if (soon) DateUtilsX.until(o.at, now) else 'Once'];
+    return [day, if (soon) DateUtilsX.until(o.at, now) else tr('Once')];
   }
 
   /// Screen-reader summary of a row.
@@ -100,12 +112,12 @@ abstract final class ReminderLabels {
     bool use24h = false,
   }) {
     final r = o.reminder;
-    final title = r.title.trim().isEmpty ? 'Untitled reminder' : r.title;
+    final title = r.title.trim().isEmpty ? tr('Untitled reminder') : r.title;
     return [
       title,
       DateUtilsX.time(o.at, use24h: use24h),
       meta(o, now),
-      if (o.isDone) 'done' else if (!r.isEnabled) 'off',
+      if (o.isDone) tr('done') else if (!r.isEnabled) tr('off'),
     ].join(', ');
   }
 
@@ -113,10 +125,17 @@ abstract final class ReminderLabels {
   /// "tomorrow, 8:00 AM" — where a one-time reminder whose time has
   /// passed moves on Save ([at] is today or tomorrow relative to [now]).
   static String rolledTo(DateTime at, DateTime now, {bool use24h = false}) {
-    final day = DateUtilsX.isSameDay(at, now) ? 'today' : 'tomorrow';
-    return '$day, ${DateUtilsX.time(at, use24h: use24h)}';
+    final time = DateUtilsX.time(at, use24h: use24h);
+    return DateUtilsX.isSameDay(at, now)
+        ? tr('today, {time}', {'time': time})
+        : tr('tomorrow, {time}', {'time': time});
   }
 
-  static String linkLabel(ItemType type) =>
-      'Linked ${type.label.toLowerCase()}';
+  static String linkLabel(ItemType type) => switch (type) {
+    ItemType.note => tr('Linked note'),
+    ItemType.task => tr('Linked task'),
+    ItemType.reminder => tr('Linked reminder'),
+    ItemType.habit => tr('Linked habit'),
+    ItemType.vault => tr('Linked password'),
+  };
 }

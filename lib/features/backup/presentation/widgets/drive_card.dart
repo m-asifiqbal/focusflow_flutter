@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
@@ -64,7 +65,7 @@ class DriveCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Google Drive',
+                      tr('Google Drive'),
                       style: text.cardTitle.copyWith(fontSize: 17),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
@@ -86,7 +87,7 @@ class DriveCard extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              FFTag('Connected', colors: ModuleStyle.notes.colors),
+              FFTag(tr('Connected'), colors: ModuleStyle.notes.colors),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -96,7 +97,7 @@ class DriveCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'App folder usage',
+                  tr('App folder usage'),
                   style: text.meta.copyWith(fontWeight: FontWeight.w400),
                 ),
               ),
@@ -104,8 +105,10 @@ class DriveCard extends ConsumerWidget {
                 Text(
                   usage.limitBytes == null
                       ? BackupLabels.size(usage.usedBytes)
-                      : '${BackupLabels.size(usage.usedBytes)} of '
-                            '${BackupLabels.size(usage.limitBytes!)}',
+                      : tr('{size} of {size2}', {
+                          'size': BackupLabels.size(usage.usedBytes),
+                          'size2': BackupLabels.size(usage.limitBytes!),
+                        }),
                   style: text.meta.copyWith(fontWeight: FontWeight.w400),
                 ),
             ],
@@ -136,7 +139,7 @@ class DriveCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: _CardButton(
-                  label: 'Sync now',
+                  label: tr('Sync now'),
                   icon: FontAwesomeIcons.arrowsRotate,
                   primary: true,
                   busy: status.isBusy,
@@ -148,7 +151,7 @@ class DriveCard extends ConsumerWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _CardButton(
-                  label: 'Restore',
+                  label: tr('Restore'),
                   icon: FontAwesomeIcons.clockRotateLeft,
                   onPressed: status.isBusy
                       ? null
@@ -254,43 +257,49 @@ class _StatusBox extends ConsumerWidget {
     final String subtitle;
     switch (status.phase) {
       case SyncPhase.preparing:
-        title = 'Preparing…';
+        title = tr('Preparing…');
         // Sync refuses to run unencrypted while the setting is on.
         subtitle = ref.read(settingsProvider).encryptBackups
-            ? 'Building an encrypted backup'
-            : 'Building a backup';
+            ? tr('Building an encrypted backup')
+            : tr('Building a backup');
       case SyncPhase.uploading:
         final pct = ((status.progress ?? 0) * 100).round();
-        title = 'Uploading $pct%…';
-        subtitle = 'Sending to your Drive app folder';
+        title = tr('Uploading {pct}%…', {'pct': pct});
+        subtitle = tr('Sending to your Drive app folder');
       case SyncPhase.downloading:
-        title = 'Checking other devices…';
-        subtitle = 'Downloading newer backups';
+        title = tr('Checking other devices…');
+        subtitle = tr('Downloading newer backups');
       case SyncPhase.merging:
-        title = 'Merging changes…';
-        subtitle = 'Newest edit of each item wins';
+        title = tr('Merging changes…');
+        subtitle = tr('Newest edit of each item wins');
       case SyncPhase.error:
         title = switch (status.failure) {
-          _ when status.needsBackupPin => 'Set a backup PIN to sync',
-          DriveFailureKind.offline => "You're offline",
+          _ when status.needsBackupPin => tr('Set a backup PIN to sync'),
+          DriveFailureKind.offline => tr("You're offline"),
           DriveFailureKind.authExpired ||
-          DriveFailureKind.notSignedIn => 'Sign in again to sync',
-          DriveFailureKind.quota => 'Google Drive is full',
-          _ => 'Sync failed',
+          DriveFailureKind.notSignedIn => tr('Sign in again to sync'),
+          DriveFailureKind.quota => tr('Google Drive is full'),
+          _ => tr('Sync failed'),
         };
-        subtitle = status.message ?? 'Tap Sync now to try again';
+        subtitle = status.message ?? tr('Tap Sync now to try again');
       case SyncPhase.done || SyncPhase.idle:
-        title = last == null ? 'Not backed up yet' : 'Everything is backed up';
+        title = last == null
+            ? tr('Not backed up yet')
+            : tr('Everything is backed up');
         final conflicts = status.conflictsResolved;
         subtitle = [
           if (status.phase == SyncPhase.done && conflicts > 0)
-            '$conflicts ${conflicts == 1 ? 'item' : 'items'} updated from '
-                'another device',
-          if (last != null) 'Last sync ${BackupLabels.ago(last, now)}',
-          if (last == null) 'Tap Sync now to back up',
+            tr(
+              '{count, plural, one {# item} other {# items}} updated from '
+              'another device',
+              {'count': conflicts},
+            ),
+          if (last != null)
+            tr('Last sync {when}', {'when': BackupLabels.ago(last, now)}),
+          if (last == null) tr('Tap Sync now to back up'),
           if (items != null &&
               !(status.phase == SyncPhase.done && conflicts > 0))
-            '$items items',
+            tr('{count} items', {'count': items}),
           if (status.phase == SyncPhase.done) ...status.warnings,
         ].join(' · ');
     }
@@ -369,7 +378,7 @@ class _StatusBox extends ConsumerWidget {
             if (error && status.needsBackupPin) ...[
               const SizedBox(height: AppSpacing.md),
               FFSecondaryButton(
-                label: 'Set backup PIN',
+                label: tr('Set backup PIN'),
                 icon: FontAwesomeIcons.lock,
                 height: 44,
                 variant: FFSecondaryVariant.outlined,
@@ -379,7 +388,7 @@ class _StatusBox extends ConsumerWidget {
             if (reauth) ...[
               const SizedBox(height: AppSpacing.md),
               FFSecondaryButton(
-                label: 'Sign in again',
+                label: tr('Sign in again'),
                 icon: FontAwesomeIcons.google,
                 height: 44,
                 variant: FFSecondaryVariant.outlined,

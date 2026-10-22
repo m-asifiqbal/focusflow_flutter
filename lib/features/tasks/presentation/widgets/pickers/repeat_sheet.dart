@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -98,7 +99,7 @@ class _RepeatSheetState extends State<_RepeatSheet> {
     return FFBottomSheet(
       footer: _expanded
           ? FFPrimaryButton(
-              label: 'Done',
+              label: tr('Done'),
               onPressed: valid
                   ? () => Navigator.of(context).pop(Picked(_draft.toRRule()))
                   : null,
@@ -109,9 +110,9 @@ class _RepeatSheetState extends State<_RepeatSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           SheetHeader(
-            'Repeat',
+            tr('Repeat'),
             subtitle: mode == RepeatChoice.none
-                ? 'Does not repeat'
+                ? tr('Does not repeat')
                 : _draft.label(widget.start),
           ),
           FFGroupedList(
@@ -119,26 +120,26 @@ class _RepeatSheetState extends State<_RepeatSheet> {
             children: [
               row(
                 RepeatChoice.none,
-                'Never',
+                tr('Never'),
                 FontAwesomeIcons.ban,
                 ActionTints.lock,
               ),
               row(
                 RepeatChoice.daily,
-                'Daily',
+                tr('Daily'),
                 FontAwesomeIcons.solidSun,
                 TagPalette.finance,
               ),
               row(
                 RepeatChoice.weekdays,
-                'Weekdays',
+                tr('Weekdays'),
                 FontAwesomeIcons.briefcase,
                 TagPalette.work,
-                subtitle: 'Monday to Friday',
+                subtitle: tr('Monday to Friday'),
               ),
               row(
                 RepeatChoice.weekly,
-                'Weekly',
+                tr('Weekly'),
                 FontAwesomeIcons.calendarWeek,
                 repeatTint,
                 subtitle: mode == RepeatChoice.weekly
@@ -147,21 +148,21 @@ class _RepeatSheetState extends State<_RepeatSheet> {
               ),
               row(
                 RepeatChoice.monthly,
-                'Monthly',
+                tr('Monthly'),
                 FontAwesomeIcons.calendarDays,
                 TagPalette.design,
                 subtitle: _sub(RepeatChoice.monthly),
               ),
               row(
                 RepeatChoice.yearly,
-                'Yearly',
+                tr('Yearly'),
                 FontAwesomeIcons.solidCalendar,
                 TagPalette.personal,
                 subtitle: _sub(RepeatChoice.yearly),
               ),
               row(
                 RepeatChoice.custom,
-                'Custom…',
+                tr('Custom…'),
                 FontAwesomeIcons.sliders,
                 ActionTints.share,
               ),
@@ -169,7 +170,7 @@ class _RepeatSheetState extends State<_RepeatSheet> {
           ),
           if (mode == RepeatChoice.weekly) ...[
             const SizedBox(height: AppSpacing.xl),
-            const FFSectionLabel('On'),
+            FFSectionLabel(tr('On')),
             WeekdayToggleRow(
               selected: _draft.weekdays,
               weekStartsOn: widget.weekStartsOn,
@@ -188,7 +189,7 @@ class _RepeatSheetState extends State<_RepeatSheet> {
           if (_expanded && !valid) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Pick at least one day',
+              tr('Pick at least one day'),
               style: context.text.meta.copyWith(color: ff.danger),
             ),
           ],

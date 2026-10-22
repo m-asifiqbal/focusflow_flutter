@@ -23,6 +23,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/crypto_bytes.dart';
 import 'package:focusflow/core/crypto/vault_key_manager.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
@@ -111,8 +112,8 @@ class VaultSessionBackupBridge implements VaultBackupBridge {
     if (!session.isUnlocked) {
       throw VaultUnavailable(
         await hasVault()
-            ? 'Unlock the vault to import passwords.'
-            : 'Password import needs the vault — set up your vault first.',
+            ? tr('Unlock the vault to import passwords.')
+            : tr('Password import needs the vault — set up your vault first.'),
       );
     }
     final key = session.requireKey();
@@ -122,7 +123,7 @@ class VaultSessionBackupBridge implements VaultBackupBridge {
     final folderIds = {for (final f in existing) f.name.toLowerCase(): f.id};
     var saved = 0;
     for (final login in logins) {
-      if (key.isDestroyed) throw const VaultUnavailable('The vault locked.');
+      if (key.isDestroyed) throw VaultUnavailable(tr('The vault locked.'));
       final folderName = login.folder?.trim() ?? '';
       String? folderId;
       if (folderName.isNotEmpty) {
@@ -163,6 +164,6 @@ class VaultSessionBackupBridge implements VaultBackupBridge {
       final host = uri?.host.replaceFirst(RegExp(r'^www\.'), '') ?? '';
       if (host.isNotEmpty) return host;
     }
-    return 'Imported login';
+    return tr('Imported login');
   }
 }

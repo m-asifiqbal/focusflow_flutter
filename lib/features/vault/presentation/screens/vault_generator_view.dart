@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/password_generator.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -33,10 +34,11 @@ import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 class VaultGeneratorView extends ConsumerWidget {
   const VaultGeneratorView({super.key});
 
-  static const _segments = [
-    FFSegment(value: GeneratorMode.password, label: 'Password'),
-    FFSegment(value: GeneratorMode.passphrase, label: 'Passphrase'),
-    FFSegment(value: GeneratorMode.pin, label: 'PIN'),
+  // A getter, not a const list: the labels follow the active language.
+  List<FFSegment<GeneratorMode>> get _segments => [
+    FFSegment(value: GeneratorMode.password, label: tr('Password')),
+    FFSegment(value: GeneratorMode.passphrase, label: tr('Passphrase')),
+    FFSegment(value: GeneratorMode.pin, label: tr('PIN')),
   ];
 
   Future<void> _copy(BuildContext context, WidgetRef ref) async {
@@ -48,13 +50,15 @@ class VaultGeneratorView extends ConsumerWidget {
       unawaited(HapticFeedback.mediumImpact());
     }
     final what = switch (mode) {
-      GeneratorMode.password => 'Password',
-      GeneratorMode.passphrase => 'Passphrase',
-      GeneratorMode.pin => 'PIN',
+      GeneratorMode.password => tr('Password'),
+      GeneratorMode.passphrase => tr('Passphrase'),
+      GeneratorMode.pin => tr('PIN'),
     };
     showFFToast(
       context,
-      seconds > 0 ? '$what copied · clears in ${seconds}s' : '$what copied',
+      seconds > 0
+          ? tr('{what} copied · clears in {s}s', {'what': what, 's': seconds})
+          : tr('{what} copied', {'what': what}),
       icon: FontAwesomeIcons.solidCircleCheck,
     );
   }
@@ -82,10 +86,10 @@ class VaultGeneratorView extends ConsumerWidget {
       ),
       children: [
         VaultTabTitle(
-          title: 'Generator',
+          title: tr('Generator'),
           trailing: VaultGlassButton(
             icon: FontAwesomeIcons.clockRotateLeft,
-            semanticLabel: 'Generator history',
+            semanticLabel: tr('Generator history'),
             onTap: () => showVaultGeneratorHistorySheet(context),
           ),
         ),
@@ -113,12 +117,12 @@ class VaultGeneratorView extends ConsumerWidget {
             onCopy: s.value == null ? null : () => _copy(context, ref),
           ),
         ),
-        const Padding(
+        Padding(
           padding: gutter,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              VaultSectionLabel('Options'),
+              VaultSectionLabel(tr('Options')),
               VaultGeneratorOptions(),
               VaultRecentGenerated(),
             ],
@@ -128,7 +132,7 @@ class VaultGeneratorView extends ConsumerWidget {
         Padding(
           padding: gutter,
           child: VaultPrimaryButton(
-            label: 'Save to new vault item',
+            label: tr('Save to new vault item'),
             icon: FontAwesomeIcons.solidFloppyDisk,
             fontSize: VaultType.row,
             onPressed: s.value == null ? null : () => _save(context, ref),

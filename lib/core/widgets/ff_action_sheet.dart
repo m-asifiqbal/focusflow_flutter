@@ -10,7 +10,12 @@
 /// ============================================================
 library;
 
+// A nullable preset label resolves to tr() when read (it must follow the
+// language), and a private field cannot be a named initializing formal.
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -25,23 +30,34 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 @immutable
 class FFActionSheetHeader {
   const FFActionSheetHeader({
-    required this.title,
+    required String title,
     required this.icon,
     required this.colors,
     this.meta,
-  }) : selectedCount = null;
+  }) : _title = title,
+       selectedCount = null;
 
-  /// Multi-select header: "3 items selected".
+  /// Multi-select header: "3 items selected". [selectedTitle] is the
+  /// finished, translated text when the caller knows the item type ("3 notes
+  /// selected"); without it the generic "N items selected" is shown.
   const FFActionSheetHeader.selection(
     int count, {
-    String noun = 'item',
+    String? selectedTitle,
     this.meta,
   }) : selectedCount = count,
-       title = '$count $noun${count == 1 ? '' : 's'} selected',
+       _title = selectedTitle,
        icon = null,
        colors = null;
 
-  final String title;
+  final String? _title;
+
+  /// The header text (for a selection header: see [selection]).
+  String get title =>
+      _title ??
+      tr('{count, plural, one {# item selected} other {# items selected}}', {
+        'count': selectedCount ?? 0,
+      });
+
   final IconData? icon;
   final ModuleColors? colors;
 
@@ -78,9 +94,10 @@ class FFActionSheetData {
     this.header,
     this.onArchive,
     this.onDelete,
-    this.archiveLabel = 'Archive',
-    this.deleteLabel = 'Delete',
-  });
+    String? archiveLabel,
+    String? deleteLabel,
+  }) : _archiveLabel = archiveLabel,
+       _deleteLabel = deleteLabel;
 
   final FFActionSheetHeader? header;
   final List<FFActionItem> actions;
@@ -90,8 +107,14 @@ class FFActionSheetData {
 
   /// Bottom-right button (hidden when null).
   final VoidCallback? onDelete;
-  final String archiveLabel;
-  final String deleteLabel;
+  final String? _archiveLabel;
+  final String? _deleteLabel;
+
+  /// The given label, else "Archive" in the active language.
+  String get archiveLabel => _archiveLabel ?? tr('Archive');
+
+  /// The given label, else "Delete" in the active language.
+  String get deleteLabel => _deleteLabel ?? tr('Delete');
 }
 
 /// Opens the actions sheet for [data]. Completes when the sheet closes.

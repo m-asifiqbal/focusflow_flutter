@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -46,12 +47,12 @@ class HabitEditorScreen extends ConsumerWidget {
     if (s != null && s.isDirty) {
       final discard = await showFFConfirm(
         context,
-        title: 'Discard changes?',
+        title: tr('Discard changes?'),
         message: s.isNew
-            ? 'This habit hasn\'t been created yet.'
-            : 'Your edits to this habit will be lost.',
-        confirmLabel: 'Discard',
-        cancelLabel: 'Keep editing',
+            ? tr('This habit hasn\'t been created yet.')
+            : tr('Your edits to this habit will be lost.'),
+        confirmLabel: tr('Discard'),
+        cancelLabel: tr('Keep editing'),
         destructive: true,
       );
       if (!discard) return;
@@ -85,7 +86,7 @@ class HabitEditorScreen extends ConsumerWidget {
     if (id == null || !context.mounted) return;
     showFFToast(
       context,
-      isNew ? 'Habit created' : 'Habit saved',
+      isNew ? tr('Habit created') : tr('Habit saved'),
       icon: FontAwesomeIcons.solidCircleCheck,
     );
     _pop(context);
@@ -125,13 +126,13 @@ class HabitEditorScreen extends ConsumerWidget {
           children: [
             FFNavHeader(
               leading: FFNavAction(
-                label: 'Cancel',
+                label: tr('Cancel'),
                 onPressed: () => _leave(context, ref),
               ),
-              title: isNew ? 'New Habit' : 'Edit Habit',
+              title: isNew ? tr('New Habit') : tr('Edit Habit'),
               trailing: [
                 FFNavAction(
-                  label: isNew ? 'Create' : 'Save',
+                  label: isNew ? tr('Create') : tr('Save'),
                   emphasized: true,
                   enabled: canSave,
                   onPressed: () => _save(context, ref),
@@ -148,7 +149,7 @@ class HabitEditorScreen extends ConsumerWidget {
                 error: (_, _) => Padding(
                   padding: const EdgeInsetsDirectional.all(AppSpacing.grouped),
                   child: FFErrorBanner(
-                    message: 'Couldn\'t load this habit.',
+                    message: tr('Couldn\'t load this habit.'),
                     onRetry: () =>
                         ref.invalidate(habitEditorControllerProvider(_args)),
                   ),
@@ -157,9 +158,9 @@ class HabitEditorScreen extends ConsumerWidget {
                     ? FFEmptyState(
                         colors: ModuleStyle.habits.colors,
                         icon: ModuleStyle.habits.icon,
-                        title: 'Habit not found',
-                        body: 'It may have been deleted on another device.',
-                        ctaLabel: 'Back to habits',
+                        title: tr('Habit not found'),
+                        body: tr('It may have been deleted on another device.'),
+                        ctaLabel: tr('Back to habits'),
                         ctaIcon: null,
                         onCta: () => context.go(AppRoutes.habits),
                       )
@@ -225,7 +226,7 @@ class _EditorBody extends ConsumerWidget {
         ),
         gap,
         if (state.isNew) ...[
-          side(const FFSectionLabel('Quick start')),
+          side(FFSectionLabel(tr('Quick start'))),
           HabitTemplateStrip(onTemplate: c.applyTemplate),
           gap,
         ],

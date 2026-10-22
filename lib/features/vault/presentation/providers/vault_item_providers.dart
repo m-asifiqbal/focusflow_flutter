@@ -27,6 +27,7 @@ import 'package:focusflow/features/vault/presentation/providers/vault_list_provi
 import 'package:focusflow/features/vault/presentation/vault_auto_hide.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 
 final vaultItemServiceProvider = Provider<VaultItemService>((ref) {
   final clock = ref.watch(clockProvider);
@@ -72,6 +73,8 @@ final vaultItemHealthProvider = Provider.autoDispose
         return null;
       }
       final reused = ref.watch(vaultReusedFingerprintsProvider);
+      // The ratings are worded here: recompute on a language switch.
+      ref.watch(settingsProvider.select((s) => s.languageCode));
       return VaultHealth.of(
         password: payload.password,
         breachCount: record.breachCount,

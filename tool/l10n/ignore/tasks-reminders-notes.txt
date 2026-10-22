@@ -1,0 +1,17 @@
+# tasks / reminders / notes / notifications_center: literals that are not user-facing (SQL fragments, exception toString for logs, file-name fallback)
+lib/features/notes/domain/services/note_export.dart	Note
+lib/features/notes/presentation/notifiers/note_editor_controller.dart	This note no longer exists.
+lib/features/tasks/data/repository/tasks_repository_impl.dart	t.is_pinned DESC, CASE WHEN t.due_date IS NULL THEN 1 ELSE 0 END, t.due_date ASC, COALESCE(t.due_time_minutes, -1) ASC, t.priority DESC, t.sort_order ASC
+lib/features/tasks/data/repository/tasks_repository_impl.dart	((t.completed_at IS NULL AND t.due_date < ?) OR (t.completed_at >= ? AND t.completed_at < ?))
+lib/features/tasks/data/repository/tasks_repository_impl.dart	t.completed_at IS NULL AND t.due_date >= ?
+lib/features/tasks/data/repository/tasks_repository_impl.dart	t.completed_at IS NULL AND t.due_date < ?
+lib/features/tasks/data/repository/tasks_repository_impl.dart	t.completed_at IS NOT NULL
+lib/features/tasks/data/repository/tasks_repository_impl.dart	t.completed_at IS NULL AND t.due_date IS NULL
+lib/features/tasks/data/repository/tasks_repository_impl.dart	t.folder_id = ?
+lib/features/tasks/data/repository/tasks_repository_impl.dart	t.rowid IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ?)
+lib/features/tasks/data/repository/tasks_repository_impl.dart	t.id = ?
+lib/features/tasks/data/repository/tasks_repository_impl.dart	{} AND t.due_date >= ? AND t.due_date < ?
+lib/features/tasks/presentation/notifiers/task_editor_controller.dart	This task no longer exists
+lib/features/reminders/data/repository/reminders_repository_impl.dart	(r.title LIKE ? ESCAPE '\' OR r.note LIKE ? ESCAPE '\')
+lib/features/reminders/data/repository/reminders_repository_impl.dart	r.is_enabled = 1 AND NOT (r.completed_at IS NOT NULL AND (r.repeat_rule IS NULL OR r.repeat_rule = ''))
+lib/features/reminders/presentation/notifiers/reminder_editor_controller.dart	This reminder no longer exists

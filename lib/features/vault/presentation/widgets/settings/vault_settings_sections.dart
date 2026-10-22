@@ -17,6 +17,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/pin_attempt_guard.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -27,7 +28,8 @@ import 'package:focusflow/features/vault/presentation/widgets/settings/vault_set
 import 'package:focusflow/features/vault/presentation/widgets/vault_reauth_sheet.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
-const _reason = 'Confirm to change Vault security settings';
+/// A getter, not a const: the text follows the active language.
+String get _reason => tr('Confirm to change Vault security settings');
 
 class VaultUnlockSection extends ConsumerWidget {
   const VaultUnlockSection({super.key});
@@ -37,14 +39,14 @@ class VaultUnlockSection extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final c = ref.read(vaultSecuritySettingsControllerProvider);
     return FFGroupedList(
-      label: 'UNLOCK',
+      label: tr('UNLOCK'),
       children: [
         FFListRow.toggle(
           leading: const VaultSettingsTile(
             FontAwesomeIcons.solidFaceSmile,
             VaultSettingsTints.emerald,
           ),
-          title: 'Face ID / Fingerprint',
+          title: tr('Face ID / Fingerprint'),
           value: s.vaultBiometrics,
           onChanged: (on) => unawaited(_setBiometrics(context, ref, on)),
         ),
@@ -53,7 +55,7 @@ class VaultUnlockSection extends ConsumerWidget {
             FontAwesomeIcons.key,
             VaultSettingsTints.amber,
           ),
-          title: 'Change master PIN',
+          title: tr('Change master PIN'),
           value: '6 digits',
           onTap: () => unawaited(_changePin(context)),
         ),
@@ -62,13 +64,13 @@ class VaultUnlockSection extends ConsumerWidget {
             FontAwesomeIcons.solidHourglassHalf,
             VaultSettingsTints.indigo,
           ),
-          title: 'Auto-lock vault',
+          title: tr('Auto-lock vault'),
           value: VaultSettingsLabels.autoLock(s.vaultAutoLockMinutes),
           onTap: () async {
             final v = await showVaultSettingsOptionSheet<int>(
               context,
-              title: 'Auto-lock vault',
-              subtitle: 'Locks after this long without vault activity',
+              title: tr('Auto-lock vault'),
+              subtitle: tr('Locks after this long without vault activity'),
               selected: s.vaultAutoLockMinutes,
               options: [
                 for (final m in VaultSettingsLabels.autoLockMinutes)
@@ -90,7 +92,7 @@ class VaultUnlockSection extends ConsumerWidget {
             FontAwesomeIcons.mobileScreenButton,
             VaultSettingsTints.slate,
           ),
-          title: 'Lock when app goes to background',
+          title: tr('Lock when app goes to background'),
           value: s.vaultLockOnBackground,
           onChanged: (on) => runWithVaultReauth(
             context,
@@ -111,7 +113,10 @@ class VaultUnlockSection extends ConsumerWidget {
     final c = ref.read(vaultSecuritySettingsControllerProvider);
     if (on && !await c.biometricsAvailable()) {
       if (context.mounted) {
-        showFFToast(context, 'Set up Face ID or a fingerprint on this device');
+        showFFToast(
+          context,
+          tr('Set up Face ID or a fingerprint on this device'),
+        );
       }
       return;
     }
@@ -122,7 +127,7 @@ class VaultUnlockSection extends ConsumerWidget {
       if (!await c.setBiometrics(on) && context.mounted) {
         showFFToast(
           context,
-          "Biometric unlock couldn't be turned on · use your PIN",
+          tr("Biometric unlock couldn't be turned on · use your PIN"),
         );
       }
     }, needsKey: on);
@@ -134,7 +139,7 @@ class VaultUnlockSection extends ConsumerWidget {
     if (!await ensureVaultUnlocked(context) || !context.mounted) return;
     if (await showVaultReauthSheet(context, changePin: true) &&
         context.mounted) {
-      showFFToast(context, 'Master PIN changed');
+      showFFToast(context, tr('Master PIN changed'));
     }
   }
 }
@@ -147,20 +152,20 @@ class VaultProtectionSection extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final c = ref.read(vaultSecuritySettingsControllerProvider);
     return FFGroupedList(
-      label: 'PROTECTION',
+      label: tr('PROTECTION'),
       children: [
         FFListRow(
           leading: const VaultSettingsTile(
             FontAwesomeIcons.solidPaste,
             VaultSettingsTints.sky,
           ),
-          title: 'Clear copied passwords',
+          title: tr('Clear copied passwords'),
           value: VaultSettingsLabels.clipboard(s.clipboardClearSeconds),
           onTap: () async {
             final v = await showVaultSettingsOptionSheet<int>(
               context,
-              title: 'Clear copied passwords',
-              subtitle: 'Copied secrets are wiped from the clipboard',
+              title: tr('Clear copied passwords'),
+              subtitle: tr('Copied secrets are wiped from the clipboard'),
               selected: s.clipboardClearSeconds,
               options: [
                 for (final sec in VaultSettingsLabels.clipboardSeconds)
@@ -182,7 +187,7 @@ class VaultProtectionSection extends ConsumerWidget {
             FontAwesomeIcons.camera,
             VaultSettingsTints.red,
           ),
-          title: 'Block screenshots in Vault',
+          title: tr('Block screenshots in Vault'),
           value: s.vaultBlockScreenshots,
           onChanged: (on) => runWithVaultReauth(
             context,
@@ -196,8 +201,8 @@ class VaultProtectionSection extends ConsumerWidget {
             FontAwesomeIcons.userSecret,
             VaultSettingsTints.violet,
           ),
-          title: 'Breach monitoring',
-          subtitle: 'Checks hashed prefixes only (k-anonymity)',
+          title: tr('Breach monitoring'),
+          subtitle: tr('Checks hashed prefixes only (k-anonymity)'),
           value: s.breachMonitoring,
           onChanged: (on) => runWithVaultReauth(
             context,
@@ -211,9 +216,9 @@ class VaultProtectionSection extends ConsumerWidget {
             FontAwesomeIcons.triangleExclamation,
             VaultSettingsTints.rose,
           ),
-          title:
-              'Wipe vault after ${PinAttemptGuard.wipeThreshold} failed '
-              'attempts',
+          title: tr('Wipe vault after {wipeThreshold} failed attempts', {
+            'wipeThreshold': PinAttemptGuard.wipeThreshold,
+          }),
           value: s.wipeAfterFailedAttempts,
           onChanged: (on) => runWithVaultReauth(
             context,
@@ -227,7 +232,7 @@ class VaultProtectionSection extends ConsumerWidget {
             FontAwesomeIcons.solidEye,
             VaultSettingsTints.teal,
           ),
-          title: 'Ask for PIN to reveal passwords',
+          title: tr('Ask for PIN to reveal passwords'),
           value: s.vaultReauthToReveal,
           onChanged: (on) => runWithVaultReauth(
             context,

@@ -13,18 +13,23 @@
 library;
 
 import 'package:flutter/foundation.dart' show immutable, listEquals;
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 
 /// Which editor a capture opens. A time makes it a reminder, a date (or a
 /// priority / repeat) without a time makes it a task, anything else a note.
 enum QuickCaptureKind {
-  note('Note'),
-  task('Task'),
-  reminder('Reminder');
+  note,
+  task,
+  reminder;
 
-  const QuickCaptureKind(this.label);
-
-  final String label;
+  /// Display name in the active language (a getter: it follows a language
+  /// switch).
+  String get label => switch (this) {
+    note => tr('Note'),
+    task => tr('Task'),
+    reminder => tr('Reminder'),
+  };
 }
 
 @immutable

@@ -15,6 +15,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/archive/domain/archive_view.dart';
 import 'package:focusflow/features/archive/presentation/providers/archive_providers.dart';
 import 'package:focusflow/features/library/presentation/library_actions.dart';
@@ -101,7 +102,7 @@ class ArchiveActions {
     final current = ref.read(archiveFilterProvider).sort;
     final picked = await showChoiceSheet<ArchiveSort>(
       context,
-      title: 'Sort archive',
+      title: tr('Sort archive'),
       selected: current,
       options: [
         for (final s in ArchiveSort.values)

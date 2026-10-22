@@ -20,6 +20,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
@@ -98,29 +99,41 @@ class ExportController extends AutoDisposeNotifier<ExportState> {
       final saved = await service.save(file, state.options.target);
       if (!saved) return null;
       final n = file.itemCount;
-      final where = switch (state.options.target) {
-        ExportTarget.drive => 'to Google Drive',
-        ExportTarget.device => 'to this device',
-        ExportTarget.share => '',
+      // One whole sentence per target (word order differs per language).
+      final sentence = switch (state.options.target) {
+        ExportTarget.drive => tr(
+          'Exported {count, plural, one {# item} other {# items}} to Google Drive',
+          {'count': n},
+        ),
+        ExportTarget.device => tr(
+          'Exported {count, plural, one {# item} other {# items}} to this device',
+          {'count': n},
+        ),
+        ExportTarget.share => tr(
+          'Exported {count, plural, one {# item} other {# items}}',
+          {'count': n},
+        ),
       };
       final sealed = file.backup == null
           ? ''
           : file.isEncrypted
-          ? ' · encrypted'
-          : ' · not encrypted';
-      return 'Exported $n ${n == 1 ? 'item' : 'items'} $where'.trim() + sealed;
+          ? ' · ${tr('encrypted')}'
+          : ' · ${tr('not encrypted')}';
+      return sentence + sealed;
     } on VaultExportNeedsKey {
-      return 'Set a backup PIN in Backup & Sync to export the vault.';
+      return tr('Set a backup PIN in Backup & Sync to export the vault.');
     } on BackupPinRequired {
-      return '"Encrypt backups" is on: set a backup PIN in Backup & Sync, '
-          'or turn encryption off to export unencrypted.';
+      return tr(
+        '"Encrypt backups" is on: set a backup PIN in Backup & Sync, '
+        'or turn encryption off to export unencrypted.',
+      );
     } on BackupKeyUnavailable catch (e) {
       return e.message;
     } on DriveFailure catch (f) {
       return f.message;
     } catch (e) {
       AppLogger.w('Export failed (${e.runtimeType})');
-      return 'Export failed. Please try again.';
+      return tr('Export failed. Please try again.');
     } finally {
       if (_alive) state = state.copyWith(busy: false);
     }
@@ -169,11 +182,6 @@ class ImportState {
   final String? notice;
 }
 
-/// Shown when a file could not be read for an unexpected reason.
-const String kImportUnreadable =
-    "This file couldn't be read. It may be damaged or in a format "
-    'FocusFlow doesn’t support.';
-
 final importControllerProvider =
     NotifierProvider.autoDispose<ImportController, ImportState>(
       ImportController.new,
@@ -203,9 +211,9 @@ class ImportController extends AutoDisposeNotifier<ImportState> {
     } on Object catch (e) {
       AppLogger.w('Import pick failed (${e.runtimeType})');
       _set(
-        const ImportState(
+        ImportState(
           phase: ImportPhase.error,
-          error: "Couldn't open the file picker. Please try again.",
+          error: tr("Couldn't open the file picker. Please try again."),
         ),
       );
       return true;
@@ -229,13 +237,13 @@ class ImportController extends AutoDisposeNotifier<ImportState> {
       }
       if (ImportDetector.isPasswordExport(name, picked.bytes) &&
           !(await unlockVault?.call() ?? false)) {
-        _set(error('Unlock the vault to import passwords.'));
+        _set(error(tr('Unlock the vault to import passwords.')));
         return true;
       }
       final bundle = ImportDetector.parse(name, picked.bytes);
       _set(
         bundle.isEmpty
-            ? error('Nothing to import in this file.')
+            ? error(tr('Nothing to import in this file.'))
             : ImportState(
                 phase: ImportPhase.preview,
                 fileName: name,
@@ -250,7 +258,14 @@ class ImportController extends AutoDisposeNotifier<ImportState> {
     } on Object catch (e) {
       // TypeError from an unexpected JSON shape, a corrupt zip entry, …
       AppLogger.w('Import read failed (${e.runtimeType})');
-      _set(error(kImportUnreadable));
+      _set(
+        error(
+          tr(
+            "This file couldn't be read. It may be damaged or in a format "
+            'FocusFlow doesn’t support.',
+          ),
+        ),
+      );
     } finally {
       // Parsed into memory: the plaintext temporary copy goes now.
       try {
@@ -306,7 +321,7 @@ class ImportController extends AutoDisposeNotifier<ImportState> {
         ImportState(
           phase: ImportPhase.error,
           fileName: name,
-          error: 'Import failed. Nothing was changed.',
+          error: tr('Import failed. Nothing was changed.'),
         ),
       );
       return;
@@ -333,9 +348,9 @@ class ImportController extends AutoDisposeNotifier<ImportState> {
           total: total,
           progress: 1,
           result: result,
-          notice:
-              "Imported reminders and habits will get their alerts the next "
-              'time FocusFlow opens.',
+          notice: tr(
+            'Imported reminders and habits will get their alerts the next time FocusFlow opens.',
+          ),
         ),
       );
     }

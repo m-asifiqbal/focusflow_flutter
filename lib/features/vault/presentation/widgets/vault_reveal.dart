@@ -18,6 +18,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -55,7 +56,9 @@ class VaultRevealButton extends StatelessWidget {
     final reduce = context.reduceMotion;
     final button = VaultRoundButton(
       icon: open ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye,
-      semanticLabel: open ? 'Hide $what' : 'Show $what',
+      semanticLabel: open
+          ? tr('Hide {what}', {'what': what})
+          : tr('Show {what}', {'what': what}),
       onTap: onTap,
     );
     return Stack(

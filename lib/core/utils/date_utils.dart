@@ -3,6 +3,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:intl/intl.dart';
 
 /// Cached [DateFormat]s. Building one parses its pattern (tens of
@@ -151,9 +152,9 @@ abstract final class DateUtilsX {
   /// "Today" / "Tomorrow" / "Yesterday" / "Tue, Jun 13".
   static String relativeDay(DateTime d, DateTime now) {
     final diff = daysBetween(now, d);
-    if (diff == 0) return 'Today';
-    if (diff == 1) return 'Tomorrow';
-    if (diff == -1) return 'Yesterday';
+    if (diff == 0) return tr('Today');
+    if (diff == 1) return tr('Tomorrow');
+    if (diff == -1) return tr('Yesterday');
     if (d.year == now.year) return DateFormats.of('EEE, MMM d').format(d);
     return DateFormats.of('MMM d, y').format(d);
   }
@@ -161,11 +162,15 @@ abstract final class DateUtilsX {
   /// "2h ago", "5 min ago", "Yesterday", "Jun 8".
   static String ago(DateTime t, DateTime now) {
     final diff = now.difference(t);
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
-    if (diff.inHours < 24 && isSameDay(t, now)) return '${diff.inHours}h ago';
-    if (isSameDay(t, addDays(now, -1))) return 'Yesterday';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return tr('Just now');
+    if (diff.inMinutes < 60) {
+      return tr('{n} min ago', {'n': diff.inMinutes});
+    }
+    if (diff.inHours < 24 && isSameDay(t, now)) {
+      return tr('{n}h ago', {'n': diff.inHours});
+    }
+    if (isSameDay(t, addDays(now, -1))) return tr('Yesterday');
+    if (diff.inDays < 7) return tr('{n}d ago', {'n': diff.inDays});
     if (t.year == now.year) return DateFormats.of('MMM d').format(t);
     return DateFormats.of('MMM d, y').format(t);
   }
@@ -174,12 +179,14 @@ abstract final class DateUtilsX {
   static String until(DateTime t, DateTime now) {
     final diff = t.difference(now);
     if (diff.isNegative) return ago(t, now);
-    if (diff.inMinutes < 1) return 'now';
-    if (diff.inMinutes < 60) return 'in ${diff.inMinutes} min';
+    if (diff.inMinutes < 1) return tr('now');
+    if (diff.inMinutes < 60) return tr('in {n} min', {'n': diff.inMinutes});
     if (diff.inHours < 24) {
       final m = diff.inMinutes % 60;
-      return m == 0 ? 'in ${diff.inHours} h' : 'in ${diff.inHours} h $m min';
+      return m == 0
+          ? tr('in {n} h', {'n': diff.inHours})
+          : tr('in {h} h {m} min', {'h': diff.inHours, 'm': m});
     }
-    return 'in ${diff.inDays} d';
+    return tr('in {n} d', {'n': diff.inDays});
   }
 }

@@ -17,6 +17,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -100,7 +101,7 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
         Semantics(
           header: true,
           child: Text(
-            'Focus session',
+            tr('Focus session'),
             textAlign: TextAlign.center,
             style: context.text.sectionTitle,
           ),
@@ -108,7 +109,7 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
         const SizedBox(height: AppSpacing.xs),
         Text(
           title == null || title.trim().isEmpty
-              ? 'One thing at a time.'
+              ? tr('One thing at a time.')
               : title,
           textAlign: TextAlign.center,
           maxLines: 2,
@@ -122,8 +123,10 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
             size: InsightsDimens.timerRing,
             stroke: InsightsDimens.timerStroke,
             duration: context.motion(AppMotion.slow),
-            semanticLabel:
-                '${_clock(remaining)} remaining of ${s.plannedMinutes} minutes',
+            semanticLabel: tr('{v} remaining of {plannedMinutes} minutes', {
+              'v': _clock(remaining),
+              'plannedMinutes': s.plannedMinutes,
+            }),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -138,10 +141,12 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
                   ),
                 ),
                 Text(switch (s.phase) {
-                  FocusPhase.setup => '${s.plannedMinutes} min',
-                  FocusPhase.running => 'Focusing',
-                  FocusPhase.paused => 'Paused',
-                  FocusPhase.finished => 'Complete',
+                  FocusPhase.setup => tr('{plannedMinutes} min', {
+                    'plannedMinutes': s.plannedMinutes,
+                  }),
+                  FocusPhase.running => tr('Focusing'),
+                  FocusPhase.paused => tr('Paused'),
+                  FocusPhase.finished => tr('Complete'),
                 }, style: context.text.meta),
               ],
             ),
@@ -153,12 +158,12 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
           FocusPhase.running => [
             _pair(
               FFSecondaryButton(
-                label: 'Pause',
+                label: tr('Pause'),
                 icon: FontAwesomeIcons.pause,
                 onPressed: _controller.pause,
               ),
               FFSoftDangerButton(
-                label: 'Stop',
+                label: tr('Stop'),
                 icon: FontAwesomeIcons.stop,
                 onPressed: _stop,
               ),
@@ -167,12 +172,12 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
           FocusPhase.paused => [
             _pair(
               FFSecondaryButton(
-                label: 'Resume',
+                label: tr('Resume'),
                 icon: FontAwesomeIcons.play,
                 onPressed: _controller.resume,
               ),
               FFSoftDangerButton(
-                label: 'Stop',
+                label: tr('Stop'),
                 icon: FontAwesomeIcons.stop,
                 onPressed: _stop,
               ),
@@ -181,20 +186,22 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
           FocusPhase.finished => [
             Text(
               s.savedMinutes == null
-                  ? 'Under a minute, so nothing was saved.'
-                  : 'Saved ${s.savedMinutes} min of focus. Nice work!',
+                  ? tr('Under a minute, so nothing was saved.')
+                  : tr('Saved {savedMinutes} min of focus. Nice work!', {
+                      'savedMinutes': s.savedMinutes,
+                    }),
               textAlign: TextAlign.center,
               style: context.text.rowTitle.copyWith(color: ff.ink),
             ),
             const SizedBox(height: AppSpacing.lg),
             _pair(
               FFSecondaryButton(
-                label: 'Again',
+                label: tr('Again'),
                 icon: FontAwesomeIcons.arrowRotateRight,
                 onPressed: _controller.reset,
               ),
               FFPrimaryButton(
-                label: 'Done',
+                label: tr('Done'),
                 height: AppSizes.secondaryButton,
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
@@ -227,7 +234,7 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
         children: [
           for (final m in FocusTimer.presets)
             FFChip(
-              label: '$m min',
+              label: tr('{m} min', {'m': m}),
               selected: isPreset && s.plannedMinutes == m,
               onTap: () {
                 setState(() => _custom = false);
@@ -235,7 +242,7 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
               },
             ),
           FFChip(
-            label: 'Custom',
+            label: tr('Custom'),
             selected: !isPreset,
             onTap: () => setState(() => _custom = true),
           ),
@@ -248,7 +255,7 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
           children: [
             FFRoundIconButton(
               icon: FontAwesomeIcons.minus,
-              semanticLabel: 'Five minutes less',
+              semanticLabel: tr('Five minutes less'),
               onPressed: s.plannedMinutes <= FocusTimer.minMinutes
                   ? null
                   : () => _controller.setMinutes(
@@ -256,11 +263,14 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
                     ),
             ),
             const SizedBox(width: AppSpacing.lg),
-            Text('${s.plannedMinutes} min', style: context.text.stat),
+            Text(
+              tr('{plannedMinutes} min', {'plannedMinutes': s.plannedMinutes}),
+              style: context.text.stat,
+            ),
             const SizedBox(width: AppSpacing.lg),
             FFRoundIconButton(
               icon: FontAwesomeIcons.plus,
-              semanticLabel: 'Five minutes more',
+              semanticLabel: tr('Five minutes more'),
               onPressed: s.plannedMinutes >= FocusTimer.maxMinutes
                   ? null
                   : () => _controller.setMinutes(
@@ -272,7 +282,7 @@ class _FocusTimerSheetState extends ConsumerState<FocusTimerSheet> {
       ],
       const SizedBox(height: AppSpacing.xl),
       FFPrimaryButton(
-        label: 'Start focus',
+        label: tr('Start focus'),
         icon: FontAwesomeIcons.play,
         onPressed: _controller.start,
       ),

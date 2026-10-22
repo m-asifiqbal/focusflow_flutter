@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/presentation/notifiers/vault_session_controller.dart';
@@ -63,9 +64,9 @@ class VaultSecuritySettingsScreen extends ConsumerWidget {
       child: FFScaffold(
         body: Column(
           children: [
-            const FFNavHeader(
-              leading: FFBackButton(label: 'Settings'),
-              title: 'Vault Security',
+            FFNavHeader(
+              leading: FFBackButton(label: tr('Settings')),
+              title: tr('Vault Security'),
             ),
             Expanded(
               child: ListView(

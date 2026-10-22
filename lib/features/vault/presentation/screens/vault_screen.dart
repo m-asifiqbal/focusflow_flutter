@@ -16,6 +16,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -100,7 +101,7 @@ class _FinishRecovery extends StatelessWidget {
     child: Padding(
       padding: const EdgeInsetsDirectional.all(AppSpacing.screen),
       child: FFPrimaryButton(
-        label: 'Choose a new PIN to finish',
+        label: tr('Choose a new PIN to finish'),
         onPressed: () => unawaited(showVaultNewPinSheet(context)),
       ),
     ),

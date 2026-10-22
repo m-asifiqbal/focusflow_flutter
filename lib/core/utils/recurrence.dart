@@ -23,6 +23,7 @@ library;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show immutable;
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 
 /// How often a [RecurrenceRule] repeats (RRULE `FREQ`).
@@ -296,8 +297,12 @@ class RecurrenceRule {
     final end = until;
     return [
       ..._patternLabel(start?.toLocal()),
-      if (total != null) total == 1 ? '1 time' : '$total times',
-      if (end != null) 'until ${DateFormats.of('MMM d').format(end.toLocal())}',
+      if (total != null)
+        tr('{count, plural, one {# time} other {# times}}', {'count': total}),
+      if (end != null)
+        tr('until {date}', {
+          'date': DateFormats.of('MMM d').format(end.toLocal()),
+        }),
     ].join(' · ');
   }
 
@@ -490,13 +495,24 @@ class RecurrenceRule {
   // ------------------------------------------------------------------- labels
 
   List<String> _patternLabel(DateTime? start) {
-    final unit = switch (frequency) {
-      RecurrenceFrequency.daily => 'days',
-      RecurrenceFrequency.weekly => 'weeks',
-      RecurrenceFrequency.monthly => 'months',
-      RecurrenceFrequency.yearly => 'years',
+    final every = switch (frequency) {
+      RecurrenceFrequency.daily => tr(
+        '{count, plural, one {Every # day} other {Every # days}}',
+        {'count': interval},
+      ),
+      RecurrenceFrequency.weekly => tr(
+        '{count, plural, one {Every # week} other {Every # weeks}}',
+        {'count': interval},
+      ),
+      RecurrenceFrequency.monthly => tr(
+        '{count, plural, one {Every # month} other {Every # months}}',
+        {'count': interval},
+      ),
+      RecurrenceFrequency.yearly => tr(
+        '{count, plural, one {Every # year} other {Every # years}}',
+        {'count': interval},
+      ),
     };
-    final every = 'Every $interval $unit';
     final monthNames = byMonths.map(_monthName).join(', ');
     switch (frequency) {
       case RecurrenceFrequency.daily || RecurrenceFrequency.weekly:
@@ -515,7 +531,7 @@ class RecurrenceRule {
           if (interval > 1)
             every
           else
-            frequency == RecurrenceFrequency.daily ? 'Daily' : 'Weekly',
+            frequency == RecurrenceFrequency.daily ? tr('Daily') : tr('Weekly'),
           if (weekdays.isNotEmpty) weekdays.map(_weekdayName).join(', '),
           if (byMonthDays.isNotEmpty)
             byMonthDays.map(_monthDayLabel).join(', '),
@@ -523,26 +539,26 @@ class RecurrenceRule {
         ];
       case RecurrenceFrequency.monthly:
         return [
-          interval == 1 ? 'Monthly' : every,
+          interval == 1 ? tr('Monthly') : every,
           ?_dayLabel(start),
           if (byMonths.isNotEmpty) monthNames,
         ];
       case RecurrenceFrequency.yearly:
-        return [interval == 1 ? 'Yearly' : every, ?_yearDayLabel(start)];
+        return [interval == 1 ? tr('Yearly') : every, ?_yearDayLabel(start)];
     }
   }
 
   /// Interval-1 weekly label for a weekday set ("Weekdays", "Weekly · Tue").
   static List<String> _weekdaysLabel(List<int> weekdays) {
-    if (weekdays.isEmpty) return ['Weekly'];
-    if (weekdays.length == 7) return ['Daily'];
+    if (weekdays.isEmpty) return [tr('Weekly')];
+    if (weekdays.length == 7) return [tr('Daily')];
     if (const ListEquality<int>().equals(weekdays, const [1, 2, 3, 4, 5])) {
-      return ['Weekdays'];
+      return [tr('Weekdays')];
     }
     if (const ListEquality<int>().equals(weekdays, const [6, 7])) {
-      return ['Weekends'];
+      return [tr('Weekends')];
     }
-    return ['Weekly', weekdays.map(_weekdayName).join(', ')];
+    return [tr('Weekly'), weekdays.map(_weekdayName).join(', ')];
   }
 
   /// Day-of-month part ("14th", "last day", "2nd Tue"); null when unknown.
@@ -572,22 +588,27 @@ class RecurrenceRule {
     final dayText = _dayLabel(start);
     final monthText = months.map(_monthName).join(', ');
     if (dayText == null) return monthText.isEmpty ? null : monthText;
-    return monthText.isEmpty ? dayText : '$dayText of $monthText';
+    return monthText.isEmpty
+        ? dayText
+        : tr('{day} of {months}', {'day': dayText, 'months': monthText});
   }
 
   static String _monthDayLabel(int day) => switch (day) {
-    -1 => 'last day',
-    < 0 => '${_ordinal(-day)} to last day',
+    -1 => tr('last day'),
+    < 0 => tr('{ordinal} to last day', {'ordinal': _ordinal(-day)}),
     _ => _ordinal(day),
   };
 
   static String _weekdayRuleLabel(WeekdayRule rule) {
     final name = _weekdayName(rule.weekday);
     return switch (rule.ordinal) {
-      null => 'every $name',
-      -1 => 'last $name',
-      final n when n < 0 => '${_ordinal(-n)} to last $name',
-      final n => '${_ordinal(n)} $name',
+      null => tr('every {day}', {'day': name}),
+      -1 => tr('last {day}', {'day': name}),
+      final n when n < 0 => tr('{ordinal} to last {day}', {
+        'ordinal': _ordinal(-n),
+        'day': name,
+      }),
+      final n => tr('{ordinal} {day}', {'ordinal': _ordinal(n), 'day': name}),
     };
   }
 
@@ -687,7 +708,7 @@ abstract final class Recurrence {
 
   /// Repeat label for the editors and lists; 'Once' for no/invalid rule.
   static String label(String? rrule, {DateTime? start}) =>
-      RecurrenceRule.tryParse(rrule)?.label(start: start) ?? 'Once';
+      RecurrenceRule.tryParse(rrule)?.label(start: start) ?? tr('Once');
 
   /// Whether [rrule] is a valid repeating rule.
   static bool isRepeating(String? rrule) =>
@@ -743,13 +764,16 @@ String _two(int n) => n.toString().padLeft(2, '0');
 String _ymd(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}${_two(d.month)}${_two(d.day)}';
 
+/// "1st", "2nd", "14th". English picks the suffix; the four texts are
+/// separate keys so another language can write its own form for all of them
+/// (e.g. "{n}." or "the {n}th").
 String _ordinal(int n) {
   final lastTwo = n % 100;
-  if (lastTwo >= 11 && lastTwo <= 13) return '${n}th';
+  if (lastTwo >= 11 && lastTwo <= 13) return tr('{n}th', {'n': n});
   return switch (n % 10) {
-    1 => '${n}st',
-    2 => '${n}nd',
-    3 => '${n}rd',
-    _ => '${n}th',
+    1 => tr('{n}st', {'n': n}),
+    2 => tr('{n}nd', {'n': n}),
+    3 => tr('{n}rd', {'n': n}),
+    _ => tr('{n}th', {'n': n}),
   };
 }

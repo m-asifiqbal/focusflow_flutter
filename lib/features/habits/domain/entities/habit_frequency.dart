@@ -23,6 +23,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 @immutable
 sealed class HabitFrequency {
@@ -81,15 +82,16 @@ sealed class HabitFrequency {
       if (maskHas(mask, d)) d,
   ];
 
-  static const List<String> _short = [
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
-  ];
+  /// Short name of [weekday] (`DateTime.monday … sunday`): "Mon" … "Sun".
+  static String shortName(int weekday) => switch (weekday) {
+    DateTime.monday => tr('Mon'),
+    DateTime.tuesday => tr('Tue'),
+    DateTime.wednesday => tr('Wed'),
+    DateTime.thursday => tr('Thu'),
+    DateTime.friday => tr('Fri'),
+    DateTime.saturday => tr('Sat'),
+    _ => tr('Sun'),
+  };
 }
 
 final class EveryDayFrequency extends HabitFrequency {
@@ -99,7 +101,7 @@ final class EveryDayFrequency extends HabitFrequency {
   int get typeCode => 0;
 
   @override
-  String get label => 'Every day';
+  String get label => tr('Every day');
 
   @override
   bool operator ==(Object other) => other is EveryDayFrequency;
@@ -125,11 +127,11 @@ final class SpecificDaysFrequency extends HabitFrequency {
   @override
   String get label {
     final m = weekdaysMask & 0x7F;
-    if (m == 0x7F) return 'Every day';
-    if (m == 0x1F) return 'Weekdays';
-    if (m == 0x60) return 'Weekends';
-    if (m == 0) return 'No days';
-    return weekdays.map((d) => HabitFrequency._short[d - 1]).join(' · ');
+    if (m == 0x7F) return tr('Every day');
+    if (m == 0x1F) return tr('Weekdays');
+    if (m == 0x60) return tr('Weekends');
+    if (m == 0) return tr('No days');
+    return weekdays.map(HabitFrequency.shortName).join(' · ');
   }
 
   @override
@@ -150,7 +152,7 @@ final class TimesPerWeekFrequency extends HabitFrequency {
   int get typeCode => 2;
 
   @override
-  String get label => '$times× per week';
+  String get label => tr('{times}× per week', {'times': times});
 
   @override
   bool operator ==(Object other) =>
@@ -170,7 +172,11 @@ final class EveryNDaysFrequency extends HabitFrequency {
   int get typeCode => 3;
 
   @override
-  String get label => days <= 1 ? 'Every day' : 'Every $days days';
+  String get label => days <= 1
+      ? tr('Every day')
+      : tr('{days, plural, one {Every # day} other {Every # days}}', {
+          'days': days,
+        });
 
   @override
   bool operator ==(Object other) =>

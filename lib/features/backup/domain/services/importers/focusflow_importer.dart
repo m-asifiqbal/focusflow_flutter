@@ -13,6 +13,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/domain/services/csv_codec.dart';
 import 'package:focusflow/features/backup/domain/services/export_records.dart';
@@ -30,11 +31,11 @@ abstract final class FocusFlowImporter {
     try {
       json = jsonDecode(text);
     } on FormatException {
-      throw const ImportFormatException('This JSON file is damaged.');
+      throw ImportFormatException(tr('This JSON file is damaged.'));
     }
     if (!isExportJson(json)) {
-      throw const ImportFormatException(
-        'This JSON file is not a FocusFlow export.',
+      throw ImportFormatException(
+        tr('This JSON file is not a FocusFlow export.'),
       );
     }
     final m = json as Map;
@@ -137,12 +138,12 @@ abstract final class FocusFlowImporter {
   static ImportBundle fromCsv(String text) {
     final rows = CsvCodec.decodeMaps(text);
     if (rows.isEmpty) {
-      throw const ImportFormatException('This CSV file is empty.');
+      throw ImportFormatException(tr('This CSV file is empty.'));
     }
     final header = rows.first.keys.toSet();
     if (!header.contains('title') && !header.contains('name')) {
-      throw const ImportFormatException(
-        'No "title" or "name" column found in this CSV.',
+      throw ImportFormatException(
+        tr('No "title" or "name" column found in this CSV.'),
       );
     }
     final ours = header.contains('type');
@@ -164,7 +165,7 @@ abstract final class FocusFlowImporter {
       final r = js(rows[i]);
       final title = (r['title'] ?? r['name'] ?? '').trim();
       if (title.isEmpty && (r['text'] ?? r['notes'] ?? '').trim().isEmpty) {
-        problems.add(ImportProblem('Row ${i + 2}: no title'));
+        problems.add(ImportProblem(tr('Row {n}: no title', {'n': i + 2})));
         continue;
       }
       final type = ours ? r['type'] : null;
@@ -178,7 +179,9 @@ abstract final class FocusFlowImporter {
         case 'reminder':
           final at = ImportParsing.dateTime(r['at']);
           if (at == null) {
-            problems.add(ImportProblem('Row ${i + 2}: reminder has no time'));
+            problems.add(
+              ImportProblem(tr('Row {n}: reminder has no time', {'n': i + 2})),
+            );
           } else {
             reminders.add(
               ImportedReminder(title: title, note: r['note'] ?? '', at: at),

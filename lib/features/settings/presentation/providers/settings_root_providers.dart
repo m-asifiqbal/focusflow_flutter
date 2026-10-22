@@ -14,6 +14,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/biometric_auth.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/settings/data/storage_repository_impl.dart';
 import 'package:focusflow/features/settings/domain/entities/settings_entry.dart';
 import 'package:focusflow/features/settings/domain/entities/storage_usage.dart';
@@ -45,7 +46,9 @@ final vaultUnlockLabelProvider = FutureProvider.autoDispose<String>((
   ref,
 ) async {
   final on = ref.watch(settingsProvider.select((s) => s.vaultBiometrics));
-  if (!on) return 'PIN only';
+  // The label is translated: recompute it when the language changes.
+  ref.watch(settingsProvider.select((s) => s.languageCode));
+  if (!on) return tr('PIN only');
   final auth = ref.watch(biometricAuthProvider);
   final kind = await auth.kind();
   return biometricLabel(kind, defaultTargetPlatform);
@@ -55,10 +58,10 @@ final vaultUnlockLabelProvider = FutureProvider.autoDispose<String>((
 String biometricLabel(BiometricKind kind, TargetPlatform platform) {
   final ios = platform == TargetPlatform.iOS;
   return switch (kind) {
-    BiometricKind.face => ios ? 'Face ID' : 'Face unlock',
-    BiometricKind.fingerprint => ios ? 'Touch ID' : 'Fingerprint',
-    BiometricKind.generic => 'Biometrics',
-    BiometricKind.none => 'PIN only',
+    BiometricKind.face => ios ? tr('Face ID') : tr('Face unlock'),
+    BiometricKind.fingerprint => ios ? tr('Touch ID') : tr('Fingerprint'),
+    BiometricKind.generic => tr('Biometrics'),
+    BiometricKind.none => tr('PIN only'),
   };
 }
 
@@ -77,7 +80,11 @@ final settingsQueryProvider =
       SettingsQueryController.new,
     );
 
-/// Index rows matching the query (empty when the query is blank).
+/// Index rows matching the query (empty when the query is blank). The index
+/// titles are translated, so the result is rebuilt when the language changes.
 final settingsSearchResultsProvider = Provider.autoDispose<List<SettingsEntry>>(
-  (ref) => searchSettings(SettingsIndex.all, ref.watch(settingsQueryProvider)),
+  (ref) {
+    ref.watch(settingsProvider.select((s) => s.languageCode));
+    return searchSettings(SettingsIndex.all, ref.watch(settingsQueryProvider));
+  },
 );

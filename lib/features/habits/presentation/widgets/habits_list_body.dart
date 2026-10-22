@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -61,7 +62,7 @@ class HabitsListBody extends ConsumerWidget {
         padding: _gutter,
         sliver: SliverToBoxAdapter(
           child: FFErrorBanner(
-            message: "Couldn't load your habits.",
+            message: tr('Couldn\'t load your habits.'),
             onRetry: () => ref.invalidate(habitDayStatusesProvider(scope)),
           ),
         ),
@@ -119,7 +120,7 @@ class _HabitRow extends ConsumerWidget {
       isPinned: habit.isPinned,
       isFavorite: habit.isFavorite,
       title: habit.name,
-      completeLabel: 'Log',
+      completeLabel: tr('Log'),
       onComplete: () => logHabitToday(context, ref, habit.id),
       child: tracked,
     );
@@ -138,12 +139,12 @@ class _HabitRow extends ConsumerWidget {
           title: name,
           icon: ModuleStyle.habits.icon,
           colors: ModuleStyle.habits.colors,
-          meta: 'Habit · Archived',
+          meta: tr('Habit · Archived'),
         ),
         actions: [
           FFActionItem(
             icon: FontAwesomeIcons.boxOpen,
-            label: 'Restore',
+            label: tr('Restore'),
             colors: ModuleStyle.habits.colors,
             onTap: () =>
                 restoreFromArchive(context, ref, [itemRef], title: name),
@@ -195,10 +196,10 @@ class _ReorderList extends StatelessWidget {
       padding: HabitsListBody._gutter,
       sliver: SliverMainAxisGroup(
         slivers: [
-          if (labelled) SliverToBoxAdapter(child: label('Pinned')),
+          if (labelled) SliverToBoxAdapter(child: label(tr('Pinned'))),
           if (pinned.isNotEmpty)
             HabitReorderGroup(key: const ValueKey('pinned'), list: pinned),
-          if (labelled) SliverToBoxAdapter(child: label('Other habits')),
+          if (labelled) SliverToBoxAdapter(child: label(tr('Other habits'))),
           if (others.isNotEmpty)
             HabitReorderGroup(key: const ValueKey('others'), list: others),
         ],
@@ -234,7 +235,7 @@ class HabitReorderGroup extends ConsumerWidget {
               child: ReorderableDragStartListener(
                 index: i,
                 child: Semantics(
-                  label: 'Reorder ${list[i].habit.name}',
+                  label: tr('Reorder {name}', {'name': list[i].habit.name}),
                   button: true,
                   child: SizedBox(
                     width: AppSizes.minTap + AppSpacing.lg,
@@ -265,20 +266,22 @@ class _HabitsEmpty extends StatelessWidget {
     final style = ModuleStyle.habits;
     final (title, body) = switch (scope) {
       HabitsScope.today || HabitsScope.all => (
-        'No habits yet',
-        'Small daily actions add up. Start one habit and keep the chain going.',
+        tr('No habits yet'),
+        tr(
+          'Small daily actions add up. Start one habit and keep the chain going.',
+        ),
       ),
       HabitsScope.morning => (
-        'No morning habits',
-        'Set a habit\'s time of day to Morning to see it here.',
+        tr('No morning habits'),
+        tr("Set a habit's time of day to Morning to see it here."),
       ),
       HabitsScope.afternoon || HabitsScope.evening => (
-        'No evening habits',
-        'Set a habit\'s time of day to Afternoon or Evening to see it here.',
+        tr('No evening habits'),
+        tr("Set a habit's time of day to Afternoon or Evening to see it here."),
       ),
       HabitsScope.archived => (
-        'No archived habits',
-        'Archived habits keep their history and can be restored anytime.',
+        tr('No archived habits'),
+        tr('Archived habits keep their history and can be restored anytime.'),
       ),
     };
     final full = scope == HabitsScope.today || scope == HabitsScope.all;
@@ -293,11 +296,11 @@ class _HabitsEmpty extends StatelessWidget {
         title: title,
         body: body,
         compact: !full,
-        ctaLabel: full ? 'New habit' : null,
+        ctaLabel: full ? tr('New habit') : null,
         onCta: full ? () => context.push(AppRoutes.newHabit()) : null,
-        hint: full ? 'Try: "Drink 8 glasses of water"' : null,
+        hint: full ? tr('Try: "Drink 8 glasses of water"') : null,
         onHint: full
-            ? () => context.push(AppRoutes.newHabit(name: 'Drink water'))
+            ? () => context.push(AppRoutes.newHabit(name: tr('Drink water')))
             : null,
       ),
     );

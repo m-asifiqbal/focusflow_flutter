@@ -15,19 +15,25 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/utils/recurrence.dart';
 
 /// Stored as 0 none · 1 low · 2 medium · 3 high ([index]).
 enum TaskPriority {
-  none('None'),
-  low('Low'),
-  medium('Medium'),
-  high('High');
+  none,
+  low,
+  medium,
+  high;
 
-  const TaskPriority(this.label);
-
-  final String label;
+  /// Display name in the active language (a getter so a language switch is
+  /// picked up).
+  String get label => switch (this) {
+    TaskPriority.none => tr('None'),
+    TaskPriority.low => tr('Low'),
+    TaskPriority.medium => tr('Medium'),
+    TaskPriority.high => tr('High'),
+  };
 
   static TaskPriority fromValue(int v) =>
       v >= 0 && v < values.length ? values[v] : TaskPriority.none;

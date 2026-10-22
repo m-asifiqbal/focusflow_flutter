@@ -16,6 +16,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -41,7 +42,7 @@ Future<ModuleItemActions> reminderItemActions(
       if (pending)
         FFActionItem(
           icon: FontAwesomeIcons.solidClock,
-          label: 'Snooze $minutes min',
+          label: tr('Snooze {minutes} min', {'minutes': minutes}),
           colors: ModuleStyle.reminders.colors,
           onTap: () {
             if (context.mounted) {
@@ -52,7 +53,7 @@ Future<ModuleItemActions> reminderItemActions(
       if (pending)
         FFActionItem(
           icon: FontAwesomeIcons.solidCircleCheck,
-          label: 'Mark done',
+          label: tr('Mark done'),
           colors: ModuleStyle.notes.colors,
           onTap: () {
             if (context.mounted) markReminderDone(context, ref, r);
@@ -62,7 +63,7 @@ Future<ModuleItemActions> reminderItemActions(
         icon: r.isEnabled
             ? FontAwesomeIcons.solidBellSlash
             : FontAwesomeIcons.solidBell,
-        label: r.isEnabled ? 'Disable' : 'Enable',
+        label: r.isEnabled ? tr('Disable') : tr('Enable'),
         colors: r.isEnabled ? ActionTints.lock : ModuleStyle.reminders.colors,
         onTap: () => setReminderEnabled(ref, r, !r.isEnabled),
       ),

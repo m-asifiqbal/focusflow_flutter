@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -64,12 +65,12 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
     if (s != null && s.isDirty) {
       final discard = await showFFConfirm(
         context,
-        title: 'Discard changes?',
+        title: tr('Discard changes?'),
         message: s.isNew
-            ? "This reminder hasn't been saved yet."
-            : "Your edits to this reminder won't be saved.",
-        confirmLabel: 'Discard',
-        cancelLabel: 'Keep editing',
+            ? tr('This reminder hasn\'t been saved yet.')
+            : tr('Your edits to this reminder won\'t be saved.'),
+        confirmLabel: tr('Discard'),
+        cancelLabel: tr('Keep editing'),
         destructive: true,
         icon: FontAwesomeIcons.solidTrashCan,
       );
@@ -86,7 +87,7 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
       if (mounted) {
         showFFToast(
           context,
-          "Couldn't save the reminder",
+          tr("Couldn't save the reminder"),
           icon: FontAwesomeIcons.triangleExclamation,
         );
       }
@@ -104,8 +105,9 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
     if (rolled != null) {
       showFFToast(
         context,
-        'Time had passed — set for '
-        '${ReminderLabels.rolledTo(rolled, now, use24h: use24h)}',
+        tr('Time had passed — set for {when}', {
+          'when': ReminderLabels.rolledTo(rolled, now, use24h: use24h),
+        }),
         icon: FontAwesomeIcons.solidClock,
       );
     }
@@ -150,7 +152,9 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TaskEditorHeader(
-                title: widget.args.isNew ? 'New Reminder' : 'Edit Reminder',
+                title: widget.args.isNew
+                    ? tr('New Reminder')
+                    : tr('Edit Reminder'),
                 canSave: s?.canSave ?? false,
                 onCancel: _cancel,
                 onSave: _save,
@@ -227,14 +231,14 @@ class _ErrorState extends StatelessWidget {
             ? FFEmptyState(
                 colors: ModuleStyle.reminders.colors,
                 icon: FontAwesomeIcons.solidBell,
-                title: 'Reminder not found',
-                body: 'It may have been deleted on another device.',
-                ctaLabel: 'Back to reminders',
+                title: tr('Reminder not found'),
+                body: tr('It may have been deleted on another device.'),
+                ctaLabel: tr('Back to reminders'),
                 ctaIcon: FontAwesomeIcons.arrowLeft,
                 onCta: onBack,
               )
             : FFErrorBanner(
-                message: "Couldn't load this reminder",
+                message: tr('Couldn\'t load this reminder'),
                 onRetry: onRetry,
               ),
       ),

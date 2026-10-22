@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
 import 'package:focusflow/core/sync/local_backups.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -34,8 +35,8 @@ class BackupHistorySection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(backupHistoryProvider);
     return history.when(
-      loading: () => const FFGroupedList(
-        label: 'History',
+      loading: () => FFGroupedList(
+        label: tr('History'),
         children: [
           Padding(
             padding: EdgeInsetsDirectional.all(AppSpacing.lg),
@@ -44,24 +45,24 @@ class BackupHistorySection extends ConsumerWidget {
         ],
       ),
       error: (e, _) => FFErrorBanner(
-        message: "Couldn't load backup history",
+        message: tr('Couldn\'t load backup history'),
         onRetry: () => ref.invalidate(backupHistoryProvider),
       ),
       data: (rows) => rows.isEmpty
           ? FFGroupedList(
-              label: 'History',
+              label: tr('History'),
               children: [
                 FFEmptyState(
                   compact: true,
                   colors: ModuleStyle.notes.colors,
                   icon: FontAwesomeIcons.clockRotateLeft,
-                  title: 'No backups yet',
-                  body: 'Your backups will be listed here.',
+                  title: tr('No backups yet'),
+                  body: tr('Your backups will be listed here.'),
                 ),
               ],
             )
           : FFGroupedList(
-              label: 'History',
+              label: tr('History'),
               children: [for (final r in rows) _HistoryRow(record: r)],
             ),
     );
@@ -102,18 +103,20 @@ class _HistoryRow extends ConsumerWidget {
   Future<void> _download(BuildContext context, WidgetRef ref) async {
     try {
       final ok = await ref.read(backupActionsProvider).download(record);
-      if (ok && context.mounted) showFFToast(context, 'Backup saved');
+      if (ok && context.mounted) showFFToast(context, tr('Backup saved'));
     } on Object {
-      if (context.mounted) showFFToast(context, "Couldn't download the backup");
+      if (context.mounted) {
+        showFFToast(context, tr("Couldn't download the backup"));
+      }
     }
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     final ok = await showFFConfirm(
       context,
-      title: 'Delete this backup?',
-      message: 'The backup file is deleted for good.',
-      confirmLabel: 'Delete',
+      title: tr('Delete this backup?'),
+      message: tr('The backup file is deleted for good.'),
+      confirmLabel: tr('Delete'),
       destructive: true,
       icon: FontAwesomeIcons.trashCan,
     );
@@ -121,7 +124,9 @@ class _HistoryRow extends ConsumerWidget {
     try {
       await ref.read(backupActionsProvider).delete(record);
     } on Object {
-      if (context.mounted) showFFToast(context, "Couldn't delete the backup");
+      if (context.mounted) {
+        showFFToast(context, tr("Couldn't delete the backup"));
+      }
     }
   }
 
@@ -140,19 +145,19 @@ class _HistoryRow extends ConsumerWidget {
         actions: [
           FFActionItem(
             icon: FontAwesomeIcons.clockRotateLeft,
-            label: 'Restore',
+            label: tr('Restore'),
             colors: ModuleStyle.notes.colors,
             onTap: () => _restore(context, ref),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.download,
-            label: 'Download',
+            label: tr('Download'),
             colors: BackupTints.drive,
             onTap: () => _download(context, ref),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.trashCan,
-            label: 'Delete',
+            label: tr('Delete'),
             colors: BackupTints.keep,
             destructive: true,
             onTap: () => _delete(context, ref),
@@ -170,9 +175,11 @@ class _HistoryRow extends ConsumerWidget {
     final drive = record.location == BackupLocation.drive;
     final title = BackupLabels.when(record.createdAt, now, use24h: use24h);
     final subtitle = [
-      drive ? 'Google Drive' : 'Local · /${LocalBackups.folder}',
+      drive
+          ? 'Google Drive'
+          : tr('Local · /{folder}', {'folder': LocalBackups.folder}),
       BackupLabels.size(record.sizeBytes),
-      if (record.isAuto) 'auto',
+      if (record.isAuto) tr('auto'),
     ].join(' · ');
     return FFListRow(
       leading: FFIconTile.soft(
@@ -186,7 +193,7 @@ class _HistoryRow extends ConsumerWidget {
       subtitle: subtitle,
       onLongPress: () => _menu(context, ref, title),
       trailing: IconButton(
-        tooltip: 'Backup options',
+        tooltip: tr('Backup options'),
         onPressed: () => _menu(context, ref, title),
         constraints: const BoxConstraints.tightFor(
           width: AppSizes.minTap,

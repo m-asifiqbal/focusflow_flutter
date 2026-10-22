@@ -15,6 +15,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -55,27 +56,27 @@ Future<void> offerRescheduleAfterRestore(
   final past = await pastRemindersAmong(ref, refs);
   for (final r in past) {
     if (!context.mounted) return;
-    final title = r.title.trim().isEmpty ? 'Reminder' : r.title.trim();
+    final title = r.title.trim().isEmpty ? tr('Reminder') : r.title.trim();
     final picked = await showChoiceSheet<RestoreRescheduleChoice>(
       context,
-      title: 'Reschedule "$title"?',
+      title: tr('Reschedule "{title}"?', {'title': title}),
       options: [
         ChoiceOption(
           value: RestoreRescheduleChoice.pickTime,
-          label: 'Pick a new time',
-          subtitle: 'Its time has already passed',
+          label: tr('Pick a new time'),
+          subtitle: tr('Its time has already passed'),
           icon: FontAwesomeIcons.calendarDays,
           colors: ModuleStyle.reminders.colors,
         ),
         ChoiceOption(
           value: RestoreRescheduleChoice.openEditor,
-          label: 'Edit reminder',
+          label: tr('Edit reminder'),
           icon: FontAwesomeIcons.penToSquare,
           colors: ModuleStyle.reminders.colors,
         ),
         ChoiceOption(
           value: RestoreRescheduleChoice.keep,
-          label: 'Keep as is',
+          label: tr('Keep as is'),
           icon: FontAwesomeIcons.check,
           colors: ModuleStyle.reminders.colors,
         ),

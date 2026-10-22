@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -48,8 +49,8 @@ class LibraryCollectionScreen extends ConsumerWidget {
         : null;
     final tagGone = tag != null && tag.hasValue && tag.value == null;
     final title = switch (kind) {
-      LibraryCollection.pinned => 'Pinned',
-      LibraryCollection.favourites => 'Favourites',
+      LibraryCollection.pinned => tr('Pinned'),
+      LibraryCollection.favourites => tr('Favourites'),
       LibraryCollection.tag => tag?.valueOrNull?.label ?? '#',
     };
     final bottom = MediaQuery.paddingOf(context).bottom;
@@ -59,17 +60,17 @@ class LibraryCollectionScreen extends ConsumerWidget {
       body = _empty(
         context,
         icon: FontAwesomeIcons.hashtag,
-        title: 'Tag deleted',
-        text: 'This tag no longer exists. Its items were kept.',
+        title: tr('Tag deleted'),
+        text: tr('This tag no longer exists. Its items were kept.'),
       );
     } else if (items == null) {
       body = async.hasError
           ? FFEmptyState.compact(
               colors: TagPalette.high,
               icon: FontAwesomeIcons.triangleExclamation,
-              title: "Couldn't load these items",
-              body: 'Your items are safe. Try again.',
-              ctaLabel: 'Retry',
+              title: tr('Couldn\'t load these items'),
+              body: tr('Your items are safe. Try again.'),
+              ctaLabel: tr('Retry'),
               ctaIcon: FontAwesomeIcons.arrowsRotate,
               onCta: () => ref.invalidate(libraryCollectionItemsProvider(args)),
             )
@@ -79,22 +80,24 @@ class LibraryCollectionScreen extends ConsumerWidget {
         LibraryCollection.pinned => _empty(
           context,
           icon: FontAwesomeIcons.thumbtack,
-          title: 'Nothing pinned yet',
-          text:
-              'Long-press any note, task, reminder or habit and choose '
-              'Pin to keep it here.',
+          title: tr('Nothing pinned yet'),
+          text: tr(
+            'Long-press any note, task, reminder or habit and choose Pin to keep it here.',
+          ),
         ),
         LibraryCollection.favourites => _empty(
           context,
           icon: FontAwesomeIcons.solidStar,
-          title: 'No favourites yet',
-          text: 'Long-press an item and choose Favourite to collect it here.',
+          title: tr('No favourites yet'),
+          text: tr(
+            'Long-press an item and choose Favourite to collect it here.',
+          ),
         ),
         LibraryCollection.tag => _empty(
           context,
           icon: FontAwesomeIcons.hashtag,
-          title: 'No items with this tag',
-          text: 'Add the tag to notes, tasks and more to see them here.',
+          title: tr('No items with this tag'),
+          text: tr('Add the tag to notes, tasks and more to see them here.'),
         ),
       };
     } else {
@@ -107,14 +110,14 @@ class LibraryCollectionScreen extends ConsumerWidget {
         padding: EdgeInsetsDirectional.only(bottom: bottom + AppSpacing.xxxl),
         children: [
           FFNavHeader(
-            leading: const FFBackButton(label: 'Library'),
+            leading: FFBackButton(label: tr('Library')),
             title: title,
             subtitle: items == null ? null : LibraryFormat.items(items.length),
             trailing: [
               if (kind == LibraryCollection.tag && tag?.valueOrNull != null)
                 FFRoundIconButton(
                   icon: FontAwesomeIcons.ellipsis,
-                  semanticLabel: 'Tag options',
+                  semanticLabel: tr('Tag options'),
                   onPressed: () =>
                       showTagActions(context, ref, tag!.valueOrNull!),
                 ),

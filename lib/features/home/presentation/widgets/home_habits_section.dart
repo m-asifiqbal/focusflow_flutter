@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -46,9 +47,9 @@ class HomeHabitsSection extends ConsumerWidget {
           ? HomeEmptyCard(
               colors: ModuleStyle.habits.colors,
               icon: ModuleStyle.habits.icon,
-              title: 'No habits yet',
-              body: 'Build a routine one small step at a time.',
-              ctaLabel: 'New habit',
+              title: tr('No habits yet'),
+              body: tr('Build a routine one small step at a time.'),
+              ctaLabel: tr('New habit'),
               onCta: () => context.push(AppRoutes.newHabitPath),
             )
           : _RingsCard(habits: value),
@@ -58,9 +59,9 @@ class HomeHabitsSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FFSectionHeader(
-          title: 'Habit Tracker',
+          title: tr('Habit Tracker'),
           trailing: HomeSectionLink(
-            'Trends',
+            tr('Trends'),
             onPressed: () => context.go(AppRoutes.insights),
           ),
         ),
@@ -127,9 +128,11 @@ class _HabitRing extends ConsumerWidget {
 
     return Semantics(
       button: true,
-      label: '${habit.name}, ${done ? 'done' : '$percent percent'}',
-      hint: habit.isYesNo ? 'Toggle today' : 'Log one more',
-      onLongPressHint: 'Open habit',
+      label: done
+          ? tr('{name}, done', {'name': habit.name})
+          : tr('{name}, {n} percent', {'name': habit.name, 'n': percent}),
+      hint: habit.isYesNo ? tr('Toggle today') : tr('Log one more'),
+      onLongPressHint: tr('Open habit'),
       excludeSemantics: true,
       child: FFPressable(
         onTap: () => checkInHabit(context, ref, status),

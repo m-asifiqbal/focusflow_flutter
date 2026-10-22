@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// A file in appDataFolder.
 @immutable
@@ -61,14 +62,19 @@ class DriveFailure implements Exception {
 
   /// Sentence-case copy for the status box / snackbar.
   String get message => switch (kind) {
-    DriveFailureKind.offline =>
+    DriveFailureKind.offline => tr(
       "You're offline. We'll back up when you're connected.",
-    DriveFailureKind.authExpired =>
+    ),
+    DriveFailureKind.authExpired => tr(
       'Your Google sign-in expired. Sign in again to keep syncing.',
-    DriveFailureKind.quota =>
+    ),
+    DriveFailureKind.quota => tr(
       'Your Google Drive is full. Free up space or keep fewer backups.',
-    DriveFailureKind.notSignedIn => 'Connect Google Drive to sync.',
-    DriveFailureKind.unknown => "Sync didn't finish. Try again in a moment.",
+    ),
+    DriveFailureKind.notSignedIn => tr('Connect Google Drive to sync.'),
+    DriveFailureKind.unknown => tr(
+      "Sync didn't finish. Try again in a moment.",
+    ),
   };
 
   @override

@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -103,9 +104,22 @@ class _DangerDialogState extends State<_DangerDialog> {
       _pin.clear();
       setState(() {
         _checking = false;
-        _pinError = 'Wrong vault PIN';
+        _pinError = tr('Wrong vault PIN');
       });
     }
+  }
+
+  /// [sentence] (already translated, with the word filled in) split around
+  /// the typed word so only that word is emphasised, wherever the language
+  /// puts it.
+  List<InlineSpan> _typeToConfirm(String sentence, TextStyle emphasis) {
+    final at = sentence.indexOf(_word);
+    if (at < 0) return [TextSpan(text: sentence)];
+    return [
+      TextSpan(text: sentence.substring(0, at)),
+      TextSpan(text: _word, style: emphasis),
+      TextSpan(text: sentence.substring(at + _word.length)),
+    ];
   }
 
   @override
@@ -124,17 +138,10 @@ class _DangerDialogState extends State<_DangerDialog> {
         children: [
           Text.rich(
             TextSpan(
-              children: [
-                const TextSpan(text: 'Type '),
-                TextSpan(
-                  text: _word,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: ff.dangerStrong,
-                  ),
-                ),
-                const TextSpan(text: ' to confirm'),
-              ],
+              children: _typeToConfirm(
+                tr('Type {word} to confirm', {'word': _word}),
+                TextStyle(fontWeight: FontWeight.w800, color: ff.dangerStrong),
+              ),
             ),
             style: text.meta,
           ),
@@ -149,7 +156,7 @@ class _DangerDialogState extends State<_DangerDialog> {
           ),
           if (widget.askPin) ...[
             const SizedBox(height: AppSpacing.md),
-            Text('Vault PIN', style: text.meta),
+            Text(tr('Vault PIN'), style: text.meta),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _pin,
@@ -174,7 +181,7 @@ class _DangerDialogState extends State<_DangerDialog> {
           onPressed: _ready && !_checking ? _confirm : null,
         ),
         FFTextButton(
-          label: 'Cancel',
+          label: tr('Cancel'),
           style: text.button.copyWith(fontSize: 17, color: ff.inkMuted),
           onPressed: () => Navigator.of(context).pop(false),
         ),

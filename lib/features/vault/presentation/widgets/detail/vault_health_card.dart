@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -42,9 +43,10 @@ class VaultHealthCard extends StatelessWidget {
             children: [
               Semantics(
                 container: true,
-                label:
-                    'Security health ${health.score} percent, '
-                    'rating ${health.rating}',
+                label: tr('Security health {score} percent, rating {rating}', {
+                  'score': health.score,
+                  'rating': health.rating,
+                }),
                 excludeSemantics: true,
                 child: Row(
                   children: [
@@ -68,14 +70,16 @@ class VaultHealthCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Security health',
+                            tr('Security health'),
                             style: context.text.sectionTitle.copyWith(
                               fontSize: VaultType.value,
                               color: ff.vaultInk,
                             ),
                           ),
                           Text(
-                            'Overall rating: ${health.rating}',
+                            tr('Overall rating: {rating}', {
+                              'rating': health.rating,
+                            }),
                             style: context.text.bodySmall.copyWith(
                               fontSize: VaultType.small,
                               height: 1.4,

@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -107,14 +108,14 @@ class TaskFilterChips extends ConsumerWidget {
     final filter = ref.watch(taskFilterProvider);
     final lists = ref.watch(taskListsProvider).valueOrNull ?? const [];
     final items = <FFChipItem<TaskFilter>>[
-      const FFChipItem(
+      FFChipItem(
         value: TaskFilter.today,
-        label: 'Today',
+        label: tr('Today'),
         icon: FontAwesomeIcons.solidSun,
       ),
-      const FFChipItem(
+      FFChipItem(
         value: TaskFilter.smart(TaskSmartList.upcoming),
-        label: 'Upcoming',
+        label: tr('Upcoming'),
         icon: FontAwesomeIcons.solidCalendar,
       ),
       for (final list in lists)
@@ -123,9 +124,9 @@ class TaskFilterChips extends ConsumerWidget {
           label: list.name,
           icon: TaskStyle.listIcon(list),
         ),
-      const FFChipItem(
+      FFChipItem(
         value: TaskFilter.smart(TaskSmartList.all),
-        label: 'All',
+        label: tr('All'),
         icon: FontAwesomeIcons.listUl,
       ),
     ];

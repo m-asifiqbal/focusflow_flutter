@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/folder.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/library/presentation/library_actions.dart';
@@ -30,14 +31,15 @@ class TagsFoldersSettingsScreen extends ConsumerWidget {
   const TagsFoldersSettingsScreen({super.key});
 
   static String sectionLabel(ItemType t) => switch (t) {
-    ItemType.task => 'Task lists',
-    ItemType.vault => 'Vault folders',
-    _ => '${t.label} folders',
+    ItemType.task => tr('Task lists'),
+    ItemType.vault => tr('Vault folders'),
+    ItemType.note => tr('Note folders'),
+    _ => tr('{label} folders', {'label': t.label}),
   };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => SettingsPage(
-    title: 'Tags & folders',
+    title: tr('Tags & folders'),
     children: [
       const _TagsSection(),
       for (final m in libraryFolderModules) _FoldersSection(module: m),
@@ -54,10 +56,10 @@ class _TagsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(libraryTagsProvider);
     return FFGroupedList(
-      label: 'Tags',
-      footer:
-          'Tags are shared by notes, tasks, reminders, habits and the '
-          'vault. Add them from any item.',
+      label: tr('Tags'),
+      footer: tr(
+        'Tags are shared by notes, tasks, reminders, habits and the vault. Add them from any item.',
+      ),
       children: async.when(
         loading: () => const [FFSkeletonRow(), FFSkeletonRow()],
         error: (_, _) => [
@@ -70,8 +72,8 @@ class _TagsSection extends ConsumerWidget {
                     FontAwesomeIcons.hashtag,
                     SettingsTints.slate,
                   ),
-                  title: 'No tags yet',
-                  subtitle: 'Type #tag in a note or task to create one',
+                  title: tr('No tags yet'),
+                  subtitle: tr('Type #tag in a note or task to create one'),
                   chevron: false,
                 ),
               ]
@@ -84,8 +86,10 @@ class _TagsSection extends ConsumerWidget {
                     ),
                     title: t.label,
                     value: _count(t.usageCount),
-                    semanticLabel:
-                        '${t.label}, ${t.usageCount} items. Manage tag',
+                    semanticLabel: tr(
+                      '{label}, {count, plural, one {# item} other {# items}}. Manage tag',
+                      {'label': t.label, 'count': t.usageCount},
+                    ),
                     onTap: () => showTagManageSheet(context, ref, t, tags),
                   ),
               ],
@@ -102,10 +106,10 @@ class _FoldersSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(libraryFoldersProvider(module));
-    final noun = module == ItemType.task ? 'list' : 'folder';
+    final isList = module == ItemType.task;
     final add = FFListRow(
       leading: settingsTile(FontAwesomeIcons.plus, SettingsTints.emerald),
-      title: 'New $noun',
+      title: isList ? tr('New list') : tr('New folder'),
       chevron: false,
       onTap: () => createFolderFlow(context, ref, module),
     );
@@ -127,7 +131,15 @@ class _FoldersSection extends ConsumerWidget {
               ),
               title: f.name,
               value: _count(f.itemCount),
-              semanticLabel: '${f.name}, ${f.itemCount} items. Manage $noun',
+              semanticLabel: isList
+                  ? tr(
+                      '{name}, {count, plural, one {# item} other {# items}}. Manage list',
+                      {'name': f.name, 'count': f.itemCount},
+                    )
+                  : tr(
+                      '{name}, {count, plural, one {# item} other {# items}}. Manage folder',
+                      {'name': f.name, 'count': f.itemCount},
+                    ),
               onTap: () => showFolderManageSheet(context, ref, f),
             ),
           add,
@@ -148,8 +160,8 @@ class _RetryRow extends StatelessWidget {
       FontAwesomeIcons.triangleExclamation,
       SettingsTints.red,
     ),
-    title: 'Couldn’t load',
-    value: 'Retry',
+    title: tr('Couldn’t load'),
+    value: tr('Retry'),
     onTap: onRetry,
   );
 }

@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/constants/app_info.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -86,18 +87,18 @@ class _LinkSheetState extends ConsumerState<_LinkSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SheetHeader('Link to'),
+          SheetHeader(tr('Link to')),
           FFSegmented<ItemType>(
-            segments: const [
-              FFSegment(value: ItemType.task, label: 'Tasks'),
-              FFSegment(value: ItemType.note, label: 'Notes'),
+            segments: [
+              FFSegment(value: ItemType.task, label: tr('Tasks')),
+              FFSegment(value: ItemType.note, label: tr('Notes')),
             ],
             value: _type,
             onChanged: (t) => setState(() => _type = t),
           ),
           const SizedBox(height: AppSpacing.md),
           FFSearchField(
-            hint: isTasks ? 'Search tasks' : 'Search notes',
+            hint: isTasks ? tr('Search tasks') : tr('Search notes'),
             onChanged: (q) => setState(() => _query = q),
             onClear: () => setState(() => _query = ''),
           ),
@@ -108,7 +109,7 @@ class _LinkSheetState extends ConsumerState<_LinkSheet> {
               children: [
                 if (current != null && _query.isEmpty)
                   OptionRow(
-                    label: 'No link',
+                    label: tr('No link'),
                     icon: FontAwesomeIcons.linkSlash,
                     colors: ActionTints.lock,
                     selected: false,
@@ -116,7 +117,7 @@ class _LinkSheetState extends ConsumerState<_LinkSheet> {
                   ),
                 for (final i in value)
                   OptionRow(
-                    label: i.title.isEmpty ? 'Untitled' : i.title,
+                    label: i.title.isEmpty ? tr('Untitled') : i.title,
                     icon: style.icon,
                     colors: style.colors,
                     selected: i.ref == current,
@@ -125,16 +126,18 @@ class _LinkSheetState extends ConsumerState<_LinkSheet> {
                 if (value.isEmpty)
                   FFListRow(
                     title: _query.isNotEmpty
-                        ? 'Nothing matches'
+                        ? tr('Nothing matches')
                         : isTasks
-                        ? 'No tasks yet'
-                        : 'No notes yet',
+                        ? tr('No tasks yet')
+                        : tr('No notes yet'),
                     enabled: false,
                   ),
               ],
             ),
             AsyncError() => FFErrorBanner(
-              message: isTasks ? "Couldn't load tasks" : "Couldn't load notes",
+              message: isTasks
+                  ? tr('Couldn\'t load tasks')
+                  : tr('Couldn\'t load notes'),
               onRetry: () => isTasks
                   ? ref.invalidate(linkableTasksProvider(_query))
                   : ref.invalidate(linkableNotesProvider(_query)),
@@ -166,21 +169,22 @@ Future<void> showLocationTriggerSheet(BuildContext context) {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Location triggers are coming soon',
+            tr('Location triggers are coming soon'),
             textAlign: TextAlign.center,
             style: sheetContext.text.cardTitle,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Reminders that go off when you arrive at or leave a place are '
-            'coming in ${AppInfo.name} 1.1, and will work offline, on your '
-            'device only. For now this reminder alerts you at its time.',
+            tr(
+              'Reminders that go off when you arrive at or leave a place are coming in {name} 1.1, and will work offline, on your device only. For now this reminder alerts you at its time.',
+              {'name': AppInfo.name},
+            ),
             textAlign: TextAlign.center,
             style: sheetContext.text.body.copyWith(color: ff.inkMuted),
           ),
           const SizedBox(height: AppSpacing.xl),
           FFPrimaryButton(
-            label: 'Got it',
+            label: tr('Got it'),
             onPressed: () => Navigator.of(sheetContext).pop(),
           ),
         ],

@@ -16,8 +16,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 
 /// 0 build · 1 quit (stored in `habits.habit_type`).
 enum HabitKind { build, quit }
@@ -129,9 +131,12 @@ class Habit {
   /// "8 glasses daily" (counted), "Every day" / "Weekdays" (yes/no — the
   /// schedule is the goal), "Quit habit".
   String get goalLabel {
-    if (isQuit) return 'Quit habit';
+    if (isQuit) return tr('Quit habit');
     if (isYesNo) return frequency.label;
-    return '$targetCount $unit daily';
+    return tr('{count} {unit} daily', {
+      'count': targetCount,
+      'unit': HabitWords.shown(unit),
+    });
   }
 
   /// Whether [log] (the log of one day, or null) counts as done for this

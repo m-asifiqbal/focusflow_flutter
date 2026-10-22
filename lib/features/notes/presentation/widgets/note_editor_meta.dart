@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -46,7 +47,7 @@ class NoteTagsRow extends StatelessWidget {
           _Chip(
             label: folder,
             background: ff.primarySoft,
-            semanticLabel: 'Folder $folder',
+            semanticLabel: tr('Folder {folder}', {'folder': folder}),
             onTap: onFolder,
           ),
         for (final tag in tags)
@@ -55,13 +56,13 @@ class NoteTagsRow extends StatelessWidget {
             background: ff.primarySoft.withValues(
               alpha: ff.primarySoft.a * 0.5,
             ),
-            semanticLabel: 'Tag ${tag.name}',
+            semanticLabel: tr('Tag {name}', {'name': tag.name}),
             onTap: onTag == null ? null : () => onTag!(tag),
           ),
         if (onAdd != null)
           Semantics(
             button: true,
-            label: 'Add tag',
+            label: tr('Add tag'),
             excludeSemantics: true,
             child: FFPressable(
               onTap: onAdd,
@@ -200,7 +201,7 @@ class NoteMetaLine extends StatelessWidget {
     if (reminder == null || onReminder == null) return text;
     return Semantics(
       button: true,
-      hint: 'Opens the reminder',
+      hint: tr('Opens the reminder'),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onReminder,

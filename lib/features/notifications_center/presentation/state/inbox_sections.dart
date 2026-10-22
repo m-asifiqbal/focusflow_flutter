@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
 
@@ -65,8 +66,8 @@ abstract final class InboxDayLabel {
   /// ("Monday"), else "Oct 12" (with the year when it is not this one).
   static String of(DateTime day, DateTime now) {
     final days = DateUtilsX.daysBetween(day, now);
-    if (days <= 0) return 'Today';
-    if (days == 1) return 'Yesterday';
+    if (days <= 0) return tr('Today');
+    if (days == 1) return tr('Yesterday');
     if (days < 7) return DateFormats.of('EEEE').format(day);
     return DateFormats.of(
       day.year == now.year ? 'MMM d' : 'MMM d, y',
@@ -81,13 +82,13 @@ abstract final class InboxTimeLabel {
   static String of(DateTime at, DateTime now, {bool use24h = false}) {
     final t = at.toLocal();
     final diff = now.difference(t);
-    if (diff.inMinutes < 1) return 'now';
+    if (diff.inMinutes < 1) return tr('now');
     if (DateUtilsX.isSameDay(t, now)) {
-      if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+      if (diff.inMinutes < 60) return tr('{m}m', {'m': diff.inMinutes});
       return DateFormats.of(use24h ? 'H:mm' : 'h:mm').format(t);
     }
     final days = DateUtilsX.daysBetween(t, now);
-    if (days == 1) return 'Yesterday';
+    if (days == 1) return tr('Yesterday');
     if (days > 1 && days < 7) return DateFormats.of('EEE').format(t);
     return DateFormats.of('MMM d').format(t);
   }

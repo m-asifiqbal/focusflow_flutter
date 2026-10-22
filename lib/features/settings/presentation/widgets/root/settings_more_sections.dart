@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
@@ -35,21 +36,21 @@ class SettingsSecuritySection extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final unlock = ref.watch(vaultUnlockLabelProvider).valueOrNull;
     return FFGroupedList(
-      label: 'Security & privacy',
+      label: tr('Security & privacy'),
       children: [
         FFListRow(
           leading: settingsTile(
             FontAwesomeIcons.shieldHalved,
             SettingsTints.emeraldDeep,
           ),
-          title: 'Vault security',
+          title: tr('Vault security'),
           value: unlock,
           onTap: () => context.push(AppRoutes.settingsVaultSecurity),
         ),
         FFListRow(
           leading: settingsTile(FontAwesomeIcons.lock, SettingsTints.slateDeep),
-          title: 'App lock',
-          value: s.appLockEnabled ? 'On' : 'Off',
+          title: tr('App lock'),
+          value: s.appLockEnabled ? tr('On') : tr('Off'),
           onTap: () => context.push(AppRoutes.settingsAppLock),
         ),
         FFListRow.toggle(
@@ -57,14 +58,14 @@ class SettingsSecuritySection extends ConsumerWidget {
             FontAwesomeIcons.solidEyeSlash,
             SettingsTints.violetDeep,
           ),
-          title: 'Hide content in app switcher',
+          title: tr('Hide content in app switcher'),
           value: s.hideInAppSwitcher,
           onChanged: (_) =>
               runRootAction(context, ref, SettingsRootAction.hideInSwitcher),
         ),
         FFListRow(
           leading: settingsTile(FontAwesomeIcons.solidPaste, SettingsTints.sky),
-          title: 'Clear clipboard after',
+          title: tr('Clear clipboard after'),
           value: SettingsLabels.clipboard(s.clipboardClearSeconds),
           // Vault security setting: changed there, behind the vault's
           // re-auth (the PIN / biometrics), never directly from the root.
@@ -89,19 +90,19 @@ class SettingsDataSection extends ConsumerWidget {
     final storage = ref.watch(storageUsageProvider).valueOrNull;
     final drive = account?.hasDrive ?? false;
     final backupValue = drive
-        ? 'Google Drive'
+        ? tr('Google Drive')
         : local == LocalBackupFrequency.off
-        ? 'Off'
-        : 'This device';
+        ? tr('Off')
+        : tr('This device');
     return FFGroupedList(
-      label: 'Data & sync',
+      label: tr('Data & sync'),
       children: [
         FFListRow(
           leading: settingsTile(
             FontAwesomeIcons.googleDrive,
             SettingsTints.blueDeep,
           ),
-          title: 'Backup & Sync',
+          title: tr('Backup & Sync'),
           value: backupValue,
           valueColor: drive ? ff.primary : null,
           onTap: () => context.push(AppRoutes.settingsBackup),
@@ -111,7 +112,7 @@ class SettingsDataSection extends ConsumerWidget {
             FontAwesomeIcons.fileExport,
             SettingsTints.amber,
           ),
-          title: 'Import & Export',
+          title: tr('Import & Export'),
           onTap: () => context.push(AppRoutes.settingsImportExport),
         ),
         FFListRow(
@@ -119,7 +120,7 @@ class SettingsDataSection extends ConsumerWidget {
             FontAwesomeIcons.database,
             SettingsTints.violet,
           ),
-          title: 'Storage',
+          title: tr('Storage'),
           value: storage == null ? null : formatBytes(storage.totalBytes),
           onTap: () => context.push(AppRoutes.settingsStorage),
         ),
@@ -128,7 +129,7 @@ class SettingsDataSection extends ConsumerWidget {
             FontAwesomeIcons.boxArchive,
             SettingsTints.slate,
           ),
-          title: 'Archive',
+          title: tr('Archive'),
           value: counts?.archived.toString(),
           onTap: () => context.push(AppRoutes.archive),
         ),
@@ -137,7 +138,7 @@ class SettingsDataSection extends ConsumerWidget {
             FontAwesomeIcons.solidTrashCan,
             SettingsTints.rose,
           ),
-          title: 'Recently deleted',
+          title: tr('Recently deleted'),
           value: counts?.trash.toString(),
           onTap: () => context.push(AppRoutes.trash),
         ),
@@ -154,14 +155,14 @@ class SettingsSupportSection extends ConsumerWidget {
     final version = ref.watch(appVersionProvider).valueOrNull;
     void run(SettingsRootAction a) => runRootAction(context, ref, a);
     return FFGroupedList(
-      label: 'Support',
+      label: tr('Support'),
       children: [
         FFListRow(
           leading: settingsTile(
             FontAwesomeIcons.solidCircleQuestion,
             SettingsTints.emerald,
           ),
-          title: 'Help & Support',
+          title: tr('Help & Support'),
           onTap: () => run(SettingsRootAction.help),
         ),
         FFListRow(
@@ -169,7 +170,7 @@ class SettingsSupportSection extends ConsumerWidget {
             FontAwesomeIcons.solidCommentDots,
             SettingsTints.blue,
           ),
-          title: 'Send feedback',
+          title: tr('Send feedback'),
           onTap: () => run(SettingsRootAction.feedback),
         ),
         FFListRow(
@@ -177,7 +178,7 @@ class SettingsSupportSection extends ConsumerWidget {
             FontAwesomeIcons.solidStar,
             SettingsTints.amber,
           ),
-          title: 'Rate ${AppInfo.name}',
+          title: tr('Rate {name}', {'name': AppInfo.name}),
           onTap: () => run(SettingsRootAction.rate),
         ),
         FFListRow(
@@ -185,7 +186,7 @@ class SettingsSupportSection extends ConsumerWidget {
             FontAwesomeIcons.circleInfo,
             SettingsTints.slate,
           ),
-          title: 'About',
+          title: tr('About'),
           value: version,
           onTap: () => context.push(AppRoutes.settingsAbout),
         ),

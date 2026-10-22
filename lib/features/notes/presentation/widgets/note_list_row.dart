@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -46,14 +47,17 @@ class NoteListRow extends StatelessWidget {
     final brightness = Theme.of(context).brightness;
     final tinted = note.colorHex != null && note.colorHex != 'FFFFFF';
     final preview = note.isLocked
-        ? 'Locked with Vault PIN'
+        ? tr('Locked with Vault PIN')
         : NotesFormat.cardPreview(note);
     final checklist = note.checklist;
     final subtitle = preview.isNotEmpty
         ? preview
         : checklist.isEmpty
         ? null
-        : '${note.checklistDone}/${checklist.length} checked';
+        : tr('{done}/{total} checked', {
+            'done': note.checklistDone,
+            'total': checklist.length,
+          });
     final colors = ModuleStyle.notes.colors;
 
     return FFCard(

@@ -20,18 +20,38 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/crypto/password_strength.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
 
-enum VaultIssueKind { breached, reused, weak, old }
+enum VaultIssueKind {
+  breached,
+  reused,
+  weak,
+  old;
+
+  /// The tag on an issue row ("BREACHED" …), in the active language.
+  String get label => switch (this) {
+    breached => tr('BREACHED'),
+    reused => tr('REUSED'),
+    weak => tr('WEAK'),
+    old => tr('OLD'),
+  };
+}
 
 /// One "Needs attention" row.
+///
+/// [title] and [reason] are getters over plain data (not stored text): the
+/// report may be computed in a background isolate, where `tr` has no language
+/// pack, so the wording is only produced when the row is shown.
 @immutable
 class VaultIssue {
   const VaultIssue({
     required this.kind,
     required this.itemIds,
-    required this.title,
-    required this.reason,
+    required this.name,
+    this.more = 0,
+    this.count = 0,
+    this.detail,
   });
 
   final VaultIssueKind kind;
@@ -39,11 +59,30 @@ class VaultIssue {
   /// The item(s) concerned; the first is the one the fix opens.
   final List<String> itemIds;
 
+  /// The (first) item's own title, e.g. "LinkedIn".
+  final String name;
+
+  /// How many more items share this row (reuse group), 0 for a single one.
+  final int more;
+
+  /// Times seen in breaches · sites sharing the password · days unchanged.
+  final int count;
+
+  /// A weak password's own explanation ("Only 8 characters"), already
+  /// worded by [describeWeakPassword]; null = the generic reason.
+  final String? detail;
+
   /// "LinkedIn" · "Netflix + 2 more".
-  final String title;
+  String get title =>
+      more == 0 ? name : tr('{title} + {v} more', {'title': name, 'v': more});
 
   /// "Found in a data breach" · "Same password on 3 sites" …
-  final String reason;
+  String get reason => switch (kind) {
+    VaultIssueKind.breached => VaultSecurityReport.breachReason(count),
+    VaultIssueKind.reused => tr('Same password on {n} sites', {'n': count}),
+    VaultIssueKind.weak => detail ?? tr('Easy to guess'),
+    VaultIssueKind.old => tr('Not changed in {n} days', {'n': count}),
+  };
 
   String get itemId => itemIds.first;
 
@@ -52,11 +91,14 @@ class VaultIssue {
       other is VaultIssue &&
       other.kind == kind &&
       listEquals(other.itemIds, itemIds) &&
-      other.title == title &&
-      other.reason == reason;
+      other.name == name &&
+      other.more == more &&
+      other.count == count &&
+      other.detail == detail;
 
   @override
-  int get hashCode => Object.hash(kind, Object.hashAll(itemIds), title, reason);
+  int get hashCode =>
+      Object.hash(kind, Object.hashAll(itemIds), name, more, count, detail);
 }
 
 @immutable
@@ -141,8 +183,8 @@ class VaultSecurityReport {
           VaultIssue(
             kind: VaultIssueKind.breached,
             itemIds: [r.id],
-            title: r.title,
-            reason: breachReason(r.breachCount!),
+            name: r.title,
+            count: r.breachCount!,
           ),
         );
       } else if (isReused) {
@@ -153,8 +195,8 @@ class VaultSecurityReport {
           VaultIssue(
             kind: VaultIssueKind.weak,
             itemIds: [r.id],
-            title: r.title,
-            reason: weakReasons[r.id] ?? 'Easy to guess',
+            name: r.title,
+            detail: weakReasons[r.id],
           ),
         );
       } else {
@@ -164,8 +206,8 @@ class VaultSecurityReport {
             VaultIssue(
               kind: VaultIssueKind.old,
               itemIds: [r.id],
-              title: r.title,
-              reason: 'Not changed in $age days',
+              name: r.title,
+              count: age,
             ),
           );
         }
@@ -192,14 +234,16 @@ class VaultSecurityReport {
         VaultIssue(
           kind: VaultIssueKind.reused,
           itemIds: [for (final r in rest) r.id],
-          title: g.length == 1
-              ? rest.first.title
-              : '${rest.first.title} + ${g.length - 1} more',
-          reason: 'Same password on ${g.length} sites',
+          name: rest.first.title,
+          more: g.length - 1,
+          count: g.length,
         ),
       );
     }
-    reuseIssues.sort((a, b) => a.title.compareTo(b.title));
+    reuseIssues.sort((a, b) {
+      final byName = a.name.compareTo(b.name);
+      return byName != 0 ? byName : a.more.compareTo(b.more);
+    });
 
     final logins = [
       for (final r in active)
@@ -220,9 +264,10 @@ class VaultSecurityReport {
     );
   }
 
-  static String breachReason(int count) => count == 1
-      ? 'Found in a data breach'
-      : 'Seen $count times in data breaches';
+  static String breachReason(int count) => tr(
+    '{count, plural, one {Found in a data breach} other {Seen # times in data breaches}}',
+    {'count': count},
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -255,17 +300,17 @@ class VaultSecurityReport {
 /// [password] (measured in memory, never kept).
 String describeWeakPassword(String password) {
   final s = PasswordStrengthEstimator.estimate(password);
-  if (s.isCommon) return 'A common password';
+  if (s.isCommon) return tr('A common password');
   final missing = [
-    if (!s.hasSymbol) 'no symbols',
-    if (!s.hasDigit) 'no numbers',
-    if (!s.hasUpper && !s.hasLower) 'no letters',
+    if (!s.hasSymbol) tr('no symbols'),
+    if (!s.hasDigit) tr('no numbers'),
+    if (!s.hasUpper && !s.hasLower) tr('no letters'),
   ];
   final parts = [
-    if (s.length < 12) 'Only ${s.length} characters',
+    if (s.length < 12) tr('Only {n} characters', {'n': s.length}),
     if (missing.isNotEmpty) missing.first,
   ];
-  if (parts.isEmpty) return 'Easy to guess';
+  if (parts.isEmpty) return tr('Easy to guess');
   final text = parts.join(', ');
   return text[0].toUpperCase() + text.substring(1);
 }

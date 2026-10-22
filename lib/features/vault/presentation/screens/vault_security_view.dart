@@ -14,6 +14,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -49,7 +50,7 @@ class _VaultSecurityViewState extends ConsumerState<VaultSecurityView> {
   }
 
   String _lastScan(DateTime? at) {
-    if (at == null) return 'Not scanned yet';
+    if (at == null) return tr('Not scanned yet');
     final now = ref.read(clockProvider).now();
     final use24h = ref.read(settingsProvider).use24HourTime;
     final day = DateUtilsX.relativeDay(at, now);
@@ -57,7 +58,7 @@ class _VaultSecurityViewState extends ConsumerState<VaultSecurityView> {
         ? day.toLowerCase()
         : day;
     final time = DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(at);
-    return 'Last scan: $dayText, $time';
+    return tr('Last scan: {day}, {time}', {'day': dayText, 'time': time});
   }
 
   @override
@@ -65,7 +66,9 @@ class _VaultSecurityViewState extends ConsumerState<VaultSecurityView> {
     final ff = context.ff;
     final report = ref.watch(securityReportProvider);
     final scan = ref.watch(vaultScanProvider);
-    final subtitle = scan.scanning ? 'Scanning…' : _lastScan(scan.lastScanAt);
+    final subtitle = scan.scanning
+        ? tr('Scanning…')
+        : _lastScan(scan.lastScanAt);
 
     final List<Widget> body = switch (report) {
       AsyncData(:final value) => _content(context, value, scan),
@@ -74,9 +77,9 @@ class _VaultSecurityViewState extends ConsumerState<VaultSecurityView> {
         FFEmptyState.compact(
           colors: ModuleStyle.vault.colors,
           icon: FontAwesomeIcons.triangleExclamation,
-          title: "Couldn't build the report",
-          body: 'Your items are safe. Try again in a moment.',
-          ctaLabel: 'Try again',
+          title: tr('Couldn\'t build the report'),
+          body: tr('Your items are safe. Try again in a moment.'),
+          ctaLabel: tr('Try again'),
           ctaIcon: FontAwesomeIcons.rotateRight,
           onCta: () => ref.invalidate(securityReportProvider),
         ),
@@ -96,7 +99,7 @@ class _VaultSecurityViewState extends ConsumerState<VaultSecurityView> {
           bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.xxl,
         ),
         children: [
-          VaultTabTitle(title: 'Security', subtitle: subtitle),
+          VaultTabTitle(title: tr('Security'), subtitle: subtitle),
           ...body,
         ],
       ),
@@ -117,8 +120,8 @@ class _VaultSecurityViewState extends ConsumerState<VaultSecurityView> {
         FFEmptyState.compact(
           colors: ModuleStyle.vault.colors,
           icon: FontAwesomeIcons.shieldHeart,
-          title: 'Nothing to check yet',
-          body: 'Save a password and its health shows up here.',
+          title: tr('Nothing to check yet'),
+          body: tr('Save a password and its health shows up here.'),
         ),
         const Padding(padding: gutter, child: VaultProtectionCard()),
       ];
@@ -188,7 +191,7 @@ class _AttentionHeader extends StatelessWidget {
             child: Semantics(
               header: true,
               child: Text(
-                'NEEDS ATTENTION · $count',
+                tr('NEEDS ATTENTION · {count}', {'count': count}),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: _labelStyle(context),
@@ -197,7 +200,7 @@ class _AttentionHeader extends StatelessWidget {
           ),
           Semantics(
             button: true,
-            label: 'Fix all $count issues',
+            label: tr('Fix all {count} issues', {'count': count}),
             excludeSemantics: true,
             child: FFPressable(
               onTap: onFixAll,
@@ -213,7 +216,7 @@ class _AttentionHeader extends StatelessWidget {
                   child: Center(
                     widthFactor: 1,
                     child: Text(
-                      'Fix all',
+                      tr('Fix all'),
                       style: context.text.body.copyWith(
                         fontSize: VaultType.small,
                         fontWeight: FontWeight.w700,
@@ -244,7 +247,7 @@ class _ProtectionLabel extends StatelessWidget {
     ),
     child: Semantics(
       header: true,
-      child: Text('PROTECTION', style: _labelStyle(context)),
+      child: Text(tr('PROTECTION'), style: _labelStyle(context)),
     ),
   );
 }

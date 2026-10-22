@@ -1,0 +1,180 @@
+# habits: literals that are NOT shown as written (or are registered in lib/core/l10n/static_keys.dart and translated where displayed).
+# Format: <path><TAB><exact text>
+# --- stored English words: category ids / units. Registered in static_keys.dart and shown through HabitWords.shown (the stored value stays English: colours, search and sync match it)
+lib/features/habits/domain/entities/habit.dart	Health
+lib/features/habits/presentation/habit_templates.dart	Health
+lib/features/habits/presentation/habit_templates.dart	Fitness
+lib/features/habits/presentation/habit_templates.dart	Learning
+lib/features/habits/presentation/habit_templates.dart	Productivity
+lib/features/habits/presentation/habit_templates.dart	Finance
+lib/features/habits/presentation/habit_templates.dart	Social
+lib/features/habits/presentation/habit_templates.dart	Other
+lib/features/habits/presentation/habit_templates.dart	Mind
+# --- icon catalogue: group = search word (registered, matched in the active language too); keywords = English search aliases, never shown
+lib/features/habits/presentation/habit_icons.dart	Creative
+lib/features/habits/presentation/habit_icons.dart	Fitness
+lib/features/habits/presentation/habit_icons.dart	Food
+lib/features/habits/presentation/habit_icons.dart	Health
+lib/features/habits/presentation/habit_icons.dart	Home
+lib/features/habits/presentation/habit_icons.dart	Learning
+lib/features/habits/presentation/habit_icons.dart	Mind
+lib/features/habits/presentation/habit_icons.dart	Money
+lib/features/habits/presentation/habit_icons.dart	Productivity
+lib/features/habits/presentation/habit_icons.dart	Quit
+lib/features/habits/presentation/habit_icons.dart	Social
+lib/features/habits/presentation/habit_icons.dart	achievement
+lib/features/habits/presentation/habit_icons.dart	alcohol
+lib/features/habits/presentation/habit_icons.dart	alcohol beer
+lib/features/habits/presentation/habit_icons.dart	alcohol cocktail
+lib/features/habits/presentation/habit_icons.dart	alcohol drink
+lib/features/habits/presentation/habit_icons.dart	balance calm
+lib/features/habits/presentation/habit_icons.dart	breakfast carbs
+lib/features/habits/presentation/habit_icons.dart	breathe breathing
+lib/features/habits/presentation/habit_icons.dart	budget spend
+lib/features/habits/presentation/habit_icons.dart	burn calories streak
+lib/features/habits/presentation/habit_icons.dart	call family friends
+lib/features/habits/presentation/habit_icons.dart	calm
+lib/features/habits/presentation/habit_icons.dart	cardio heart rate
+lib/features/habits/presentation/habit_icons.dart	cash
+lib/features/habits/presentation/habit_icons.dart	chat talk
+lib/features/habits/presentation/habit_icons.dart	chores clean
+lib/features/habits/presentation/habit_icons.dart	cigarettes
+lib/features/habits/presentation/habit_icons.dart	clean chores tidy
+lib/features/habits/presentation/habit_icons.dart	climb hike
+lib/features/habits/presentation/habit_icons.dart	coffee tea
+lib/features/habits/presentation/habit_icons.dart	cold shower hygiene
+lib/features/habits/presentation/habit_icons.dart	cook
+lib/features/habits/presentation/habit_icons.dart	cycle bike
+lib/features/habits/presentation/habit_icons.dart	cycle bike ride
+lib/features/habits/presentation/habit_icons.dart	dishes chores
+lib/features/habits/presentation/habit_icons.dart	done todo
+lib/features/habits/presentation/habit_icons.dart	drive commute
+lib/features/habits/presentation/habit_icons.dart	eco environment
+lib/features/habits/presentation/habit_icons.dart	email inbox
+lib/features/habits/presentation/habit_icons.dart	energy power
+lib/features/habits/presentation/habit_icons.dart	expenses track
+lib/features/habits/presentation/habit_icons.dart	eyes screen
+lib/features/habits/presentation/habit_icons.dart	favourite general
+lib/features/habits/presentation/habit_icons.dart	finish goal
+lib/features/habits/presentation/habit_icons.dart	floss brush teeth dental
+lib/features/habits/presentation/habit_icons.dart	focus flow
+lib/features/habits/presentation/habit_icons.dart	friends family
+lib/features/habits/presentation/habit_icons.dart	friends family people
+lib/features/habits/presentation/habit_icons.dart	fruit
+lib/features/habits/presentation/habit_icons.dart	fruit healthy eat
+lib/features/habits/presentation/habit_icons.dart	game play
+lib/features/habits/presentation/habit_icons.dart	game strategy
+lib/features/habits/presentation/habit_icons.dart	games gaming
+lib/features/habits/presentation/habit_icons.dart	goal target focus
+lib/features/habits/presentation/habit_icons.dart	golf sport
+lib/features/habits/presentation/habit_icons.dart	grow plant
+lib/features/habits/presentation/habit_icons.dart	gym lift
+lib/features/habits/presentation/habit_icons.dart	gym workout weights strength
+lib/features/habits/presentation/habit_icons.dart	hike walk outdoors
+lib/features/habits/presentation/habit_icons.dart	idea learn
+lib/features/habits/presentation/habit_icons.dart	insulin shot
+lib/features/habits/presentation/habit_icons.dart	invest
+lib/features/habits/presentation/habit_icons.dart	junk fast food
+lib/features/habits/presentation/habit_icons.dart	kindness charity
+lib/features/habits/presentation/habit_icons.dart	kindness present
+lib/features/habits/presentation/habit_icons.dart	languages duolingo
+lib/features/habits/presentation/habit_icons.dart	launch project
+lib/features/habits/presentation/habit_icons.dart	laundry clothes
+lib/features/habits/presentation/habit_icons.dart	listen podcast music
+lib/features/habits/presentation/habit_icons.dart	love care
+lib/features/habits/presentation/habit_icons.dart	meal
+lib/features/habits/presentation/habit_icons.dart	meal cook
+lib/features/habits/presentation/habit_icons.dart	meal eat cook
+lib/features/habits/presentation/habit_icons.dart	medicine
+lib/features/habits/presentation/habit_icons.dart	medicine vitamins
+lib/features/habits/presentation/habit_icons.dart	meditate meditation lotus calm
+lib/features/habits/presentation/habit_icons.dart	meditate yoga
+lib/features/habits/presentation/habit_icons.dart	mind focus
+lib/features/habits/presentation/habit_icons.dart	mood happy
+lib/features/habits/presentation/habit_icons.dart	mood happy gratitude
+lib/features/habits/presentation/habit_icons.dart	mood joy
+lib/features/habits/presentation/habit_icons.dart	morning wake daylight
+lib/features/habits/presentation/habit_icons.dart	movie video
+lib/features/habits/presentation/habit_icons.dart	nature calm green
+lib/features/habits/presentation/habit_icons.dart	nature outside
+lib/features/habits/presentation/habit_icons.dart	network meet
+lib/features/habits/presentation/habit_icons.dart	news read
+lib/features/habits/presentation/habit_icons.dart	no phone detox
+lib/features/habits/presentation/habit_icons.dart	no stop quit sugar
+lib/features/habits/presentation/habit_icons.dart	notifications detox
+lib/features/habits/presentation/habit_icons.dart	outdoors
+lib/features/habits/presentation/habit_icons.dart	outside weather
+lib/features/habits/presentation/habit_icons.dart	paint art
+lib/features/habits/presentation/habit_icons.dart	paint art draw
+lib/features/habits/presentation/habit_icons.dart	peace birds
+lib/features/habits/presentation/habit_icons.dart	pet
+lib/features/habits/presentation/habit_icons.dart	pet aquarium
+lib/features/habits/presentation/habit_icons.dart	pet walk dog
+lib/features/habits/presentation/habit_icons.dart	phone screen time social
+lib/features/habits/presentation/habit_icons.dart	photo
+lib/features/habits/presentation/habit_icons.dart	photo photography
+lib/features/habits/presentation/habit_icons.dart	ping pong sport
+lib/features/habits/presentation/habit_icons.dart	plan review
+lib/features/habits/presentation/habit_icons.dart	plan schedule
+lib/features/habits/presentation/habit_icons.dart	practice instrument
+lib/features/habits/presentation/habit_icons.dart	pray
+lib/features/habits/presentation/habit_icons.dart	pray gratitude
+lib/features/habits/presentation/habit_icons.dart	programming
+lib/features/habits/presentation/habit_icons.dart	programming coding
+lib/features/habits/presentation/habit_icons.dart	progress growth
+lib/features/habits/presentation/habit_icons.dart	puzzle brain
+lib/features/habits/presentation/habit_icons.dart	read
+lib/features/habits/presentation/habit_icons.dart	read reading pages
+lib/features/habits/presentation/habit_icons.dart	read study
+lib/features/habits/presentation/habit_icons.dart	relax hygiene
+lib/features/habits/presentation/habit_icons.dart	relax rest
+lib/features/habits/presentation/habit_icons.dart	run exercise jog cardio
+lib/features/habits/presentation/habit_icons.dart	save
+lib/features/habits/presentation/habit_icons.dart	save savings
+lib/features/habits/presentation/habit_icons.dart	science
+lib/features/habits/presentation/habit_icons.dart	science experiment
+lib/features/habits/presentation/habit_icons.dart	shopping groceries
+lib/features/habits/presentation/habit_icons.dart	sing podcast
+lib/features/habits/presentation/habit_icons.dart	ski winter
+lib/features/habits/presentation/habit_icons.dart	skincare wash
+lib/features/habits/presentation/habit_icons.dart	sleep night bedtime
+lib/features/habits/presentation/habit_icons.dart	sleep rest nap
+lib/features/habits/presentation/habit_icons.dart	smoking cigarettes quit
+lib/features/habits/presentation/habit_icons.dart	spicy
+lib/features/habits/presentation/habit_icons.dart	sport
+lib/features/habits/presentation/habit_icons.dart	study school course
+lib/features/habits/presentation/habit_icons.dart	sugar dessert
+lib/features/habits/presentation/habit_icons.dart	sugar sweets
+lib/features/habits/presentation/habit_icons.dart	sugar sweets dessert
+lib/features/habits/presentation/habit_icons.dart	sugar sweets snack
+lib/features/habits/presentation/habit_icons.dart	swim pool
+lib/features/habits/presentation/habit_icons.dart	television screen
+lib/features/habits/presentation/habit_icons.dart	time focus
+lib/features/habits/presentation/habit_icons.dart	time routine
+lib/features/habits/presentation/habit_icons.dart	timer focus pomodoro
+lib/features/habits/presentation/habit_icons.dart	todo plan
+lib/features/habits/presentation/habit_icons.dart	travel
+lib/features/habits/presentation/habit_icons.dart	type write
+lib/features/habits/presentation/habit_icons.dart	vegetables healthy eat
+lib/features/habits/presentation/habit_icons.dart	walk steps
+lib/features/habits/presentation/habit_icons.dart	wash hands skincare
+lib/features/habits/presentation/habit_icons.dart	wash hygiene
+lib/features/habits/presentation/habit_icons.dart	water drink
+lib/features/habits/presentation/habit_icons.dart	water drink hydrate
+lib/features/habits/presentation/habit_icons.dart	weather
+lib/features/habits/presentation/habit_icons.dart	weed
+lib/features/habits/presentation/habit_icons.dart	weigh diet
+lib/features/habits/presentation/habit_icons.dart	win goal
+lib/features/habits/presentation/habit_icons.dart	work computer
+lib/features/habits/presentation/habit_icons.dart	work job
+lib/features/habits/presentation/habit_icons.dart	write draw
+lib/features/habits/presentation/habit_icons.dart	write journal
+lib/features/habits/presentation/habit_icons.dart	write poetry journal
+# --- SQL
+lib/features/habits/data/repository/habits_repository_impl.dart	{} AND h.is_paused = 0
+lib/features/habits/data/repository/habits_repository_impl.dart	{} AND h.part_of_day = 1
+lib/features/habits/data/repository/habits_repository_impl.dart	{} AND h.part_of_day = 2
+lib/features/habits/data/repository/habits_repository_impl.dart	{} AND h.part_of_day IN (2, 3)
+lib/features/habits/data/repository/habits_repository_impl.dart	h.archived_at IS NOT NULL AND h.deleted_at IS NULL
+lib/features/habits/data/repository/habits_repository_impl.dart	(h.name LIKE ? ESCAPE '\' OR h.category LIKE ? ESCAPE '\')
+lib/features/habits/data/repository/habits_repository_impl.dart	h.id = ?

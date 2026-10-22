@@ -35,6 +35,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
@@ -203,7 +204,7 @@ class DriveSync {
       }
     } on Object catch (e) {
       AppLogger.w('Devices manifest update failed (${e.runtimeType})');
-      warnings.add("Linked devices couldn't be updated this time");
+      warnings.add(tr("Linked devices couldn't be updated this time"));
     }
 
     if (!merge || state.decisionPending) {
@@ -246,7 +247,7 @@ class DriveSync {
       await records.pruneTo(keep, location: BackupLocation.drive);
     } on Object catch (e) {
       AppLogger.w('Pruning old backups failed (${e.runtimeType})');
-      warnings.add("Old backups couldn't be removed; we'll try next time");
+      warnings.add(tr("Old backups couldn't be removed; we'll try next time"));
     }
     return pruned;
   }
@@ -306,7 +307,7 @@ class DriveSync {
         needsPin++;
         continue;
       }
-      final from = b.deviceName.isEmpty ? 'another device' : b.deviceName;
+      final from = b.deviceName.isEmpty ? tr('another device') : b.deviceName;
       try {
         final archive = engine.inspect(await store.download(b.fileId));
         report(SyncPhase.merging);
@@ -326,20 +327,30 @@ class DriveSync {
         needsPin++;
       } on RestoreFailed {
         // Writing failed and was rolled back: try again next sync.
-        warnings.add("Couldn't merge the backup from $from; we'll try again");
+        warnings.add(
+          tr("Couldn't merge the backup from {device}; we'll try again", {
+            'device': from,
+          }),
+        );
       } on BackupTooNew {
         // Retried after the app is updated.
-        warnings.add('Update FocusFlow to read the backup from $from');
+        warnings.add(
+          tr('Update FocusFlow to read the backup from {device}', {
+            'device': from,
+          }),
+        );
       } on DriveFailure catch (f) {
         // Offline / signed out mid-way: try again next sync.
         AppLogger.w('Merge download failed (${f.kind.name})');
-        warnings.add("Couldn't check other devices' backups this time");
+        warnings.add(tr("Couldn't check other devices' backups this time"));
         break;
       } on Object catch (e) {
         // Damaged or otherwise unreadable: skip this version for good (its
         // device's next backup supersedes it) and keep going.
         AppLogger.w('Skipped an unreadable backup (${e.runtimeType})');
-        warnings.add("Couldn't read the backup from $from");
+        warnings.add(
+          tr("Couldn't read the backup from {device}", {'device': from}),
+        );
         await state.markHandled(b.deviceId, b.createdAt);
       }
     }

@@ -43,6 +43,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/database/app_database.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/items_repository.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/backup_settings.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_files.dart';
@@ -374,7 +375,7 @@ class BackupEngine {
       bytes = await BackupCipher.open(bytes, key);
     }
     if (BackupArchive.sha256Hex(bytes) != archive.manifest.checksum) {
-      throw const FormatException('The backup file is damaged');
+      throw FormatException(tr('The backup file is damaged'));
     }
     return DbSnapshot.decode(bytes);
   }

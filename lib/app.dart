@@ -19,6 +19,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/app_language.dart';
+import 'package:focusflow/core/l10n/language_service.dart';
 import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/startup/app_startup.dart';
@@ -59,6 +61,9 @@ class FocusFlowApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     final a = ref.watch(settingsProvider.select(appearanceOf));
     final reducedEffects = ref.watch(reducedEffectsProvider);
+    // Only the language in use: its pack was loaded by [activateLanguage]
+    // before this changes, and the whole tree is rebuilt afterwards.
+    final language = ref.watch(settingsProvider.select(storedLanguage));
 
     return MaterialApp.router(
       title: AppInfo.name,
@@ -66,8 +71,8 @@ class FocusFlowApp extends ConsumerWidget {
       theme: AppTheme.light(a.accent, systemFont: a.useSystemFont),
       darkTheme: AppTheme.dark(a.accent, systemFont: a.useSystemFont),
       themeMode: a.themeMode,
-      locale: const Locale('en'),
-      supportedLocales: const [Locale('en')],
+      locale: language.locale,
+      supportedLocales: [for (final l in AppLanguage.values) l.locale],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

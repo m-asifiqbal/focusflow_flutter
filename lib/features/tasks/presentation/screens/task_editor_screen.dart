@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -60,12 +61,12 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
     if (s != null && s.isDirty) {
       final discard = await showFFConfirm(
         context,
-        title: 'Discard changes?',
+        title: tr('Discard changes?'),
         message: s.isNew
-            ? "This task hasn't been saved yet."
-            : "Your edits to this task won't be saved.",
-        confirmLabel: 'Discard',
-        cancelLabel: 'Keep editing',
+            ? tr('This task hasn\'t been saved yet.')
+            : tr('Your edits to this task won\'t be saved.'),
+        confirmLabel: tr('Discard'),
+        cancelLabel: tr('Keep editing'),
         destructive: true,
         icon: FontAwesomeIcons.solidTrashCan,
       );
@@ -82,7 +83,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
       if (mounted) {
         showFFToast(
           context,
-          "Couldn't save the task",
+          tr("Couldn't save the task"),
           icon: FontAwesomeIcons.triangleExclamation,
         );
       }
@@ -134,7 +135,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TaskEditorHeader(
-                title: widget.args.isNew ? 'New Task' : 'Edit Task',
+                title: widget.args.isNew ? tr('New Task') : tr('Edit Task'),
                 canSave: s?.canSave ?? false,
                 onCancel: _cancel,
                 onSave: _save,
@@ -209,14 +210,14 @@ class _ErrorState extends StatelessWidget {
             ? FFEmptyState(
                 colors: TaskStyle.module,
                 icon: FontAwesomeIcons.checkDouble,
-                title: 'Task not found',
-                body: 'It may have been deleted on another device.',
-                ctaLabel: 'Back to tasks',
+                title: tr('Task not found'),
+                body: tr('It may have been deleted on another device.'),
+                ctaLabel: tr('Back to tasks'),
                 ctaIcon: FontAwesomeIcons.arrowLeft,
                 onCta: onBack,
               )
             : FFErrorBanner(
-                message: "Couldn't load this task",
+                message: tr('Couldn\'t load this task'),
                 onRetry: onRetry,
               ),
       ),

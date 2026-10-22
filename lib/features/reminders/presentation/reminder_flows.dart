@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/alarm_overlay.dart';
 import 'package:focusflow/core/notifications/background_delivery.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
@@ -27,7 +28,7 @@ import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
 String _quoted(String title) =>
-    title.trim().isEmpty ? 'Reminder' : '"${title.trim()}"';
+    title.trim().isEmpty ? tr('Reminder') : '"${title.trim()}"';
 
 /// Snoozes [occurrence] of [r] (the tapped row; default: its current
 /// occurrence) for [minutes] and shows "Snoozed for 10 min · UNDO".
@@ -47,7 +48,10 @@ Future<void> snoozeReminder(
   if (before == null || !context.mounted) return;
   showUndoSnackbar(
     context,
-    message: '${_quoted(r.title)} snoozed for $minutes min',
+    message: tr('{v} snoozed for {minutes} min', {
+      'v': _quoted(r.title),
+      'minutes': minutes,
+    }),
     icon: FontAwesomeIcons.solidClock,
     onUndo: () => actions.restore(before),
   );
@@ -67,7 +71,7 @@ Future<void> markReminderDone(
   if (done == null || !context.mounted) return;
   showUndoSnackbar(
     context,
-    message: '${_quoted(r.title)} done',
+    message: tr('{v} done', {'v': _quoted(r.title)}),
     icon: FontAwesomeIcons.solidCircleCheck,
     onUndo: () => actions.undoComplete(done),
   );
@@ -91,7 +95,7 @@ Future<bool> rescheduleReminder(
     today: now,
     weekStartsOn: settings.weekStartsOn,
     current: DateUtilsX.dateOnly(now),
-    title: 'Reschedule',
+    title: tr('Reschedule'),
     subtitle: r.title.trim().isEmpty ? null : r.title.trim(),
     allowNoDate: false,
   );
@@ -111,10 +115,11 @@ Future<bool> rescheduleReminder(
   if (before == null || !context.mounted) return false;
   showUndoSnackbar(
     context,
-    message:
-        '${_quoted(r.title)} moved to '
-        '${DateUtilsX.relativeDay(at, now)} '
-        '${DateUtilsX.time(at, use24h: settings.use24HourTime)}',
+    message: tr('{v} moved to {relativeDay} {time}', {
+      'v': _quoted(r.title),
+      'relativeDay': DateUtilsX.relativeDay(at, now),
+      'time': DateUtilsX.time(at, use24h: settings.use24HourTime),
+    }),
     icon: FontAwesomeIcons.calendarDays,
     onUndo: () => actions.restore(before),
   );

@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -86,8 +87,8 @@ class NoteEditorHeader extends StatelessWidget {
                           ? FontAwesomeIcons.lock
                           : FontAwesomeIcons.lockOpen,
                       semanticLabel: locked
-                          ? 'Note is locked. Change or remove the PIN'
-                          : 'Lock note with a PIN',
+                          ? tr('Note is locked. Change or remove the PIN')
+                          : tr('Lock note with a PIN'),
                       iconColor: locked ? null : context.ff.inkFaint,
                       onPressed: onLock,
                     ),
@@ -99,7 +100,7 @@ class NoteEditorHeader extends StatelessWidget {
                   _Halo(
                     child: FFRoundIconButton(
                       icon: FontAwesomeIcons.thumbtack,
-                      semanticLabel: pinned ? 'Unpin note' : 'Pin note',
+                      semanticLabel: pinned ? tr('Unpin note') : tr('Pin note'),
                       iconColor: pinned ? null : context.ff.inkFaint,
                       onPressed: onPin,
                     ),
@@ -109,7 +110,7 @@ class NoteEditorHeader extends StatelessWidget {
                   _Halo(
                     child: FFRoundIconButton(
                       icon: FontAwesomeIcons.ellipsis,
-                      semanticLabel: 'More note actions',
+                      semanticLabel: tr('More note actions'),
                       onPressed: onMore,
                     ),
                   ),
@@ -135,15 +136,15 @@ class _Title extends StatelessWidget {
     final (IconData icon, String label, Color color) = switch (s) {
       NoteSaveStatus.saving => (
         FontAwesomeIcons.arrowsRotate,
-        'Saving…',
+        tr('Saving…'),
         ff.inkFaint,
       ),
       NoteSaveStatus.failed => (
         FontAwesomeIcons.triangleExclamation,
-        'Not saved',
+        tr('Not saved'),
         ff.danger,
       ),
-      _ => (FontAwesomeIcons.cloudArrowUp, 'Auto-saved', ff.success),
+      _ => (FontAwesomeIcons.cloudArrowUp, tr('Auto-saved'), ff.success),
     };
     return Column(
       mainAxisSize: MainAxisSize.min,

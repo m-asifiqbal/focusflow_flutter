@@ -13,6 +13,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/password_generator.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -37,7 +38,7 @@ class VaultGeneratorOptions extends ConsumerWidget {
       GeneratorMode.passphrase => _passphrase(s.passphrase, c),
       GeneratorMode.pin => [
         VaultLengthSlider(
-          label: 'Digits',
+          label: tr('Digits'),
           value: s.pinLength,
           min: VaultGeneratorState.minPin,
           max: VaultGeneratorState.maxPin,
@@ -57,7 +58,7 @@ class VaultGeneratorOptions extends ConsumerWidget {
         );
     return [
       VaultLengthSlider(
-        label: 'Length',
+        label: tr('Length'),
         value: o.length,
         min: PasswordOptions.minLength,
         max: PasswordOptions.maxLength,
@@ -66,12 +67,12 @@ class VaultGeneratorOptions extends ConsumerWidget {
         stops: const [(16, 0.45), (32, 0.8)],
         onChanged: (v) => c.setPasswordOptions(o.copyWith(length: v)),
       ),
-      sw('Uppercase (A–Z)', o.upper, (v) => o.copyWith(upper: v)),
-      sw('Lowercase (a–z)', o.lower, (v) => o.copyWith(lower: v)),
-      sw('Numbers (0–9)', o.digits, (v) => o.copyWith(digits: v)),
-      sw(r'Symbols (!@#$)', o.symbols, (v) => o.copyWith(symbols: v)),
+      sw(tr('Uppercase (A–Z)'), o.upper, (v) => o.copyWith(upper: v)),
+      sw(tr('Lowercase (a–z)'), o.lower, (v) => o.copyWith(lower: v)),
+      sw(tr('Numbers (0–9)'), o.digits, (v) => o.copyWith(digits: v)),
+      sw(tr(r'Symbols (!@#$)'), o.symbols, (v) => o.copyWith(symbols: v)),
       sw(
-        'Avoid ambiguous (l, 1, O, 0)',
+        tr('Avoid ambiguous (l, 1, O, 0)'),
         o.avoidAmbiguous,
         (v) => o.copyWith(avoidAmbiguous: v),
       ),
@@ -81,7 +82,7 @@ class VaultGeneratorOptions extends ConsumerWidget {
   List<Widget> _passphrase(PassphraseOptions o, VaultGeneratorController c) {
     return [
       VaultLengthSlider(
-        label: 'Words',
+        label: tr('Words'),
         value: o.words,
         min: PassphraseOptions.minWords,
         max: PassphraseOptions.maxWords,
@@ -92,12 +93,12 @@ class VaultGeneratorOptions extends ConsumerWidget {
         onChanged: (v) => c.setPassphraseOptions(o.copyWith(separator: v)),
       ),
       VaultOptionSwitch(
-        label: 'Capitalise words',
+        label: tr('Capitalise words'),
         value: o.capitalize,
         onChanged: (v) => c.setPassphraseOptions(o.copyWith(capitalize: v)),
       ),
       VaultOptionSwitch(
-        label: 'Add a number',
+        label: tr('Add a number'),
         value: o.includeNumber,
         onChanged: (v) => c.setPassphraseOptions(o.copyWith(includeNumber: v)),
       ),
@@ -338,7 +339,13 @@ class _SeparatorRow extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
-  static const _choices = {'-': 'Dash', '.': 'Dot', ' ': 'Space'};
+  // A getter, not a const map: the labels follow the active language (the
+  // keys are the separator characters themselves).
+  Map<String, String> get _choices => {
+    '-': tr('Dash'),
+    '.': tr('Dot'),
+    ' ': tr('Space'),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -351,7 +358,7 @@ class _SeparatorRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Separator',
+            tr('Separator'),
             style: context.vaultValueStyle.copyWith(fontSize: VaultType.row),
           ),
           const SizedBox(height: AppSpacing.sm + 2),

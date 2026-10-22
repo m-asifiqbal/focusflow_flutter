@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -101,16 +102,19 @@ abstract final class NotificationLabels {
 
   /// "Off", "Every 10 min", "Every 2 hours".
   static String repeat(int minutes) => minutes <= 0
-      ? 'Never'
-      : 'Every ${ReminderAlertOptions.snoozeLabel(minutes)}';
+      ? tr('Never')
+      : tr('Every {label}', {
+          'label': ReminderAlertOptions.snoozeLabel(minutes),
+        });
 
   /// "3 times".
-  static String repeatCount(int n) => n == 1 ? 'Once' : '$n times';
+  static String repeatCount(int n) =>
+      tr('{count, plural, =1 {Once} other {# times}}', {'count': n});
 
   static String lockScreen(LockScreenVisibility v) => switch (v) {
-    LockScreenVisibility.full => 'Full content',
-    LockScreenVisibility.titleOnly => 'Title only',
-    LockScreenVisibility.hidden => 'Hidden',
+    LockScreenVisibility.full => tr('Full content'),
+    LockScreenVisibility.titleOnly => tr('Title only'),
+    LockScreenVisibility.hidden => tr('Hidden'),
   };
 
   /// What each mode really does (LocalNotificationsGateway): Android has
@@ -124,27 +128,27 @@ abstract final class NotificationLabels {
     final android =
         (platform ?? defaultTargetPlatform) == TargetPlatform.android;
     return switch (v) {
-      LockScreenVisibility.full => 'Title and details are visible',
+      LockScreenVisibility.full => tr('Title and details are visible'),
       LockScreenVisibility.titleOnly =>
         android
-            ? 'Contents stay hidden until unlocked'
-            : 'Details stay hidden until unlocked',
+            ? tr('Contents stay hidden until unlocked')
+            : tr('Details stay hidden until unlocked'),
       LockScreenVisibility.hidden =>
         android
-            ? 'Nothing shows while locked; alerts just say "Reminder"'
-            : 'Alerts just say "Reminder" — details stay in the app',
+            ? tr('Nothing shows while locked; alerts just say "Reminder"')
+            : tr('Alerts just say "Reminder" — details stay in the app'),
     };
   }
 
   static String badge(BadgeMode m) => switch (m) {
-    BadgeMode.overdue => 'Overdue count',
-    BadgeMode.today => 'Due today',
-    BadgeMode.none => 'Off',
+    BadgeMode.overdue => tr('Overdue count'),
+    BadgeMode.today => tr('Due today'),
+    BadgeMode.none => tr('Off'),
   };
 
   static String badgeHint(BadgeMode m) => switch (m) {
-    BadgeMode.overdue => 'Open tasks that are past due',
-    BadgeMode.today => 'Overdue plus open tasks due today',
-    BadgeMode.none => 'No number on the app icon',
+    BadgeMode.overdue => tr('Open tasks that are past due'),
+    BadgeMode.today => tr('Overdue plus open tasks due today'),
+    BadgeMode.none => tr('No number on the app icon'),
   };
 }

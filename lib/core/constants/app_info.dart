@@ -9,9 +9,13 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
+
 abstract final class AppInfo {
   static const String name = 'FocusFlow';
-  static const String tagline = 'Everything you need, in one calm place.';
+
+  /// A getter, not a const, so it follows the language.
+  static String get tagline => tr('Everything you need, in one calm place.');
 
   /// Deep-link scheme used by notification taps: `focusflow://item/{type}/{id}`.
   static const String deepLinkScheme = 'focusflow';

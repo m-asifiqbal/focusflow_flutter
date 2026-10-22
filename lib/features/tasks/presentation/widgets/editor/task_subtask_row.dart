@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -106,7 +107,9 @@ class _TaskSubtaskRowState extends State<TaskSubtaskRow> {
             checked: done,
             size: TaskSizes.subtaskCheck,
             color: widget.color,
-            semanticLabel: title.isEmpty ? 'Subtask done' : '$title done',
+            semanticLabel: title.isEmpty
+                ? tr('Subtask done')
+                : tr('{title} done', {'title': title}),
             onChanged: (_) => widget.onToggle(),
           ),
           const SizedBox(width: AppSpacing.xxs),
@@ -123,7 +126,7 @@ class _TaskSubtaskRowState extends State<TaskSubtaskRow> {
               onSubmitted: _submitted,
               onEditingComplete: () {},
               decoration: InputDecoration(
-                hintText: 'Subtask',
+                hintText: tr('Subtask'),
                 hintStyle: style.copyWith(
                   color: ff.inkFaint,
                   decoration: TextDecoration.none,
@@ -142,7 +145,9 @@ class _TaskSubtaskRowState extends State<TaskSubtaskRow> {
           ReorderableDragStartListener(
             index: widget.index,
             child: Semantics(
-              label: title.isEmpty ? 'Reorder subtask' : 'Reorder $title',
+              label: title.isEmpty
+                  ? tr('Reorder subtask')
+                  : tr('Reorder {title}', {'title': title}),
               button: true,
               child: SizedBox.square(
                 dimension: AppSizes.minTap,
@@ -161,7 +166,7 @@ class _TaskSubtaskRowState extends State<TaskSubtaskRow> {
     );
     return Semantics(
       customSemanticsActions: {
-        const CustomSemanticsAction(label: 'Delete subtask'): widget.onDelete,
+        CustomSemanticsAction(label: tr('Delete subtask')): widget.onDelete,
       },
       child: Dismissible(
         key: ValueKey('swipe-${widget.row.key}'),
@@ -179,7 +184,7 @@ class _TaskSubtaskRowState extends State<TaskSubtaskRow> {
                 FontAwesomeIcons.trashCan,
                 size: TaskSizes.glyphMd,
                 color: ff.onPrimary,
-                semanticLabel: 'Delete',
+                semanticLabel: tr('Delete'),
               ),
             ),
           ),

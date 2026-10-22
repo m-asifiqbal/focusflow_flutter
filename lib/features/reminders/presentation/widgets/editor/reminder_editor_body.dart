@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/alarm_overlay.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -85,8 +86,8 @@ class ReminderEditorBody extends ConsumerWidget {
           FFInfoBanner(
             icon: FontAwesomeIcons.solidBellSlash,
             colors: ModuleStyle.reminders.colors,
-            text: "Notifications are off — this reminder can't alert you.",
-            actionLabel: 'Enable',
+            text: tr('Notifications are off — this reminder can\'t alert you.'),
+            actionLabel: tr('Enable'),
             onAction: () => enableReminderNotifications(ref),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -101,7 +102,7 @@ class ReminderEditorBody extends ConsumerWidget {
           onNoteChanged: form.setNote,
         ),
         gap,
-        const FFSectionLabel('When', padding: labelPadding),
+        FFSectionLabel(tr('When'), padding: labelPadding),
         ReminderDayChips(args: args, reminder: r),
         const SizedBox(height: ReminderSizes.whenGap),
         ReminderTimeWheel(
@@ -111,25 +112,25 @@ class ReminderEditorBody extends ConsumerWidget {
         ),
         if (rolled != null)
           ReminderPastTimeHint(
-            text:
-                'This time has passed — saving sets it for '
-                '${ReminderLabels.rolledTo(rolled, now, use24h: use24h)}.',
+            text: tr('This time has passed — saving sets it for {rolledTo}.', {
+              'rolledTo': ReminderLabels.rolledTo(rolled, now, use24h: use24h),
+            }),
           ),
         gap,
-        const FFSectionLabel('Repeat', padding: labelPadding),
+        FFSectionLabel(tr('Repeat'), padding: labelPadding),
         ReminderRepeatChips(args: args, reminder: r),
         gap,
-        const FFSectionLabel('Alert', padding: labelPadding),
+        FFSectionLabel(tr('Alert'), padding: labelPadding),
         ReminderAlertCard(args: args, reminder: r),
         if (fullScreenOff) ...[
           const SizedBox(height: AppSpacing.md),
           FFInfoBanner(
             icon: FontAwesomeIcons.bellConcierge,
             colors: ModuleStyle.reminders.colors,
-            text:
-                'Full-screen alarms are off — this reminder will show as a '
-                'regular alert.',
-            actionLabel: 'Allow',
+            text: tr(
+              'Full-screen alarms are off — this reminder will show as a regular alert.',
+            ),
+            actionLabel: tr('Allow'),
             onAction: () => allowFullScreenAlarms(ref),
           ),
         ],
@@ -139,12 +140,12 @@ class ReminderEditorBody extends ConsumerWidget {
             icon: FontAwesomeIcons.windowRestore,
             colors: ModuleStyle.reminders.colors,
             text: ReminderReliabilityBanners.overAppsText,
-            actionLabel: 'Allow',
+            actionLabel: tr('Allow'),
             onAction: () => allowAlarmOverApps(ref),
           ),
         ],
         gap,
-        const FFSectionLabel('Link to', padding: labelPadding),
+        FFSectionLabel(tr('Link to'), padding: labelPadding),
         ReminderLinkCard(args: args, reminder: r),
         if (!state.isNew) ...[
           const SizedBox(height: AppSpacing.xxl),

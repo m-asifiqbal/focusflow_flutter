@@ -13,6 +13,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/platform/text_scanner.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -124,8 +125,8 @@ Future<void> runQuickScan(BuildContext context) async {
       showFFToast(
         context,
         source == ScanSource.camera
-            ? "Couldn't open the camera"
-            : "Couldn't open your photos",
+            ? tr("Couldn't open the camera")
+            : tr("Couldn't open your photos"),
         icon: FontAwesomeIcons.circleExclamation,
       );
     }
@@ -145,7 +146,9 @@ Future<void> runQuickScan(BuildContext context) async {
   if (text.isEmpty) {
     showFFToast(
       context,
-      failed ? "Couldn't read that photo" : 'No text found in that photo',
+      failed
+          ? tr("Couldn't read that photo")
+          : tr('No text found in that photo'),
       icon: FontAwesomeIcons.circleExclamation,
     );
     return;
@@ -169,21 +172,21 @@ Future<ScanSource?> _chooseScanSource(BuildContext context) async {
     context,
     FFActionSheetData(
       header: FFActionSheetHeader(
-        title: 'Quick Scan',
+        title: tr('Quick Scan'),
         icon: ModuleStyle.scan.icon,
         colors: ModuleStyle.scan.colors,
-        meta: 'Turn printed text into a note',
+        meta: tr('Turn printed text into a note'),
       ),
       actions: [
         FFActionItem(
           icon: FontAwesomeIcons.camera,
-          label: 'Take photo',
+          label: tr('Take photo'),
           colors: ModuleStyle.scan.colors,
           onTap: () => picked = ScanSource.camera,
         ),
         FFActionItem(
           icon: FontAwesomeIcons.solidImages,
-          label: 'Choose from library',
+          label: tr('Choose from library'),
           colors: ModuleStyle.notes.colors,
           onTap: () => picked = ScanSource.gallery,
         ),

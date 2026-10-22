@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -43,7 +44,7 @@ class TasksHeader extends ConsumerWidget {
     final view = ref.watch(taskViewProvider);
     final board = view == TaskView.board;
     return FFLargeHeader(
-      title: 'Tasks',
+      title: tr('Tasks'),
       leading: const FFBackButton(),
       fitTitle: true,
       padding: _padding,
@@ -54,14 +55,14 @@ class TasksHeader extends ConsumerWidget {
       actions: [
         FFRoundIconButton(
           icon: board ? FontAwesomeIcons.tableColumns : FontAwesomeIcons.listUl,
-          semanticLabel: board ? 'Show as list' : 'Show as board',
+          semanticLabel: board ? tr('Show as list') : tr('Show as board'),
           onPressed: () => ref
               .read(taskViewProvider.notifier)
               .set(board ? TaskView.list : TaskView.board),
         ),
         FFRoundIconButton(
           icon: FontAwesomeIcons.ellipsis,
-          semanticLabel: 'More options',
+          semanticLabel: tr('More options'),
           onPressed: () => showTasksMoreMenu(context, ref),
         ),
       ],
@@ -95,8 +96,8 @@ class _SelectionHeader extends ConsumerWidget {
       showUndoSnackbar(
         context,
         message: open.length == 1
-            ? '1 task completed'
-            : '${open.length} tasks completed',
+            ? tr('1 task completed')
+            : tr('{length} tasks completed', {'length': open.length}),
         icon: FontAwesomeIcons.solidCircleCheck,
         onUndo: () {
           for (final t in open) {
@@ -110,20 +111,22 @@ class _SelectionHeader extends ConsumerWidget {
     // at 360 pt.
     return FFNavHeader(
       leading: FFNavAction(
-        label: 'Done',
+        label: tr('Done'),
         emphasized: true,
         onPressed: selector.clear,
       ),
-      title: sel.count == 0 ? 'Select tasks' : '${sel.count} selected',
+      title: sel.count == 0
+          ? tr('Select tasks')
+          : tr('{count} selected', {'count': sel.count}),
       trailing: [
         FFRoundIconButton(
           icon: FontAwesomeIcons.check,
-          semanticLabel: 'Complete selected tasks',
+          semanticLabel: tr('Complete selected tasks'),
           onPressed: open.isEmpty ? null : completeAll,
         ),
         FFRoundIconButton(
           icon: FontAwesomeIcons.calendarDays,
-          semanticLabel: 'Reschedule selected tasks',
+          semanticLabel: tr('Reschedule selected tasks'),
           onPressed: chosen.isEmpty
               ? null
               : () async {
@@ -132,7 +135,7 @@ class _SelectionHeader extends ConsumerWidget {
                 },
         ),
         FFNavAction(
-          label: allSelected ? 'None' : 'All',
+          label: allSelected ? tr('None') : tr('All'),
           onPressed: () => allSelected
               ? selector.selectAll(const [])
               : selector.selectAll(visible.map((t) => t.ref)),

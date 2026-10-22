@@ -14,16 +14,20 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// Order of the Archive rows (search field's filter button).
 enum ArchiveSort {
-  newest('Recently archived'),
-  oldest('Oldest first'),
-  title('Title A–Z');
+  newest,
+  oldest,
+  title;
 
-  const ArchiveSort(this.label);
-
-  final String label;
+  /// Menu text in the active language (a getter: it follows a switch).
+  String get label => switch (this) {
+    newest => tr('Recently archived'),
+    oldest => tr('Oldest first'),
+    title => tr('Title A–Z'),
+  };
 }
 
 /// Module chip (null = All), search text and sort of the Archive screen.
@@ -69,12 +73,14 @@ class ArchiveFilter {
 
 /// When an archived item was archived, relative to now.
 enum ArchiveSection {
-  thisMonth('This month'),
-  earlier('Earlier');
+  thisMonth,
+  earlier;
 
-  const ArchiveSection(this.label);
-
-  final String label;
+  /// Section title in the active language.
+  String get label => switch (this) {
+    thisMonth => tr('This month'),
+    earlier => tr('Earlier'),
+  };
 
   static ArchiveSection of(DateTime archivedAt, DateTime now) =>
       archivedAt.year == now.year && archivedAt.month == now.month

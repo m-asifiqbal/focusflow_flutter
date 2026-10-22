@@ -25,6 +25,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/pin_attempt_guard.dart';
 import 'package:focusflow/core/crypto/vault_key_manager.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/vault/presentation/notifiers/vault_session_controller.dart';
 import 'package:focusflow/features/vault/presentation/state/vault_session_state.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
@@ -159,7 +160,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
     state = VaultPinPadState(
       step: stayOn,
       errorTick: state.errorTick + 1,
-      message: '$reason · choose another PIN',
+      message: tr('{reason} · choose another PIN', {'reason': reason}),
     );
     return true;
   }
@@ -217,7 +218,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
           state = VaultPinPadState(
             step: VaultPadStep.create,
             errorTick: state.errorTick + 1,
-            message: "PINs didn't match · try again",
+            message: tr('PINs didn\'t match · try again'),
           );
           return;
         }
@@ -229,7 +230,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
           state = VaultPinPadState(
             step: VaultPadStep.create,
             errorTick: state.errorTick + 1,
-            message: "Couldn't set up the vault · try again",
+            message: tr('Couldn\'t set up the vault · try again'),
           );
           return;
         }
@@ -265,7 +266,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
           state = VaultPinPadState(
             step: VaultPadStep.changeNew,
             errorTick: state.errorTick + 1,
-            message: "PINs didn't match · try again",
+            message: tr('PINs didn\'t match · try again'),
           );
           return;
         }
@@ -282,7 +283,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
             state = VaultPinPadState(
               step: _resetMode ? VaultPadStep.changeNew : VaultPadStep.verify,
               errorTick: state.errorTick + 1,
-              message: "Couldn't change the PIN · try again",
+              message: tr('Couldn\'t change the PIN · try again'),
             );
             return;
           }
@@ -291,7 +292,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
             state = VaultPinPadState(
               step: VaultPadStep.changeNew,
               errorTick: state.errorTick + 1,
-              message: 'The vault locked · unlock again',
+              message: tr('The vault locked · unlock again'),
             );
             return;
           }
@@ -299,7 +300,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
           state = VaultPinPadState(
             step: VaultPadStep.verify,
             errorTick: state.errorTick + 1,
-            message: 'The vault locked · try again',
+            message: tr('The vault locked · try again'),
           );
           return;
         }
@@ -342,19 +343,20 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
     final failed = ref.read(vaultSessionProvider).attempts.failed;
     final wipe = ref.read(settingsProvider).wipeAfterFailedAttempts;
     return switch (result) {
-      UnlockResult.wiped => 'Too many attempts · the vault was erased',
+      UnlockResult.wiped => tr('Too many attempts · the vault was erased'),
       UnlockResult.lockedOut => null, // the lock-out line takes over
-      UnlockResult.failed =>
-        "Couldn't check the PIN on this phone · close other apps and try "
-            'again',
-      _ when wipe && failed >= PinAttemptGuard.wipeThreshold - 3 =>
-        'Wrong PIN · ${PinAttemptGuard.wipeThreshold - failed} tries before '
-            'the vault is erased',
+      UnlockResult.failed => tr(
+        "Couldn't check the PIN on this phone · close other apps and try again",
+      ),
+      _ when wipe && failed >= PinAttemptGuard.wipeThreshold - 3 => tr(
+        '{count, plural, one {Wrong PIN · # try before the vault is erased} other {Wrong PIN · # tries before the vault is erased}}',
+        {'count': PinAttemptGuard.wipeThreshold - failed},
+      ),
       _ when failed >= PinAttemptGuard.freeAttempts => null,
-      _ =>
-        'Wrong PIN · ${PinAttemptGuard.freeAttempts - failed} '
-            '${PinAttemptGuard.freeAttempts - failed == 1 ? 'try' : 'tries'} '
-            'left',
+      _ => tr(
+        '{count, plural, one {Wrong PIN · # try left} other {Wrong PIN · # tries left}}',
+        {'count': PinAttemptGuard.freeAttempts - failed},
+      ),
     };
   }
 }

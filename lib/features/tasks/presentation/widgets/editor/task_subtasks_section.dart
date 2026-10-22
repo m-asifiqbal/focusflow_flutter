@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -56,8 +57,8 @@ class _TaskSubtasksSectionState extends ConsumerState<TaskSubtasksSection> {
     showUndoSnackbar(
       context,
       message: row.title.trim().isEmpty
-          ? 'Subtask deleted'
-          : '"${row.title.trim()}" deleted',
+          ? tr('Subtask deleted')
+          : tr('"{trim}" deleted', {'trim': row.title.trim()}),
       icon: FontAwesomeIcons.trashCan,
       onUndo: () => _form.restoreSubtask(index, row),
     );
@@ -80,13 +81,18 @@ class _TaskSubtasksSectionState extends ConsumerState<TaskSubtasksSection> {
           child: SizedBox(
             height: AppSizes.minTap,
             child: FFSectionLabel(
-              rows.isEmpty ? 'Subtasks' : 'Subtasks · $done/${rows.length}',
+              rows.isEmpty
+                  ? tr('Subtasks')
+                  : tr('Subtasks · {done}/{length}', {
+                      'done': done,
+                      'length': rows.length,
+                    }),
               padding: const EdgeInsetsDirectional.symmetric(
                 horizontal: AppSpacing.xs,
               ),
               trailing: FFTextButton(
-                label: '+ Add',
-                semanticLabel: 'Add subtask',
+                label: tr('+ Add'),
+                semanticLabel: tr('Add subtask'),
                 onPressed: _add,
                 padding: const EdgeInsetsDirectional.symmetric(
                   horizontal: AppSpacing.xxs,
@@ -107,7 +113,7 @@ class _TaskSubtasksSectionState extends ConsumerState<TaskSubtasksSection> {
                     size: TaskSizes.glyphCheck,
                     color: ff.primary,
                   ),
-                  title: 'Add a subtask',
+                  title: tr('Add a subtask'),
                   chevron: false,
                   onTap: _add,
                 )

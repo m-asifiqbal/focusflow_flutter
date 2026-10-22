@@ -1,0 +1,32 @@
+# backup / auth / onboarding: literals that are data, not shown text
+# exported / saved file names
+lib/features/backup/data/export_service.dart	FocusFlow-{}.ffbackup
+lib/features/backup/presentation/notifiers/backup_actions.dart	FocusFlow-{}.ffbackup
+lib/features/backup/domain/services/export_writers.dart	Untitled
+# file-format / product names (never translated)
+lib/features/backup/domain/entities/export_options.dart	PDF/MD
+lib/features/backup/domain/entities/import_bundle.dart	FocusFlow JSON
+lib/features/backup/domain/entities/import_bundle.dart	FocusFlow CSV
+lib/features/backup/domain/entities/import_bundle.dart	Google Keep
+lib/features/backup/domain/entities/import_bundle.dart	Todoist
+lib/features/backup/domain/entities/import_bundle.dart	Bitwarden CSV
+lib/features/backup/domain/entities/import_bundle.dart	Loop Habit
+lib/features/backup/domain/entities/import_bundle.dart	Evernote (.enex)
+lib/features/backup/presentation/widgets/export_tab.dart	Google Keep
+lib/features/backup/presentation/widgets/export_tab.dart	Todoist
+lib/features/backup/presentation/widgets/export_tab.dart	Bitwarden CSV
+lib/features/backup/presentation/widgets/export_tab.dart	Loop Habit
+lib/features/backup/presentation/widgets/export_tab.dart	Evernote (.enex)
+lib/features/backup/presentation/widgets/import_tab.dart	FocusFlow JSON / CSV
+lib/features/backup/presentation/widgets/import_tab.dart	Google Keep
+lib/features/backup/presentation/widgets/import_tab.dart	Todoist
+lib/features/backup/presentation/widgets/import_tab.dart	Bitwarden / 1Password
+lib/features/backup/presentation/widgets/import_tab.dart	Loop Habit Tracker
+lib/features/backup/presentation/widgets/import_tab.dart	Evernote
+# note text the importer stores in the task (stored data, same in every language)
+lib/features/backup/domain/services/importers/tasks_habits_importers.dart	Due: {}
+# folder path
+lib/features/backup/presentation/widgets/backup_settings_sections.dart	Documents/{}
+# toString() / typed confirmation word
+lib/features/auth/presentation/notifiers/account_actions_controller.dart	AccountActionFailure: {}
+lib/features/auth/presentation/widgets/danger_confirm_dialog.dart	DELETE

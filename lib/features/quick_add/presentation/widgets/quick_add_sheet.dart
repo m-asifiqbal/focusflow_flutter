@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -35,7 +36,7 @@ class QuickAddSheet extends StatelessWidget {
         AppSpacing.xl,
       ),
       footer: FFSecondaryButton(
-        label: 'Cancel',
+        label: tr('Cancel'),
         variant: FFSecondaryVariant.surface,
         // Mockup: darker than the subtitle's inkMuted.
         foreground: ff.ink.withValues(alpha: 0.7),
@@ -48,14 +49,14 @@ class QuickAddSheet extends StatelessWidget {
           Semantics(
             header: true,
             child: Text(
-              'What’s next?',
+              tr('What’s next?'),
               textAlign: TextAlign.center,
               style: context.text.title,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Capture anything in two taps',
+            tr('Capture anything in two taps'),
             textAlign: TextAlign.center,
             style: context.text.bodySmall,
           ),

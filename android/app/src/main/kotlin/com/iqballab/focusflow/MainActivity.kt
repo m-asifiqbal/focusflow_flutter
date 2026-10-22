@@ -200,6 +200,15 @@ class MainActivity : FlutterFragmentActivity() {
                         )
                         result.success(null)
                     }
+                    "lockScreenAccess" -> result.success(
+                        MakerPermissions.status(
+                            this,
+                            call.argument<List<String>>("channelIds") ?: emptyList()
+                        )
+                    )
+                    "openLockScreenSettings" -> result.success(
+                        MakerPermissions.openSettings(this, call.argument<String>("channelId"))
+                    )
                     "openAutostartSettings" -> result.success(openAutostartSettings())
                     "syncAlarmGuard" -> {
                         // The notification engine's report after each pass:

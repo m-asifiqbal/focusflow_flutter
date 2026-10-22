@@ -19,6 +19,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -132,8 +133,8 @@ class NoteBodyActions {
         showFFToast(
           context,
           source == NoteImageSource.camera
-              ? 'Camera access is off — allow it in Settings'
-              : 'Photo access is off — allow it in Settings',
+              ? tr('Camera access is off — allow it in Settings')
+              : tr('Photo access is off — allow it in Settings'),
           icon: FontAwesomeIcons.triangleExclamation,
         );
       }
@@ -145,7 +146,7 @@ class NoteBodyActions {
     if (relative == null) {
       showFFToast(
         context,
-        "Couldn't add the image",
+        tr("Couldn't add the image"),
         icon: FontAwesomeIcons.triangleExclamation,
       );
       return;
@@ -172,13 +173,13 @@ class NoteBodyActions {
         actions: [
           FFActionItem(
             icon: FontAwesomeIcons.images,
-            label: 'Choose from library',
+            label: tr('Choose from library'),
             colors: ModuleStyle.notes.colors,
             onTap: () => picked = NoteImageSource.gallery,
           ),
           FFActionItem(
             icon: FontAwesomeIcons.camera,
-            label: 'Take photo',
+            label: tr('Take photo'),
             colors: ModuleStyle.scan.colors,
             onTap: () => picked = NoteImageSource.camera,
           ),
@@ -218,7 +219,7 @@ class NoteBodyActions {
       if (context.mounted) {
         showFFToast(
           context,
-          "Speech recognition isn't available",
+          tr("Speech recognition isn't available"),
           icon: FontAwesomeIcons.microphone,
         );
       }
@@ -296,7 +297,7 @@ class NoteBodyActions {
     if (!context.mounted) return;
     showUndoSnackbar(
       context,
-      message: '#${tag.name} removed',
+      message: tr('#{name} removed', {'name': tag.name}),
       icon: FontAwesomeIcons.tag,
       onUndo: () => unawaited(controller.addTag(tag.name)),
     );

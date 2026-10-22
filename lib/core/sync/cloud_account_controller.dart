@@ -19,6 +19,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/account_store.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
@@ -77,9 +78,7 @@ class GoogleCloudAccountController
   @override
   Future<CloudAccount?> signInWithGoogle() async {
     if (!googleAvailable) {
-      throw const CloudAuthException(
-        'Google Drive is not set up in this build',
-      );
+      throw CloudAuthException(tr('Google Drive is not set up in this build'));
     }
     final p = await _google.signIn();
     if (p == null) return null;

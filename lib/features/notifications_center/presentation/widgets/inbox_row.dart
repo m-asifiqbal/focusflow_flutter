@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -101,7 +102,9 @@ class InboxRow extends StatelessWidget {
                   colors: colors,
                   size: tile,
                   radius: AppRadii.tile,
-                  semanticLabel: '${entry.kind.label} notification',
+                  semanticLabel: tr('{label} notification', {
+                    'label': entry.kind.label,
+                  }),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(child: _content(context, ff)),
@@ -123,7 +126,7 @@ class InboxRow extends StatelessWidget {
           children: [
             Expanded(
               child: Semantics(
-                label: entry.isRead ? null : 'Unread',
+                label: entry.isRead ? null : tr('Unread'),
                 child: Text(
                   entry.title,
                   maxLines: 2,

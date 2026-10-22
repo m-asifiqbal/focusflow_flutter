@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart' as settings;
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -122,7 +123,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                         ),
                         child: FFSearchField(
                           controller: _search,
-                          hint: 'Search notes...',
+                          hint: tr('Search notes...'),
                           onChanged: ref
                               .read(notesListFilterProvider.notifier)
                               .search,
@@ -131,7 +132,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                               .search(''),
                           onFilter: () => pickNotesTagFilter(context, ref),
                           filterActive: tagActive,
-                          filterSemanticLabel: 'Filter by tag',
+                          filterSemanticLabel: tr('Filter by tag'),
                         ),
                       ),
                       const NotesFolderChips(),

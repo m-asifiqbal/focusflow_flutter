@@ -17,6 +17,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/notifications/planning/planner_input.dart';
 import 'package:focusflow/core/notifications/planning/task_day_index.dart';
@@ -74,7 +75,7 @@ abstract final class DigestPlanner {
           (key, fireAt) => _digest(
             key,
             fireAt,
-            title: 'Good morning',
+            title: tr('Good morning'),
             body: _morningBody(input, day, index),
             route: AppRoutes.home,
           ),
@@ -88,10 +89,10 @@ abstract final class DigestPlanner {
           (key, fireAt) => _digest(
             key,
             fireAt,
-            title: 'Evening review',
+            title: tr('Evening review'),
             body: day == input.today
                 ? _eveningBody(input, day, index)
-                : 'Look back on your day and plan tomorrow.',
+                : tr('Look back on your day and plan tomorrow.'),
             route: AppRoutes.home,
           ),
         );
@@ -104,8 +105,8 @@ abstract final class DigestPlanner {
           (key, fireAt) => _digest(
             key,
             fireAt,
-            title: 'Your weekly report',
-            body: 'See how your week went — tasks, habits and focus time.',
+            title: tr('Your weekly report'),
+            body: tr('See how your week went — tasks, habits and focus time.'),
             route: AppRoutes.insights,
           ),
         );
@@ -145,7 +146,9 @@ abstract final class DigestPlanner {
       key: key,
       fireAt: fireAt,
       category: NotificationCategory.task,
-      title: n == 1 ? '1 task is overdue' : '$n tasks are overdue',
+      title: n == 1
+          ? tr('1 task is overdue')
+          : tr('{n} tasks are overdue', {'n': n}),
       body: overdue
           .map((t) => t.title.trim())
           .where((t) => t.isNotEmpty)
@@ -201,12 +204,12 @@ abstract final class DigestPlanner {
         .where((s) => HabitSchedule.isScheduledOn(s.habit, day))
         .length;
     final parts = [
-      if (tasks > 0) _count(tasks, 'task'),
-      if (reminders > 0) _count(reminders, 'reminder'),
-      if (habits > 0) _count(habits, 'habit'),
+      if (tasks > 0) _count(tasks, _Noun.task),
+      if (reminders > 0) _count(reminders, _Noun.reminder),
+      if (habits > 0) _count(habits, _Noun.habit),
     ];
-    if (parts.isEmpty) return 'Nothing scheduled today — a fresh start.';
-    return '${_join(parts)} today.';
+    if (parts.isEmpty) return tr('Nothing scheduled today — a fresh start.');
+    return tr('{list} today.', {'list': _join(parts)});
   }
 
   static String _eveningBody(
@@ -227,17 +230,42 @@ abstract final class DigestPlanner {
     final scheduled = input.habits.where((s) => s.isScheduled).toList();
     final habitsDone = scheduled.where((s) => s.isDone).length;
     final parts = [
-      if (done + open > 0) 'You finished $done of ${done + open} tasks',
+      if (done + open > 0)
+        tr('You finished {done} of {total} tasks', {
+          'done': done,
+          'total': done + open,
+        }),
       if (scheduled.isNotEmpty)
-        '$habitsDone of ${scheduled.length} habits done',
+        tr('{done} of {total} habits done', {
+          'done': habitsDone,
+          'total': scheduled.length,
+        }),
     ];
-    if (parts.isEmpty) return 'Look back on your day and plan tomorrow.';
-    return '${parts.join(' · ')}. Plan tomorrow?';
+    if (parts.isEmpty) return tr('Look back on your day and plan tomorrow.');
+    return tr('{summary}. Plan tomorrow?', {'summary': parts.join(' · ')});
   }
 
-  static String _count(int n, String noun) => '$n $noun${n == 1 ? '' : 's'}';
+  static String _count(int n, _Noun noun) => switch (noun) {
+    _Noun.task => tr('{count, plural, one {# task} other {# tasks}}', {
+      'count': n,
+    }),
+    _Noun.reminder => tr(
+      '{count, plural, one {# reminder} other {# reminders}}',
+      {'count': n},
+    ),
+    _Noun.habit => tr('{count, plural, one {# habit} other {# habits}}', {
+      'count': n,
+    }),
+  };
 
-  static String _join(List<String> parts) => parts.length == 1
-      ? parts.first
-      : '${parts.sublist(0, parts.length - 1).join(', ')} and ${parts.last}';
+  /// "a", "a and b", "a, b and c" (at most three) — one text per length,
+  /// because the way a list is joined differs between languages.
+  static String _join(List<String> parts) => switch (parts.length) {
+    1 => parts[0],
+    2 => tr('{a} and {b}', {'a': parts[0], 'b': parts[1]}),
+    _ => tr('{a}, {b} and {c}', {'a': parts[0], 'b': parts[1], 'c': parts[2]}),
+  };
 }
+
+/// What the morning briefing counts.
+enum _Noun { task, reminder, habit }

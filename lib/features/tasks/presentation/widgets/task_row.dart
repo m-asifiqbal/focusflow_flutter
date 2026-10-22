@@ -16,6 +16,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -158,8 +159,8 @@ class TaskRow extends StatelessWidget {
         color: ff.primary,
         size: TaskSizes.check,
         semanticLabel: selected
-            ? 'Deselect ${task.title}'
-            : 'Select ${task.title}',
+            ? tr('Deselect {title}', {'title': task.title})
+            : tr('Select {title}', {'title': task.title}),
         onChanged: onCheck,
       );
     }
@@ -168,8 +169,8 @@ class TaskRow extends StatelessWidget {
       color: TaskStyle.module.solid,
       size: TaskSizes.check,
       semanticLabel: _done
-          ? 'Mark ${task.title} as not done'
-          : 'Complete ${task.title}',
+          ? tr('Mark {title} as not done', {'title': task.title})
+          : tr('Complete {title}', {'title': task.title}),
       onChanged: onCheck,
     );
   }
@@ -192,7 +193,7 @@ class TaskRow extends StatelessWidget {
               decorationThickness: 2,
             ),
             child: Text(
-              task.title.isEmpty ? 'Untitled task' : task.title,
+              task.title.isEmpty ? tr('Untitled task') : task.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -248,7 +249,7 @@ class TaskRow extends StatelessWidget {
       if (pill != null) FFTag(pill.$1, colors: pill.$2),
       if (task.isRepeating)
         Semantics(
-          label: 'Repeats',
+          label: tr('Repeats'),
           child: Icon(
             FontAwesomeIcons.arrowsRotate,
             size: TaskSizes.glyphMeta,
@@ -257,7 +258,7 @@ class TaskRow extends StatelessWidget {
         ),
       if (task.hasReminder)
         Semantics(
-          label: 'Reminder',
+          label: tr('Reminder'),
           child: Icon(
             FontAwesomeIcons.bell,
             size: TaskSizes.glyphMeta,
@@ -372,7 +373,7 @@ class _SubtaskList extends StatelessWidget {
         if (more > 0)
           Semantics(
             button: true,
-            label: 'Show $more more subtasks',
+            label: tr('Show {more} more subtasks', {'more': more}),
             excludeSemantics: true,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -386,7 +387,7 @@ class _SubtaskList extends StatelessWidget {
                       start: AppSpacing.sm,
                     ),
                     child: Text(
-                      '+ $more more',
+                      tr('+ {more} more', {'more': more}),
                       style: context.text.meta.copyWith(
                         fontWeight: FontWeight.w600,
                         color: ff.primary,
@@ -416,7 +417,7 @@ class _SubtaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
-    final title = subtask.title.trim().isEmpty ? 'Subtask' : subtask.title;
+    final title = subtask.title.trim().isEmpty ? tr('Subtask') : subtask.title;
     return Row(
       children: [
         FFCheckCircle(
@@ -424,8 +425,8 @@ class _SubtaskTile extends StatelessWidget {
           color: TaskStyle.module.solid,
           size: TaskSizes.subtaskRowCheck,
           semanticLabel: done
-              ? 'Mark subtask $title as not done'
-              : 'Complete subtask $title',
+              ? tr('Mark subtask {title} as not done', {'title': title})
+              : tr('Complete subtask {title}', {'title': title}),
           onChanged: onToggle == null ? null : (_) => onToggle!(subtask),
         ),
         const SizedBox(width: AppSpacing.xs),
@@ -470,7 +471,10 @@ class _SubtaskProgress extends StatelessWidget {
         const SizedBox(width: AppSpacing.md),
         Flexible(
           child: Text(
-            '${task.subtaskDone}/${task.subtaskTotal} subtasks',
+            tr('{subtaskDone}/{subtaskTotal} subtasks', {
+              'subtaskDone': task.subtaskDone,
+              'subtaskTotal': task.subtaskTotal,
+            }),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.text.meta.copyWith(

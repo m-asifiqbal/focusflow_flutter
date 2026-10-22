@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -103,7 +104,7 @@ class _ReminderTitleCardState extends State<ReminderTitleCard> {
                   onSubmitted: (_) => _noteFocus.requestFocus(),
                   style: titleStyle,
                   decoration: bare.copyWith(
-                    hintText: 'Reminder title',
+                    hintText: tr('Reminder title'),
                     hintStyle: titleStyle.copyWith(color: ff.inkFaint),
                   ),
                 ),
@@ -117,7 +118,7 @@ class _ReminderTitleCardState extends State<ReminderTitleCard> {
                   onChanged: widget.onNoteChanged,
                   style: noteStyle,
                   decoration: bare.copyWith(
-                    hintText: 'Add a note…',
+                    hintText: tr('Add a note…'),
                     hintStyle: noteStyle.copyWith(color: ff.inkFaint),
                   ),
                 ),

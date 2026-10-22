@@ -19,6 +19,7 @@ import 'dart:math' as math;
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 
@@ -164,7 +165,10 @@ class _TimeSplitDonutState extends State<TimeSplitDonut>
                             style: context.text.stat,
                           ),
                           Text(
-                            widget.total == 1 ? 'action' : 'actions',
+                            tr(
+                              '{count, plural, one {action} other {actions}}',
+                              {'count': widget.total},
+                            ),
                             style: context.text.caption.copyWith(
                               color: ff.inkMuted,
                             ),

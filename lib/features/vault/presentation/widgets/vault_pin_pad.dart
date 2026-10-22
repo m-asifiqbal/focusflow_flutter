@@ -15,6 +15,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -60,7 +61,10 @@ class _VaultPinDotsState extends ConsumerState<VaultPinDots>
     });
     const n = VaultPinPadState.pinLength;
     return Semantics(
-      label: 'PIN, ${pad.length} of $n digits entered',
+      label: tr('PIN, {length} of {n} digits entered', {
+        'length': pad.length,
+        'n': n,
+      }),
       liveRegion: true,
       child: AnimatedBuilder(
         animation: _shake,
@@ -115,7 +119,7 @@ class VaultPadStatusLine extends ConsumerWidget {
       child = Text(pad.message!, textAlign: TextAlign.center, style: style);
     } else if (pad.busy) {
       child = Text(
-        'Checking…',
+        tr('Checking…'),
         style: context.text.meta.copyWith(color: ff.vaultInkMuted),
       );
     } else {
@@ -164,7 +168,9 @@ class _LockoutCountdownState extends ConsumerState<_LockoutCountdown> {
       return const SizedBox.shrink();
     }
     return Text(
-      'Too many attempts · try again in ${formatCountdown(left)}',
+      tr('Too many attempts · try again in {formatCountdown}', {
+        'formatCountdown': formatCountdown(left),
+      }),
       textAlign: TextAlign.center,
       style: widget.style,
     );
@@ -204,7 +210,7 @@ class VaultKeypad extends ConsumerWidget {
             const SizedBox.shrink(),
             digit('0'),
             _Key(
-              semanticLabel: 'Delete last digit',
+              semanticLabel: tr('Delete last digit'),
               icon: FontAwesomeIcons.deleteLeft,
               onTap: () => tap(pad.backspace),
             ),

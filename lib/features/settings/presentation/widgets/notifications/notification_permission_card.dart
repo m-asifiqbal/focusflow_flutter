@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -53,10 +54,10 @@ class NotificationPermissionCard extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           FFInfoBanner.danger(
             icon: FontAwesomeIcons.bellSlash,
-            text:
-                'Notifications are blocked in system settings, so reminders '
-                "can't alert you.",
-            actionLabel: 'Open settings',
+            text: tr(
+              'Notifications are blocked in system settings, so reminders can\'t alert you.',
+            ),
+            actionLabel: tr('Open settings'),
             onAction: controller.requestPermission,
           ),
         ],
@@ -68,12 +69,12 @@ class NotificationPermissionCard extends ConsumerWidget {
     bool enabled,
     AsyncValue<NotificationPermission> permission,
   ) {
-    if (!enabled) return 'All notifications are paused';
+    if (!enabled) return tr('All notifications are paused');
     return switch (permission.valueOrNull) {
-      null => 'Checking system permission…',
-      NotificationPermission.granted => 'System permission granted',
-      NotificationPermission.denied => 'Blocked in system settings',
-      NotificationPermission.notDetermined => 'Tap to allow notifications',
+      null => tr('Checking system permission…'),
+      NotificationPermission.granted => tr('System permission granted'),
+      NotificationPermission.denied => tr('Blocked in system settings'),
+      NotificationPermission.notDetermined => tr('Tap to allow notifications'),
     };
   }
 }
@@ -96,7 +97,7 @@ class _HeroCard extends StatelessWidget {
     final radius = BorderRadius.circular(AppRadii.card);
     return Semantics(
       toggled: on,
-      label: 'Allow notifications',
+      label: tr('Allow notifications'),
       value: status,
       onTap: () => onChanged(!on),
       excludeSemantics: true,
@@ -136,7 +137,7 @@ class _HeroCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Allow notifications',
+                          tr('Allow notifications'),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: context.text.cardTitle.copyWith(

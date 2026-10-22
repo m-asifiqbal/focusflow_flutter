@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/crypto/password_strength.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -67,7 +68,7 @@ class VaultGeneratePill extends StatelessWidget {
     final ff = context.ff;
     return Semantics(
       button: true,
-      label: 'Generate password',
+      label: tr('Generate password'),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,
@@ -96,7 +97,7 @@ class VaultGeneratePill extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs + 2),
                   Text(
-                    'Generate',
+                    tr('Generate'),
                     style: context.text.rowTitle.copyWith(
                       fontSize: VaultType.subtitle,
                       fontWeight: FontWeight.w600,
@@ -128,16 +129,15 @@ class VaultStrengthMeter extends StatelessWidget {
       _ => ff.vaultAccent,
     };
     final filled = strength.length == 0 ? 0 : score.clamp(1, 4);
-    final crack = strength.crackTimeLabel;
+    // `summary` is "<label> · could be cracked instantly" / "… would take
+    // <time> to crack", decided by crackSeconds (never by the translated text).
     final text = strength.length == 0
-        ? 'Add a password or generate one'
-        : crack == 'instantly'
-        ? '${strength.label} · could be cracked instantly'
-        : '${strength.label} · would take $crack to crack';
+        ? tr('Add a password or generate one')
+        : strength.summary;
     return Padding(
       padding: const EdgeInsetsDirectional.only(top: AppSpacing.lg + 2),
       child: Semantics(
-        label: 'Password strength: $text',
+        label: tr('Password strength: {text}', {'text': text}),
         excludeSemantics: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

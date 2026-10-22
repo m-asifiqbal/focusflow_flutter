@@ -31,6 +31,7 @@ import 'package:alarm/alarm.dart';
 import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
 
@@ -227,8 +228,8 @@ class PackageAlarmDriver implements AlarmDriver {
           notificationSettings: NotificationSettings(
             title: r.title,
             body: r.body,
-            stopButton: 'Stop',
-            androidSnoozeButton: 'Snooze',
+            stopButton: tr('Stop'),
+            androidSnoozeButton: tr('Snooze'),
             // A stray swipe must not silence a wake-up alarm.
             androidStopAlarmOnDismiss: false,
           ),

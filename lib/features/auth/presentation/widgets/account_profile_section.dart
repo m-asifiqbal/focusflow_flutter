@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -53,14 +54,16 @@ class AccountProfileSection extends ConsumerWidget {
     );
 
     return FFGroupedList(
-      label: 'Profile',
+      label: tr('Profile'),
       dividerIndent:
           AppSpacing.lg + AppSizes.iconTileSm + AppSpacing.rowLeadingGap,
       children: [
         FFListRow(
           leading: tile(FontAwesomeIcons.solidUser, ModuleStyle.notes.colors),
-          title: 'Display name',
-          value: settings.displayName.isEmpty ? 'Add' : settings.displayName,
+          title: tr('Display name'),
+          value: settings.displayName.isEmpty
+              ? tr('Add')
+              : settings.displayName,
           onTap: () async {
             final name = await showDisplayNameSheet(
               context,
@@ -71,8 +74,10 @@ class AccountProfileSection extends ConsumerWidget {
         ),
         FFListRow(
           leading: tile(FontAwesomeIcons.bullseye, ModuleStyle.vault.colors),
-          title: 'Daily focus goal',
-          value: goal == 1 ? '1 task' : '$goal tasks',
+          title: tr('Daily focus goal'),
+          value: tr('{count, plural, one {# task} other {# tasks}}', {
+            'count': goal,
+          }),
           onTap: () async {
             final v = await showFocusGoalSheet(context, goal);
             if (v != null) await actions.setDailyFocusGoal(v);
@@ -80,8 +85,8 @@ class AccountProfileSection extends ConsumerWidget {
         ),
         FFListRow(
           leading: tile(FontAwesomeIcons.earthAsia, _skyTile),
-          title: 'Time zone',
-          value: zone.isEmpty ? 'Device' : zone,
+          title: tr('Time zone'),
+          value: zone.isEmpty ? tr('Device') : zone,
           onTap: () async {
             final pick = await showTimeZoneSheet(
               context,
@@ -118,7 +123,7 @@ class AccountDevicesSection extends ConsumerWidget {
       if (context.mounted) {
         showUndoSnackbar(
           context,
-          message: "Couldn't remove the device. Try again when online.",
+          message: tr('Couldn\'t remove the device. Try again when online.'),
           icon: FontAwesomeIcons.triangleExclamation,
         );
       }
@@ -132,11 +137,11 @@ class AccountDevicesSection extends ConsumerWidget {
     final data = devices.valueOrNull;
     final error = data?.cloudError;
     return FFGroupedList(
-      label: 'Linked devices',
+      label: tr('Linked devices'),
       labelAction: error == null
           ? null
           : FFTextButton(
-              label: 'Retry',
+              label: tr('Retry'),
               onPressed: () => ref.invalidate(linkedDevicesProvider),
             ),
       footer: error,
@@ -175,21 +180,24 @@ Future<RemoveDeviceChoice?> showRemoveDeviceDialog(
     icon: FontAwesomeIcons.mobileScreenButton,
     iconColor: ctx.ff.dangerSolid,
     iconBackground: ctx.ff.dangerSoft,
-    title: 'Remove $name?',
-    message:
-        'It stops appearing here and is linked again if it syncs. Its '
-        'backups stay in Google Drive, so you can still restore them.',
+    title: tr('Remove {name}?', {'name': name}),
+    message: tr(
+      'It stops appearing here and is linked again if it syncs. Its backups stay in Google Drive, so you can still restore them.',
+    ),
     actions: [
       FFDangerButton(
-        label: 'Remove',
+        label: tr('Remove'),
         onPressed: () => Navigator.of(ctx).pop(RemoveDeviceChoice.keepBackups),
       ),
       FFSoftDangerButton(
-        label: 'Also delete its backups',
+        label: tr('Also delete its backups'),
         onPressed: () =>
             Navigator.of(ctx).pop(RemoveDeviceChoice.alsoDeleteBackups),
       ),
-      FFTextButton(label: 'Cancel', onPressed: () => Navigator.of(ctx).pop()),
+      FFTextButton(
+        label: tr('Cancel'),
+        onPressed: () => Navigator.of(ctx).pop(),
+      ),
     ],
   ),
 );
@@ -209,10 +217,12 @@ class _DeviceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final ff = context.ff;
     final when = device.isThisDevice
-        ? 'This device'
+        ? tr('This device')
         : device.lastSyncAt == null
-        ? 'Never synced'
-        : 'Last synced ${DateUtilsX.ago(device.lastSyncAt!, now)}';
+        ? tr('Never synced')
+        : tr('Last synced {when}', {
+            'when': DateUtilsX.ago(device.lastSyncAt!, now),
+          });
     final subtitle = device.platform.isEmpty
         ? when
         : '$when · ${device.platform}';
@@ -231,15 +241,15 @@ class _DeviceRow extends StatelessWidget {
         subtitle: subtitle,
         chevron: false,
         trailing: device.isThisDevice
-            ? FFTag('Active', colors: ModuleStyle.notes.colors)
+            ? FFTag(tr('Active'), colors: ModuleStyle.notes.colors)
             : FFTextButton(
-                label: 'Remove',
+                label: tr('Remove'),
                 color: ff.dangerStrong,
                 style: context.text.bodySmall.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
-                semanticLabel: 'Remove ${device.name}',
+                semanticLabel: tr('Remove {name}', {'name': device.name}),
                 onPressed: onRemove,
               ),
       ),

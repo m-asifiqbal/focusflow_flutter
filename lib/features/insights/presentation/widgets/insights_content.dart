@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_snapshot.dart';
@@ -56,14 +57,14 @@ class InsightsContent extends StatelessWidget {
           child: InsightsKpiGrid(
             cards: [
               InsightsKpiCard(
-                label: 'Task completion',
+                label: tr('Task completion'),
                 value: InsightsFormat.percent(s.taskCompletion.current.rate),
                 number: _pct(s.taskCompletion.current.rate),
                 format: _fmtPct,
                 delta: _rateDelta(s.taskCompletion),
               ),
               InsightsKpiCard(
-                label: 'Focus hours',
+                label: tr('Focus hours'),
                 value: InsightsFormat.hours(focus.current),
                 number: focus.current.toDouble(),
                 format: (v) => InsightsFormat.hours(v.round()),
@@ -72,20 +73,20 @@ class InsightsContent extends StatelessWidget {
                     // Hours with one decimal, like the value.
                     : KpiDelta(
                         ((focus.current - focus.previous) / 6).round() / 10,
-                        'h',
+                        tr('h'),
                       ),
                 onTap: startFocus,
-                semanticHint: 'Starts a focus session',
+                semanticHint: tr('Starts a focus session'),
               ),
               InsightsKpiCard(
-                label: 'Habit consistency',
+                label: tr('Habit consistency'),
                 value: InsightsFormat.percent(s.habitConsistency.current.rate),
                 number: _pct(s.habitConsistency.current.rate),
                 format: _fmtPct,
                 delta: _rateDelta(s.habitConsistency),
               ),
               InsightsKpiCard(
-                label: 'Notes created',
+                label: tr('Notes created'),
                 value: '${s.notesCreated.current}',
                 number: s.notesCreated.current.toDouble(),
                 format: (v) => '${v.round()}',

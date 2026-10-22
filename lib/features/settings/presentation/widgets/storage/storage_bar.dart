@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -21,15 +22,24 @@ import 'package:focusflow/features/settings/presentation/settings_style.dart';
 
 /// The measured buckets, in bar order.
 enum StorageBucket {
-  database('Database', 'Notes, tasks, habits & vault · encrypted'),
-  attachments('Attachments', 'Images and note covers'),
-  backups('Local backups', 'Backup files kept on this device'),
-  cache('Cache', 'Temporary files · safe to clear');
+  database,
+  attachments,
+  backups,
+  cache;
 
-  const StorageBucket(this.label, this.hint);
+  String get label => switch (this) {
+    StorageBucket.database => tr('Database'),
+    StorageBucket.attachments => tr('Attachments'),
+    StorageBucket.backups => tr('Local backups'),
+    StorageBucket.cache => tr('Cache'),
+  };
 
-  final String label;
-  final String hint;
+  String get hint => switch (this) {
+    StorageBucket.database => tr('Notes, tasks, habits & vault · encrypted'),
+    StorageBucket.attachments => tr('Images and note covers'),
+    StorageBucket.backups => tr('Backup files kept on this device'),
+    StorageBucket.cache => tr('Temporary files · safe to clear'),
+  };
 
   IconData get icon => switch (this) {
     StorageBucket.database => FontAwesomeIcons.database,

@@ -16,6 +16,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/router/open_location.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -70,7 +71,7 @@ Future<void> runInboxAction(
       _result(
         context,
         undo,
-        '"${e.title}" done',
+        tr('"{title}" done', {'title': e.title}),
         FontAwesomeIcons.solidCircleCheck,
       );
     case InboxActions.snooze:
@@ -79,7 +80,7 @@ Future<void> runInboxAction(
       _result(
         context,
         undo,
-        'Snoozed for $snoozeMinutes min',
+        tr('Snoozed for {m} min', {'m': snoozeMinutes}),
         FontAwesomeIcons.solidClock,
       );
     case InboxActions.reschedule:
@@ -89,7 +90,7 @@ Future<void> runInboxAction(
       if (overdue.isEmpty) {
         showFFToast(
           context,
-          'Nothing is overdue',
+          tr('Nothing is overdue'),
           icon: FontAwesomeIcons.solidCircleCheck,
         );
         return;
@@ -100,7 +101,7 @@ Future<void> runInboxAction(
       if (!context.mounted) return;
       showFFToast(
         context,
-        logged ? 'Checked in' : 'Already up to date',
+        logged ? tr('Checked in') : tr('Already up to date'),
         icon: FontAwesomeIcons.solidCircleCheck,
       );
     default: // view, open, fix
@@ -110,7 +111,7 @@ Future<void> runInboxAction(
 
 void _result(BuildContext context, InboxUndo? undo, String msg, IconData icon) {
   if (undo == null) {
-    showFFToast(context, 'Already up to date', icon: icon);
+    showFFToast(context, tr('Already up to date'), icon: icon);
     return;
   }
   showUndoSnackbar(context, message: msg, icon: icon, onUndo: () => undo());
@@ -128,7 +129,7 @@ Future<void> dismissInboxEntry(
   if (!context.mounted) return;
   showUndoSnackbar(
     context,
-    message: 'Notification dismissed',
+    message: tr('Notification dismissed'),
     icon: FontAwesomeIcons.solidBellSlash,
     onUndo: () async {
       await undo();
@@ -154,7 +155,9 @@ Future<void> clearInboxEntries(
   final n = entries.length;
   showUndoSnackbar(
     context,
-    message: n == 1 ? 'Notification cleared' : '$n notifications cleared',
+    message: n == 1
+        ? tr('Notification cleared')
+        : tr('{n} notifications cleared', {'n': n}),
     icon: FontAwesomeIcons.solidBellSlash,
     onUndo: () async {
       await undo();
@@ -165,12 +168,12 @@ Future<void> clearInboxEntries(
 
 /// The label of an inline button ([snoozeMinutes] for "Snooze 10m").
 String inboxActionLabel(String action, int snoozeMinutes) => switch (action) {
-  InboxActions.done => 'Done',
-  InboxActions.snooze => 'Snooze ${snoozeMinutes}m',
-  InboxActions.reschedule => 'Reschedule',
-  InboxActions.view => 'View',
-  InboxActions.open => 'Open',
-  InboxActions.fix => 'Fix',
-  InboxActions.log => 'Log',
+  InboxActions.done => tr('Done'),
+  InboxActions.snooze => tr('Snooze {m}m', {'m': snoozeMinutes}),
+  InboxActions.reschedule => tr('Reschedule'),
+  InboxActions.view => tr('View'),
+  InboxActions.open => tr('Open'),
+  InboxActions.fix => tr('Fix'),
+  InboxActions.log => tr('Log'),
   _ => action,
 };

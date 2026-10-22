@@ -17,6 +17,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -37,7 +38,12 @@ class TaskBoard extends ConsumerWidget {
   /// Space to keep clear under the cards (tab bar).
   final double bottomInset;
 
-  static const List<String> columns = ['To do', 'Doing', 'Done'];
+  /// Column title in the active language (0 To do · 1 Doing · 2 Done).
+  static String columnTitle(int index) => switch (index) {
+    0 => tr('To do'),
+    1 => tr('Doing'),
+    _ => tr('Done'),
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,7 +53,7 @@ class TaskBoard extends ConsumerWidget {
       return async.hasError
           ? Center(
               child: FFTextButton(
-                label: 'Retry',
+                label: tr('Retry'),
                 onPressed: () => ref.invalidate(taskBoardTasksProvider),
               ),
             )
@@ -66,7 +72,7 @@ class TaskBoard extends ConsumerWidget {
         AppSpacing.screen,
         0,
       ),
-      itemCount: columns.length,
+      itemCount: byColumn.length,
       separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
       itemBuilder: (context, i) => SizedBox(
         width: width,
@@ -101,7 +107,7 @@ class _BoardColumn extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FFSectionLabel(
-          '${TaskBoard.columns[index]} · ${tasks.length}',
+          '${TaskBoard.columnTitle(index)} · ${tasks.length}',
           padding: const EdgeInsetsDirectional.fromSTEB(
             AppSpacing.xs,
             AppSpacing.sm,
@@ -120,8 +126,8 @@ class _BoardColumn extends ConsumerWidget {
             itemBuilder: (context, i) {
               final task = tasks[i];
               final move = switch (index) {
-                0 => ('Start', FontAwesomeIcons.play, 1),
-                1 => ('To do', FontAwesomeIcons.arrowLeft, 0),
+                0 => (tr('Start'), FontAwesomeIcons.play, 1),
+                1 => (tr('To do'), FontAwesomeIcons.arrowLeft, 0),
                 _ => null,
               };
               return Column(

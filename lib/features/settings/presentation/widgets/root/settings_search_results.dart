@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -30,13 +31,15 @@ class SettingsSearchResults extends ConsumerWidget {
         child: FFEmptyState.compact(
           colors: SettingsTints.slate,
           icon: FontAwesomeIcons.magnifyingGlass,
-          title: 'No settings match "$query"',
-          body: 'Try another word, like "dark", "backup" or "PIN".',
+          title: tr('No settings match "{query}"', {'query': query}),
+          body: tr('Try another word, like "dark", "backup" or "PIN".'),
         ),
       );
     }
     return FFGroupedList(
-      label: results.length == 1 ? '1 result' : '${results.length} results',
+      label: tr('{count, plural, one {# result} other {# results}}', {
+        'count': results.length,
+      }),
       dividerIndent: AppSpacing.lg,
       children: [
         for (final e in results)

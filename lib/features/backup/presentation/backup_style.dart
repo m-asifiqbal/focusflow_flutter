@@ -11,6 +11,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -51,10 +52,12 @@ abstract final class BackupLabels {
   /// "just now", "2 min ago", "3 h ago", "Yesterday", "Jun 11".
   static String ago(DateTime t, DateTime now) {
     final d = now.difference(t);
-    if (d.inSeconds < 60) return 'just now';
-    if (d.inMinutes < 60) return '${d.inMinutes} min ago';
-    if (d.inHours < 24) return '${d.inHours} h ago';
-    if (DateUtilsX.daysBetween(t, now) == 1) return 'yesterday';
+    if (d.inSeconds < 60) return tr('just now');
+    if (d.inMinutes < 60) {
+      return tr('{m} min ago', {'m': d.inMinutes});
+    }
+    if (d.inHours < 24) return tr('{h} h ago', {'h': d.inHours});
+    if (DateUtilsX.daysBetween(t, now) == 1) return tr('yesterday');
     return DateFormats.of('MMM d').format(t);
   }
 
@@ -63,8 +66,8 @@ abstract final class BackupLabels {
     final time = DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(t);
     final days = DateUtilsX.daysBetween(t, now);
     final day = switch (days) {
-      0 => 'Today',
-      1 => 'Yesterday',
+      0 => tr('Today'),
+      1 => tr('Yesterday'),
       _ =>
         t.year == now.year
             ? DateFormats.of('MMM d').format(t)
@@ -80,13 +83,15 @@ abstract final class BackupLabels {
 
   /// "Daily · 9:00 PM".
   static String frequency(AppSettings s) {
-    final f = s.backupFrequency == BackupFrequency.daily ? 'Daily' : 'Weekly';
+    final f = s.backupFrequency == BackupFrequency.daily
+        ? tr('Daily')
+        : tr('Weekly');
     return '$f · ${minutes(s.backupMinutes, use24h: s.use24HourTime)}';
   }
 
   static String localFrequency(LocalBackupFrequency f) => switch (f) {
-    LocalBackupFrequency.off => 'Off',
-    LocalBackupFrequency.daily => 'Daily',
-    LocalBackupFrequency.weekly => 'Weekly',
+    LocalBackupFrequency.off => tr('Off'),
+    LocalBackupFrequency.daily => tr('Daily'),
+    LocalBackupFrequency.weekly => tr('Weekly'),
   };
 }

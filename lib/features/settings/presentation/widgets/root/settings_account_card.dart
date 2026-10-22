@@ -16,6 +16,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/auth/presentation/widgets/profile_avatar.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
@@ -78,9 +79,13 @@ class _SignedInCard extends ConsumerWidget {
       ModuleColors? pillColors,
       IconData pillIcon,
     ) = switch (sync) {
-      _ when sync.isBusy => ('Syncing…', null, FontAwesomeIcons.arrowsRotate),
+      _ when sync.isBusy => (
+        tr('Syncing…'),
+        null,
+        FontAwesomeIcons.arrowsRotate,
+      ),
       _ when sync.phase == SyncPhase.error => (
-        'Sync paused',
+        tr('Sync paused'),
         TagPalette.finance,
         FontAwesomeIcons.triangleExclamation,
       ),
@@ -108,7 +113,10 @@ class _SignedInCard extends ConsumerWidget {
         AppSpacing.lg,
         AppSpacing.lg - slack,
       ),
-      semanticLabel: '$name, ${account.email}. Account and profile',
+      semanticLabel: tr('{name}, {email}. Account and profile', {
+        'name': name,
+        'email': account.email,
+      }),
       onTap: () => context.push(AppRoutes.settingsAccount),
       child: Row(
         children: [
@@ -218,7 +226,7 @@ class _SyncButton extends ConsumerWidget {
     } else if (after.phase == SyncPhase.error) {
       showFFToast(
         context,
-        after.message ?? "Couldn't sync. Try again.",
+        after.message ?? tr("Couldn't sync. Try again."),
         icon: FontAwesomeIcons.triangleExclamation,
         duration: const Duration(seconds: 4),
       );
@@ -237,7 +245,7 @@ class _SyncButton extends ConsumerWidget {
       container: true,
       button: true,
       enabled: !busy,
-      label: busy ? 'Syncing with Google Drive' : 'Sync now',
+      label: busy ? tr('Syncing with Google Drive') : tr('Sync now'),
       excludeSemantics: true,
       child: FFPressable(
         // A no-op while busy still claims the tap from the card.
@@ -300,15 +308,16 @@ class _SignedOutCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sign in to back up',
+                      tr('Sign in to back up'),
                       style: context.text.sectionTitle.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      'Your data stays on this device. Add Google Drive to '
-                      'back up and sync.',
+                      tr(
+                        'Your data stays on this device. Add Google Drive to back up and sync.',
+                      ),
                       style: context.text.bodySmall.copyWith(height: 1.35),
                     ),
                   ],
@@ -318,7 +327,7 @@ class _SignedOutCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           FFSecondaryButton(
-            label: 'Continue with Google',
+            label: tr('Continue with Google'),
             icon: FontAwesomeIcons.google,
             variant: FFSecondaryVariant.outlined,
             foreground: ff.ink,

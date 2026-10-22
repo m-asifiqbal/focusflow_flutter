@@ -13,12 +13,14 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/habits/presentation/habit_detail_actions.dart';
 import 'package:focusflow/features/habits/presentation/widgets/editor/habit_stepper.dart';
 
@@ -97,7 +99,9 @@ class _HabitDayLogSheetState extends ConsumerState<HabitDayLogSheet> {
   Widget build(BuildContext context) {
     final habit = widget.habit;
     final text = context.text;
-    final unit = habit.isQuit ? 'Slips' : 'Count (${habit.unit})';
+    final unit = habit.isQuit
+        ? tr('Slips')
+        : tr('Count ({unit})', {'unit': HabitWords.shown(habit.unit)});
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -109,8 +113,12 @@ class _HabitDayLogSheetState extends ConsumerState<HabitDayLogSheet> {
         const SizedBox(height: AppSpacing.xs),
         Text(
           habit.isQuit
-              ? '${habit.name} · slips that day'
-              : '${habit.name} · goal ${habit.targetCount} ${habit.unit}',
+              ? tr('{name} · slips that day', {'name': habit.name})
+              : tr('{name} · goal {targetCount} {unit}', {
+                  'name': habit.name,
+                  'targetCount': habit.targetCount,
+                  'unit': HabitWords.shown(habit.unit),
+                }),
           style: text.bodySmall,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -137,7 +145,7 @@ class _HabitDayLogSheetState extends ConsumerState<HabitDayLogSheet> {
               ),
             ),
             FFListRow.toggle(
-              title: 'Skipped (rest day)',
+              title: tr('Skipped (rest day)'),
               value: _skipped,
               onChanged: (v) => setState(() => _skipped = v),
             ),
@@ -148,10 +156,10 @@ class _HabitDayLogSheetState extends ConsumerState<HabitDayLogSheet> {
           controller: _note,
           maxLength: 120,
           textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(hintText: 'Note (optional)'),
+          decoration: InputDecoration(hintText: tr('Note (optional)')),
         ),
         const SizedBox(height: AppSpacing.md),
-        FFPrimaryButton(label: 'Save', onPressed: _save),
+        FFPrimaryButton(label: tr('Save'), onPressed: _save),
       ],
     );
   }

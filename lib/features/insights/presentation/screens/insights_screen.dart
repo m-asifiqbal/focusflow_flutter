@@ -19,6 +19,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -68,7 +69,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           .read(insightsShareServiceProvider)
           .sharePng(data.buffer.asUint8List(), fileStamp: stamp);
     } on Object {
-      if (mounted) showFFToast(context, "Couldn't share your insights");
+      if (mounted) showFFToast(context, tr("Couldn't share your insights"));
     } finally {
       if (mounted) setState(() => _sharing = false);
     }
@@ -89,9 +90,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
       body = FFEmptyState.compact(
         colors: ModuleStyle.notes.colors,
         icon: FontAwesomeIcons.chartPie,
-        title: "Couldn't load insights",
-        body: 'Something went wrong while reading your data.',
-        ctaLabel: 'Try again',
+        title: tr('Couldn\'t load insights'),
+        body: tr('Something went wrong while reading your data.'),
+        ctaLabel: tr('Try again'),
         ctaIcon: FontAwesomeIcons.arrowRotateRight,
         onCta: () => ref.invalidate(insightsProvider(range)),
       );
@@ -114,13 +115,13 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
         body: Column(
           children: [
             FFLargeHeader(
-              title: 'Insights',
-              subtitle: 'Your productivity at a glance',
+              title: tr('Insights'),
+              subtitle: tr('Your productivity at a glance'),
               fitTitle: true,
               actions: [
                 FFRoundIconButton(
                   icon: FontAwesomeIcons.shareNodes,
-                  semanticLabel: 'Share insights',
+                  semanticLabel: tr('Share insights'),
                   iconColor: ff.primary,
                   onPressed: async.hasValue && !_sharing ? _share : null,
                 ),

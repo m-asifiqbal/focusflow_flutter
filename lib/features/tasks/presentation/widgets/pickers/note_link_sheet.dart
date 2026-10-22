@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -58,9 +59,9 @@ class _NoteLinkSheetState extends ConsumerState<_NoteLinkSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SheetHeader('Linked note'),
+          SheetHeader(tr('Linked note')),
           FFSearchField(
-            hint: 'Search notes',
+            hint: tr('Search notes'),
             onChanged: (q) => setState(() => _query = q),
             onClear: () => setState(() => _query = ''),
           ),
@@ -71,7 +72,7 @@ class _NoteLinkSheetState extends ConsumerState<_NoteLinkSheet> {
               children: [
                 if (widget.currentId != null && _query.isEmpty)
                   OptionRow(
-                    label: 'No linked note',
+                    label: tr('No linked note'),
                     icon: FontAwesomeIcons.linkSlash,
                     colors: ActionTints.lock,
                     selected: false,
@@ -90,14 +91,14 @@ class _NoteLinkSheetState extends ConsumerState<_NoteLinkSheet> {
                 if (value.isEmpty)
                   FFListRow(
                     title: _query.isEmpty
-                        ? 'No notes yet'
-                        : 'No matching notes',
+                        ? tr('No notes yet')
+                        : tr('No matching notes'),
                     enabled: false,
                   ),
               ],
             ),
             AsyncError() => FFErrorBanner(
-              message: "Couldn't load notes",
+              message: tr('Couldn\'t load notes'),
               onRetry: () => ref.invalidate(linkableNotesProvider(_query)),
             ),
             _ => const FFSkeletonRow(),

@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -40,7 +41,7 @@ class CalendarAgendaRow extends StatelessWidget {
   /// "09:00" (24 h) / "9:00 AM" (wraps under the time at large text).
   static String timeLabel(CalendarEntry e, {required bool use24h}) {
     final t = e.time;
-    if (t == null) return 'All day';
+    if (t == null) return tr('All day');
     return DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(t);
   }
 
@@ -72,7 +73,7 @@ class CalendarAgendaRow extends StatelessWidget {
       ],
     );
     final hint = draggable && entry.canReschedule
-        ? 'Long press and drag to another day to reschedule'
+        ? tr('Long press and drag to another day to reschedule')
         : null;
     final semantic = Semantics(
       button: true,

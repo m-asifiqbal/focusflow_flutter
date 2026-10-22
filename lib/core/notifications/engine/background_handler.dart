@@ -23,6 +23,7 @@ import 'dart:ui' show DartPluginRegistrant;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/language_service.dart';
 import 'package:focusflow/core/database/app_database.dart';
 import 'package:focusflow/core/database/encrypted_database.dart';
 import 'package:focusflow/core/notifications/engine/background_reconcile.dart';
@@ -50,6 +51,7 @@ Future<void> notificationBackgroundHandler(
     final key = await SecureStore().read(SecureStore.databaseKey);
     if (key == null || key.length != 64) return;
     final prefs = await SharedPreferences.getInstance();
+    await activateLanguageFromPrefs(prefs);
     final gateway = LocalNotificationsGateway();
     await gateway.initializeInBackground();
     container = ProviderContainer(

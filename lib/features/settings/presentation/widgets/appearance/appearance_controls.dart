@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_text_scaler.dart';
@@ -52,7 +53,7 @@ class AccentPicker extends StatelessWidget {
             Semantics(
               button: true,
               selected: a == selected,
-              label: '${a.label} accent',
+              label: tr('{label} accent', {'label': a.label}),
               excludeSemantics: true,
               child: FFPressable(
                 onTap: () => onSelected(a),
@@ -112,12 +113,20 @@ class _TextSizeCardState extends State<TextSizeCard> {
 
   /// "Default", "Large"… for a scale (stops are 0.85 … 1.3).
   static String nameOf(double scale) {
-    if ((scale - 1).abs() < 0.001) return 'Default';
-    const smaller = ['Small', 'Smaller', 'Smallest'];
-    const larger = ['Large', 'Larger', 'Largest'];
+    if ((scale - 1).abs() < 0.001) return tr('Default');
     final steps = ((scale - 1).abs() / 0.05).round();
-    if (scale < 1) return smaller[(steps - 1).clamp(0, 2)];
-    return larger[((steps ~/ 2) - 1).clamp(0, 2)];
+    if (scale < 1) {
+      return switch ((steps - 1).clamp(0, 2)) {
+        0 => tr('Small'),
+        1 => tr('Smaller'),
+        _ => tr('Smallest'),
+      };
+    }
+    return switch (((steps ~/ 2) - 1).clamp(0, 2)) {
+      0 => tr('Large'),
+      1 => tr('Larger'),
+      _ => tr('Largest'),
+    };
   }
 
   static String percentOf(double scale) => '${(scale * 100).round()}%';
@@ -128,7 +137,7 @@ class _TextSizeCardState extends State<TextSizeCard> {
     final stops = widget.scales.length;
     final small = context.text.cardTitle.copyWith(fontSize: 15);
     final preview = Text(
-      "Preview: The quick brown fox plans tomorrow's tasks.",
+      tr('Preview: The quick brown fox plans tomorrow\'s tasks.'),
       style: context.text.body.copyWith(height: 1.5),
     );
     return FFCard(
@@ -146,7 +155,7 @@ class _TextSizeCardState extends State<TextSizeCard> {
             children: [
               Flexible(
                 child: Text(
-                  'Text size',
+                  tr('Text size'),
                   style: context.text.rowTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -224,8 +233,10 @@ class _TextSizeCardState extends State<TextSizeCard> {
                     divisions: stops - 1,
                     label: percentOf(widget.scales[_shown]),
                     semanticFormatterCallback: (v) =>
-                        'Text size ${nameOf(widget.scales[v.round()])}, '
-                        '${percentOf(widget.scales[v.round()])}',
+                        tr('Text size {name}, {percent}', {
+                          'name': nameOf(widget.scales[v.round()]),
+                          'percent': percentOf(widget.scales[v.round()]),
+                        }),
                     // Drag ticks only move the local preview; the setting
                     // (one JSON write + an app-wide relayout) is saved
                     // once, when the gesture ends.
@@ -336,22 +347,22 @@ class AppIconPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final ff = context.ff;
     final variants = [
-      const _IconVariant('default', 'Default', null, AppPalette.white),
-      const _IconVariant(
+      _IconVariant('default', tr('Default'), null, AppPalette.white),
+      _IconVariant(
         'mint',
-        'Mint',
+        tr('Mint'),
         AppPalette.emerald100,
         AppPalette.emerald600,
       ),
-      const _IconVariant(
+      _IconVariant(
         'night',
-        'Night',
+        tr('Night'),
         AppPalette.emerald950,
         AppPalette.emerald400,
       ),
-      const _IconVariant(
+      _IconVariant(
         'mono',
-        'Mono',
+        tr('Mono'),
         AppPalette.white,
         AppPalette.emerald950,
         border: AppPalette.slate200,
@@ -374,8 +385,8 @@ class AppIconPicker extends StatelessWidget {
                 button: true,
                 selected: v.id == current,
                 label: v.id == current
-                    ? '${v.label} app icon'
-                    : '${v.label} app icon, coming soon',
+                    ? tr('{label} app icon', {'label': v.label})
+                    : tr('{label} app icon, coming soon', {'label': v.label}),
                 excludeSemantics: true,
                 child: FFPressable(
                   onTap: v.id == current ? null : () => onUnavailable(v.label),

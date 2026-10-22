@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -18,15 +19,22 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 
 enum VaultTab {
-  vault('Vault', FontAwesomeIcons.shieldHalved),
-  generator('Generator', FontAwesomeIcons.wandMagicSparkles),
-  favourites('Favourites', FontAwesomeIcons.solidHeart),
-  security('Security', FontAwesomeIcons.shieldHeart);
+  vault(FontAwesomeIcons.shieldHalved),
+  generator(FontAwesomeIcons.wandMagicSparkles),
+  favourites(FontAwesomeIcons.solidHeart),
+  security(FontAwesomeIcons.shieldHeart);
 
-  const VaultTab(this.label, this.icon);
+  const VaultTab(this.icon);
 
-  final String label;
   final IconData icon;
+
+  /// Tab name (a getter, so it follows the active language).
+  String get label => switch (this) {
+    vault => tr('Vault'),
+    generator => tr('Generator'),
+    favourites => tr('Favourites'),
+    security => tr('Security'),
+  };
 }
 
 class VaultTabController extends AutoDisposeNotifier<VaultTab> {

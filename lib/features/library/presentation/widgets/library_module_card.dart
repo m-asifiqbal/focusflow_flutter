@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -64,7 +65,7 @@ class LibraryModuleCard extends StatelessWidget {
     final dark = ff.isDark;
     final l = lines;
     final semantic = l == null
-        ? '${type.plural}, loading'
+        ? tr('{type}, loading', {'type': type.plural})
         : [
             showCount ? '${l.count} ${type.plural}' : type.plural,
             l.highlight,

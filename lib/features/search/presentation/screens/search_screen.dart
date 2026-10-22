@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -173,8 +174,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ],
                 if (recent.isNotEmpty) ...[
                   SearchSectionLabel(
-                    'Recent searches',
-                    actionLabel: 'Clear',
+                    tr('Recent searches'),
+                    actionLabel: tr('Clear'),
                     onAction: () =>
                         ref.read(recentSearchesProvider.notifier).clear(),
                   ),
@@ -196,10 +197,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     compact: true,
                     colors: ModuleStyle.notes.colors,
                     icon: FontAwesomeIcons.magnifyingGlass,
-                    title: 'Search everything',
-                    body:
-                        'Notes, tasks, reminders, habits and vault titles — '
-                        'all offline.',
+                    title: tr('Search everything'),
+                    body: tr(
+                      'Notes, tasks, reminders, habits and vault titles — all offline.',
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.section),
                 ],
@@ -249,14 +250,14 @@ class _SearchBar extends StatelessWidget {
               controller: controller,
               focusNode: focusNode,
               autofocus: true,
-              hint: 'Search everything',
+              hint: tr('Search everything'),
               onChanged: onChanged,
               onSubmitted: onSubmitted,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
           FFTextButton(
-            label: 'Cancel',
+            label: tr('Cancel'),
             onPressed: onCancel,
             padding: EdgeInsetsDirectional.zero,
             style: context.text.button.copyWith(fontSize: _cancelSize),
@@ -291,7 +292,7 @@ class _TypeChips extends StatelessWidget {
       child: Row(
         children: [
           FFChip(
-            label: 'All',
+            label: tr('All'),
             count: r?.total,
             selected: selected == null,
             onTap: () => onSelected(null),

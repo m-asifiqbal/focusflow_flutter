@@ -26,13 +26,16 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 
 /// The backup was written by a newer app (database schema) than this one.
 /// A [FormatException] so every existing "can't read this backup" path
 /// shows its message; Drive sync tells it apart to retry after an update.
 class BackupTooNew extends FormatException {
-  const BackupTooNew() : super('Update FocusFlow to read this backup');
+  BackupTooNew()
+    : super(tr('Update {name} to read this backup', {'name': AppInfo.name}));
 }
 
 /// A device that has synced with this Google account (screen 36).
@@ -187,7 +190,7 @@ class BackupManifest {
   /// something this version can't know. Older schemas restore as-is:
   /// columns they lack take this schema's defaults (see SnapshotIo).
   void checkReadableBy(int currentSchema) {
-    if (schemaVersion > currentSchema) throw const BackupTooNew();
+    if (schemaVersion > currentSchema) throw BackupTooNew();
   }
 
   Map<String, Object?> toJson() => {
@@ -212,10 +215,10 @@ class BackupManifest {
 
   static BackupManifest fromJson(Map<String, Object?> j) {
     if (j['format'] != 'ffbackup') {
-      throw const FormatException('Not a FocusFlow backup');
+      throw FormatException(tr('Not a FocusFlow backup'));
     }
     final format = _int(j['formatVersion']) ?? 1;
-    if (format > currentFormat) throw const BackupTooNew();
+    if (format > currentFormat) throw BackupTooNew();
     final enc = j['encryption'];
     try {
       return _fromJson(j, format, enc);
@@ -223,7 +226,7 @@ class BackupManifest {
       rethrow;
     } on Object {
       // Wrong JSON types (a hand-edited or foreign file): never a crash.
-      throw const FormatException('The backup manifest is damaged');
+      throw FormatException(tr('The backup manifest is damaged'));
     }
   }
 
@@ -332,21 +335,21 @@ class BackupArchive {
     try {
       zip = ZipDecoder().decodeBytes(bytes);
     } catch (_) {
-      throw const FormatException('Not a FocusFlow backup (not a zip file)');
+      throw FormatException(tr('Not a FocusFlow backup (not a zip file)'));
     }
     final manifestFile = zip.findFile(BackupManifest.fileName);
     final dbFile = zip.findFile(BackupManifest.dbFileName);
     if (manifestFile == null || dbFile == null) {
-      throw const FormatException('Not a FocusFlow backup');
+      throw FormatException(tr('Not a FocusFlow backup'));
     }
     final Object? json;
     try {
       json = jsonDecode(utf8.decode(manifestFile.content));
     } catch (_) {
-      throw const FormatException('The backup manifest is damaged');
+      throw FormatException(tr('The backup manifest is damaged'));
     }
     if (json is! Map) {
-      throw const FormatException('The backup manifest is damaged');
+      throw FormatException(tr('The backup manifest is damaged'));
     }
     final manifest = BackupManifest.fromJson(json.cast<String, Object?>());
     try {
@@ -370,7 +373,7 @@ class BackupArchive {
       );
     } on Object {
       // A truncated / corrupt zip entry fails while inflating.
-      throw const FormatException('The backup file is damaged');
+      throw FormatException(tr('The backup file is damaged'));
     }
   }
 }

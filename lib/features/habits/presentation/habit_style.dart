@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/painting.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -45,23 +46,24 @@ abstract final class HabitPalette {
   ];
 
   /// Accessible names of [colors], same order.
-  static const List<String> names = [
-    'Blue',
-    'Emerald',
-    'Amber',
-    'Red',
-    'Indigo',
-    'Violet',
-    'Pink',
-    'Orange',
-    'Sky',
-    'Rose',
+  // A getter, not a const list: it must follow the active language.
+  static List<String> get names => [
+    tr('Blue'),
+    tr('Emerald'),
+    tr('Amber'),
+    tr('Red'),
+    tr('Indigo'),
+    tr('Violet'),
+    tr('Pink'),
+    tr('Orange'),
+    tr('Sky'),
+    tr('Rose'),
   ];
 
   /// Accessible name of the swatch [c] ("Custom" when not in the palette).
   static String nameOf(ModuleColors c) {
     final i = colors.indexWhere((e) => e.solid == c.solid);
-    return i < 0 ? 'Custom' : names[i];
+    return i < 0 ? tr('Custom') : names[i];
   }
 
   /// Storage hex of a swatch.

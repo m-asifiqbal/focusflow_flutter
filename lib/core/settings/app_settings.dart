@@ -64,6 +64,7 @@ class AppSettings {
     this.timeZone,
     // ── General ──
     this.languageCode = 'en',
+    this.enabledLanguages = const [],
     this.startScreen = StartScreen.home,
     this.weekStartsOn = DateTime.monday,
     this.use24HourTime = false,
@@ -156,6 +157,10 @@ class AppSettings {
   final String? timeZone;
 
   final String languageCode;
+
+  /// Codes of the bundled language packs the user added in Settings ›
+  /// Language (English is always available and not listed).
+  final List<String> enabledLanguages;
   final StartScreen startScreen;
 
   /// DateTime.monday (1) … DateTime.sunday (7).
@@ -285,6 +290,7 @@ class AppSettings {
     int? dailyFocusGoal,
     String? Function()? timeZone,
     String? languageCode,
+    List<String>? enabledLanguages,
     StartScreen? startScreen,
     int? weekStartsOn,
     bool? use24HourTime,
@@ -364,6 +370,7 @@ class AppSettings {
       dailyFocusGoal: dailyFocusGoal ?? this.dailyFocusGoal,
       timeZone: timeZone != null ? timeZone() : this.timeZone,
       languageCode: languageCode ?? this.languageCode,
+      enabledLanguages: enabledLanguages ?? this.enabledLanguages,
       startScreen: startScreen ?? this.startScreen,
       weekStartsOn: weekStartsOn ?? this.weekStartsOn,
       use24HourTime: use24HourTime ?? this.use24HourTime,
@@ -456,6 +463,7 @@ class AppSettings {
     'dailyFocusGoal': dailyFocusGoal,
     'timeZone': timeZone,
     'languageCode': languageCode,
+    'enabledLanguages': enabledLanguages,
     'startScreen': startScreen.name,
     'weekStartsOn': weekStartsOn,
     'use24HourTime': use24HourTime,
@@ -569,6 +577,7 @@ class AppSettings {
       ),
       timeZone: sn('timeZone'),
       languageCode: s('languageCode', d.languageCode),
+      enabledLanguages: ls('enabledLanguages'),
       startScreen: e(StartScreen.values, j['startScreen'], d.startScreen),
       weekStartsOn: r('weekStartsOn', d.weekStartsOn, 1, 7),
       use24HourTime: b('use24HourTime', d.use24HourTime),

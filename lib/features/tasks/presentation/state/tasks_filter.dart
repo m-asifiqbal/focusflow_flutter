@@ -13,19 +13,25 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/tasks/domain/repository/tasks_repository.dart';
 
 /// Smart lists: chips and stat tiles.
 enum TaskSmartList {
-  today('Today'),
-  upcoming('Upcoming'),
-  overdue('Overdue'),
-  completed('Done'),
-  all('All');
+  today,
+  upcoming,
+  overdue,
+  completed,
+  all;
 
-  const TaskSmartList(this.label);
-
-  final String label;
+  /// Chip / tile text in the active language.
+  String get label => switch (this) {
+    TaskSmartList.today => tr('Today'),
+    TaskSmartList.upcoming => tr('Upcoming'),
+    TaskSmartList.overdue => tr('Overdue'),
+    TaskSmartList.completed => tr('Done'),
+    TaskSmartList.all => tr('All'),
+  };
 
   TasksScope get scope => switch (this) {
     TaskSmartList.today => TasksScope.today,

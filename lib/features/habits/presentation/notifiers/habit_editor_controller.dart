@@ -24,6 +24,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
@@ -41,14 +42,18 @@ typedef HabitEditorArgs = ({String? id, String? name});
 
 /// The four schedule kinds of the Frequency picker.
 enum HabitFrequencyKind {
-  everyDay('Every day'),
-  specificDays('Specific days'),
-  timesPerWeek('X times per week'),
-  everyNDays('Every N days');
+  everyDay,
+  specificDays,
+  timesPerWeek,
+  everyNDays;
 
-  const HabitFrequencyKind(this.label);
-
-  final String label;
+  /// The picker row's text, in the active language.
+  String get label => switch (this) {
+    everyDay => tr('Every day'),
+    specificDays => tr('Specific days'),
+    timesPerWeek => tr('X times per week'),
+    everyNDays => tr('Every N days'),
+  };
 
   static HabitFrequencyKind of(HabitFrequency f) => switch (f) {
     EveryDayFrequency() => everyDay,
@@ -96,9 +101,9 @@ class HabitEditorState {
     final o = original;
     if (o == null) return const [];
     return [
-      if (draft.targetCount != o.targetCount) 'daily target',
-      if (draft.frequency != o.frequency) 'schedule',
-      if (!_sameDay(draft.startDate, o.startDate)) 'start date',
+      if (draft.targetCount != o.targetCount) tr('daily target'),
+      if (draft.frequency != o.frequency) tr('schedule'),
+      if (!_sameDay(draft.startDate, o.startDate)) tr('start date'),
     ];
   }
 

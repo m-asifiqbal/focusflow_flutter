@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -40,16 +41,16 @@ Future<ModuleItemActions> vaultItemActions(
       if (record.type == VaultItemType.login)
         FFActionItem(
           icon: FontAwesomeIcons.solidUser,
-          label: 'Copy username',
+          label: tr('Copy username'),
           colors: colors,
           onTap: () => copy(VaultCopyField.username),
         ),
       FFActionItem(
         icon: FontAwesomeIcons.solidCopy,
         label: switch (record.type) {
-          VaultItemType.card => 'Copy card number',
-          VaultItemType.secureNote => 'Copy note',
-          _ => 'Copy password',
+          VaultItemType.card => tr('Copy card number'),
+          VaultItemType.secureNote => tr('Copy note'),
+          _ => tr('Copy password'),
         },
         colors: colors,
         onTap: () => copy(VaultCopyField.primary),
@@ -57,7 +58,7 @@ Future<ModuleItemActions> vaultItemActions(
       if (website != null)
         FFActionItem(
           icon: FontAwesomeIcons.arrowUpRightFromSquare,
-          label: 'Open website',
+          label: tr('Open website'),
           colors: colors,
           onTap: () => unawaited(openVaultWebsite(context, ref, record)),
         ),

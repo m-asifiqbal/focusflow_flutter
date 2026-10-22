@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -69,8 +70,8 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
                 variant: FFSecondaryVariant.surface,
                 icon: compact ? null : FontAwesomeIcons.boxOpen,
                 label: selecting
-                    ? ArchiveFormat.withCount('Restore', picked.length)
-                    : 'Restore all',
+                    ? ArchiveFormat.withCount(tr('Restore'), picked.length)
+                    : tr('Restore all'),
                 onPressed: selecting && picked.isEmpty
                     ? null
                     : () => actions.restore(selecting ? picked : shown),
@@ -78,8 +79,8 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
               end: FFSoftDangerButton(
                 icon: compact ? null : FontAwesomeIcons.trashCan,
                 label: selecting
-                    ? ArchiveFormat.withCount('Delete', picked.length)
-                    : 'Delete all',
+                    ? ArchiveFormat.withCount(tr('Delete'), picked.length)
+                    : tr('Delete all'),
                 onPressed: selecting && picked.isEmpty
                     ? null
                     : () => actions.delete(selecting ? picked : shown),
@@ -93,7 +94,7 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
           ),
           children: [
             ArchiveHeader(
-              title: 'Archive',
+              title: tr('Archive'),
               selecting: selecting,
               canSelect: hasItems,
               allSelected: shown.isNotEmpty && picked.length == shown.length,
@@ -132,9 +133,9 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
               ? FFEmptyState.compact(
                   colors: TagPalette.high,
                   icon: FontAwesomeIcons.triangleExclamation,
-                  title: "Couldn't load the archive",
-                  body: 'Your items are safe. Try again.',
-                  ctaLabel: 'Retry',
+                  title: tr('Couldn\'t load the archive'),
+                  body: tr('Your items are safe. Try again.'),
+                  ctaLabel: tr('Retry'),
                   ctaIcon: FontAwesomeIcons.arrowsRotate,
                   onCta: () => ref.invalidate(archivedItemsProvider),
                 )
@@ -143,7 +144,7 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
       ];
     }
     if (view.total == 0) {
-      return const [
+      return [
         Padding(
           padding: EdgeInsetsDirectional.fromSTEB(
             AppSpacing.grouped,
@@ -154,8 +155,8 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
           child: FFEmptyState(
             colors: TagPalette.ideas,
             icon: FontAwesomeIcons.boxArchive,
-            title: 'Nothing archived yet',
-            body: 'Swipe left on any item to archive it.',
+            title: tr('Nothing archived yet'),
+            body: tr('Swipe left on any item to archive it.'),
           ),
         ),
       ];
@@ -172,7 +173,7 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
           onClear: () => notifier.setQuery(''),
           onFilter: actions.pickSort,
           filterActive: filter.sort != ArchiveSort.newest,
-          filterSemanticLabel: 'Sort archive',
+          filterSemanticLabel: tr('Sort archive'),
         ),
       ),
       const SizedBox(height: AppSpacing.lg),
@@ -181,7 +182,7 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
         selected: filter.type?.key ?? 'all',
         onSelected: (k) => notifier.setType(ItemType.fromKey(k)),
         items: [
-          FFChipItem(value: 'all', label: 'All', count: view.total),
+          FFChipItem(value: 'all', label: tr('All'), count: view.total),
           for (final t in ItemType.values)
             if (view.counts[t] case final n?)
               FFChipItem(
@@ -193,24 +194,24 @@ class _ArchiveScreenState extends ConsumerState<ArchiveScreen> {
         ],
       ),
       const SizedBox(height: AppSpacing.sm),
-      const Padding(
+      Padding(
         padding: pad,
         child: ArchiveNotice(
           icon: FontAwesomeIcons.circleInfo,
-          body:
-              'Archived items are hidden from lists, search and reminders '
-              'but kept safe & synced.',
+          body: tr(
+            'Archived items are hidden from lists, search and reminders but kept safe & synced.',
+          ),
         ),
       ),
       const SizedBox(height: AppSpacing.xxl),
       if (view.items.isEmpty)
-        const Padding(
+        Padding(
           padding: pad,
           child: FFEmptyState.compact(
             colors: TagPalette.ideas,
             icon: FontAwesomeIcons.magnifyingGlass,
-            title: 'No matches',
-            body: 'No archived items match this search or filter.',
+            title: tr('No matches'),
+            body: tr('No archived items match this search or filter.'),
           ),
         ),
       for (final g in view.groups) ...[

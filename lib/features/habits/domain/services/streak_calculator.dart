@@ -19,6 +19,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
@@ -54,16 +55,20 @@ class HabitStreak {
   static const zero = HabitStreak(current: 0, best: 0);
 
   /// "12 days", "1 day", "3 weeks", "1 week".
-  String get label => '$current ${unitWord(current)}';
+  String get label => _count(current);
 
   /// "31 days" / "4 weeks" — the best streak with its unit.
-  String get bestLabel => '$best ${unitWord(best)}';
+  String get bestLabel => _count(best);
+
+  /// [n] with its unit as one phrase (the word order is the language's).
+  String _count(int n) => unit == StreakUnit.weeks
+      ? tr('{count, plural, one {# week} other {# weeks}}', {'count': n})
+      : tr('{count, plural, one {# day} other {# days}}', {'count': n});
 
   /// The unit for a count of [n]: "day" / "days" / "week" / "weeks".
-  String unitWord(int n) {
-    final word = unit == StreakUnit.weeks ? 'week' : 'day';
-    return n == 1 ? word : '${word}s';
-  }
+  String unitWord(int n) => unit == StreakUnit.weeks
+      ? tr('{count, plural, one {week} other {weeks}}', {'count': n})
+      : tr('{count, plural, one {day} other {days}}', {'count': n});
 
   @override
   bool operator ==(Object other) =>

@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -32,17 +33,19 @@ class BackupSyncScreen extends ConsumerWidget {
   Future<void> _disconnect(BuildContext context, WidgetRef ref) async {
     final ok = await showFFConfirm(
       context,
-      title: 'Disconnect Google account?',
-      message:
-          'Backups stay in your Drive and everything stays on this phone. '
-          'Sync stops until you connect again.',
-      confirmLabel: 'Disconnect',
+      title: tr('Disconnect Google account?'),
+      message: tr(
+        'Backups stay in your Drive and everything stays on this phone. Sync stops until you connect again.',
+      ),
+      confirmLabel: tr('Disconnect'),
       destructive: true,
       icon: FontAwesomeIcons.linkSlash,
     );
     if (!ok) return;
     await ref.read(backupActionsProvider).disconnect();
-    if (context.mounted) showFFToast(context, 'Google account disconnected');
+    if (context.mounted) {
+      showFFToast(context, tr('Google account disconnected'));
+    }
   }
 
   @override
@@ -53,9 +56,9 @@ class BackupSyncScreen extends ConsumerWidget {
     return FFScaffold(
       body: Column(
         children: [
-          const FFNavHeader(
-            leading: FFBackButton(label: 'Settings'),
-            title: 'Backup & Sync',
+          FFNavHeader(
+            leading: FFBackButton(label: tr('Settings')),
+            title: tr('Backup & Sync'),
           ),
           Expanded(
             child: ListView(
@@ -99,13 +102,13 @@ class _DisconnectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FFCard(
     onTap: onTap,
-    semanticLabel: 'Disconnect Google account',
+    semanticLabel: tr('Disconnect Google account'),
     padding: const EdgeInsetsDirectional.symmetric(
       horizontal: AppSpacing.lg,
       vertical: AppSpacing.lg + 2,
     ),
     child: Text(
-      'Disconnect Google account',
+      tr('Disconnect Google account'),
       textAlign: TextAlign.center,
       style: context.text.button.copyWith(
         color: context.ff.danger,

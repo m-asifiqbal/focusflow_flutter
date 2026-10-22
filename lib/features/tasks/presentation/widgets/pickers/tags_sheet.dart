@@ -13,6 +13,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -88,27 +89,27 @@ class _TagsSheetState extends ConsumerState<_TagsSheet> {
       }
     }
     return FFBottomSheet(
-      footer: FFPrimaryButton(label: 'Done', onPressed: _done),
+      footer: FFPrimaryButton(label: tr('Done'), onPressed: _done),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           SheetHeader(
-            'Tags',
+            tr('Tags'),
             subtitle: _picked.isEmpty
-                ? 'No tags'
+                ? tr('No tags')
                 : _picked.map((n) => '#$n').join(' '),
           ),
           FFSearchField(
             controller: _field,
-            hint: 'New tag',
+            hint: tr('New tag'),
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _addTyped(),
           ),
           const SizedBox(height: AppSpacing.lg),
           if (names.isEmpty)
             Text(
-              'Type a name to create your first tag.',
+              tr('Type a name to create your first tag.'),
               style: context.text.meta,
             )
           else

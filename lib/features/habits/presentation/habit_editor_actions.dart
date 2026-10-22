@@ -18,6 +18,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
@@ -27,29 +28,34 @@ import 'package:focusflow/features/habits/presentation/notifiers/habit_editor_co
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
 /// Body of the "Change habit type?" dialog for switching [name] to [kind].
-String habitKindChangeMessage(String name, HabitKind kind) {
-  final what = kind == HabitKind.quit
-      ? 'A quit habit counts every log as a slip, so the check-ins of '
-            '"$name" would turn into slips'
-      : 'A build habit counts every log as a check-in, so the slips of '
-            '"$name" would turn into check-ins';
-  return '$what and its streaks and stats would change. To switch type, '
-      'its history is reset (you can undo right after).';
-}
+String habitKindChangeMessage(String name, HabitKind kind) =>
+    kind == HabitKind.quit
+    ? tr(
+        'A quit habit counts every log as a slip, so the check-ins of "{name}" would turn into slips and its streaks and stats would change. To switch type, its history is reset (you can undo right after).',
+        {'name': name},
+      )
+    : tr(
+        'A build habit counts every log as a check-in, so the slips of "{name}" would turn into check-ins and its streaks and stats would change. To switch type, its history is reset (you can undo right after).',
+        {'name': name},
+      );
 
 /// Body of the "Apply to past days?" dialog ([changes] from
 /// HabitEditorState.scheduleChanges).
 String habitScheduleChangeMessage(String name, List<String> changes) {
   final list = switch (changes.length) {
-    0 => 'schedule',
+    0 => tr('schedule'),
     1 => changes.single,
-    _ =>
-      '${changes.sublist(0, changes.length - 1).join(', ')} and '
-          '${changes.last}',
+    2 => tr('{a} and {b}', {'a': changes[0], 'b': changes[1]}),
+    _ => tr('{a}, {b} and {c}', {
+      'a': changes.sublist(0, changes.length - 2).join(', '),
+      'b': changes[changes.length - 2],
+      'c': changes.last,
+    }),
   };
-  return 'Streaks and stats of "$name" are recalculated from its history, '
-      'so past days will be measured against the new $list. Your '
-      'check-ins themselves stay as they are.';
+  return tr(
+    'Streaks and stats of "{name}" are recalculated from its history, so past days will be measured against the new {list}. Your check-ins themselves stay as they are.',
+    {'name': name, 'list': list},
+  );
 }
 
 /// Habit type picked in the editor. A new habit, a habit without logs or a
@@ -70,9 +76,9 @@ Future<bool> changeHabitKind(
   if (!context.mounted) return false;
   final ok = await showFFConfirm(
     context,
-    title: 'Change habit type?',
+    title: tr('Change habit type?'),
     message: habitKindChangeMessage(original.name, kind),
-    confirmLabel: 'Reset & change',
+    confirmLabel: tr('Reset & change'),
     destructive: true,
     icon: FontAwesomeIcons.rotateLeft,
   );
@@ -102,12 +108,12 @@ Future<bool> confirmScheduleChange(
   if (!context.mounted) return false;
   return showFFConfirm(
     context,
-    title: 'Apply to past days?',
+    title: tr('Apply to past days?'),
     message: habitScheduleChangeMessage(
       s.original?.name ?? s.draft.name,
       s.scheduleChanges,
     ),
-    confirmLabel: 'Save',
+    confirmLabel: tr('Save'),
     icon: FontAwesomeIcons.calendarCheck,
   );
 }
@@ -121,9 +127,9 @@ Future<void> resetHabitHistory(
 ) async {
   final ok = await showFFConfirm(
     context,
-    title: 'Reset history?',
-    message: 'Every check-in of "$name" will be removed.',
-    confirmLabel: 'Reset',
+    title: tr('Reset history?'),
+    message: tr('Every check-in of "{name}" will be removed.', {'name': name}),
+    confirmLabel: tr('Reset'),
     destructive: true,
     icon: FontAwesomeIcons.rotateLeft,
   );
@@ -144,7 +150,7 @@ void _showResetUndo(
   String name,
 ) => showUndoSnackbar(
   context,
-  message: 'History of "$name" reset',
+  message: tr('History of "{name}" reset', {'name': name}),
   icon: FontAwesomeIcons.rotateLeft,
   onUndo: () => repo.restoreLogs(removed),
 );

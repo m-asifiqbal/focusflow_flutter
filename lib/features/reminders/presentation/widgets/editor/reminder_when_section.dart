@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -60,7 +61,7 @@ class ReminderDayChips extends ConsumerWidget {
         today: readFreshToday(ref),
         weekStartsOn: weekStartsOn,
         current: day,
-        title: 'Pick date',
+        title: tr('Pick date'),
         allowNoDate: false,
       );
       final value = picked?.value;
@@ -69,8 +70,8 @@ class ReminderDayChips extends ConsumerWidget {
 
     final pickLabel = selected == WhenChoice.other
         ? DateFormats.of('EEE d MMM').format(day)
-        : 'Pick date';
-    const labels = ['Today', 'Tomorrow', 'Next week'];
+        : tr('Pick date');
+    final labels = [tr('Today'), tr('Tomorrow'), tr('Next week')];
 
     Widget chip(WhenChoice c, String label, TextScaler scaler) => Expanded(
       child: _ReminderChip(

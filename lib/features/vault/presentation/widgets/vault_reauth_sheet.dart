@@ -17,6 +17,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -69,7 +70,7 @@ Future<bool> confirmVaultReveal(BuildContext context, WidgetRef ref) async {
   if (!ref.read(settingsProvider).vaultReauthToReveal) return true;
   final session = ref.read(vaultSessionProvider.notifier)..touch();
   return session.keepUnlockedDuring(
-    () => vaultReauthenticate(context, ref, reason: 'Reveal this secret'),
+    () => vaultReauthenticate(context, ref, reason: tr('Reveal this secret')),
   );
 }
 
@@ -134,21 +135,22 @@ class _VaultReauthPadState extends ConsumerState<VaultReauthPad> {
     final step = _ready ? pad.step : VaultPadStep.verify;
     final (title, body) = switch (step) {
       VaultPadStep.changeNew => (
-        'Choose a new PIN',
-        'Your items stay encrypted; only the key that protects them is '
-            're-wrapped.',
+        tr('Choose a new PIN'),
+        tr(
+          'Your items stay encrypted; only the key that protects them is re-wrapped.',
+        ),
       ),
       VaultPadStep.changeConfirm => (
-        'Confirm new PIN',
-        'Enter the same 6 digits again.',
+        tr('Confirm new PIN'),
+        tr('Enter the same 6 digits again.'),
       ),
       _ when widget.changePin => (
-        'Change master PIN',
-        'Enter your current 6-digit PIN.',
+        tr('Change master PIN'),
+        tr('Enter your current 6-digit PIN.'),
       ),
       _ => (
-        "Confirm it's you",
-        'Enter your master PIN to change Vault security settings.',
+        tr("Confirm it's you"),
+        tr('Enter your master PIN to change Vault security settings.'),
       ),
     };
     return Padding(
@@ -184,12 +186,12 @@ class _VaultReauthPadState extends ConsumerState<VaultReauthPad> {
           const SizedBox(height: AppSpacing.sm),
           if (step == VaultPadStep.changeConfirm)
             FFTextButton(
-              label: 'Start over',
+              label: tr('Start over'),
               onPressed: () =>
                   ref.read(vaultPinPadProvider.notifier).restartSetup(),
             )
           else
-            FFTextButton(label: 'Cancel', onPressed: () => _close(false)),
+            FFTextButton(label: tr('Cancel'), onPressed: () => _close(false)),
         ],
       ),
     );

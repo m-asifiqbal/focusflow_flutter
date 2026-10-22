@@ -17,6 +17,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/vault/presentation/vault_backup_bridge.dart';
 
 /// A login parsed from a password-manager export (plaintext, in memory
@@ -45,9 +46,12 @@ class ImportedLogin {
 
 /// Thrown by [VaultBackupBridge.importLogins] when no vault session exists.
 class VaultUnavailable implements Exception {
-  const VaultUnavailable([this.message = 'The vault is not available']);
+  const VaultUnavailable([this._message]);
 
-  final String message;
+  final String? _message;
+
+  /// Shown to the user; the default text is translated when it is read.
+  String get message => _message ?? tr('The vault is not available');
 
   @override
   String toString() => 'VaultUnavailable: $message';
@@ -95,8 +99,8 @@ class NoVaultBackupBridge implements VaultBackupBridge {
 
   @override
   Future<int> importLogins(List<ImportedLogin> logins) async =>
-      throw const VaultUnavailable(
-        'Password import needs the vault — set up your vault first.',
+      throw VaultUnavailable(
+        tr('Password import needs the vault — set up your vault first.'),
       );
 }
 

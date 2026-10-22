@@ -18,6 +18,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/storage/secure_store.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 
@@ -25,9 +26,10 @@ import 'package:focusflow/core/sync/backup_crypto.dart';
 class BackupPinRequired implements Exception {
   const BackupPinRequired();
 
-  String get message =>
-      'Set a backup PIN to encrypt your backups, or choose to back up '
-      'without encryption.';
+  String get message => tr(
+    'Set a backup PIN to encrypt your backups, or choose to back up '
+    'without encryption.',
+  );
 
   @override
   String toString() => 'BackupPinRequired';
@@ -40,9 +42,10 @@ class BackupKeyUnavailable implements Exception {
   /// Technical detail for logs (never a key).
   final String? detail;
 
-  String get message =>
-      "Couldn't read your backup key from this device's keychain, so "
-      'nothing was backed up. Try again, or set your backup PIN again.';
+  String get message => tr(
+    "Couldn't read your backup key from this device's keychain, so "
+    'nothing was backed up. Try again, or set your backup PIN again.',
+  );
 
   @override
   String toString() =>

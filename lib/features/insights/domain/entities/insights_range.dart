@@ -15,19 +15,28 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 
 /// The range chips, in mockup order (7 Days first = default).
 enum InsightsPreset {
-  week('7 Days', 7),
-  today('Today', 1),
-  month('30 Days', 30),
-  quarter('90 Days', 90),
-  custom('Custom', 0);
+  week(7),
+  today(1),
+  month(30),
+  quarter(90),
+  custom(0);
 
-  const InsightsPreset(this.label, this.days);
+  const InsightsPreset(this.days);
 
-  final String label;
+  /// Chip text in the active language (a getter: it follows a language
+  /// switch).
+  String get label => switch (this) {
+    week => tr('7 Days'),
+    today => tr('Today'),
+    month => tr('30 Days'),
+    quarter => tr('90 Days'),
+    custom => tr('Custom'),
+  };
 
   /// Window length in days (0 for [custom], which carries its own span).
   final int days;

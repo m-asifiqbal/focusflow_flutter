@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -40,26 +41,27 @@ class AppLockSettingsScreen extends ConsumerWidget {
       appLockControllerProvider.select((l) => l.authenticating),
     );
     final method = kind == BiometricKind.none
-        ? 'device passcode'
-        : '${kind.label} or passcode';
+        ? tr('device passcode')
+        : tr('{label} or passcode', {'label': kind.label});
     final grace = AppLockController.grace.inSeconds;
 
     return SettingsPage(
-      title: 'App lock',
+      title: tr('App lock'),
       children: [
         SettingsHero(
           icon: FontAwesomeIcons.shieldHalved,
-          title: 'Lock ${AppInfo.name}',
-          body:
-              'Ask for your $method whenever ${AppInfo.name} opens. '
-              'Your data stays encrypted on this device either way.',
+          title: tr('Lock {name}', {'name': AppInfo.name}),
+          body: tr(
+            'Ask for your {method} whenever {name} opens. Your data stays encrypted on this device either way.',
+            {'method': method, 'name': AppInfo.name},
+          ),
         ),
         FFGroupedList(
-          label: 'App lock',
-          footer:
-              'Locks on launch and after $grace seconds in the background. '
-              'Uses the screen lock you already have — ${AppInfo.name} never '
-              'sees it.',
+          label: tr('App lock'),
+          footer: tr(
+            'Locks on launch and after {grace} seconds in the background. Uses the screen lock you already have — {name} never sees it.',
+            {'grace': grace, 'name': AppInfo.name},
+          ),
           children: [
             FFListRow.toggle(
               leading: settingsTile(
@@ -71,8 +73,8 @@ class AppLockSettingsScreen extends ConsumerWidget {
                 SettingsTints.emeraldDeep,
               ),
               title: kind == BiometricKind.none
-                  ? 'Require passcode'
-                  : 'Require ${kind.label}',
+                  ? tr('Require passcode')
+                  : tr('Require {label}', {'label': kind.label}),
               value: s.appLockEnabled,
               enabled: !busy,
               onChanged: (on) => _toggle(context, ref, on),
@@ -80,32 +82,32 @@ class AppLockSettingsScreen extends ConsumerWidget {
           ],
         ),
         FFGroupedList(
-          label: 'Privacy',
-          footer:
-              'Shows a blank screen in the app switcher. On Android this '
-              'also blocks screenshots.',
+          label: tr('Privacy'),
+          footer: tr(
+            'Shows a blank screen in the app switcher. On Android this also blocks screenshots.',
+          ),
           children: [
             FFListRow.toggle(
               leading: settingsTile(
                 FontAwesomeIcons.solidEyeSlash,
                 SettingsTints.slateDeep,
               ),
-              title: 'Hide content in app switcher',
+              title: tr('Hide content in app switcher'),
               value: s.hideInAppSwitcher,
               onChanged: ref.read(settingsEditorProvider).setHideInAppSwitcher,
             ),
           ],
         ),
         FFGroupedList(
-          label: 'Vault',
+          label: tr('Vault'),
           children: [
             FFListRow(
               leading: settingsTile(
                 FontAwesomeIcons.shieldHalved,
                 SettingsTints.amber,
               ),
-              title: 'Vault security',
-              subtitle: 'The vault keeps its own PIN on top of App lock',
+              title: tr('Vault security'),
+              subtitle: tr('The vault keeps its own PIN on top of App lock'),
               onTap: () => context.push(AppRoutes.settingsVaultSecurity),
             ),
           ],
@@ -120,13 +122,16 @@ class AppLockSettingsScreen extends ConsumerWidget {
         .setEnabled(on);
     if (!context.mounted) return;
     final text = switch (result) {
-      DeviceAuthResult.success => on ? 'App lock is on' : 'App lock is off',
-      DeviceAuthResult.unavailable =>
+      DeviceAuthResult.success =>
+        on ? tr('App lock is on') : tr('App lock is off'),
+      DeviceAuthResult.unavailable => tr(
         'Set up a screen lock on this device first',
-      DeviceAuthResult.lockedOut =>
+      ),
+      DeviceAuthResult.lockedOut => tr(
         'Too many attempts. Unlock your device, then try again.',
+      ),
       DeviceAuthResult.cancelled => null,
-      DeviceAuthResult.failed => 'Couldn’t verify it’s you',
+      DeviceAuthResult.failed => tr('Couldn’t verify it’s you'),
     };
     if (text != null) {
       showFFToast(

@@ -16,6 +16,8 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/settings/data/local_device_authenticator.dart';
 import 'package:focusflow/features/settings/data/plugin_privacy_screen.dart';
 import 'package:focusflow/features/settings/domain/services/device_authenticator.dart';
@@ -115,7 +117,9 @@ class AppLockController extends Notifier<AppLockState> {
     if (state.authenticating) return false;
     state = state.copyWith(authenticating: true);
     final auth = ref.read(deviceAuthenticatorProvider);
-    final result = await auth.authenticate('Unlock FocusFlow');
+    final result = await auth.authenticate(
+      tr('Unlock {name}', {'name': AppInfo.name}),
+    );
     // No screen lock on the device any more: only the owner can remove
     // it (the OS asks for the old passcode), so let them in and say why.
     // Re-check, so a biometric hardware error can never unlock.
@@ -137,7 +141,7 @@ class AppLockController extends Notifier<AppLockState> {
     if (on && !await auth.isSupported()) return DeviceAuthResult.unavailable;
     state = state.copyWith(authenticating: true);
     final result = await auth.authenticate(
-      on ? 'Turn on App lock' : 'Turn off App lock',
+      on ? tr('Turn on App lock') : tr('Turn off App lock'),
     );
     state = state.copyWith(authenticating: false);
     if (result == DeviceAuthResult.success) {
@@ -150,11 +154,14 @@ class AppLockController extends Notifier<AppLockState> {
 
   static String? _message(DeviceAuthResult r) => switch (r) {
     DeviceAuthResult.success || DeviceAuthResult.cancelled => null,
-    DeviceAuthResult.lockedOut =>
+    DeviceAuthResult.lockedOut => tr(
       'Too many attempts. Unlock your device, then try again.',
-    DeviceAuthResult.unavailable =>
-      'This device has no screen lock, so App lock can’t protect FocusFlow.',
-    DeviceAuthResult.failed => 'Couldn’t verify it’s you. Try again.',
+    ),
+    DeviceAuthResult.unavailable => tr(
+      'This device has no screen lock, so App lock can’t protect {name}.',
+      {'name': AppInfo.name},
+    ),
+    DeviceAuthResult.failed => tr('Couldn’t verify it’s you. Try again.'),
   };
 }
 

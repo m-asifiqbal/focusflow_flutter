@@ -13,12 +13,14 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/search/domain/entities/search_hit.dart';
 import 'package:focusflow/features/search/presentation/providers/search_providers.dart';
 import 'package:focusflow/features/vault/presentation/vault_gate.dart';
@@ -37,9 +39,9 @@ String searchHitMeta(
       DateFormats.of(use24h ? 'HH:mm' : 'h:mm a').format(t);
   String day(DateTime d) {
     final diff = DateUtilsX.daysBetween(now, d);
-    if (diff == 0) return 'Today';
-    if (diff == 1) return 'Tomorrow';
-    if (diff == -1) return 'Yesterday';
+    if (diff == 0) return tr('Today');
+    if (diff == 1) return tr('Tomorrow');
+    if (diff == -1) return tr('Yesterday');
     if (diff > 1 && diff < 7) return DateFormats.of('EEE').format(d);
     return DateFormats.of(d.year == now.year ? 'MMM d' : 'MMM d, y').format(d);
   }
@@ -48,10 +50,12 @@ String searchHitMeta(
   switch (hit.type) {
     case ItemType.note:
       if (hit.folderName != null) parts.add(hit.folderName!);
-      parts.add(hit.isLocked ? 'Locked' : DateUtilsX.ago(hit.updatedAt, now));
+      parts.add(
+        hit.isLocked ? tr('Locked') : DateUtilsX.ago(hit.updatedAt, now),
+      );
     case ItemType.task:
       if (hit.isCompleted) {
-        parts.add('Done');
+        parts.add(tr('Done'));
       } else if (hit.dueDay != null) {
         final d = hit.dueDay!;
         parts.add(
@@ -69,14 +73,15 @@ String searchHitMeta(
       );
     case ItemType.habit:
       if (habitStreak != null && habitStreak > 0) {
-        parts.add('$habitStreak-day streak');
+        parts.add(tr('{n}-day streak', {'n': habitStreak}));
       } else if (hit.detail.isNotEmpty) {
-        parts.add(hit.detail);
+        // The habit category is stored in English.
+        parts.add(HabitWords.shown(hit.detail));
       }
     case ItemType.vault:
-      parts.add(vaultUnlocked ? hit.detail : 'unlock to view');
+      parts.add(vaultUnlocked ? hit.detail : tr('unlock to view'));
   }
-  if (hit.isArchived) parts.add('Archived');
+  if (hit.isArchived) parts.add(tr('Archived'));
   return parts.where((p) => p.isNotEmpty).join(' · ');
 }
 
@@ -109,7 +114,7 @@ class SearchResultRow extends ConsumerWidget {
           ref.watch(vaultStatusProvider) == VaultStatus.unlocked,
       habitStreak: streak,
     );
-    final title = hit.title.trim().isEmpty ? 'Untitled' : hit.title;
+    final title = hit.title.trim().isEmpty ? tr('Untitled') : hit.title;
     final titleMatches = FFHighlightedText.segments(
       title,
       query,
@@ -119,7 +124,7 @@ class SearchResultRow extends ConsumerWidget {
     return Semantics(
       button: true,
       label: '$title, $meta',
-      hint: 'Open',
+      hint: tr('Open'),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

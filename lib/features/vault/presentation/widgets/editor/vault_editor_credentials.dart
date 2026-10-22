@@ -17,6 +17,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -66,7 +67,7 @@ class VaultTitleCard extends StatelessWidget {
             children: [
               Semantics(
                 button: true,
-                label: 'Change icon',
+                label: tr('Change icon'),
                 excludeSemantics: true,
                 child: FFPressable(
                   onTap: onChangeIcon,
@@ -85,11 +86,11 @@ class VaultTitleCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const VaultFieldLabel('Title'),
+                    VaultFieldLabel(tr('Title')),
                     const SizedBox(height: AppSpacing.xs),
                     Semantics(
                       textField: true,
-                      label: 'Title',
+                      label: tr('Title'),
                       child: TextField(
                         controller: controller,
                         onChanged: onTitle,
@@ -104,7 +105,9 @@ class VaultTitleCard extends StatelessWidget {
                           color: ff.vaultInk,
                         ),
                         decoration: vaultBareDecoration(
-                          hintText: 'e.g. ${_example(state.type)}',
+                          hintText: tr('e.g. {example}', {
+                            'example': _example(state.type),
+                          }),
                           hintStyle: context.text.cardTitle.copyWith(
                             fontSize: VaultType.stat,
                             color: ff.vaultFieldLabel,
@@ -133,7 +136,7 @@ class VaultTitleCard extends StatelessWidget {
                   child: Center(
                     widthFactor: 1,
                     child: Text(
-                      'Change icon',
+                      tr('Change icon'),
                       style: context.text.caption.copyWith(
                         fontSize: VaultType.secondary,
                         fontWeight: FontWeight.w600,
@@ -151,10 +154,10 @@ class VaultTitleCard extends StatelessWidget {
   }
 
   static String _example(VaultItemType t) => switch (t) {
-    VaultItemType.login => 'Figma',
-    VaultItemType.card => 'Visa Platinum',
-    VaultItemType.wifi => 'Home Wi-Fi',
-    VaultItemType.secureNote => 'Passport',
+    VaultItemType.login => 'Figma', // brand name
+    VaultItemType.card => 'Visa Platinum', // product name
+    VaultItemType.wifi => tr('Home Wi-Fi'),
+    VaultItemType.secureNote => tr('Passport'),
   };
 }
 
@@ -197,7 +200,9 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
     return VaultIconButton(
       // The icon shows the current state (eye = visible), as in the mockup.
       icon: shown ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
-      semanticLabel: shown ? 'Hide $name' : 'Show $name',
+      semanticLabel: shown
+          ? tr('Hide {name}', {'name': name})
+          : tr('Show {name}', {'name': name}),
       onTap: () => unawaited(_toggle(field)),
     );
   }
@@ -230,14 +235,14 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
   }
 
   Widget _password(VaultEditorState s) => VaultTextRow(
-    label: 'Password',
+    label: tr('Password'),
     controller: _t('password', s.payload.password),
     onChanged: _c.setPassword,
     mono: true,
     obscure: !_shown.contains('password'),
     autofillHints: const [AutofillHints.newPassword],
     trailing: [
-      _eye('password', 'password'),
+      _eye('password', tr('password')),
       VaultGeneratePill(onTap: () => unawaited(_generate())),
     ],
     below: VaultStrengthMeter(strength: s.strength),
@@ -251,7 +256,7 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
     final rows = switch (s.type) {
       VaultItemType.login => [
         VaultTextRow(
-          label: 'Username / email',
+          label: tr('Username / email'),
           controller: _t('username', p.username),
           onChanged: c.setUsername,
           keyboardType: TextInputType.emailAddress,
@@ -259,22 +264,22 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
         ),
         _password(s),
         VaultTextRow(
-          label: 'Website',
+          label: tr('Website'),
           hint: 'example.com',
           controller: _t('url', p.url),
           onChanged: c.setUrl,
           keyboardType: TextInputType.url,
         ),
         VaultTextRow(
-          label: '2FA secret (TOTP)',
-          hint: 'Scan QR or paste key',
+          label: tr('2FA secret (TOTP)'),
+          hint: tr('Scan QR or paste key'),
           controller: _t('totp', p.totpSecret ?? ''),
           onChanged: c.setTotp,
-          errorText: s.totpInvalid ? 'Not a valid 2FA key' : null,
+          errorText: s.totpInvalid ? tr('Not a valid 2FA key') : null,
           trailing: [
             VaultIconButton(
               icon: FontAwesomeIcons.qrcode,
-              semanticLabel: 'Scan 2FA QR code',
+              semanticLabel: tr('Scan 2FA QR code'),
               onTap: () => unawaited(_scan()),
             ),
           ],
@@ -282,14 +287,14 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
       ],
       VaultItemType.card => [
         VaultTextRow(
-          label: 'Cardholder name',
+          label: tr('Cardholder name'),
           controller: _t('cardholder', p.cardholder),
           onChanged: c.setCardholder,
           textCapitalization: TextCapitalization.words,
           autofillHints: const [AutofillHints.creditCardName],
         ),
         VaultTextRow(
-          label: 'Card number',
+          label: tr('Card number'),
           hint: '4242 4242 4242 4242',
           controller: _t('cardNumber', p.cardNumber),
           onChanged: c.setCardNumber,
@@ -301,8 +306,8 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
           autofillHints: const [AutofillHints.creditCardNumber],
         ),
         VaultTextRow(
-          label: 'Expiry (MM/YY)',
-          hint: 'MM/YY',
+          label: tr('Expiry (MM/YY)'),
+          hint: tr('MM/YY'),
           controller: _t('cardExpiry', p.cardExpiry),
           onChanged: c.setCardExpiry,
           mono: true,
@@ -313,36 +318,38 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
           ],
         ),
         VaultTextRow(
-          label: 'Security code (CVV)',
+          label: tr('Security code (CVV)'),
           controller: _t('cardCvv', p.cardCvv),
           onChanged: c.setCardCvv,
           mono: true,
           obscure: !_shown.contains('cvv'),
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          trailing: [_eye('cvv', 'security code')],
+          trailing: [_eye('cvv', tr('security code'))],
         ),
         VaultTextRow(
-          label: 'PIN',
+          label: tr('PIN'),
           controller: _t('cardPin', p.cardPin),
           onChanged: c.setCardPin,
           mono: true,
           obscure: !_shown.contains('pin'),
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          trailing: [_eye('pin', 'PIN')],
+          trailing: [_eye('pin', tr('PIN'))],
         ),
       ],
       VaultItemType.wifi => [
         VaultTextRow(
-          label: 'Network name (SSID)',
+          label: tr('Network name (SSID)'),
           controller: _t('wifiSsid', p.wifiSsid),
           onChanged: c.setWifiSsid,
         ),
         _password(s),
         VaultValueRow(
-          label: 'Security',
-          value: p.wifiSecurity.isEmpty ? 'WPA2' : p.wifiSecurity,
+          label: tr('Security'),
+          value: vaultWifiSecurityName(
+            p.wifiSecurity.isEmpty ? 'WPA2' : p.wifiSecurity,
+          ),
           onTap: () => unawaited(_pickSecurity(p.wifiSecurity)),
         ),
       ],
@@ -352,7 +359,7 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const VaultSectionLabel('Credentials'),
+        VaultSectionLabel(tr('Credentials')),
         VaultCard(children: rows),
       ],
     );
@@ -361,11 +368,13 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
   Future<void> _pickSecurity(String current) async {
     final choice = await showVaultChoiceSheet<String>(
       context,
-      title: 'Security',
+      title: tr('Security'),
       current: current.isEmpty ? 'WPA2' : current,
       options: [
+        // The stored value is the English / protocol name; only the label
+        // ("None") is translated.
         for (final v in const ['WPA3', 'WPA2', 'WEP', 'None'])
-          (value: v, label: v),
+          (value: v, label: vaultWifiSecurityName(v)),
       ],
     );
     if (choice != null) _c.setWifiSecurity(choice.value);

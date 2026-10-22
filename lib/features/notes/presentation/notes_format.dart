@@ -9,6 +9,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
 
@@ -16,9 +17,9 @@ abstract final class NotesFormat {
   /// "Today", "Yesterday", "Jun 10" (or "Jun 10, 2025" in another year).
   static String day(DateTime d, DateTime now) {
     final diff = DateUtilsX.daysBetween(now, d);
-    if (diff == 0) return 'Today';
-    if (diff == -1) return 'Yesterday';
-    if (diff == 1) return 'Tomorrow';
+    if (diff == 0) return tr('Today');
+    if (diff == -1) return tr('Yesterday');
+    if (diff == 1) return tr('Tomorrow');
     return d.year == now.year
         ? DateFormats.of('MMM d').format(d)
         : DateFormats.of('MMM d, y').format(d);
@@ -56,29 +57,37 @@ abstract final class NotesFormat {
 
   /// "48 notes · 3 pinned" (pinned part only when > 0).
   static String headerSubtitle(int total, int pinned) {
-    final notes = '$total ${total == 1 ? 'note' : 'notes'}';
-    return pinned > 0 ? '$notes · $pinned pinned' : notes;
+    final notes = tr('{count, plural, one {# note} other {# notes}}', {
+      'count': total,
+    });
+    return pinned > 0 ? '$notes · ${tr('{n} pinned', {'n': pinned})}' : notes;
   }
 
   /// "Edited today, 9:12 AM".
   static String edited(DateTime t, DateTime now, {bool use24h = false}) {
-    final d = day(t, now);
-    final dayLabel = d == 'Today' || d == 'Yesterday' ? d.toLowerCase() : d;
-    return 'Edited $dayLabel, ${time(t, use24h: use24h)}';
+    // Decided on the day difference, not on the (translated) day text.
+    final diff = DateUtilsX.daysBetween(now, t);
+    final at = time(t, use24h: use24h);
+    if (diff == 0) return tr('Edited today, {time}', {'time': at});
+    if (diff == -1) return tr('Edited yesterday, {time}', {'time': at});
+    return tr('Edited {day}, {time}', {'day': day(t, now), 'time': at});
   }
 
   /// "214 words".
-  static String words(int count) => '$count ${count == 1 ? 'word' : 'words'}';
+  static String words(int count) =>
+      tr('{count, plural, one {# word} other {# words}}', {'count': count});
 
   /// "Reminder Fri" (this week), "Reminder 3:00 PM" (today), "Reminder
   /// tomorrow", "Reminder Jun 20".
   static String reminder(DateTime at, DateTime now, {bool use24h = false}) {
     final diff = DateUtilsX.daysBetween(now, at);
-    if (diff == 0) return 'Reminder ${time(at, use24h: use24h)}';
-    if (diff == 1) return 'Reminder tomorrow';
-    if (diff > 1 && diff < 7) {
-      return 'Reminder ${DateFormats.of('EEE').format(at)}';
+    if (diff == 0) {
+      return tr('Reminder {when}', {'when': time(at, use24h: use24h)});
     }
-    return 'Reminder ${day(at, now)}';
+    if (diff == 1) return tr('Reminder tomorrow');
+    if (diff > 1 && diff < 7) {
+      return tr('Reminder {when}', {'when': DateFormats.of('EEE').format(at)});
+    }
+    return tr('Reminder {when}', {'when': day(at, now)});
   }
 }

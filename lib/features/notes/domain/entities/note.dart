@@ -16,6 +16,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 @immutable
 class ChecklistItem {
@@ -145,7 +146,7 @@ class Note {
       final first = plainText.trim().split('\n').first.trim();
       if (first.isNotEmpty) return first;
     }
-    return 'Untitled note';
+    return tr('Untitled note');
   }
 
   /// Card preview: the body with whitespace collapsed (max 240 chars);

@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -93,7 +94,9 @@ class TaskSectionHeader extends ConsumerWidget {
         child: Semantics(
           button: true,
           expanded: !collapsed,
-          label: collapsed ? 'Show completed tasks' : 'Hide completed tasks',
+          label: collapsed
+              ? tr('Show completed tasks')
+              : tr('Hide completed tasks'),
           // excludeSemantics drops the child's tap action; re-add it.
           onTap: toggle,
           excludeSemantics: true,
@@ -135,13 +138,13 @@ class TaskSectionHeader extends ConsumerWidget {
           padding: EdgeInsetsDirectional.zero,
           trailing: reschedule
               ? _SectionLink(
-                  label: 'Reschedule all',
+                  label: tr('Reschedule all'),
                   color: ff.danger,
                   onTap: () => rescheduleTasks(
                     context,
                     ref,
                     tasks,
-                    title: 'Reschedule all',
+                    title: tr('Reschedule all'),
                   ),
                 )
               : null,
@@ -255,7 +258,7 @@ class _TaskSectionListState extends ConsumerState<TaskSectionList> {
       if (mounted) {
         showFFToast(
           context,
-          'Sorted manually',
+          tr('Sorted manually'),
           icon: FontAwesomeIcons.gripVertical,
         );
       }
@@ -289,13 +292,13 @@ class _TaskSectionListState extends ConsumerState<TaskSectionList> {
                   // same reorder as a drop one row away.
                   child: Semantics(
                     container: true,
-                    label: 'Reorder ${task.title}',
+                    label: tr('Reorder {title}', {'title': task.title}),
                     customSemanticsActions: {
                       if (index > 0)
-                        const CustomSemanticsAction(label: 'Move up'): () =>
+                        CustomSemanticsAction(label: tr('Move up')): () =>
                             _onReorder(index, index - 1),
                       if (index < tasks.length - 1)
-                        const CustomSemanticsAction(label: 'Move down'): () =>
+                        CustomSemanticsAction(label: tr('Move down')): () =>
                             _onReorder(index, index + 1),
                     },
                     child: const TaskDragHandle(),

@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -46,14 +47,14 @@ class GeneralSettingsScreen extends ConsumerWidget {
     String sample(String pattern) => DateFormats.of(pattern, 'en').format(now);
 
     return SettingsPage(
-      title: 'General',
+      title: tr('General'),
       children: [
         FFGroupedList(
-          label: 'Language & region',
+          label: tr('Language & region'),
           children: [
             FFListRow(
               leading: settingsTile(FontAwesomeIcons.globe, SettingsTints.sky),
-              title: 'Language',
+              title: tr('Language'),
               value: SettingsLabels.language(s.languageCode),
               onTap: () => run(SettingsRootAction.language),
             ),
@@ -62,7 +63,7 @@ class GeneralSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.solidCalendar,
                 SettingsTints.violet,
               ),
-              title: 'Week starts on',
+              title: tr('Week starts on'),
               value: SettingsLabels.weekday(s.weekStartsOn),
               onTap: () => run(SettingsRootAction.weekStart),
             ),
@@ -71,19 +72,19 @@ class GeneralSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.calendarDays,
                 SettingsTints.blue,
               ),
-              title: 'Date format',
+              title: tr('Date format'),
               // Saved now; DateUtilsX formats don't read it yet.
-              subtitle: 'Full dates · coming soon',
+              subtitle: tr('Full dates · coming soon'),
               value: sample(s.dateFormat),
               onTap: () async {
                 final v = await pickSetting<String>(
                   context,
-                  title: 'Date format',
+                  title: tr('Date format'),
                   // Honest: the choice is saved, but screens still use
                   // their own formats until every feature reads it.
-                  subtitle:
-                      'Saved for full dates. Screens switch to it in a '
-                      'coming update.',
+                  subtitle: tr(
+                    'Saved for full dates. Screens switch to it in a coming update.',
+                  ),
                   selected: s.dateFormat,
                   options: [for (final p in datePatterns) option(p, sample(p))],
                 );
@@ -97,40 +98,39 @@ class GeneralSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.solidClock,
                 SettingsTints.slate,
               ),
-              title: 'Time format',
+              title: tr('Time format'),
               value: SettingsLabels.timeFormat(use24h: s.use24HourTime),
               onTap: () => run(SettingsRootAction.dateTimeFormat),
             ),
           ],
         ),
         FFGroupedList(
-          label: 'Startup',
-          footer: 'The tab FocusFlow opens on after launch.',
+          label: tr('Startup'),
+          footer: tr('The tab FocusFlow opens on after launch.'),
           children: [
             FFListRow(
               leading: settingsTile(
                 FontAwesomeIcons.house,
                 SettingsTints.emerald,
               ),
-              title: 'Start screen',
+              title: tr('Start screen'),
               value: SettingsLabels.startScreen(s.startScreen),
               onTap: () => run(SettingsRootAction.startScreen),
             ),
           ],
         ),
         FFGroupedList(
-          label: 'Reset',
-          footer:
-              'Restores appearance, notifications, module defaults, layout, '
-              'gestures and sounds. Security, vault, backup and your data '
-              'stay as they are.',
+          label: tr('Reset'),
+          footer: tr(
+            'Restores appearance, notifications, module defaults, layout, gestures and sounds. Security, vault, backup and your data stay as they are.',
+          ),
           children: [
             FFListRow(
               leading: settingsTile(
                 FontAwesomeIcons.arrowRotateLeft,
                 SettingsTints.red,
               ),
-              title: 'Reset settings',
+              title: tr('Reset settings'),
               destructive: true,
               onTap: () => confirmResetSettings(context, ref),
             ),
@@ -146,12 +146,11 @@ class GeneralSettingsScreen extends ConsumerWidget {
 Future<void> confirmResetSettings(BuildContext context, WidgetRef ref) async {
   final ok = await showFFConfirm(
     context,
-    title: 'Reset settings?',
-    message:
-        'Appearance, notifications, module defaults, layout, gestures and '
-        'sounds go back to their defaults. Security, vault, backup settings '
-        'and your data are not changed.',
-    confirmLabel: 'Reset',
+    title: tr('Reset settings?'),
+    message: tr(
+      'Appearance, notifications, module defaults, layout, gestures and sounds go back to their defaults. Security, vault, backup settings and your data are not changed.',
+    ),
+    confirmLabel: tr('Reset'),
     destructive: true,
     icon: FontAwesomeIcons.arrowRotateLeft,
   );
@@ -160,7 +159,7 @@ Future<void> confirmResetSettings(BuildContext context, WidgetRef ref) async {
   if (context.mounted) {
     showFFToast(
       context,
-      'Settings reset',
+      tr('Settings reset'),
       icon: FontAwesomeIcons.solidCircleCheck,
     );
   }

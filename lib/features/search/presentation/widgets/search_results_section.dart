@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -64,9 +65,9 @@ class SearchResultsSection extends StatelessWidget {
         compact: true,
         colors: ModuleStyle.reminders.colors,
         icon: FontAwesomeIcons.circleExclamation,
-        title: 'Search failed',
-        body: 'Something went wrong while searching.',
-        ctaLabel: 'Retry',
+        title: tr('Search failed'),
+        body: tr('Something went wrong while searching.'),
+        ctaLabel: tr('Retry'),
         ctaIcon: FontAwesomeIcons.rotateRight,
         onCta: onRetry,
       );
@@ -82,11 +83,11 @@ class SearchResultsSection extends StatelessWidget {
         compact: true,
         colors: ModuleStyle.notes.colors,
         icon: FontAwesomeIcons.magnifyingGlass,
-        title: 'No matches for “$query”',
+        title: tr('No matches for “{query}”', {'query': query}),
         body: filtersActive
-            ? 'Try removing filters or checking the spelling.'
-            : 'Try another word or check the spelling.',
-        ctaLabel: filtersActive ? 'Clear filters' : null,
+            ? tr('Try removing filters or checking the spelling.')
+            : tr('Try another word or check the spelling.'),
+        ctaLabel: filtersActive ? tr('Clear filters') : null,
         ctaIcon: FontAwesomeIcons.xmark,
         onCta: filtersActive ? onClearFilters : null,
       );
@@ -122,7 +123,9 @@ class SearchResultsSection extends StatelessWidget {
           if (shown.length < r.hits.length)
             Center(
               child: FFTextButton(
-                label: 'Show all ${r.hits.length} results',
+                label: tr('Show all {length} results', {
+                  'length': r.hits.length,
+                }),
                 onPressed: onShowAll,
               ),
             ),
@@ -133,8 +136,8 @@ class SearchResultsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SearchSectionLabel(
-          'Top results',
-          actionLabel: 'Sort: ${sort.label}',
+          tr('Top results'),
+          actionLabel: tr('Sort: {label}', {'label': sort.label}),
           onAction: onToggleSort,
         ),
         body,

@@ -23,6 +23,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/drive_backup_file.dart';
@@ -177,8 +178,8 @@ class SignInController extends AutoDisposeNotifier<SignInMethod?> {
     } on CloudAuthException catch (e) {
       return SignInFailed(e.message);
     } on Object {
-      return const SignInFailed(
-        "Couldn't sign in. Check your connection and try again.",
+      return SignInFailed(
+        tr("Couldn't sign in. Check your connection and try again."),
       );
     } finally {
       link.close();

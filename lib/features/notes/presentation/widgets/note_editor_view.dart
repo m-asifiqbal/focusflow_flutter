@@ -16,6 +16,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_caret_handle.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
@@ -204,7 +205,7 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
       body: Column(
         children: [
           NoteEditorHeader(
-            folderName: note.folderName ?? 'Notes',
+            folderName: note.folderName ?? tr('Notes'),
             status: widget.state.status,
             showStatus: !readOnly,
             pinned: note.isPinned,
@@ -300,7 +301,7 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
       style: style,
       cursorColor: ff.primary,
       decoration: InputDecoration(
-        hintText: 'Title',
+        hintText: tr('Title'),
         hintStyle: style.copyWith(color: ff.inkFaint),
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
@@ -337,7 +338,7 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
         expands: false,
         padding: EdgeInsets.zero,
         minHeight: NoteEditorMetrics.bodyMinHeight,
-        placeholder: 'Start writing…',
+        placeholder: tr('Start writing…'),
         textCapitalization: TextCapitalization.sentences,
         keyboardAppearance: Theme.of(context).brightness,
         customStyles: noteQuillStyles(context),
@@ -362,9 +363,9 @@ class NoteReadOnlyBanner extends ConsumerWidget {
     return FFInfoBanner(
       icon: deleted ? FontAwesomeIcons.trashCan : FontAwesomeIcons.boxArchive,
       text: deleted
-          ? 'In Recently Deleted — restore it to edit.'
-          : 'Archived — restore it to edit.',
-      actionLabel: 'Restore',
+          ? tr('In Recently Deleted — restore it to edit.')
+          : tr('Archived — restore it to edit.'),
+      actionLabel: tr('Restore'),
       onAction: () => restoreNote(context, ref, note),
     );
   }

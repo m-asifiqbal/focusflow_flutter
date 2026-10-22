@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/widgets/ff_open_origin.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -79,7 +80,7 @@ class ReminderTimelineItem extends ConsumerWidget {
         isPinned: r.isPinned,
         isFavorite: r.isFavorite,
         radius: AppRadii.card,
-        completeLabel: 'Done',
+        completeLabel: tr('Done'),
         onComplete: pending
             ? () => markReminderDone(context, ref, r, occurrence: occurrence.at)
             : null,

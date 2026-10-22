@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -47,12 +48,12 @@ class CalendarHeader extends StatelessWidget {
       trailing: [
         FFRoundIconButton(
           icon: FontAwesomeIcons.magnifyingGlass,
-          semanticLabel: 'Search',
+          semanticLabel: tr('Search'),
           onPressed: onSearch,
         ),
         FFRoundIconButton(
           icon: FontAwesomeIcons.plus,
-          semanticLabel: 'Add on selected day',
+          semanticLabel: tr('Add on selected day'),
           variant: FFRoundIconButtonVariant.accent,
           iconSize: AppSizes.heroGlyph,
           onPressed: onAdd,

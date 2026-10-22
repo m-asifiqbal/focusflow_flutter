@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -81,7 +82,7 @@ class CalendarDayCell extends StatelessWidget {
       height: 1,
     );
     final label = StringBuffer(DateFormats.of('EEEE, MMMM d').format(day));
-    if (isToday) label.write(', today');
+    if (isToday) label.write(', ${tr('today')}');
     if (dots.isNotEmpty) {
       label.write(', ${dots.map((t) => t.plural.toLowerCase()).join(', ')}');
     }
@@ -90,7 +91,7 @@ class CalendarDayCell extends StatelessWidget {
       button: true,
       selected: isSelected,
       label: label.toString(),
-      hint: 'Long press to add on this day',
+      hint: tr('Long press to add on this day'),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,

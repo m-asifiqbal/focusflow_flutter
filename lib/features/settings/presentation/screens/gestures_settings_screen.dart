@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -56,10 +57,10 @@ class GesturesSettingsScreen extends ConsumerWidget {
     Future<void> pick({required bool right}) async {
       final v = await pickSetting<SwipeAction>(
         context,
-        title: right ? 'Swipe right' : 'Swipe left',
+        title: right ? tr('Swipe right') : tr('Swipe left'),
         subtitle: right
-            ? 'A full swipe right runs it at once.'
-            : 'Swipe left reveals it next to Delete.',
+            ? tr('A full swipe right runs it at once.')
+            : tr('Swipe left reveals it next to Delete.'),
         selected: right ? s.swipeRight : s.swipeLeft,
         options: [
           for (final a in right ? rightChoices : leftChoices)
@@ -71,28 +72,27 @@ class GesturesSettingsScreen extends ConsumerWidget {
     }
 
     return SettingsPage(
-      title: 'Gestures',
+      title: tr('Gestures'),
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const FFSectionLabel('Try it'),
+            FFSectionLabel(tr('Try it')),
             _DemoRow(left: s.swipeLeft, right: s.swipeRight),
           ],
         ),
         FFGroupedList(
-          label: 'Swipe actions',
-          footer:
-              'Applies to every list. Where an action does not fit an item '
-              '(e.g. Complete on a note) the row pins instead. Archive and '
-              'Delete always offer Undo for 5 seconds.',
+          label: tr('Swipe actions'),
+          footer: tr(
+            'Applies to every list. Where an action does not fit an item (e.g. Complete on a note) the row pins instead. Archive and Delete always offer Undo for 5 seconds.',
+          ),
           children: [
             FFListRow(
               leading: settingsTile(
                 FontAwesomeIcons.arrowRight,
                 SettingsTints.emerald,
               ),
-              title: 'Swipe right',
+              title: tr('Swipe right'),
               value: SettingsLabels.swipe(s.swipeRight),
               onTap: () => pick(right: true),
             ),
@@ -101,12 +101,14 @@ class GesturesSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.arrowLeft,
                 SettingsTints.slate,
               ),
-              title: 'Swipe left',
+              title: tr('Swipe left'),
               value: s.swipeLeft == SwipeAction.none
                   ? SettingsLabels.swipe(s.swipeLeft)
                   : s.swipeLeft == SwipeAction.delete
-                  ? 'Delete'
-                  : '${SettingsLabels.swipe(s.swipeLeft)} + Delete',
+                  ? tr('Delete')
+                  : tr('{action} + Delete', {
+                      'action': SettingsLabels.swipe(s.swipeLeft),
+                    }),
               onTap: () => pick(right: false),
             ),
           ],
@@ -127,7 +129,7 @@ class _DemoRow extends StatelessWidget {
   FFSwipeAction? _action(BuildContext context, SwipeAction a) {
     void say() => showFFToast(
       context,
-      '${SettingsLabels.swipe(a)} — just a preview',
+      tr('{action} — just a preview', {'action': SettingsLabels.swipe(a)}),
       icon: FontAwesomeIcons.solidHandPointer,
     );
     return switch (a) {
@@ -138,13 +140,13 @@ class _DemoRow extends StatelessWidget {
       SwipeAction.pin => FFSwipeAction.pin(onTap: say),
       SwipeAction.favourite => FFSwipeAction(
         icon: FontAwesomeIcons.solidStar,
-        label: 'Favourite',
+        label: tr('Favourite'),
         color: ModuleStyle.vault.solid,
         onTap: say,
       ),
       SwipeAction.snooze => FFSwipeAction(
         icon: FontAwesomeIcons.clockRotateLeft,
-        label: 'Snooze',
+        label: tr('Snooze'),
         color: ModuleStyle.reminders.solid,
         onTap: say,
       ),
@@ -165,7 +167,7 @@ class _DemoRow extends StatelessWidget {
           FFSwipeAction.delete(
             onTap: () => showFFToast(
               context,
-              'Delete — just a preview',
+              tr('Delete — just a preview'),
               icon: FontAwesomeIcons.solidHandPointer,
             ),
           ),
@@ -183,9 +185,9 @@ class _DemoRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Review weekly plan', style: context.text.rowTitle),
+                  Text(tr('Review weekly plan'), style: context.text.rowTitle),
                   Text(
-                    'Swipe this row left or right',
+                    tr('Swipe this row left or right'),
                     style: context.text.meta.copyWith(color: ff.inkMuted),
                   ),
                 ],

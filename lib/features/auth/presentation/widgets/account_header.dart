@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -24,11 +25,17 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 
 /// The name shown under the avatar: the account's full name, else the
 /// display name, else a neutral fallback.
-String accountHeaderName(CloudAccount? account, String displayName) {
+String accountHeaderName(CloudAccount? account, String displayName) =>
+    _realName(account, displayName) ?? tr('Your profile');
+
+/// The account's / display name, or null when there is none (the header then
+/// shows the neutral fallback and the avatar its placeholder). Kept apart from
+/// the fallback text so the logic never compares against a translated label.
+String? _realName(CloudAccount? account, String displayName) {
   final full = account?.displayName?.trim() ?? '';
   if (full.isNotEmpty) return full;
   if (displayName.trim().isNotEmpty) return displayName.trim();
-  return 'Your profile';
+  return null;
 }
 
 class AccountHeader extends ConsumerWidget {
@@ -45,7 +52,8 @@ class AccountHeader extends ConsumerWidget {
     final displayName = ref.watch(
       settingsProvider.select((s) => s.displayName),
     );
-    final name = accountHeaderName(account, displayName);
+    final realName = _realName(account, displayName);
+    final name = realName ?? tr('Your profile');
 
     final Widget providerIcon = switch (account?.provider) {
       CloudProvider.google => const GoogleLogo(size: 15),
@@ -61,9 +69,9 @@ class AccountHeader extends ConsumerWidget {
       ),
     };
     final providerText = switch (account) {
-      null => 'Offline · data stays on this device',
+      null => tr('Offline · data stays on this device'),
       final a when a.email.isNotEmpty => a.email,
-      _ => 'Signed in with Apple',
+      _ => tr('Signed in with Apple'),
     };
 
     return Column(
@@ -72,10 +80,10 @@ class AccountHeader extends ConsumerWidget {
           clipBehavior: Clip.none,
           children: [
             ProfileAvatar(
-              initial: name == 'Your profile' ? null : name,
+              initial: realName,
               size: 96,
               onTap: onPhotoTap,
-              semanticLabel: 'Change profile photo',
+              semanticLabel: tr('Change profile photo'),
             ),
             PositionedDirectional(
               end: -2,
@@ -137,9 +145,9 @@ class AccountStatsCard extends ConsumerWidget {
     final stats = ref.watch(accountStatsProvider);
     final s = stats.valueOrNull;
     final values = [
-      (s?.items, 'Items'),
-      (s?.bestStreak, 'Best streak'),
-      (s?.daysActive, 'Days active'),
+      (s?.items, tr('Items')),
+      (s?.bestStreak, tr('Best streak')),
+      (s?.daysActive, tr('Days active')),
     ];
     return FFCard(
       padding: const EdgeInsetsDirectional.symmetric(
@@ -183,7 +191,10 @@ class _Stat extends StatelessWidget {
     final text = context.text;
     final v = value;
     return Semantics(
-      label: '$label: ${v ?? (failed ? 'unavailable' : 'loading')}',
+      label: tr('{label}: {value}', {
+        'label': label,
+        'value': v ?? (failed ? tr('unavailable') : tr('loading')),
+      }),
       excludeSemantics: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,

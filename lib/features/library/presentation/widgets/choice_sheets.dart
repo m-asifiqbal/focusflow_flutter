@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -71,7 +72,7 @@ Future<Choice<T>?> showChoiceSheet<T>(
                   title: o.label,
                   subtitle: o.subtitle,
                   semanticLabel: o.value == selected
-                      ? '${o.label}, selected'
+                      ? tr('{label}, selected', {'label': o.label})
                       : o.label,
                   trailing: o.value == selected
                       ? Icon(
@@ -97,7 +98,7 @@ Future<String?> showTextInputSheet(
   BuildContext context, {
   required String title,
   String hint = '',
-  String confirmLabel = 'Save',
+  String? confirmLabel,
   String initial = '',
 }) async {
   final text = await showFFBottomSheet<String>(
@@ -107,7 +108,7 @@ Future<String?> showTextInputSheet(
     builder: (_) => _TextInputSheet(
       title: title,
       hint: hint,
-      confirmLabel: confirmLabel,
+      confirmLabel: confirmLabel ?? tr('Save'),
       initial: initial,
     ),
   );

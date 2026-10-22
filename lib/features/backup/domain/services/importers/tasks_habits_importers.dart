@@ -15,6 +15,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/domain/services/csv_codec.dart';
@@ -31,7 +32,7 @@ abstract final class TodoistImporter {
   static ImportBundle parse(String text) {
     final rows = CsvCodec.decodeMaps(text);
     if (rows.isEmpty || !isTodoistCsv(rows.first.keys.toSet())) {
-      throw const ImportFormatException('This is not a Todoist CSV export.');
+      throw ImportFormatException(tr('This is not a Todoist CSV export.'));
     }
     final tasks = <_TaskDraft>[];
     for (final r in rows) {
@@ -73,7 +74,7 @@ abstract final class TodoistImporter {
       );
     }
     if (tasks.isEmpty) {
-      throw const ImportFormatException('No tasks found in this Todoist CSV.');
+      throw ImportFormatException(tr('No tasks found in this Todoist CSV.'));
     }
     return ImportBundle(
       source: ImportSource.todoist,
@@ -130,7 +131,7 @@ abstract final class LoopImporter {
   static ImportBundle parse(String habitsCsv, {String? checkmarksCsv}) {
     final rows = CsvCodec.decodeMaps(habitsCsv);
     if (rows.isEmpty || !isHabitsCsv(rows.first.keys.toSet())) {
-      throw const ImportFormatException('This is not a Loop Habit export.');
+      throw ImportFormatException(tr('This is not a Loop Habit export.'));
     }
     final logs = _checkmarks(checkmarksCsv);
     final habits = <ImportedHabit>[];
@@ -176,7 +177,7 @@ abstract final class LoopImporter {
       );
     }
     if (habits.isEmpty) {
-      throw const ImportFormatException('No habits found in this export.');
+      throw ImportFormatException(tr('No habits found in this export.'));
     }
     return ImportBundle(source: ImportSource.loopHabit, habits: habits);
   }

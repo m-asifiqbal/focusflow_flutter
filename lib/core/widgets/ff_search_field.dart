@@ -9,7 +9,12 @@
 /// ============================================================
 library;
 
+// A nullable preset label resolves to tr() when read (it must follow the
+// language), and a private field cannot be a named initializing formal.
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
@@ -20,13 +25,13 @@ class FFSearchField extends StatefulWidget {
   const FFSearchField({
     this.controller,
     this.focusNode,
-    this.hint = 'Search',
+    String? hint,
     this.onChanged,
     this.onSubmitted,
     this.onClear,
     this.onFilter,
     this.filterActive = false,
-    this.filterSemanticLabel = 'Filters',
+    String? filterSemanticLabel,
     this.autofocus = false,
     this.readOnly = false,
     this.onTap,
@@ -34,11 +39,15 @@ class FFSearchField extends StatefulWidget {
     this.trailing,
     this.textInputAction = TextInputAction.search,
     super.key,
-  });
+  }) : _hint = hint,
+       _filterSemanticLabel = filterSemanticLabel;
 
   final TextEditingController? controller;
   final FocusNode? focusNode;
-  final String hint;
+  final String? _hint;
+
+  /// The given hint, else "Search" in the active language.
+  String get hint => _hint ?? tr('Search');
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onClear;
@@ -48,7 +57,10 @@ class FFSearchField extends StatefulWidget {
 
   /// Adds a dot to the filter button (filters applied).
   final bool filterActive;
-  final String filterSemanticLabel;
+  final String? _filterSemanticLabel;
+
+  /// The given label, else "Filters" in the active language.
+  String get filterSemanticLabel => _filterSemanticLabel ?? tr('Filters');
   final bool autofocus;
 
   /// Non-editable: the whole field becomes a button calling [onTap].
@@ -186,7 +198,7 @@ class _FFSearchFieldState extends State<FFSearchField> {
             _IconAction(
               icon: FontAwesomeIcons.solidCircleXmark,
               color: hintColor,
-              semanticLabel: 'Clear search',
+              semanticLabel: tr('Clear search'),
               onTap: _clear,
             )
           else if (widget.trailing == null && widget.onFilter == null)

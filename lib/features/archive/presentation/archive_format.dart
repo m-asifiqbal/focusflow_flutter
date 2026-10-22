@@ -11,18 +11,20 @@ library;
 
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/services/streak_calculator.dart';
 
 abstract final class ArchiveFormat {
   /// Module name on a row: "Note", "Task", "Reminder", "Habit", "Vault".
-  static String typeName(ItemType t) => t == ItemType.vault ? 'Vault' : t.label;
+  static String typeName(ItemType t) =>
+      t == ItemType.vault ? tr('Vault') : t.label;
 
   /// "today", "yesterday", "Jun 2", "Mar 3, 2025" (mid-sentence casing).
   static String day(DateTime t, DateTime now) {
     final ago = DateUtilsX.daysBetween(t, now);
-    if (ago == 0) return 'today';
-    if (ago == 1) return 'yesterday';
+    if (ago == 0) return tr('today');
+    if (ago == 1) return tr('yesterday');
     if (t.year == now.year) return DateFormats.of('MMM d').format(t);
     return DateFormats.of('MMM d, y').format(t);
   }
@@ -30,8 +32,9 @@ abstract final class ArchiveFormat {
   /// "34-day streak saved" / "5-week streak saved"; null without a streak.
   static String? streakSaved(HabitStreak? streak) {
     if (streak == null || streak.current <= 0) return null;
-    final unit = streak.unit == StreakUnit.weeks ? 'week' : 'day';
-    return '${streak.current}-$unit streak saved';
+    return streak.unit == StreakUnit.weeks
+        ? tr('{n}-week streak saved', {'n': streak.current})
+        : tr('{n}-day streak saved', {'n': streak.current});
   }
 
   /// Second line of an Archive row. [streak] (habits) replaces the date.
@@ -39,14 +42,15 @@ abstract final class ArchiveFormat {
     final at = s.archivedAt ?? s.updatedAt;
     return [
       typeName(s.type),
-      if (s.type == ItemType.task && s.isCompleted) 'completed',
-      streak ?? 'archived ${day(at, now)}',
+      if (s.type == ItemType.task && s.isCompleted) tr('completed'),
+      streak ?? tr('archived {when}', {'when': day(at, now)}),
     ].join(' · ');
   }
 
   /// Second line of a Recently Deleted row: "Note · deleted today".
   static String deletedMeta(ItemSummary s, DateTime now) =>
-      '${typeName(s.type)} · deleted ${day(s.deletedAt ?? s.updatedAt, now)}';
+      '${typeName(s.type)} · '
+      '${tr('deleted {when}', {'when': day(s.deletedAt ?? s.updatedAt, now)})}';
 
   /// Whole days an item stays in Recently Deleted before the purge, counted
   /// in calendar days like design/24: deleted today → 29, yesterday → 28;
@@ -59,25 +63,34 @@ abstract final class ArchiveFormat {
 
   /// Days before the purge: "29 days", "1 day", "Today".
   static String daysLeft(int days) => switch (days) {
-    <= 0 => 'Today',
-    1 => '1 day',
-    _ => '$days days',
+    <= 0 => tr('Today'),
+    _ => tr('{count, plural, one {# day} other {# days}}', {'count': days}),
   };
 
   /// Screen-reader form of [daysLeft].
   static String daysLeftSemantics(int days) => days <= 0
-      ? 'deleted permanently today'
-      : '${daysLeft(days)} until deleted permanently';
+      ? tr('deleted permanently today')
+      : tr('{days} until deleted permanently', {'days': daysLeft(days)});
 
   /// Search hint: "Search 37 archived items…".
   static String searchHint(int total) => total == 0
-      ? 'Search archived items…'
-      : 'Search $total archived ${total == 1 ? 'item' : 'items'}…';
+      ? tr('Search archived items…')
+      : tr(
+          'Search {count, plural, one {# archived item} other {# archived items}}…',
+          {'count': total},
+        );
 
   /// "5 items" / "2 selected · 5 items" (shown upper-case).
   static String countLabel(int total, {int? selected}) {
-    final items = '$total ${total == 1 ? 'item' : 'items'}';
-    return selected == null ? items : '$selected selected · $items';
+    final items = tr('{count, plural, one {# item} other {# items}}', {
+      'count': total,
+    });
+    return selected == null
+        ? items
+        : tr('{selected} selected · {items}', {
+            'selected': selected,
+            'items': items,
+          });
   }
 
   /// "Restore (2)".

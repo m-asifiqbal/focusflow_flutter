@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -118,7 +119,7 @@ class CountStepper extends StatelessWidget {
       children: [
         FFRoundIconButton(
           icon: FontAwesomeIcons.minus,
-          semanticLabel: 'Decrease',
+          semanticLabel: tr('Decrease'),
           onPressed: value > min ? () => onChanged(value - 1) : null,
         ),
         Expanded(
@@ -132,7 +133,7 @@ class CountStepper extends StatelessWidget {
         ),
         FFRoundIconButton(
           icon: FontAwesomeIcons.plus,
-          semanticLabel: 'Increase',
+          semanticLabel: tr('Increase'),
           onPressed: value < max ? () => onChanged(value + 1) : null,
         ),
       ],
@@ -164,28 +165,55 @@ class RepeatCustomPanel extends StatefulWidget {
 class _RepeatCustomPanelState extends State<RepeatCustomPanel> {
   bool _calendar = false;
 
-  static const _units = {
-    RecurrenceFrequency.daily: ('Days', 'day'),
-    RecurrenceFrequency.weekly: ('Weeks', 'week'),
-    RecurrenceFrequency.monthly: ('Months', 'month'),
-    RecurrenceFrequency.yearly: ('Years', 'year'),
+  static const _units = [
+    RecurrenceFrequency.daily,
+    RecurrenceFrequency.weekly,
+    RecurrenceFrequency.monthly,
+    RecurrenceFrequency.yearly,
+  ];
+
+  /// Segment text of a unit (plural noun).
+  static String _unitName(RecurrenceFrequency f) => switch (f) {
+    RecurrenceFrequency.daily => tr('Days'),
+    RecurrenceFrequency.weekly => tr('Weeks'),
+    RecurrenceFrequency.monthly => tr('Months'),
+    RecurrenceFrequency.yearly => tr('Years'),
+  };
+
+  /// Stepper text: "Every day" / "Every 2 weeks" (one key per unit so each
+  /// language can inflect the noun).
+  static String _everyLabel(RecurrenceFrequency f, int n) => switch (f) {
+    RecurrenceFrequency.daily => tr(
+      '{count, plural, one {Every day} other {Every # days}}',
+      {'count': n},
+    ),
+    RecurrenceFrequency.weekly => tr(
+      '{count, plural, one {Every week} other {Every # weeks}}',
+      {'count': n},
+    ),
+    RecurrenceFrequency.monthly => tr(
+      '{count, plural, one {Every month} other {Every # months}}',
+      {'count': n},
+    ),
+    RecurrenceFrequency.yearly => tr(
+      '{count, plural, one {Every year} other {Every # years}}',
+      {'count': n},
+    ),
   };
 
   @override
   Widget build(BuildContext context) {
     final d = widget.draft;
-    final unit = _units[d.unit]!.$2;
     void set(RepeatDraft next) => widget.onChanged(next);
     const gap = SizedBox(height: AppSpacing.md);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const FFSectionLabel('Every'),
+        FFSectionLabel(tr('Every')),
         FFSegmented<RecurrenceFrequency>(
           segments: [
-            for (final e in _units.entries)
-              FFSegment(value: e.key, label: e.value.$1),
+            for (final u in _units) FFSegment(value: u, label: _unitName(u)),
           ],
           value: d.unit,
           onChanged: (u) => set(d.copyWith(unit: u)),
@@ -193,9 +221,7 @@ class _RepeatCustomPanelState extends State<RepeatCustomPanel> {
         gap,
         CountStepper(
           value: d.interval,
-          label: d.interval == 1
-              ? 'Every $unit'
-              : 'Every ${d.interval} ${unit}s',
+          label: _everyLabel(d.unit, d.interval),
           onChanged: (n) => set(d.copyWith(interval: n)),
         ),
         if (d.unit == RecurrenceFrequency.weekly) ...[
@@ -207,12 +233,12 @@ class _RepeatCustomPanelState extends State<RepeatCustomPanel> {
           ),
         ],
         const SizedBox(height: AppSpacing.xl),
-        const FFSectionLabel('Ends'),
+        FFSectionLabel(tr('Ends')),
         FFSegmented<RepeatEnd>(
-          segments: const [
-            FFSegment(value: RepeatEnd.never, label: 'Never'),
-            FFSegment(value: RepeatEnd.onDate, label: 'On date'),
-            FFSegment(value: RepeatEnd.after, label: 'After'),
+          segments: [
+            FFSegment(value: RepeatEnd.never, label: tr('Never')),
+            FFSegment(value: RepeatEnd.onDate, label: tr('On date')),
+            FFSegment(value: RepeatEnd.after, label: tr('After')),
           ],
           value: d.end,
           onChanged: (e) => set(d.copyWith(end: e)),
@@ -222,7 +248,7 @@ class _RepeatCustomPanelState extends State<RepeatCustomPanel> {
           FFGroupedList(
             children: [
               FFListRow(
-                title: 'End date',
+                title: tr('End date'),
                 value: DateFormats.of('EEE, MMM d, y').format(d.until),
                 valueColor: context.ff.primaryStrong,
                 onTap: () => setState(() => _calendar = !_calendar),
@@ -251,7 +277,9 @@ class _RepeatCustomPanelState extends State<RepeatCustomPanel> {
           gap,
           CountStepper(
             value: d.count,
-            label: d.count == 1 ? '1 time' : '${d.count} times',
+            label: tr('{count, plural, one {# time} other {# times}}', {
+              'count': d.count,
+            }),
             onChanged: (n) => set(d.copyWith(count: n)),
           ),
         ],

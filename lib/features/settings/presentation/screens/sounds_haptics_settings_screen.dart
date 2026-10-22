@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/reminders/presentation/state/reminder_alert_options.dart';
@@ -33,22 +34,22 @@ class SoundsHapticsSettingsScreen extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final editor = ref.read(settingsEditorProvider);
     return SettingsPage(
-      title: 'Sounds & haptics',
+      title: tr('Sounds & haptics'),
       children: [
         FFGroupedList(
-          label: 'Sounds',
-          footer:
-              'Notification sounds also follow your device’s silent mode '
-              'and Focus settings.',
+          label: tr('Sounds'),
+          footer: tr(
+            'Notification sounds also follow your device’s silent mode and Focus settings.',
+          ),
           children: [
             FFListRow.toggle(
               leading: settingsTile(
                 FontAwesomeIcons.volumeHigh,
                 SettingsTints.pink,
               ),
-              title: 'In-app sounds',
+              title: tr('In-app sounds'),
               // No widget plays sounds yet: say so instead of a dead switch.
-              subtitle: 'Completing tasks and habits · coming soon',
+              subtitle: tr('Completing tasks and habits · coming soon'),
               value: s.soundsEnabled,
               onChanged: editor.setSounds,
             ),
@@ -57,15 +58,15 @@ class SoundsHapticsSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.solidBell,
                 SettingsTints.orange,
               ),
-              title: 'Reminder sound',
+              title: tr('Reminder sound'),
               value: ReminderAlertOptions.soundLabel(s.remindersDefaultSound),
               onTap: () async {
                 final v = await pickSetting<String>(
                   context,
-                  title: 'Reminder sound',
-                  subtitle:
-                      'Used by new reminders. Each reminder can '
-                      'override it.',
+                  title: tr('Reminder sound'),
+                  subtitle: tr(
+                    'Used by new reminders. Each reminder can override it.',
+                  ),
                   selected: s.remindersDefaultSound,
                   options: [
                     for (final o in ReminderAlertOptions.sounds)
@@ -78,15 +79,15 @@ class SoundsHapticsSettingsScreen extends ConsumerWidget {
           ],
         ),
         FFGroupedList(
-          label: 'Haptics',
+          label: tr('Haptics'),
           children: [
             FFListRow.toggle(
               leading: settingsTile(
                 FontAwesomeIcons.mobileScreenButton,
                 SettingsTints.violet,
               ),
-              title: 'Haptic feedback',
-              subtitle: 'Check-ins, PIN pad, copy and swipes',
+              title: tr('Haptic feedback'),
+              subtitle: tr('Check-ins, PIN pad, copy and swipes'),
               value: s.hapticsEnabled,
               onChanged: editor.setHaptics,
             ),
@@ -95,14 +96,14 @@ class SoundsHapticsSettingsScreen extends ConsumerWidget {
                 FontAwesomeIcons.solidHandPointer,
                 SettingsTints.amber,
               ),
-              title: 'Try haptics',
+              title: tr('Try haptics'),
               enabled: s.hapticsEnabled,
               chevron: false,
               onTap: () {
                 HapticFeedback.mediumImpact();
                 showFFToast(
                   context,
-                  'Felt that?',
+                  tr('Felt that?'),
                   icon: FontAwesomeIcons.mobileScreenButton,
                 );
               },

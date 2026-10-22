@@ -19,6 +19,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'
     show InputBorder, InputDecoration, TextField;
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -87,7 +88,7 @@ class _TimeSheetState extends State<_TimeSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FFPrimaryButton(
-            label: 'Set $label',
+            label: tr('Set {label}', {'label': label}),
             icon: FontAwesomeIcons.solidClock,
             onPressed: () => Navigator.of(context).pop(SheetChoice(_minutes)),
           ),
@@ -280,10 +281,11 @@ class _RepeatIntervalSheetState extends State<_RepeatIntervalSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const _SheetTitle(
-            'Repeat until done',
-            subtitle:
-                'Show a reminder again every… until you mark it done or snooze it',
+          _SheetTitle(
+            tr('Repeat until done'),
+            subtitle: tr(
+              'Show a reminder again every… until you mark it done or snooze it',
+            ),
           ),
           FFGroupedList(
             dividerIndent: AppSpacing.lg,
@@ -300,7 +302,7 @@ class _RepeatIntervalSheetState extends State<_RepeatIntervalSheet> {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text('Custom interval', style: context.text.meta),
+          Text(tr('Custom interval'), style: context.text.meta),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
@@ -327,12 +329,14 @@ class _RepeatIntervalSheetState extends State<_RepeatIntervalSheet> {
                       style: context.text.body.copyWith(color: ff.ink),
                       decoration: InputDecoration(
                         border: InputBorder.none,
-                        hintText:
-                            'Minutes (1–${AppSettings.maxRepeatIntervalMinutes})',
+                        hintText: tr('Minutes (1–{maxRepeatIntervalMinutes})', {
+                          'maxRepeatIntervalMinutes':
+                              AppSettings.maxRepeatIntervalMinutes,
+                        }),
                         hintStyle: context.text.body.copyWith(
                           color: ff.inkFaint,
                         ),
-                        suffixText: 'min',
+                        suffixText: tr('min'),
                       ),
                     ),
                   ),
@@ -340,7 +344,7 @@ class _RepeatIntervalSheetState extends State<_RepeatIntervalSheet> {
               ),
               const SizedBox(width: AppSpacing.md),
               FFPrimaryButton(
-                label: 'Set',
+                label: tr('Set'),
                 expand: false,
                 height: AppSizes.secondaryButton,
                 onPressed: _minutes == null

@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -72,17 +73,19 @@ abstract final class VaultSettingsLabels {
   static const clipboardSeconds = [10, 30, 60, 90, 0];
 
   static String autoLock(int minutes) =>
-      minutes == 0 ? 'On leave' : 'After $minutes min';
+      minutes == 0 ? tr('On leave') : tr('After {m} min', {'m': minutes});
 
-  static String autoLockOption(int minutes) =>
-      minutes == 0 ? 'Only when I leave the app' : 'After $minutes min';
+  static String autoLockOption(int minutes) => minutes == 0
+      ? tr('Only when I leave the app')
+      : tr('After {m} min', {'m': minutes});
 
-  static String clipboard(int seconds) => seconds == 0 ? 'Never' : '$seconds s';
+  static String clipboard(int seconds) =>
+      seconds == 0 ? tr('Never') : tr('{s} s', {'s': seconds});
 
   static String clipboardOption(int seconds) => switch (seconds) {
-    0 => 'Never',
-    60 => 'After 1 minute',
-    90 => 'After 90 seconds',
-    _ => 'After $seconds seconds',
+    0 => tr('Never'),
+    60 => tr('After 1 minute'),
+    90 => tr('After 90 seconds'),
+    _ => tr('After {s} seconds', {'s': seconds}),
   };
 }

@@ -15,6 +15,7 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
 import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/domain/services/csv_codec.dart';
@@ -32,7 +33,7 @@ abstract final class PasswordImporters {
   static ImportBundle bitwarden(String text) {
     final rows = CsvCodec.decodeMaps(text);
     if (rows.isEmpty || !isBitwarden(rows.first.keys.toSet())) {
-      throw const ImportFormatException('This is not a Bitwarden CSV export.');
+      throw ImportFormatException(tr('This is not a Bitwarden CSV export.'));
     }
     final logins = <ImportedLogin>[];
     var skipped = 0;
@@ -60,7 +61,10 @@ abstract final class PasswordImporters {
       source: ImportSource.bitwarden,
       logins: logins,
       problems: [
-        if (skipped > 0) ImportProblem('$skipped non-login entries left out'),
+        if (skipped > 0)
+          ImportProblem(
+            tr('{count} non-login entries left out', {'count': skipped}),
+          ),
       ],
     );
   }
@@ -68,7 +72,7 @@ abstract final class PasswordImporters {
   static ImportBundle onePassword(String text) {
     final rows = CsvCodec.decodeMaps(text);
     if (rows.isEmpty || !isOnePassword(rows.first.keys.toSet())) {
-      throw const ImportFormatException('This is not a 1Password CSV export.');
+      throw ImportFormatException(tr('This is not a 1Password CSV export.'));
     }
     final logins = <ImportedLogin>[];
     var skipped = 0;
@@ -95,7 +99,10 @@ abstract final class PasswordImporters {
       source: ImportSource.onePassword,
       logins: logins,
       problems: [
-        if (skipped > 0) ImportProblem('$skipped archived or empty entries'),
+        if (skipped > 0)
+          ImportProblem(
+            tr('{count} archived or empty entries', {'count': skipped}),
+          ),
       ],
     );
   }

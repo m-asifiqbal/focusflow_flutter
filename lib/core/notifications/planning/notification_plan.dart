@@ -20,6 +20,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/app_language.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
 
 /// Android notification channels (created at start-up).
@@ -35,71 +37,55 @@ import 'package:focusflow/features/notifications_center/domain/entities/inbox_en
 /// plain and task reminders; any other sound key uses the system default
 /// sound of [reminders] / [tasks].
 enum NotificationChannelId {
-  reminders(
-    'reminders_v2',
-    'Reminders',
-    'Your reminders at the time you set (system sound)',
-  ),
-  chime(
-    'reminders_chime_v2',
-    'Reminders · Chime',
-    'Reminders that use the Chime sound',
-    tone: 'chime',
-  ),
-  bell(
-    'reminders_bell_v2',
-    'Reminders · Bell',
-    'Reminders that use the Bell sound',
-    tone: 'bell',
-  ),
-  gentle(
-    'reminders_gentle_v2',
-    'Reminders · Gentle',
-    'Reminders that use the Gentle sound',
-    tone: 'gentle',
-  ),
-  pulse(
-    'reminders_pulse_v2',
-    'Reminders · Pulse',
-    'Reminders that use the Pulse sound',
-    tone: 'pulse',
-  ),
-  alarms('alarms_v2', 'Alarms', 'Alarm-style reminders shown full screen'),
-  tasks('tasks_v2', 'Tasks', 'Task due and overdue alerts'),
-  habits('habits_v2', 'Habits', "Habit check-ins and streaks at risk"),
+  reminders('reminders_v2'),
+  chime('reminders_chime_v2', tone: 'chime'),
+  bell('reminders_bell_v2', tone: 'bell'),
+  gentle('reminders_gentle_v2', tone: 'gentle'),
+  pulse('reminders_pulse_v2', tone: 'pulse'),
+  alarms('alarms_v2'),
+  tasks('tasks_v2'),
+  habits('habits_v2'),
 
   /// Reminders whose sound is "Silent" (Android channel sounds are fixed,
   /// so silence needs a channel of its own).
-  silentReminders(
-    'reminders_silent_v2',
-    'Silent reminders',
-    'Reminders set to Silent: shown without a sound',
-    playSound: false,
-  ),
-  digests(
-    'digests_v2',
-    'Daily digest',
-    'Morning briefing, evening review and '
-        'weekly report',
-  ),
-  system(
-    'system_v2',
-    'Security & sync',
-    'Vault security alerts and backup / '
-        'sync status',
-  );
+  silentReminders('reminders_silent_v2', playSound: false),
+  digests('digests_v2'),
+  system('system_v2');
 
-  const NotificationChannelId(
-    this.id,
-    this.label,
-    this.description, {
-    this.tone,
-    this.playSound = true,
-  });
+  const NotificationChannelId(this.id, {this.tone, this.playSound = true});
 
   final String id;
-  final String label;
-  final String description;
+
+  /// Channel name shown in the system settings, in the active language (the
+  /// gateway re-creates the channels at start-up, which updates the name).
+  String get label => switch (this) {
+    reminders => tr('Reminders'),
+    chime => tr('Reminders · Chime'),
+    bell => tr('Reminders · Bell'),
+    gentle => tr('Reminders · Gentle'),
+    pulse => tr('Reminders · Pulse'),
+    alarms => tr('Alarms'),
+    tasks => tr('Tasks'),
+    habits => tr('Habits'),
+    silentReminders => tr('Silent reminders'),
+    digests => tr('Daily digest'),
+    system => tr('Security & sync'),
+  };
+
+  /// Channel description shown in the system settings, in the active language.
+  String get description => switch (this) {
+    reminders => tr('Your reminders at the time you set (system sound)'),
+    chime => tr('Reminders that use the Chime sound'),
+    bell => tr('Reminders that use the Bell sound'),
+    gentle => tr('Reminders that use the Gentle sound'),
+    pulse => tr('Reminders that use the Pulse sound'),
+    alarms => tr('Alarm-style reminders shown full screen'),
+    tasks => tr('Task due and overdue alerts'),
+    habits => tr('Habit check-ins and streaks at risk'),
+    silentReminders => tr('Reminders set to Silent: shown without a sound'),
+    digests => tr('Morning briefing, evening review and weekly report'),
+    system => tr('Vault security alerts and backup / sync status'),
+  };
 
   /// Bundled sound (`res/raw/<tone>`, iOS `Library/Sounds/<tone>.wav`);
   /// null = the system default sound.
@@ -376,6 +362,11 @@ class PlannedNotification {
       sound ?? '',
       // The channel is part of the OS copy (channels are versioned).
       NotificationChannelId.forNotification(this).id,
+      // Button labels and the channel text follow the language, which the
+      // title/body may not reveal. Nothing is added for English, so the
+      // fingerprints stored before languages existed stay valid (a changed
+      // one would re-send every notification once).
+      if (L10n.language != AppLanguage.en) L10n.language.code,
     ].join('\u0001');
     return fnv1a32(s).toRadixString(16);
   }

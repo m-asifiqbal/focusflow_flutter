@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -38,10 +39,10 @@ class _TimeSplitCardState extends State<TimeSplitCard> {
     final split = widget.split;
     final percents = split.percents;
     final entries = [
-      ('Tasks', split.tasks, ModuleStyle.tasks.colors),
-      ('Habits', split.habits, ModuleStyle.habits.colors),
-      ('Notes', split.notes, ModuleStyle.notes.colors),
-      ('Reminders', split.reminders, ModuleStyle.reminders.colors),
+      (tr('Tasks'), split.tasks, ModuleStyle.tasks.colors),
+      (tr('Habits'), split.habits, ModuleStyle.habits.colors),
+      (tr('Notes'), split.notes, ModuleStyle.notes.colors),
+      (tr('Reminders'), split.reminders, ModuleStyle.reminders.colors),
     ];
     return FFCard(
       padding: const EdgeInsetsDirectional.all(InsightsDimens.cardPadding),
@@ -51,7 +52,7 @@ class _TimeSplitCardState extends State<TimeSplitCard> {
           Semantics(
             header: true,
             child: Text(
-              'Where your time went',
+              tr('Where your time went'),
               style: context.text.sectionTitle.copyWith(
                 fontSize: InsightsDimens.cardTitle,
               ),
@@ -59,15 +60,19 @@ class _TimeSplitCardState extends State<TimeSplitCard> {
           ),
           const SizedBox(height: InsightsDimens.cardGap),
           if (split.total == 0)
-            const InsightsNoData(
+            InsightsNoData(
               icon: FontAwesomeIcons.chartPie,
-              message: 'Nothing done in this range yet.',
+              message: tr('Nothing done in this range yet.'),
             )
           else
             Semantics(
-              label:
-                  '${split.total} actions. '
-                  '${[for (var i = 0; i < 4; i++) '${entries[i].$1} ${percents[i]}%'].join(', ')}',
+              label: tr('{total} actions. {join}', {
+                'total': split.total,
+                'join': [
+                  for (var i = 0; i < 4; i++)
+                    '${entries[i].$1} ${percents[i]}%',
+                ].join(', '),
+              }),
               excludeSemantics: true,
               child: Column(
                 children: [

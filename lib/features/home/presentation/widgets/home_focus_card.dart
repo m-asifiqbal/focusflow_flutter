@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -34,11 +35,17 @@ class HomeFocusCard extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label:
-          "Today's focus, ${focus.percent} percent. "
-          '${focus.tasksDone} of ${focus.tasksTarget} tasks, '
-          '${focus.habitsDone} of ${focus.habitsDue} habits, '
-          '${focus.remindersLeft} reminders left',
+      label: tr(
+        'Today\'s focus, {percent} percent. {tasksDone} of {tasksTarget} tasks, {habitsDone} of {habitsDue} habits, {remindersLeft} reminders left',
+        {
+          'percent': focus.percent,
+          'tasksDone': focus.tasksDone,
+          'tasksTarget': focus.tasksTarget,
+          'habitsDone': focus.habitsDone,
+          'habitsDue': focus.habitsDue,
+          'remindersLeft': focus.remindersLeft,
+        },
+      ),
       child: Container(
         decoration: BoxDecoration(
           gradient: ff.primaryGradient,
@@ -81,7 +88,7 @@ class HomeFocusCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Today's Focus",
+                                tr('Today\'s Focus'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: text.title.copyWith(
@@ -119,7 +126,7 @@ class HomeFocusCard extends StatelessWidget {
                         Expanded(
                           child: FFStatTile.glass(
                             value: '${focus.tasksDone}/${focus.tasksTarget}',
-                            label: 'Tasks',
+                            label: tr('Tasks'),
                             onTap: () => context.push(AppRoutes.tasks),
                           ),
                         ),
@@ -127,7 +134,7 @@ class HomeFocusCard extends StatelessWidget {
                         Expanded(
                           child: FFStatTile.glass(
                             value: '${focus.habitsDone}/${focus.habitsDue}',
-                            label: 'Habits',
+                            label: tr('Habits'),
                             onTap: () => context.push(AppRoutes.habits),
                           ),
                         ),
@@ -135,7 +142,7 @@ class HomeFocusCard extends StatelessWidget {
                         Expanded(
                           child: FFStatTile.glass(
                             value: '${focus.remindersLeft}',
-                            label: 'Reminders',
+                            label: tr('Reminders'),
                             onTap: () => context.push(AppRoutes.reminders),
                           ),
                         ),

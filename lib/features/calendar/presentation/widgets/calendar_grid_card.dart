@@ -17,6 +17,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -99,7 +100,7 @@ class _CalendarMonthCardState extends State<CalendarMonthCard> {
     return _GridCard(
       weekStart: widget.weekStart,
       child: _Swipe(
-        unit: 'month',
+        monthly: true,
         onShift: widget.onShift,
         child: AnimatedSwitcher(
           duration: context.motion(AppMotion.normal),
@@ -176,7 +177,7 @@ class CalendarWeekCard extends StatelessWidget {
     return _GridCard(
       weekStart: weekStart,
       child: _Swipe(
-        unit: 'week',
+        monthly: false,
         onShift: onShift,
         child: Row(
           children: [
@@ -275,17 +276,17 @@ class _WeekdayRow extends StatelessWidget {
   }
 }
 
-/// Horizontal swipe → previous / next [unit]; mirrored in RTL so the
+/// Horizontal swipe → previous / next month ([monthly]) or week; mirrored in RTL so the
 /// content always follows the finger. Exposes the same moves as
 /// semantics actions.
 class _Swipe extends StatelessWidget {
   const _Swipe({
-    required this.unit,
+    required this.monthly,
     required this.onShift,
     required this.child,
   });
 
-  final String unit;
+  final bool monthly;
   final ValueChanged<int> onShift;
   final Widget child;
 
@@ -296,8 +297,14 @@ class _Swipe extends StatelessWidget {
     final rtl = Directionality.of(context) == TextDirection.rtl;
     return Semantics(
       customSemanticsActions: {
-        CustomSemanticsAction(label: 'Next $unit'): () => onShift(1),
-        CustomSemanticsAction(label: 'Previous $unit'): () => onShift(-1),
+        CustomSemanticsAction(
+          label: monthly ? tr('Next month') : tr('Next week'),
+        ): () =>
+            onShift(1),
+        CustomSemanticsAction(
+          label: monthly ? tr('Previous month') : tr('Previous week'),
+        ): () =>
+            onShift(-1),
       },
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,

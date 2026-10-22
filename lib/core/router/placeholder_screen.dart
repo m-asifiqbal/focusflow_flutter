@@ -10,6 +10,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -46,10 +47,13 @@ class PlaceholderScreen extends ConsumerWidget {
               ],
               if (kDebugMode && launchFlow) ...[
                 const SizedBox(height: AppSpacing.xxl),
-                Text('This screen is not built yet.', style: context.text.meta),
+                Text(
+                  tr('This screen is not built yet.'),
+                  style: context.text.meta,
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 FFPrimaryButton(
-                  label: 'Continue to app',
+                  label: tr('Continue to app'),
                   onPressed: () async {
                     await ref
                         .read(settingsProvider.notifier)

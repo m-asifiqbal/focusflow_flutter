@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
@@ -158,7 +159,7 @@ class FFColorSwatchRow extends StatelessWidget {
             outline: ff.divider,
             label: labels != null && i < labels!.length
                 ? labels![i]
-                : 'Colour ${i + 1}',
+                : tr('Colour {v}', {'v': i + 1}),
             onTap: () => onSelected(colors[i]),
           ),
       ],

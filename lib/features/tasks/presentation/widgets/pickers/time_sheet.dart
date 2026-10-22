@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/cupertino.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/features/tasks/presentation/task_tokens.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -20,13 +21,14 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/picker_common.dart';
 
-/// Quick choices (minutes after midnight).
-const Map<String, int> kQuickTimes = {
-  'Morning': 9 * 60,
-  'Noon': 12 * 60,
-  'Afternoon': 15 * 60,
-  'Evening': 18 * 60,
-};
+/// Quick choices: label in the active language and minutes after midnight
+/// (a function, not a const map, so a language switch is picked up).
+List<(String, int)> quickTimes() => [
+  (tr('Morning'), 9 * 60),
+  (tr('Noon'), 12 * 60),
+  (tr('Afternoon'), 15 * 60),
+  (tr('Evening'), 18 * 60),
+];
 
 /// Opens the time sheet seeded with [current] (minutes; null = all day).
 /// [allowAllDay] adds the "All day" action (tasks; reminders need a time).
@@ -35,7 +37,7 @@ Future<Picked<int?>?> showTimeSheet(
   int? current,
   bool use24h = false,
   bool allowAllDay = true,
-  String title = 'Time',
+  String? title,
 }) {
   return showFFBottomSheet<Picked<int?>>(
     context,
@@ -45,7 +47,7 @@ Future<Picked<int?>?> showTimeSheet(
       hadTime: current != null,
       use24h: use24h,
       allowAllDay: allowAllDay,
-      title: title,
+      title: title ?? tr('Time'),
     ),
   );
 }
@@ -92,14 +94,16 @@ class _TimeSheetState extends State<_TimeSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FFPrimaryButton(
-            label: 'Set $time',
+            label: tr('Set {time}', {'time': time}),
             icon: FontAwesomeIcons.solidClock,
             onPressed: () => _pop(_minutes),
           ),
           if (widget.allowAllDay) ...[
             const SizedBox(height: AppSpacing.sm),
             FFSecondaryButton(
-              label: widget.hadTime ? 'Remove time (all day)' : 'All day',
+              label: widget.hadTime
+                  ? tr('Remove time (all day)')
+                  : tr('All day'),
               icon: FontAwesomeIcons.calendarDay,
               onPressed: () => _pop(null),
             ),
@@ -115,14 +119,14 @@ class _TimeSheetState extends State<_TimeSheet> {
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
             children: [
-              for (final e in kQuickTimes.entries)
+              for (final (name, minutes) in quickTimes())
                 FFChip(
                   label:
-                      '${e.key} · '
-                      '${DateUtilsX.minutesToTime(e.value, use24h: widget.use24h)}',
-                  selected: _minutes == e.value,
+                      '$name · '
+                      '${DateUtilsX.minutesToTime(minutes, use24h: widget.use24h)}',
+                  selected: _minutes == minutes,
                   activeColor: ff.primary,
-                  onTap: () => _quick(e.value),
+                  onTap: () => _quick(minutes),
                 ),
             ],
           ),

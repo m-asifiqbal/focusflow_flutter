@@ -30,6 +30,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 
 class NoteCaretHandle extends StatefulWidget {
@@ -254,7 +255,7 @@ class _NoteCaretHandleState extends State<NoteCaretHandle> {
                     ),
               },
               child: Semantics(
-                label: 'Move cursor',
+                label: tr('Move cursor'),
                 child: CustomPaint(
                   painter: _TeardropPainter(
                     color: context.ff.primary,

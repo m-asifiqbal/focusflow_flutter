@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -33,19 +34,19 @@ class HabitsListScreen extends ConsumerStatefulWidget {
   const HabitsListScreen({super.key});
 
   /// Chips in mockup order. "Evening" also lists afternoon habits.
-  static const chips = [
-    FFChipItem(value: HabitsScope.today, label: 'Today'),
-    FFChipItem(value: HabitsScope.all, label: 'All habits'),
-    FFChipItem(value: HabitsScope.morning, label: 'Morning'),
-    FFChipItem(value: HabitsScope.evening, label: 'Evening'),
-    FFChipItem(value: HabitsScope.archived, label: 'Archived'),
+  static List<FFChipItem<HabitsScope>> get chips => [
+    FFChipItem(value: HabitsScope.today, label: tr('Today')),
+    FFChipItem(value: HabitsScope.all, label: tr('All habits')),
+    FFChipItem(value: HabitsScope.morning, label: tr('Morning')),
+    FFChipItem(value: HabitsScope.evening, label: tr('Evening')),
+    FFChipItem(value: HabitsScope.archived, label: tr('Archived')),
   ];
 
   /// Header subtitle for [s].
   static String subtitle(HabitsDaySummary s) {
-    if (s.total == 0) return 'Build a streak, one day at a time';
-    if (s.due == 0) return 'Nothing due today';
-    return '${s.done} of ${s.due} done today';
+    if (s.total == 0) return tr('Build a streak, one day at a time');
+    if (s.due == 0) return tr('Nothing due today');
+    return tr('{done} of {due} done today', {'done': s.done, 'due': s.due});
   }
 
   @override
@@ -82,20 +83,20 @@ class _HabitsListScreenState extends ConsumerState<HabitsListScreen> {
     context,
     FFActionSheetData(
       header: FFActionSheetHeader(
-        title: 'Habits',
+        title: tr('Habits'),
         icon: ModuleStyle.habits.icon,
         colors: ModuleStyle.habits.colors,
       ),
       actions: [
         FFActionItem(
           icon: FontAwesomeIcons.plus,
-          label: 'New habit',
+          label: tr('New habit'),
           colors: ModuleStyle.habits.colors,
           onTap: () => context.push(AppRoutes.newHabit()),
         ),
         FFActionItem(
           icon: FontAwesomeIcons.gripLines,
-          label: 'Reorder habits',
+          label: tr('Reorder habits'),
           colors: ModuleStyle.tasks.colors,
           onTap: () => setState(() => _reordering = true),
         ),
@@ -112,7 +113,7 @@ class _HabitsListScreenState extends ConsumerState<HabitsListScreen> {
     final actions = _reordering
         ? [
             FFNavAction(
-              label: 'Done',
+              label: tr('Done'),
               emphasized: true,
               onPressed: () => setState(() => _reordering = false),
             ),
@@ -120,12 +121,12 @@ class _HabitsListScreenState extends ConsumerState<HabitsListScreen> {
         : [
             FFRoundIconButton(
               icon: FontAwesomeIcons.chartSimple,
-              semanticLabel: 'Habit stats',
+              semanticLabel: tr('Habit stats'),
               onPressed: () => context.go(AppRoutes.insights),
             ),
             FFRoundIconButton(
               icon: FontAwesomeIcons.ellipsis,
-              semanticLabel: 'More options',
+              semanticLabel: tr('More options'),
               onPressed: _more,
             ),
           ];
@@ -141,10 +142,10 @@ class _HabitsListScreenState extends ConsumerState<HabitsListScreen> {
             Column(
               children: [
                 FFLargeHeader(
-                  title: 'Habits',
+                  title: tr('Habits'),
                   leading: const FFBackButton(),
                   subtitle: _reordering
-                      ? 'Drag to reorder'
+                      ? tr('Drag to reorder')
                       : summary == null
                       ? ' '
                       : HabitsListScreen.subtitle(summary),

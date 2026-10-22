@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -75,16 +76,25 @@ class InsightsKpiCard extends StatelessWidget {
         ? FontAwesomeIcons.caretUp
         : (down ? FontAwesomeIcons.caretDown : FontAwesomeIcons.minus);
     final deltaText = d == null ? null : InsightsFormat.delta(d.value, d.unit);
+    // One sentence per case (word order differs between languages).
     final spoken = d == null
-        ? ''
-        : (up
-              ? ', up ${InsightsFormat.delta(d.value, d.unit)}'
-              : down
-              ? ', down ${InsightsFormat.delta(d.value, d.unit)}'
-              : ', no change');
+        ? '$label: $value'
+        : up
+        ? tr('{label}: {value}, up {delta}', {
+            'label': label,
+            'value': value,
+            'delta': InsightsFormat.delta(d.value, d.unit),
+          })
+        : down
+        ? tr('{label}: {value}, down {delta}', {
+            'label': label,
+            'value': value,
+            'delta': InsightsFormat.delta(d.value, d.unit),
+          })
+        : tr('{label}: {value}, no change', {'label': label, 'value': value});
 
     return Semantics(
-      label: '$label: $value$spoken',
+      label: spoken,
       hint: semanticHint,
       button: onTap != null,
       excludeSemantics: true,

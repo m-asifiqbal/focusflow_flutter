@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/data/export/habit_csv_share_service.dart';
 import 'package:focusflow/features/habits/domain/services/habit_history.dart';
@@ -19,13 +20,18 @@ import 'package:focusflow/features/habits/presentation/providers/habits_provider
 
 /// Heatmap span: weeks shown and the selector's label.
 enum HabitHeatmapRange {
-  months4(17, 'Last 4 months'),
-  year(53, 'Last year');
+  months4(17),
+  year(53);
 
-  const HabitHeatmapRange(this.weeks, this.label);
+  const HabitHeatmapRange(this.weeks);
 
   final int weeks;
-  final String label;
+
+  /// The selector's text, in the active language.
+  String get label => switch (this) {
+    months4 => tr('Last 4 months'),
+    year => tr('Last year'),
+  };
 }
 
 class HabitHeatmapRangeController

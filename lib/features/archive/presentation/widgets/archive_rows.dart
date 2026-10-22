@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -84,7 +85,7 @@ class ArchivedItemRow extends ConsumerWidget {
       endActions: [
         FFSwipeAction(
           icon: FontAwesomeIcons.boxOpen,
-          label: 'Restore',
+          label: tr('Restore'),
           color: ff.primary,
           onTap: actions.onRestore,
         ),
@@ -105,7 +106,9 @@ class ArchivedItemRow extends ConsumerWidget {
         trailing: selecting
             ? null
             : RestoreButton(
-                semanticLabel: 'Restore ${item.displayTitle}',
+                semanticLabel: tr('Restore {displayTitle}', {
+                  'displayTitle': item.displayTitle,
+                }),
                 onPressed: actions.onRestore,
               ),
       ),
@@ -141,11 +144,11 @@ class TrashedItemRow extends StatelessWidget {
       endActions: [
         FFSwipeAction(
           icon: FontAwesomeIcons.arrowRotateLeft,
-          label: 'Recover',
+          label: tr('Recover'),
           color: ff.primary,
           onTap: actions.onRestore,
         ),
-        FFSwipeAction.delete(onTap: actions.onDelete, label: 'Delete'),
+        FFSwipeAction.delete(onTap: actions.onDelete, label: tr('Delete')),
       ],
       child: ItemSummaryRow(
         item: item,

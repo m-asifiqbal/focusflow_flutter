@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/drive_backup_file.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -52,11 +53,12 @@ class _NameSheetState extends State<_NameSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('What should we call you?', style: text.title),
+        Text(tr('What should we call you?'), style: text.title),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Optional — your name stays on this device. You can connect '
-          'Google Drive later in Settings › Backup.',
+          tr(
+            'Optional — your name stays on this device. You can connect Google Drive later in Settings › Backup.',
+          ),
           style: text.bodySmall,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -67,16 +69,16 @@ class _NameSheetState extends State<_NameSheet> {
           textInputAction: TextInputAction.done,
           maxLength: 40,
           onSubmitted: (v) => _done(v),
-          decoration: const InputDecoration(
-            hintText: 'Your name',
+          decoration: InputDecoration(
+            hintText: tr('Your name'),
             counterText: '',
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        FFPrimaryButton(label: 'Continue', onPressed: _done),
+        FFPrimaryButton(label: tr('Continue'), onPressed: _done),
         const SizedBox(height: AppSpacing.xs),
         Center(
-          child: FFTextButton(label: 'Skip', onPressed: () => _done('')),
+          child: FFTextButton(label: tr('Skip'), onPressed: () => _done('')),
         ),
       ],
     );
@@ -101,9 +103,10 @@ class _BackupFoundSheet extends StatelessWidget {
     final local = backup.createdAt.toLocal();
     final when = DateFormats.of('d MMM y · h:mm a').format(local);
     final items = NumberFormat.decimalPattern().format(backup.itemCount);
-    final device = backup.deviceName.isEmpty
-        ? ''
-        : ' from ${backup.deviceName}';
+    final count = tr('{count, plural, one {# item} other {{items} items}}', {
+      'count': backup.itemCount,
+      'items': items,
+    });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -117,24 +120,29 @@ class _BackupFoundSheet extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        Text('Backup found', style: text.title),
+        Text(tr('Backup found'), style: text.title),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Your Google Drive has a backup$device — $when, '
-          '${backup.itemCount == 1 ? '1 item' : '$items items'}. '
-          'Restore it to pick up where you left off, or start fresh — '
-          "the backup stays in Drive and isn't merged unless you restore it.",
+          backup.deviceName.isEmpty
+              ? tr(
+                  'Your Google Drive has a backup — {when}, {v}. Restore it to pick up where you left off, or start fresh — the backup stays in Drive and isn\'t merged unless you restore it.',
+                  {'when': when, 'v': count},
+                )
+              : tr(
+                  'Your Google Drive has a backup from {device} — {when}, {v}. Restore it to pick up where you left off, or start fresh — the backup stays in Drive and isn\'t merged unless you restore it.',
+                  {'device': backup.deviceName, 'when': when, 'v': count},
+                ),
           style: text.bodySmall,
         ),
         const SizedBox(height: AppSpacing.xl),
         FFPrimaryButton(
-          label: 'Restore',
+          label: tr('Restore'),
           icon: FontAwesomeIcons.clockRotateLeft,
           onPressed: () => Navigator.of(context).pop(true),
         ),
         const SizedBox(height: AppSpacing.sm),
         FFSecondaryButton(
-          label: 'Start fresh',
+          label: tr('Start fresh'),
           onPressed: () => Navigator.of(context).pop(false),
         ),
       ],

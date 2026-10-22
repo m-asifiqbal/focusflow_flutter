@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -100,7 +101,7 @@ class _IssueRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    issue.kind.name.toUpperCase(),
+                    issue.kind.label,
                     style: context.text.sectionLabel.copyWith(
                       fontSize: VaultType.micro,
                       fontWeight: FontWeight.w800,
@@ -137,7 +138,10 @@ class _IssueRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Semantics(
             button: true,
-            label: '$action ${issue.title}',
+            label: tr('{action} {title}', {
+              'action': action,
+              'title': issue.title,
+            }),
             excludeSemantics: true,
             child: FFPressable(
               onTap: onFix,
@@ -210,7 +214,7 @@ class VaultAllGood extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Your vault is in great shape',
+                tr('Your vault is in great shape'),
                 textAlign: TextAlign.center,
                 style: context.text.title.copyWith(
                   fontSize: VaultType.heading,
@@ -220,7 +224,7 @@ class VaultAllGood extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'No breached, reused, weak or old passwords.',
+                tr('No breached, reused, weak or old passwords.'),
                 textAlign: TextAlign.center,
                 style: context.text.body.copyWith(
                   fontSize: VaultType.lead,

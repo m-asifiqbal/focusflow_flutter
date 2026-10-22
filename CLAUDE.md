@@ -73,7 +73,11 @@ vault, archive, insights, calendar, notifications_center, settings, backup.
 
 ## Conventions
 - Imports: always `package:focusflow/...`.
-- Strings: English, inline in widgets (no l10n layer yet). Sentence case, as in the mockups.
+- Strings: every user-facing text goes through `tr('English text')` (`core/l10n/tr.dart`, `{name}` placeholders,
+  `{n, plural, one {# x} other {# xs}}` for counts; the English text is the key and the fallback; key = one plain
+  literal). Never in const/static/field initialisers (stale after a language switch): use getters. Const label data is
+  registered in `core/l10n/static_keys.dart`. Add the text to all 6 packs in `assets/l10n/` (see docs/localization.md;
+  `catalog_test` fails otherwise). Sentence case, as in the mockups.
 - Times: show in local time; store DateTimes via drift (unix seconds); pure days as `yyyy-MM-dd`
   (`DateUtilsX.dayKey`). Week start comes from settings (`AppSettings.weekStartsOn`).
   Exception: `tasks.due_date` is a *floating day* — write/compare it only via

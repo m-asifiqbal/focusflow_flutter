@@ -55,6 +55,7 @@ import 'package:focusflow/core/notifications/engine/task_reminder_zones.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/notifications/alarm_guard.dart';
 import 'package:focusflow/core/notifications/alarm_overlay.dart';
+import 'package:focusflow/core/notifications/lock_screen_access.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/notifications/notification_providers.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
@@ -193,7 +194,8 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     'accountMode',
     'displayName',
     'dailyFocusGoal',
-    'languageCode',
+    // 'languageCode' is planned: notification text is in that language.
+    'enabledLanguages',
     'startScreen',
     'dateFormat',
     'themeMode',
@@ -259,6 +261,7 @@ class ReconcilingNotificationEngine implements NotificationEngine {
       ..invalidate(exactAlarmPermissionProvider)
       ..invalidate(fullScreenAlarmsAllowedProvider)
       ..invalidate(alarmOverAppsAllowedProvider)
+      ..invalidate(lockScreenAccessProvider)
       ..invalidate(unrestrictedBackgroundProvider);
     // No table refresh here: a background isolate that wrote pinged the
     // refresh port (delivered, at the latest, as the app resumes), and

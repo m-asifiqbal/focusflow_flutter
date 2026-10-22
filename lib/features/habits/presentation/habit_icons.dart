@@ -15,6 +15,7 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 
 /// One pickable icon: storage [key], glyph and search [keywords].
@@ -25,10 +26,13 @@ class HabitIconEntry {
   final String key;
   final IconData icon;
 
-  /// Picker section ("Health", "Fitness" …).
+  /// Search group ("Health", "Fitness" …): a search word, never shown. Its
+  /// English text is registered in static_keys.dart so the group is also
+  /// found by its name in the active language.
   final String group;
 
-  /// Extra search words besides the key.
+  /// Extra search words besides the key (English search aliases, never
+  /// shown).
   final String keywords;
 
   /// Whether this icon matches a search [query] (case-insensitive).
@@ -37,6 +41,7 @@ class HabitIconEntry {
     if (q.isEmpty) return true;
     return key.contains(q) ||
         group.toLowerCase().contains(q) ||
+        tr(group).toLowerCase().contains(q) ||
         keywords.contains(q);
   }
 }

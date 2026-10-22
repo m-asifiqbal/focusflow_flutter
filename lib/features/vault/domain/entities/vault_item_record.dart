@@ -15,18 +15,30 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// Stored as 0 login · 1 card · 2 wifi · 3 secure note ([index]).
 enum VaultItemType {
-  login('Login', 'Logins'),
-  card('Card', 'Cards'),
-  wifi('Wi-Fi', 'Wi-Fi'),
-  secureNote('Secure note', 'Secure notes');
+  login,
+  card,
+  wifi,
+  secureNote;
 
-  const VaultItemType(this.label, this.plural);
+  /// Singular display name (a getter, so it follows the active language).
+  String get label => switch (this) {
+    login => tr('Login'),
+    card => tr('Card'),
+    wifi => tr('Wi-Fi'),
+    secureNote => tr('Secure note'),
+  };
 
-  final String label;
-  final String plural;
+  /// Plural display name.
+  String get plural => switch (this) {
+    login => tr('Logins'),
+    card => tr('Cards'),
+    wifi => tr('Wi-Fi'),
+    secureNote => tr('Secure notes'),
+  };
 
   static VaultItemType fromValue(int v) =>
       v >= 0 && v < values.length ? values[v] : VaultItemType.login;

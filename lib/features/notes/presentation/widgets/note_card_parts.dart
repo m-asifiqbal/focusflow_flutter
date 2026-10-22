@@ -16,6 +16,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -66,7 +67,7 @@ class NotePinMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Pinned',
+    label: tr('Pinned'),
     child: Transform.rotate(
       angle: math.pi / 5,
       child: Icon(
@@ -86,7 +87,7 @@ class NoteLockMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Locked',
+    label: tr('Locked'),
     child: Icon(FontAwesomeIcons.lock, size: size, color: context.ff.inkMuted),
   );
 }
@@ -141,7 +142,10 @@ class NoteChecklistPreview extends StatelessWidget {
         if (more > 0)
           Padding(
             padding: const EdgeInsetsDirectional.only(top: AppSpacing.xs),
-            child: Text('+$more more', style: context.text.meta),
+            child: Text(
+              tr('+{more} more', {'more': more}),
+              style: context.text.meta,
+            ),
           ),
       ],
     );
@@ -222,7 +226,7 @@ class NoteLockedPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = context.ff.inkMuted.withValues(alpha: 0.35);
     return Semantics(
-      label: 'Preview hidden — locked with Vault PIN',
+      label: tr('Preview hidden — locked with Vault PIN'),
       child: ExcludeSemantics(
         child: ImageFiltered(
           imageFilter: ImageFilter.blur(

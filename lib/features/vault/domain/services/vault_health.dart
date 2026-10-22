@@ -14,6 +14,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/crypto/password_strength.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// One line of the health checklist.
 @immutable
@@ -71,19 +72,24 @@ class VaultHealth {
       checks: [
         VaultHealthCheck(
           breachCount == null
-              ? 'Not checked for breaches'
+              ? tr('Not checked for breaches')
               : breached
               ? _breachText(breachCount)
-              : 'No breaches',
+              : tr('No breaches'),
           ok: !breached,
           unknown: breachCount == null,
         ),
-        VaultHealthCheck(reused ? 'Reused' : 'Unique', ok: !reused),
+        VaultHealthCheck(reused ? tr('Reused') : tr('Unique'), ok: !reused),
         VaultHealthCheck(
-          long ? '16+ characters' : '${strength.length} characters',
+          long
+              ? tr('16+ characters')
+              : tr('{n} characters', {'n': strength.length}),
           ok: long,
         ),
-        VaultHealthCheck(hasTotp ? '2FA enabled' : 'No 2FA', ok: hasTotp),
+        VaultHealthCheck(
+          hasTotp ? tr('2FA enabled') : tr('No 2FA'),
+          ok: hasTotp,
+        ),
       ],
     );
   }
@@ -101,15 +107,17 @@ class VaultHealth {
   final List<VaultHealthCheck> checks;
 
   static String ratingFor(int score) => score >= 90
-      ? 'Excellent'
+      ? tr('Excellent')
       : score >= 75
-      ? 'Good'
+      ? tr('Good')
       : score >= 50
-      ? 'Fair'
-      : 'Poor';
+      ? tr('Fair')
+      : tr('Poor');
 
-  static String _breachText(int n) =>
-      n == 1 ? 'Seen in 1 breach' : 'Seen in $n breaches';
+  static String _breachText(int n) => tr(
+    '{count, plural, one {Seen in # breach} other {Seen in # breaches}}',
+    {'count': n},
+  );
 
   @override
   bool operator ==(Object other) =>

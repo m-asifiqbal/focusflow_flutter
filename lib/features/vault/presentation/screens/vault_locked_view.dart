@@ -15,6 +15,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -42,7 +43,6 @@ class VaultLockedView extends ConsumerWidget {
       vaultPinPadProvider.select((s) => s.step == VaultPadStep.unlock),
     );
     final preview = ref.watch(vaultLockedPreviewProvider);
-    final accounts = total == 1 ? '1 account' : '$total accounts';
     return ListView(
       padding: EdgeInsetsDirectional.only(
         bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.xl,
@@ -50,12 +50,15 @@ class VaultLockedView extends ConsumerWidget {
       children: [
         VaultHeader(
           subtitle: setUp
-              ? '${total == 1 ? '1 item' : '$total items'} · AES-256 encrypted'
-              : 'Set up · AES-256 encrypted',
-          lockLabel: 'Vault is locked',
+              ? tr(
+                  '{count, plural, one {# item · AES-256 encrypted} other {# items · AES-256 encrypted}}',
+                  {'count': total},
+                )
+              : tr('Set up · AES-256 encrypted'),
+          lockLabel: tr('Vault is locked'),
           onLock: () => showFFToast(
             context,
-            'Vault is locked',
+            tr('Vault is locked'),
             icon: FontAwesomeIcons.lock,
           ),
           onAdd: () async {
@@ -72,9 +75,12 @@ class VaultLockedView extends ConsumerWidget {
           child: FFSearchField(
             vault: true,
             readOnly: true,
-            hint: 'Search $accounts…',
+            hint: tr(
+              '{count, plural, one {Search # account…} other {Search # accounts…}}',
+              {'count': total},
+            ),
             trailing: Semantics(
-              label: 'Locked',
+              label: tr('Locked'),
               child: Icon(
                 FontAwesomeIcons.lock,
                 size: VaultSizes.iconMd,

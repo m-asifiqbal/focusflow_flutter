@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -56,10 +57,10 @@ class _NotificationCenterScreenState
           children: [
             FFNavHeader(
               leading: const FFBackButton(),
-              title: 'Notifications',
+              title: tr('Notifications'),
               trailing: [
                 FFNavAction(
-                  label: 'Read all',
+                  label: tr('Read all'),
                   enabled: unread > 0,
                   onPressed: () => ref
                       .read(inboxActionsControllerProvider)
@@ -84,9 +85,9 @@ class _NotificationCenterScreenState
                   child: FFEmptyState.compact(
                     colors: ModuleStyle.reminders.colors,
                     icon: FontAwesomeIcons.triangleExclamation,
-                    title: "Couldn't load notifications",
-                    body: 'Something went wrong reading your inbox.',
-                    ctaLabel: 'Try again',
+                    title: tr('Couldn\'t load notifications'),
+                    body: tr('Something went wrong reading your inbox.'),
+                    ctaLabel: tr('Try again'),
                     ctaIcon: FontAwesomeIcons.arrowRotateRight,
                     onCta: () => ref.invalidate(inboxEntriesProvider(kind)),
                   ),
@@ -112,11 +113,12 @@ class _NotificationCenterScreenState
           child: FFEmptyState(
             colors: ModuleStyle.notes.colors,
             icon: FontAwesomeIcons.solidBell,
-            title: "You're all caught up",
+            title: tr('You\'re all caught up'),
             body: kind == null
-                ? 'Reminders, overdue tasks, habit nudges and security or '
-                      'sync alerts will show up here.'
-                : 'Nothing here right now.',
+                ? tr(
+                    'Reminders, overdue tasks, habit nudges and security or sync alerts will show up here.',
+                  )
+                : tr('Nothing here right now.'),
           ),
         ),
       );

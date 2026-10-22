@@ -12,6 +12,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/folder.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -45,11 +46,11 @@ class TaskOrganiseCard extends ConsumerWidget {
     Future<void> pickList() async {
       final picked = await showOptionSheet<String?>(
         context,
-        title: 'List',
+        title: tr('List'),
         options: [
           OptionItem<String?>(
             value: null,
-            label: 'No list',
+            label: tr('No list'),
             icon: FontAwesomeIcons.folderOpen,
             colors: ActionTints.lock,
           ),
@@ -62,7 +63,7 @@ class TaskOrganiseCard extends ConsumerWidget {
             ),
           OptionItem<String?>(
             value: _newList,
-            label: 'New list…',
+            label: tr('New list…'),
             icon: FontAwesomeIcons.plus,
             colors: ModuleStyle.notes.colors,
           ),
@@ -73,9 +74,9 @@ class TaskOrganiseCard extends ConsumerWidget {
       if (picked.value == _newList) {
         final name = await showTextInputSheet(
           context,
-          title: 'New list',
-          hint: 'List name',
-          confirmLabel: 'Create list',
+          title: tr('New list'),
+          hint: tr('List name'),
+          confirmLabel: tr('Create list'),
         );
         if (name != null) await form.createList(name);
         return;
@@ -106,26 +107,26 @@ class TaskOrganiseCard extends ConsumerWidget {
         TaskEditorRow(
           icon: FontAwesomeIcons.solidFolder,
           colors: TagPalette.design,
-          title: 'List',
-          value: task.listId == null ? 'None' : (listName ?? 'List'),
+          title: tr('List'),
+          value: task.listId == null ? tr('None') : (listName ?? tr('List')),
           onTap: pickList,
         ),
         TaskEditorRow(
           icon: FontAwesomeIcons.tag,
           colors: TagPalette.travel,
-          title: 'Tags',
+          title: tr('Tags'),
           value: task.tags.isEmpty
-              ? 'None'
+              ? tr('None')
               : task.tags.map((t) => '#${t.name}').join(' '),
           onTap: pickTags,
         ),
         TaskEditorRow(
           icon: FontAwesomeIcons.link,
           colors: ModuleStyle.notes.colors,
-          title: 'Linked note',
+          title: tr('Linked note'),
           value: task.linkedNoteId == null
-              ? 'None'
-              : (task.linkedNoteTitle ?? 'Note'),
+              ? tr('None')
+              : (task.linkedNoteTitle ?? tr('Note')),
           onTap: pickNote,
         ),
       ],

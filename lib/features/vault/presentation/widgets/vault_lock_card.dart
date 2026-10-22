@@ -15,6 +15,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/biometric_auth.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -29,9 +30,9 @@ import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 
 /// "Face ID" / "fingerprint" / "biometrics".
 String biometricName(BiometricKind kind) => switch (kind) {
-  BiometricKind.face => 'Face ID',
-  BiometricKind.fingerprint => 'fingerprint',
-  _ => 'biometrics',
+  BiometricKind.face => tr('Face ID'),
+  BiometricKind.fingerprint => tr('fingerprint'),
+  _ => tr('biometrics'),
 };
 
 class VaultLockCard extends ConsumerStatefulWidget {
@@ -93,24 +94,28 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
 
     final (title, body) = switch (step) {
       VaultPadStep.unlock => (
-        'Vault Locked',
+        tr('Vault Locked'),
         session.biometricsReady
-            ? 'Use ${bio == 'Face ID' ? 'Face ID / fingerprint' : bio} or '
-                  'your master PIN to view your accounts.'
-            : 'Enter your 6-digit master PIN to view your accounts.',
+            ? tr('Use {bio} or your master PIN to view your accounts.', {
+                'bio': session.biometricKind == BiometricKind.face
+                    ? tr('Face ID / fingerprint')
+                    : bio,
+              })
+            : tr('Enter your 6-digit master PIN to view your accounts.'),
       ),
       VaultPadStep.create => (
-        'Create master PIN',
-        'Choose a 6-digit PIN. It encrypts your vault and is never stored '
-            'or sent anywhere.',
+        tr('Create master PIN'),
+        tr(
+          'Choose a 6-digit PIN. It encrypts your vault and is never stored or sent anywhere.',
+        ),
       ),
       VaultPadStep.confirm || VaultPadStep.changeConfirm => (
-        'Confirm your PIN',
-        'Enter the same 6 digits again.',
+        tr('Confirm your PIN'),
+        tr('Enter the same 6 digits again.'),
       ),
       // Re-auth steps are shown by the Vault security sheet, not here.
-      VaultPadStep.verify => ('Enter master PIN', ''),
-      VaultPadStep.changeNew => ('New master PIN', ''),
+      VaultPadStep.verify => (tr('Enter master PIN'), ''),
+      VaultPadStep.changeNew => (tr('New master PIN'), ''),
     };
 
     final content = Column(
@@ -149,7 +154,7 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
         const SizedBox(height: AppSpacing.xl),
         if (showBio) ...[
           VaultPrimaryButton(
-            label: 'Unlock with $bio',
+            label: tr('Unlock with {bio}', {'bio': bio}),
             icon: FontAwesomeIcons.fingerprint,
             loading: _prompting && pinDigits == 0,
             onPressed: _biometrics,
@@ -184,18 +189,18 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
     final ff = context.ff;
     final (label, onTap) = switch (step) {
       VaultPadStep.unlock when bioReady && !_pinOnly => (
-        'Use master PIN instead',
+        tr('Use master PIN instead'),
         () => setState(() {
           _pinOnly = true;
           _prompting = false;
         }),
       ),
       VaultPadStep.unlock => (
-        'Forgot PIN?',
+        tr('Forgot PIN?'),
         () => unawaited(showVaultRecoveryDialog(context)),
       ),
       VaultPadStep.confirm => (
-        'Start over',
+        tr('Start over'),
         () => ref.read(vaultPinPadProvider.notifier).restartSetup(),
       ),
       VaultPadStep.create ||

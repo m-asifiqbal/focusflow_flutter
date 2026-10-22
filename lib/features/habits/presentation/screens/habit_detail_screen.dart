@@ -16,6 +16,7 @@ library;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -79,11 +80,11 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                 horizontal: AppSpacing.grouped,
               ),
               leading: FFBackButton(onPressed: _back),
-              title: 'Habit',
+              title: tr('Habit'),
               trailing: [
                 FFRoundIconButton(
                   icon: FontAwesomeIcons.pen,
-                  semanticLabel: 'Edit habit',
+                  semanticLabel: tr('Edit habit'),
                   iconColor: context.ff.primary,
                   onPressed: d == null
                       ? null
@@ -91,7 +92,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                 ),
                 FFRoundIconButton(
                   icon: FontAwesomeIcons.ellipsis,
-                  semanticLabel: 'More options',
+                  semanticLabel: tr('More options'),
                   onPressed: d == null
                       ? null
                       : () =>
@@ -106,7 +107,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                 error: (_, _) => Padding(
                   padding: const EdgeInsetsDirectional.all(AppSpacing.grouped),
                   child: FFErrorBanner(
-                    message: 'Couldn\'t load this habit.',
+                    message: tr('Couldn\'t load this habit.'),
                     onRetry: () =>
                         ref.invalidate(habitDetailProvider(widget.habitId)),
                   ),
@@ -115,9 +116,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                     ? FFEmptyState(
                         colors: ModuleStyle.habits.colors,
                         icon: ModuleStyle.habits.icon,
-                        title: 'Habit not found',
-                        body: 'It may have been deleted.',
-                        ctaLabel: 'Back to habits',
+                        title: tr('Habit not found'),
+                        body: tr('It may have been deleted.'),
+                        ctaLabel: tr('Back to habits'),
                         ctaIcon: null,
                         onCta: () => context.go(AppRoutes.habits),
                       )
@@ -180,10 +181,12 @@ class _DetailBody extends ConsumerWidget {
           FFEmptyState.compact(
             colors: habit.colors,
             icon: FontAwesomeIcons.chartSimple,
-            title: habit.isQuit ? 'Not started yet' : 'No check-ins yet',
+            title: habit.isQuit
+                ? tr('Not started yet')
+                : tr('No check-ins yet'),
             body: habit.isQuit
-                ? 'Clean days count from the start date.'
-                : 'Your stats appear after the first check-in.',
+                ? tr('Clean days count from the start date.')
+                : tr('Your stats appear after the first check-in.'),
           )
         else ...[
           HabitConsistencyCard(habit: habit, today: detail.today, onDay: onDay),

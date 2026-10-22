@@ -20,6 +20,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/backup_key_policy.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
@@ -35,11 +36,12 @@ import 'package:focusflow/features/backup/presentation/widgets/restore_sheets.da
 import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 
-/// Message of the "Set a backup PIN" sheet.
-const String kBackupPinMessage =
-    'Backups are encrypted with this backup PIN — it is separate from your '
-    'vault PIN. Use the same PIN on your other devices; without it a '
-    'backup cannot be opened.';
+/// Message of the "Set a backup PIN" sheet (a getter: it follows the language).
+String get kBackupPinMessage => tr(
+  'Backups are encrypted with this backup PIN — it is separate from your '
+  'vault PIN. Use the same PIN on your other devices; without it a '
+  'backup cannot be opened.',
+);
 
 /// "Sync now" (Backup & Sync card, Settings account card): with "Encrypt
 /// backups" on and no backup PIN, asks first (Set a backup PIN / Back up
@@ -89,7 +91,7 @@ Future<bool> resolveBackupEncryption(
       case _EncryptionChoice.pin:
         final pin = await showBackupPinSheet(
           context,
-          title: 'Set a backup PIN',
+          title: tr('Set a backup PIN'),
           message: kBackupPinMessage,
           confirm: true,
         );
@@ -103,7 +105,7 @@ Future<bool> resolveBackupEncryption(
     if (context.mounted) {
       showFFToast(
         context,
-        "Couldn't save the backup PIN on this device. Try again.",
+        tr("Couldn't save the backup PIN on this device. Try again."),
         icon: FontAwesomeIcons.triangleExclamation,
       );
     }
@@ -130,23 +132,23 @@ class _EncryptionChoiceSheet extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        Text('Protect your backups', style: text.title),
+        Text(tr('Protect your backups'), style: text.title),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          '"Encrypt backups" is on, but no backup PIN is set on this device '
-          'yet. Set one to encrypt your backups, or back up without '
-          'encryption.',
+          tr(
+            '"Encrypt backups" is on, but no backup PIN is set on this device yet. Set one to encrypt your backups, or back up without encryption.',
+          ),
           style: text.bodySmall,
         ),
         const SizedBox(height: AppSpacing.xl),
         FFPrimaryButton(
-          label: 'Set a backup PIN',
+          label: tr('Set a backup PIN'),
           icon: FontAwesomeIcons.lock,
           onPressed: () => Navigator.of(context).pop(_EncryptionChoice.pin),
         ),
         const SizedBox(height: AppSpacing.sm),
         FFSecondaryButton(
-          label: 'Back up without encryption',
+          label: tr('Back up without encryption'),
           onPressed: () => Navigator.of(context).pop(_EncryptionChoice.plain),
         ),
       ],
@@ -172,11 +174,13 @@ class BackupEncryptionBanner extends ConsumerWidget {
       child: FFInfoBanner.danger(
         icon: FontAwesomeIcons.lock,
         text: unreadable
-            ? "Your backup PIN couldn't be read on this device, so backups "
-                  'are paused. Set it again to keep backing up.'
-            : 'Backups are paused: "Encrypt backups" is on but no backup '
-                  'PIN is set.',
-        actionLabel: 'Fix',
+            ? tr(
+                'Your backup PIN couldn\'t be read on this device, so backups are paused. Set it again to keep backing up.',
+              )
+            : tr(
+                'Backups are paused: "Encrypt backups" is on but no backup PIN is set.',
+              ),
+        actionLabel: tr('Fix'),
         onAction: () => resolveBackupEncryption(context, ref),
       ),
     );
@@ -197,29 +201,28 @@ class MergeDecisionBanner extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Backups from other devices', style: ctx.text.title),
+          Text(tr('Backups from other devices'), style: ctx.text.title),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Your Drive has backups made before this device was set up '
-            '(after a reinstall, your own old ones too). Restore one, merge '
-            'them automatically, or start fresh and keep them only for a '
-            'manual restore.',
+            tr(
+              'Your Drive has backups made before this device was set up (after a reinstall, your own old ones too). Restore one, merge them automatically, or start fresh and keep them only for a manual restore.',
+            ),
             style: ctx.text.bodySmall,
           ),
           const SizedBox(height: AppSpacing.xl),
           FFPrimaryButton(
-            label: 'Restore…',
+            label: tr('Restore…'),
             icon: FontAwesomeIcons.clockRotateLeft,
             onPressed: () => Navigator.of(ctx).pop(_MergeChoice.restore),
           ),
           const SizedBox(height: AppSpacing.sm),
           FFSecondaryButton(
-            label: 'Merge automatically',
+            label: tr('Merge automatically'),
             onPressed: () => Navigator.of(ctx).pop(_MergeChoice.merge),
           ),
           const SizedBox(height: AppSpacing.sm),
           FFSecondaryButton(
-            label: 'Start fresh',
+            label: tr('Start fresh'),
             onPressed: () => Navigator.of(ctx).pop(_MergeChoice.fresh),
           ),
         ],
@@ -240,7 +243,7 @@ class MergeDecisionBanner extends ConsumerWidget {
       if (context.mounted) {
         showFFToast(
           context,
-          "Couldn't reach Google Drive. Try again when online.",
+          tr("Couldn't reach Google Drive. Try again when online."),
           icon: FontAwesomeIcons.triangleExclamation,
         );
       }
@@ -256,10 +259,10 @@ class MergeDecisionBanner extends ConsumerWidget {
       padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.lg),
       child: FFInfoBanner(
         icon: FontAwesomeIcons.cloudArrowDown,
-        text:
-            "Backups from your other devices aren't merged until you "
-            'choose what to do with them.',
-        actionLabel: 'Choose',
+        text: tr(
+          'Backups from your other devices aren\'t merged until you choose what to do with them.',
+        ),
+        actionLabel: tr('Choose'),
         onAction: () => _choose(context, ref),
       ),
     );

@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -48,11 +49,11 @@ class VaultNotesCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Expanded(child: VaultFieldLabel('Notes')),
+                    Expanded(child: VaultFieldLabel(tr('Notes'))),
                     if (onCopy != null)
                       VaultRoundButton(
                         icon: FontAwesomeIcons.solidCopy,
-                        semanticLabel: 'Copy notes',
+                        semanticLabel: tr('Copy notes'),
                         onTap: onCopy,
                       ),
                   ],
@@ -72,9 +73,10 @@ class VaultNotesCard extends StatelessWidget {
         if (historyCount > 0)
           Semantics(
             button: true,
-            label:
-                'Password history, $historyCount '
-                '${historyCount == 1 ? 'version' : 'versions'}',
+            label: tr(
+              '{count, plural, one {Password history, # version} other {Password history, # versions}}',
+              {'count': historyCount},
+            ),
             excludeSemantics: true,
             child: FFPressable(
               onTap: onHistory,
@@ -93,8 +95,10 @@ class VaultNotesCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          'Password history · $historyCount '
-                          '${historyCount == 1 ? 'version' : 'versions'}',
+                          tr(
+                            '{count, plural, one {Password history · # version} other {Password history · # versions}}',
+                            {'count': historyCount},
+                          ),
                           style: context.text.rowTitle.copyWith(
                             fontSize: VaultType.row,
                             color: ff.vaultAccentBright,
@@ -124,17 +128,20 @@ class VaultDetailActions extends StatelessWidget {
   const VaultDetailActions({
     required this.onArchive,
     required this.onDelete,
-    this.archiveLabel = 'Archive',
+    this.archiveLabel,
     this.archiveIcon = FontAwesomeIcons.boxArchive,
-    this.deleteLabel = 'Delete',
+    this.deleteLabel,
     super.key,
   });
 
   final VoidCallback onArchive;
   final VoidCallback onDelete;
-  final String archiveLabel;
+
+  /// Defaults to "Archive" / "Delete" (resolved when built, so the text
+  /// follows the active language).
+  final String? archiveLabel;
   final IconData archiveIcon;
-  final String deleteLabel;
+  final String? deleteLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +151,7 @@ class VaultDetailActions extends StatelessWidget {
       children: [
         Expanded(
           child: _Button(
-            label: archiveLabel,
+            label: archiveLabel ?? tr('Archive'),
             icon: archiveIcon,
             fg: ff.vaultInk.withValues(alpha: 0.9),
             bg: ff.vaultKey,
@@ -154,7 +161,7 @@ class VaultDetailActions extends StatelessWidget {
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: _Button(
-            label: deleteLabel,
+            label: deleteLabel ?? tr('Delete'),
             icon: FontAwesomeIcons.trashCan,
             fg: danger.fg,
             bg: danger.bg,

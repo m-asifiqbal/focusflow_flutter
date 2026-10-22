@@ -16,6 +16,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_key_policy.dart';
@@ -68,7 +69,7 @@ class LocalBackups {
     final name = DriveBackupFile.fileNameFor(m.createdAt, engine.deviceId);
     final path = '$folder/$name';
     if (await files.write(path, built.bytes) == null) {
-      throw const FileSystemFailure('Could not write the backup file');
+      throw FileSystemFailure(tr('Could not write the backup file'));
     }
     final record = BackupRecord(
       id: '',

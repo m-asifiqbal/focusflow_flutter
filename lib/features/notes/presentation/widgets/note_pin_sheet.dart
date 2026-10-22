@@ -21,6 +21,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -182,7 +183,7 @@ class _NotePinSheetState extends ConsumerState<NotePinSheet>
         Navigator.of(context).pop(pin);
       } else {
         _first = null;
-        _wrong("PINs don't match. Choose a PIN again.");
+        _wrong(tr("PINs don't match. Choose a PIN again."));
       }
       return;
     }
@@ -191,7 +192,7 @@ class _NotePinSheetState extends ConsumerState<NotePinSheet>
     try {
       ok = await widget.verify!(pin);
     } on Object {
-      if (mounted) _wrong("Couldn't check the PIN. Try again.");
+      if (mounted) _wrong(tr("Couldn't check the PIN. Try again."));
       return;
     }
     if (!mounted) return;
@@ -203,23 +204,25 @@ class _NotePinSheetState extends ConsumerState<NotePinSheet>
       return;
     }
     if (key != null) attempts.failed(key, _now);
-    _wrong('Wrong PIN');
+    _wrong(tr('Wrong PIN'));
     _syncLockout();
   }
 
   String get _heading =>
       widget.title ??
       (_create
-          ? (_confirming ? 'Confirm PIN' : 'Set a PIN for this note')
-          : 'Enter PIN');
+          ? (_confirming ? tr('Confirm PIN') : tr('Set a PIN for this note'))
+          : tr('Enter PIN'));
 
   String get _hint {
     if (_create) {
       return _confirming
-          ? 'Enter the same PIN again.'
-          : 'Only this note uses it. Choose 4–6 digits, then tap the check key.';
+          ? tr('Enter the same PIN again.')
+          : tr(
+              'Only this note uses it. Choose 4–6 digits, then tap the check key.',
+            );
     }
-    return widget.subtitle ?? 'This note has its own PIN.';
+    return widget.subtitle ?? tr('This note has its own PIN.');
   }
 
   @override
@@ -228,9 +231,11 @@ class _NotePinSheetState extends ConsumerState<NotePinSheet>
     final colors = ModuleStyle.notes.colors;
     final locked = _lockedFor;
     final message = locked > Duration.zero
-        ? 'Too many wrong PINs. Try again in ${_format(locked)}.'
+        ? tr('Too many wrong PINs. Try again in {time}.', {
+            'time': _format(locked),
+          })
         : _busy
-        ? 'Checking…'
+        ? tr('Checking…')
         : _error;
     final isError = !_busy && message != null;
     // showFFBottomSheet wraps this in the floating sheet card.
@@ -299,6 +304,6 @@ class _NotePinSheetState extends ConsumerState<NotePinSheet>
   }
 
   static String _format(Duration d) => d.inMinutes >= 1
-      ? '${d.inMinutes} min ${d.inSeconds % 60} s'
-      : '${d.inSeconds.clamp(1, 59)} s';
+      ? tr('{m} min {s} s', {'m': d.inMinutes, 's': d.inSeconds % 60})
+      : tr('{s} s', {'s': d.inSeconds.clamp(1, 59)});
 }

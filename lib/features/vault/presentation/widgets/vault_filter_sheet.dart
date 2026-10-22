@@ -6,6 +6,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
@@ -39,22 +40,22 @@ class _FilterSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SheetLabel('Sort'),
+          _SheetLabel(tr('Sort')),
           FFChipBar<VaultSort>(
             vault: true,
             selected: q.sort,
-            items: const [
+            items: [
               FFChipItem(value: VaultSort.az, label: 'A – Z'),
-              FFChipItem(value: VaultSort.recent, label: 'Most recent'),
+              FFChipItem(value: VaultSort.recent, label: tr('Most recent')),
             ],
             onSelected: filter.setSort,
           ),
-          const _SheetLabel('Category'),
+          _SheetLabel(tr('Category')),
           FFChipBar<String>(
             vault: true,
             selected: q.type?.name ?? '#any',
             items: [
-              const FFChipItem(value: '#any', label: 'All types'),
+              FFChipItem(value: '#any', label: tr('All types')),
               for (final t in VaultItemType.values)
                 FFChipItem(value: t.name, label: t.plural),
             ],

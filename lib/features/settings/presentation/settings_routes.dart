@@ -9,6 +9,7 @@ import 'package:focusflow/features/settings/presentation/screens/about_settings_
 import 'package:focusflow/features/settings/presentation/screens/app_lock_settings_screen.dart';
 import 'package:focusflow/features/settings/presentation/screens/appearance_settings_screen.dart';
 import 'package:focusflow/features/settings/presentation/screens/general_settings_screen.dart';
+import 'package:focusflow/features/settings/presentation/screens/language_settings_screen.dart';
 import 'package:focusflow/features/settings/presentation/screens/gestures_settings_screen.dart';
 import 'package:focusflow/features/settings/presentation/screens/home_layout_settings_screen.dart';
 import 'package:focusflow/features/settings/presentation/screens/module_settings_screen.dart';
@@ -44,6 +45,7 @@ final List<RouteBase> settingsChildRoutes = [
   ),
   for (final (path, screen) in <(String, Widget)>[
     ('general', const GeneralSettingsScreen()),
+    ('language', const LanguageSettingsScreen()),
     ('home-layout', const HomeLayoutSettingsScreen()),
     ('gestures', const GesturesSettingsScreen()),
     ('sounds-haptics', const SoundsHapticsSettingsScreen()),

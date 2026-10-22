@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -23,14 +24,16 @@ class VaultHeader extends StatelessWidget {
     required this.subtitle,
     required this.onLock,
     required this.onAdd,
-    this.lockLabel = 'Lock vault',
+    this.lockLabel,
     super.key,
   });
 
   final String subtitle;
   final VoidCallback? onLock;
   final VoidCallback onAdd;
-  final String lockLabel;
+
+  /// Defaults to "Lock vault" (resolved when built, in the active language).
+  final String? lockLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +50,7 @@ class VaultHeader extends StatelessWidget {
         children: [
           Semantics(
             button: canPop,
-            label: canPop ? 'Close vault' : 'Vault',
+            label: canPop ? tr('Close vault') : tr('Vault'),
             excludeSemantics: true,
             child: FFPressable(
               onTap: canPop ? () => context.pop() : null,
@@ -76,7 +79,7 @@ class VaultHeader extends StatelessWidget {
                 Semantics(
                   header: true,
                   child: Text(
-                    'Vault',
+                    tr('Vault'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.text.largeTitle.copyWith(
@@ -105,7 +108,7 @@ class VaultHeader extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           FFRoundIconButton(
             icon: FontAwesomeIcons.lock,
-            semanticLabel: lockLabel,
+            semanticLabel: lockLabel ?? tr('Lock vault'),
             onPressed: onLock,
             size: VaultSizes.toolbarButton,
             iconSize: VaultSizes.iconMd,
@@ -114,7 +117,7 @@ class VaultHeader extends StatelessWidget {
           const SizedBox(width: VaultSizes.gapSm),
           FFRoundIconButton(
             icon: FontAwesomeIcons.plus,
-            semanticLabel: 'Add password',
+            semanticLabel: tr('Add password'),
             onPressed: onAdd,
             size: VaultSizes.toolbarButton,
             iconSize: VaultSizes.iconMd,

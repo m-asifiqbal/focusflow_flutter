@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
@@ -36,7 +37,7 @@ class HabitSwatch extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${HabitPalette.nameOf(colors)} colour',
+      label: tr('{nameOf} colour', {'nameOf': HabitPalette.nameOf(colors)}),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,

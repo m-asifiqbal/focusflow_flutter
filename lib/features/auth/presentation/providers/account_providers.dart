@@ -15,6 +15,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/library_counts.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/notification_providers.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_files.dart';
@@ -140,15 +141,18 @@ final linkedDevicesProvider = FutureProvider.autoDispose<LinkedDevices>((
   } on DriveFailure catch (e) {
     return LinkedDevices([self], cloudError: _driveMessage(e.kind));
   } on Object {
-    return LinkedDevices([self], cloudError: "Couldn't load your devices.");
+    return LinkedDevices([self], cloudError: tr("Couldn't load your devices."));
   }
 });
 
 String _driveMessage(DriveFailureKind kind) => switch (kind) {
-  DriveFailureKind.offline => "You're offline — other devices will show here.",
-  DriveFailureKind.authExpired ||
-  DriveFailureKind.notSignedIn => 'Sign in again to see your other devices.',
-  _ => "Couldn't load your devices.",
+  DriveFailureKind.offline => tr(
+    "You're offline — other devices will show here.",
+  ),
+  DriveFailureKind.authExpired || DriveFailureKind.notSignedIn => tr(
+    'Sign in again to see your other devices.',
+  ),
+  _ => tr("Couldn't load your devices."),
 };
 
 /// The device's IANA time zone, e.g. "Asia/Dhaka".

@@ -14,6 +14,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -33,10 +34,10 @@ class NotificationBehaviourSection extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final c = ref.read(notificationSettingsControllerProvider);
     return FFGroupedList(
-      label: 'BEHAVIOUR',
-      footer:
-          "Reminders are scheduled on-device, so they fire even when you're "
-          'offline.',
+      label: tr('BEHAVIOUR'),
+      footer: tr(
+        'Reminders are scheduled on-device, so they fire even when you\'re offline.',
+      ),
       children: [
         const QuietHoursRow(),
         FFListRow(
@@ -44,7 +45,7 @@ class NotificationBehaviourSection extends ConsumerWidget {
             FontAwesomeIcons.clockRotateLeft,
             NotificationTints.snooze,
           ),
-          title: 'Default snooze',
+          title: tr('Default snooze'),
           value: ReminderAlertOptions.snoozeLabel(s.defaultSnoozeMinutes),
           onTap: () => _pickSnooze(context, s, c),
         ),
@@ -53,8 +54,8 @@ class NotificationBehaviourSection extends ConsumerWidget {
             FontAwesomeIcons.repeat,
             NotificationTints.repeat,
           ),
-          title: 'Repeat until done',
-          subtitle: 'Show a reminder again if you have not acted on it',
+          title: tr('Repeat until done'),
+          subtitle: tr('Show a reminder again if you have not acted on it'),
           value: NotificationLabels.repeat(s.repeatIntervalMinutes),
           onTap: () => _pickRepeat(context, s, c),
         ),
@@ -64,7 +65,7 @@ class NotificationBehaviourSection extends ConsumerWidget {
               FontAwesomeIcons.hashtag,
               NotificationTints.repeat,
             ),
-            title: 'Repeat up to',
+            title: tr('Repeat up to'),
             value: NotificationLabels.repeatCount(s.repeatCount),
             onTap: () => _pickRepeatCount(context, s, c),
           ),
@@ -76,11 +77,12 @@ class NotificationBehaviourSection extends ConsumerWidget {
               FontAwesomeIcons.shieldHalved,
               NotificationTints.guard,
             ),
-            title: 'Keep alarms running',
+            title: tr('Keep alarms running'),
             subtitle: s.keepAlarmsAlive
-                ? 'A quiet notification keeps alarms and reminders on time '
-                      'after you close the app'
-                : 'Some phones stop alarms when the app is swiped away',
+                ? tr(
+                    'A quiet notification keeps alarms and reminders on time after you close the app',
+                  )
+                : tr('Some phones stop alarms when the app is swiped away'),
             value: s.keepAlarmsAlive,
             onChanged: c.setKeepAlarmsAlive,
           ),
@@ -89,10 +91,10 @@ class NotificationBehaviourSection extends ConsumerWidget {
             FontAwesomeIcons.mobileScreenButton,
             NotificationTints.lockScreen,
           ),
-          title: 'Show on lock screen',
+          title: tr('Show on lock screen'),
           subtitle: s.showOnLockScreen
-              ? 'Notifications appear while the phone is locked'
-              : 'Nothing is shown while the phone is locked',
+              ? tr('Notifications appear while the phone is locked')
+              : tr('Nothing is shown while the phone is locked'),
           value: s.showOnLockScreen,
           onChanged: c.setShowOnLockScreen,
         ),
@@ -102,7 +104,7 @@ class NotificationBehaviourSection extends ConsumerWidget {
               FontAwesomeIcons.eye,
               NotificationTints.lockScreen,
             ),
-            title: 'Lock screen details',
+            title: tr('Lock screen details'),
             value: NotificationLabels.lockScreen(s.lockScreenVisibility),
             onTap: () => _pickLockScreen(context, s, c),
           ),
@@ -111,7 +113,7 @@ class NotificationBehaviourSection extends ConsumerWidget {
             FontAwesomeIcons.hashtag,
             NotificationTints.badge,
           ),
-          title: 'App icon badge',
+          title: tr('App icon badge'),
           value: NotificationLabels.badge(s.badgeMode),
           onTap: () => _pickBadge(context, s, c),
         ),
@@ -126,8 +128,8 @@ class NotificationBehaviourSection extends ConsumerWidget {
   ) async {
     final choice = await showNotificationOptionSheet<int>(
       context,
-      title: 'Default snooze',
-      subtitle: 'Used by "Snooze" on notifications and in the inbox',
+      title: tr('Default snooze'),
+      subtitle: tr('Used by "Snooze" on notifications and in the inbox'),
       selected: s.defaultSnoozeMinutes,
       options: [
         for (final m in ReminderAlertOptions.snoozeMinutes)
@@ -161,8 +163,8 @@ class NotificationBehaviourSection extends ConsumerWidget {
   ) async {
     final choice = await showNotificationOptionSheet<int>(
       context,
-      title: 'Repeat up to',
-      subtitle: 'Most times a notification is shown again',
+      title: tr('Repeat up to'),
+      subtitle: tr('Most times a notification is shown again'),
       selected: s.repeatCount,
       options: [
         for (final n in const [1, 2, 3, 5, 10])
@@ -183,7 +185,7 @@ class NotificationBehaviourSection extends ConsumerWidget {
   ) async {
     final choice = await showNotificationOptionSheet<LockScreenVisibility>(
       context,
-      title: 'Lock screen details',
+      title: tr('Lock screen details'),
       selected: s.lockScreenVisibility,
       options: [
         // Hiding is the switch above; this only picks how much is shown.
@@ -211,7 +213,7 @@ class NotificationBehaviourSection extends ConsumerWidget {
   ) async {
     final choice = await showNotificationOptionSheet<BadgeMode>(
       context,
-      title: 'App icon badge',
+      title: tr('App icon badge'),
       selected: s.badgeMode,
       options: [
         for (final m in BadgeMode.values)

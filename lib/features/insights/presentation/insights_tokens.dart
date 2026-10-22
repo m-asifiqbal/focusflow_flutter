@@ -12,6 +12,7 @@ library;
 
 import 'dart:ui' show Color;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/features/habits/domain/services/streak_calculator.dart';
 
@@ -107,8 +108,9 @@ abstract final class InsightsFormat {
   }
 
   /// "45 d" / "3 w".
-  static String streakShort(HabitStreak s) =>
-      '${s.current} ${s.unit == StreakUnit.weeks ? 'w' : 'd'}';
+  static String streakShort(HabitStreak s) => s.unit == StreakUnit.weeks
+      ? tr('{n} w', {'n': s.current})
+      : tr('{n} d', {'n': s.current});
 
   /// "45 days" / "1 week" (screen readers).
   static String streakLong(HabitStreak s) => s.label;

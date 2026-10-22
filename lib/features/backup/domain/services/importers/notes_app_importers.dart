@@ -15,6 +15,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/domain/services/importers/import_parsing.dart';
 
@@ -35,7 +36,9 @@ abstract final class KeepImporter {
       try {
         json = jsonDecode(ImportParsing.text(data));
       } on FormatException {
-        problems.add(ImportProblem('$name: not valid JSON'));
+        problems.add(
+          ImportProblem(tr('{name}: not valid JSON', {'name': name})),
+        );
         return;
       }
       if (!isKeepNote(json)) return;
@@ -47,7 +50,9 @@ abstract final class KeepImporter {
       try {
         notes.add(_note(m));
       } on Object {
-        problems.add(ImportProblem('$name: unexpected note format'));
+        problems.add(
+          ImportProblem(tr('{name}: unexpected note format', {'name': name})),
+        );
       }
     }
 
@@ -62,13 +67,17 @@ abstract final class KeepImporter {
       }
     }
     if (notes.isEmpty && problems.isEmpty) {
-      throw const ImportFormatException(
-        'No Google Keep notes found. Export Keep from Google Takeout and '
-        'pick the zip.',
+      throw ImportFormatException(
+        tr(
+          'No Google Keep notes found. Export Keep from Google Takeout and '
+          'pick the zip.',
+        ),
       );
     }
     if (trashed > 0) {
-      problems.add(ImportProblem('$trashed trashed notes left out'));
+      problems.add(
+        ImportProblem(tr('{count} trashed notes left out', {'count': trashed})),
+      );
     }
     return ImportBundle(
       source: ImportSource.googleKeep,
@@ -114,7 +123,7 @@ abstract final class EnexImporter {
 
   static ImportBundle parse(String xml) {
     if (!looksLikeEnex(xml)) {
-      throw const ImportFormatException('This is not an Evernote .enex file.');
+      throw ImportFormatException(tr('This is not an Evernote .enex file.'));
     }
     final notes = <ImportedNote>[];
     for (final m in _note.allMatches(xml)) {
@@ -133,7 +142,7 @@ abstract final class EnexImporter {
       );
     }
     if (notes.isEmpty) {
-      throw const ImportFormatException('No notes found in this .enex file.');
+      throw ImportFormatException(tr('No notes found in this .enex file.'));
     }
     return ImportBundle(source: ImportSource.evernote, notes: notes);
   }

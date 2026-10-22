@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -85,7 +86,10 @@ class _CategoryTile extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${type.plural}, $count ${count == 1 ? 'item' : 'items'}',
+      label: tr('{type}, {count, plural, one {# item} other {# items}}', {
+        'type': type.plural,
+        'count': count,
+      }),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,
@@ -127,7 +131,9 @@ class _CategoryTile extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xxs),
               Text(
-                '$count ${count == 1 ? 'item' : 'items'}',
+                tr('{count, plural, one {# item} other {# items}}', {
+                  'count': count,
+                }),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.text.meta.copyWith(
@@ -157,9 +163,10 @@ class VaultBreachBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final ff = context.ff;
     final tone = ff.vaultAlert;
-    final message = count == 1
-        ? '1 password found in a data breach'
-        : '$count passwords found in data breaches';
+    final message = tr(
+      '{count, plural, one {# password found in a data breach} other {# passwords found in data breaches}}',
+      {'count': count},
+    );
     return Container(
       constraints: const BoxConstraints(minHeight: AppSizes.minTap),
       padding: const EdgeInsetsDirectional.only(start: AppSpacing.lg),
@@ -194,7 +201,7 @@ class VaultBreachBanner extends StatelessWidget {
             ),
           ),
           FFTextButton(
-            label: 'Fix now',
+            label: tr('Fix now'),
             onPressed: onFix,
             color: tone.fg,
             style: _linkStyle(context),
@@ -202,7 +209,7 @@ class VaultBreachBanner extends StatelessWidget {
               start: AppSpacing.sm,
               end: AppSpacing.lg,
             ),
-            semanticLabel: 'Fix breached passwords',
+            semanticLabel: tr('Fix breached passwords'),
           ),
         ],
       ),
@@ -223,7 +230,7 @@ class VaultSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
-    final label = sort == VaultSort.az ? 'A – Z' : 'RECENT';
+    final label = sort == VaultSort.az ? tr('A – Z') : tr('RECENT');
     return Padding(
       padding: const EdgeInsetsDirectional.only(start: AppSpacing.screen),
       child: Row(
@@ -242,7 +249,7 @@ class VaultSectionHeader extends StatelessWidget {
             ),
           ),
           FFTextButton(
-            label: 'Sort',
+            label: tr('Sort'),
             icon: sort == VaultSort.az
                 ? FontAwesomeIcons.arrowDownAZ
                 : FontAwesomeIcons.arrowDownShortWide,
@@ -254,8 +261,8 @@ class VaultSectionHeader extends StatelessWidget {
               end: AppSpacing.screen,
             ),
             semanticLabel: sort == VaultSort.az
-                ? 'Sort: A to Z. Switch to most recent'
-                : 'Sort: most recent. Switch to A to Z',
+                ? tr('Sort: A to Z. Switch to most recent')
+                : tr('Sort: most recent. Switch to A to Z'),
           ),
         ],
       ),

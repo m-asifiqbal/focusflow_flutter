@@ -6,6 +6,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -30,7 +31,7 @@ Future<ModuleItemActions> habitItemActions(
     leading: [
       FFActionItem(
         icon: FontAwesomeIcons.check,
-        label: 'Log today',
+        label: tr('Log today'),
         colors: ModuleStyle.habits.colors,
         onTap: () {
           if (context.mounted) logHabitToday(context, ref, habit.id);
@@ -38,7 +39,7 @@ Future<ModuleItemActions> habitItemActions(
       ),
       FFActionItem(
         icon: paused ? FontAwesomeIcons.play : FontAwesomeIcons.pause,
-        label: paused ? 'Resume habit' : 'Pause habit',
+        label: paused ? tr('Resume habit') : tr('Pause habit'),
         colors: ActionTints.lock,
         onTap: () async {
           if (!context.mounted) return;
@@ -48,8 +49,8 @@ Future<ModuleItemActions> habitItemActions(
           showUndoSnackbar(
             context,
             message: paused
-                ? '"${habit.name}" resumed'
-                : '"${habit.name}" paused',
+                ? tr('"{name}" resumed', {'name': habit.name})
+                : tr('"{name}" paused', {'name': habit.name}),
             icon: paused ? FontAwesomeIcons.play : FontAwesomeIcons.pause,
             onUndo: () => logger.setPaused(habit.id, paused),
           );

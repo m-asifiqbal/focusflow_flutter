@@ -117,7 +117,7 @@ class DbSnapshot {
       throw const FormatException('db.json has no tables');
     }
     final format = json['format'];
-    if (format is num && format > formatVersion) throw const BackupTooNew();
+    if (format is num && format > formatVersion) throw BackupTooNew();
     final tables = <String, List<RawRow>>{};
     for (final e in (json['tables'] as Map).entries) {
       final name = e.key.toString();

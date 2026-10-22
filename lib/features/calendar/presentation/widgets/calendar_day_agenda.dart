@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -40,7 +41,8 @@ class CalendarDayAgenda extends ConsumerWidget {
   final bool dense;
 
   /// "4 items" / "1 item".
-  static String countLabel(int n) => n == 1 ? '1 item' : '$n items';
+  static String countLabel(int n) =>
+      tr('{count, plural, one {# item} other {# items}}', {'count': n});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,7 +56,7 @@ class CalendarDayAgenda extends ConsumerWidget {
         SizedBox(height: dense ? AppSpacing.md : CalendarDimens.titleGap),
         if (agenda.hasError && entries == null)
           FFErrorBanner(
-            message: "Couldn't load this day.",
+            message: tr('Couldn\'t load this day.'),
             onRetry: () => retryCalendarAgenda(ref, day),
           )
         else if (entries == null)
@@ -141,9 +143,9 @@ class CalendarEmptyDay extends StatelessWidget {
     final style = context.text.rowTitle.copyWith(color: ff.inkMuted);
     return Semantics(
       button: true,
-      label:
-          'Nothing planned. Add something on '
-          '${DateFormats.of('EEEE, MMMM d').format(day)}',
+      label: tr('Nothing planned. Add something on {format}', {
+        'format': DateFormats.of('EEEE, MMMM d').format(day),
+      }),
       excludeSemantics: true,
       child: FFCard(
         onTap: onAdd,
@@ -154,9 +156,9 @@ class CalendarEmptyDay extends StatelessWidget {
         child: Text.rich(
           TextSpan(
             children: [
-              const TextSpan(text: 'Nothing planned · '),
+              TextSpan(text: tr('Nothing planned · ')),
               TextSpan(
-                text: 'Add',
+                text: tr('Add'),
                 style: style.copyWith(
                   color: ff.primary,
                   fontWeight: FontWeight.w700,

@@ -14,6 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/features/search/presentation/providers/search_providers.dart';
@@ -32,7 +33,7 @@ class SearchSuggestionsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SearchSectionLabel('Pinned'),
+        SearchSectionLabel(tr('Pinned')),
         SearchPillWrap(
           children: [
             for (final item in items)
@@ -41,7 +42,7 @@ class SearchSuggestionsSection extends ConsumerWidget {
                     ? item.ref.type.label
                     : item.title.trim(),
                 icon: item.ref.type.style.icon,
-                semanticLabel: 'Open ${item.title.trim()}',
+                semanticLabel: tr('Open {trim}', {'trim': item.title.trim()}),
                 onTap: () => onOpen(item),
               ),
           ],

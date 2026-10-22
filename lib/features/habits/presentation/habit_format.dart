@@ -9,10 +9,12 @@
 /// ============================================================
 library;
 
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
 import 'package:focusflow/features/habits/domain/services/habit_history.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 
 abstract final class HabitFormat {
   /// `HH:mm` storage form of a time.
@@ -32,16 +34,16 @@ abstract final class HabitFormat {
 
   /// "Build (do more)" / "Quit (do less)".
   static String kind(HabitKind kind) => switch (kind) {
-    HabitKind.build => 'Build (do more)',
-    HabitKind.quit => 'Quit (do less)',
+    HabitKind.build => tr('Build (do more)'),
+    HabitKind.quit => tr('Quit (do less)'),
   };
 
   /// "Anytime" / "Morning" / "Afternoon" / "Evening".
   static String partOfDay(PartOfDay part) => switch (part) {
-    PartOfDay.anytime => 'Anytime',
-    PartOfDay.morning => 'Morning',
-    PartOfDay.afternoon => 'Afternoon',
-    PartOfDay.evening => 'Evening',
+    PartOfDay.anytime => tr('Anytime'),
+    PartOfDay.morning => tr('Morning'),
+    PartOfDay.afternoon => tr('Afternoon'),
+    PartOfDay.evening => tr('Evening'),
   };
 
   /// Singular of a unit for "Log 1 glass": glasses → glass, pages → page.
@@ -59,12 +61,15 @@ abstract final class HabitFormat {
   /// "Health · Weekdays · 8 glasses" (detail header). Quit habits count
   /// every day, so their (ignored) frequency is left out.
   static String meta(Habit habit) => [
-    if (habit.category.trim().isNotEmpty) habit.category,
+    if (habit.category.trim().isNotEmpty) HabitWords.shown(habit.category),
     if (!habit.isQuit) habit.frequency.label,
     if (habit.isQuit)
-      'Quit habit'
+      tr('Quit habit')
     else if (!habit.isYesNo)
-      '${habit.targetCount} ${habit.unit}',
+      tr('{count} {unit}', {
+        'count': habit.targetCount,
+        'unit': HabitWords.shown(habit.unit),
+      }),
   ].join(' · ');
 
   /// The value inside the detail ring: "6/8"; quit habits "Clean" /
@@ -72,20 +77,21 @@ abstract final class HabitFormat {
   static String ring(Habit habit, HabitLog? today) {
     if (habit.isQuit) {
       final slips = today == null || today.skipped ? 0 : today.count;
-      return slips == 0 ? 'Clean' : slipCount(slips);
+      return slips == 0 ? tr('Clean') : slipCount(slips);
     }
     final count = today == null || today.skipped ? 0 : today.count;
     return '$count/${habit.targetCount}';
   }
 
   /// "1 slip" / "3 slips".
-  static String slipCount(int n) => n == 1 ? '1 slip' : '$n slips';
+  static String slipCount(int n) =>
+      tr('{count, plural, one {# slip} other {# slips}}', {'count': n});
 
   /// Label of the detail's primary button.
   static String logButton(Habit habit, {required bool doneToday}) {
-    if (habit.isQuit) return 'Log a slip';
-    if (habit.isYesNo) return doneToday ? 'Done today' : 'Mark done';
-    return 'Log 1 ${singular(habit.unit)}';
+    if (habit.isQuit) return tr('Log a slip');
+    if (habit.isYesNo) return doneToday ? tr('Done today') : tr('Mark done');
+    return tr('Log 1 {unit}', {'unit': HabitWords.shown(singular(habit.unit))});
   }
 
   /// "75%".
@@ -105,26 +111,36 @@ abstract final class HabitFormat {
   }) {
     final log = e.log;
     final base = switch (e.kind) {
-      HabitHistoryKind.skipped => 'Skipped',
-      HabitHistoryKind.slip => '${slipCount(log.count)} logged',
-      HabitHistoryKind.done when habit.isQuit => 'Clean day',
-      HabitHistoryKind.done when habit.isYesNo =>
-        'Done at ${clock(log.updatedAt, use24h: use24h)}',
-      HabitHistoryKind.done =>
-        'Goal reached at ${clock(log.updatedAt, use24h: use24h)}',
-      HabitHistoryKind.partial =>
-        '${log.count} of ${habit.targetCount} ${habit.unit}',
+      HabitHistoryKind.skipped => tr('Skipped'),
+      HabitHistoryKind.slip => tr(
+        '{count, plural, one {# slip logged} other {# slips logged}}',
+        {'count': log.count},
+      ),
+      HabitHistoryKind.done when habit.isQuit => tr('Clean day'),
+      HabitHistoryKind.done when habit.isYesNo => tr('Done at {time}', {
+        'time': clock(log.updatedAt, use24h: use24h),
+      }),
+      HabitHistoryKind.done => tr('Goal reached at {time}', {
+        'time': clock(log.updatedAt, use24h: use24h),
+      }),
+      HabitHistoryKind.partial => tr('{count} of {target} {unit}', {
+        'count': log.count,
+        'target': habit.targetCount,
+        'unit': HabitWords.shown(habit.unit),
+      }),
     };
     final note = log.note?.trim() ?? '';
-    return note.isEmpty ? base : '$base · note: $note';
+    return note.isEmpty
+        ? base
+        : tr('{base} · note: {note}', {'base': base, 'note': note});
   }
 
   /// History row trailing value: "75%", "100%", "Skip", "Slip".
   static String historyValue(Habit habit, HabitHistoryEntry e) =>
       switch (e.kind) {
-        HabitHistoryKind.skipped => 'Skip',
-        HabitHistoryKind.slip => 'Slip',
-        HabitHistoryKind.done when habit.isQuit => 'Clean',
+        HabitHistoryKind.skipped => tr('Skip'),
+        HabitHistoryKind.slip => tr('Slip'),
+        HabitHistoryKind.done when habit.isQuit => tr('Clean'),
         _ => percent(e.progress),
       };
 

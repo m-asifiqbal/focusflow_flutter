@@ -24,6 +24,7 @@ library;
 
 import 'package:collection/collection.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/notifications/planning/planner_input.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -203,9 +204,10 @@ abstract final class ReminderPlanner {
                 ? NotificationCategory.task
                 : NotificationCategory.reminder)
           : null,
-      body:
-          'Missed · was due at ${input.formatTime(occurrence)}'
-          '${note == null ? '' : ' · $note'}',
+      body: tr('Missed · was due at {formatTime}{v}', {
+        'formatTime': input.formatTime(occurrence),
+        'v': note == null ? '' : ' · $note',
+      }),
     );
   }
 
@@ -236,7 +238,7 @@ abstract final class ReminderPlanner {
         ? r.title.trim()
         : (task?.title.trim().isNotEmpty ?? false)
         ? task!.title.trim()
-        : 'Reminder';
+        : tr('Reminder');
     final open = taskLinked ? r.linkedRef : (r.linkedRef ?? r.ref);
     return PlannedNotification(
       id: id,
@@ -290,17 +292,25 @@ abstract final class ReminderPlanner {
         input.calendar.dayOf(occurrence),
         dueDay,
       );
-      final day = switch (diff) {
-        0 => null,
-        1 => 'tomorrow',
-        _ => DateFormats.of('EEE, MMM d').format(dueDay),
-      };
       final time = task.dueAt == null || task.dueTimeMinutes == null
           ? null
           : input.formatTime(task.dueAt!);
-      if (time == null) return day == null ? 'Due today' : 'Due $day';
-      return day == null ? 'Due at $time' : 'Due $day at $time';
+      // One whole text per case: the word order of "Due tomorrow at 9:00"
+      // differs between languages.
+      return switch (diff) {
+        0 =>
+          time == null ? tr('Due today') : tr('Due at {time}', {'time': time}),
+        1 =>
+          time == null
+              ? tr('Due tomorrow')
+              : tr('Due tomorrow at {time}', {'time': time}),
+        _ => _dueOn(DateFormats.of('EEE, MMM d').format(dueDay), time),
+      };
     }
-    return 'Due at ${input.formatTime(occurrence)}';
+    return tr('Due at {time}', {'time': input.formatTime(occurrence)});
   }
+
+  static String _dueOn(String date, String? time) => time == null
+      ? tr('Due {date}', {'date': date})
+      : tr('Due {date} at {time}', {'date': date, 'time': time});
 }

@@ -14,6 +14,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -75,8 +76,10 @@ class _VaultListViewState extends ConsumerState<VaultListView> {
     final filter = ref.read(vaultQueryProvider.notifier);
 
     final subtitle = remaining == null
-        ? 'Unlocked'
-        : 'Unlocked · auto-locks in ${formatCountdown(remaining)}';
+        ? tr('Unlocked')
+        : tr('Unlocked · auto-locks in {time}', {
+            'time': formatCountdown(remaining),
+          });
 
     final rows = entries.valueOrNull ?? const <VaultListEntry>[];
     final scrubber =
@@ -111,12 +114,15 @@ class _VaultListViewState extends ConsumerState<VaultListView> {
             ),
             child: FFSearchField(
               vault: true,
-              hint: 'Search ${total == 1 ? '1 account' : '$total accounts'}…',
+              hint: tr(
+                '{count, plural, one {Search # account…} other {Search # accounts…}}',
+                {'count': total},
+              ),
               onChanged: filter.setText,
               onClear: () => filter.setText(''),
               onFilter: () => showVaultFilterSheet(context),
               filterActive: base.type != null || base.sort != VaultSort.az,
-              filterSemanticLabel: 'Filter and sort',
+              filterSemanticLabel: tr('Filter and sort'),
             ),
           ),
         ),
@@ -168,9 +174,9 @@ class _VaultListViewState extends ConsumerState<VaultListView> {
               child: FFEmptyState.compact(
                 colors: ModuleStyle.vault.colors,
                 icon: FontAwesomeIcons.circleExclamation,
-                title: "Couldn't load your vault",
-                body: 'Something went wrong while reading the vault.',
-                ctaLabel: 'Retry',
+                title: tr('Couldn\'t load your vault'),
+                body: tr('Something went wrong while reading the vault.'),
+                ctaLabel: tr('Retry'),
                 ctaIcon: FontAwesomeIcons.arrowRotateRight,
                 onCta: () => ref.invalidate(vaultListProvider(query)),
               ),
@@ -267,8 +273,8 @@ class _FilterChips extends ConsumerWidget {
       vault: true,
       selected: selected,
       items: [
-        FFChipItem(value: '#all', label: 'All', count: total),
-        const FFChipItem(value: '#fav', label: 'Favourites'),
+        FFChipItem(value: '#all', label: tr('All'), count: total),
+        FFChipItem(value: '#fav', label: tr('Favourites')),
         for (final f in folders) FFChipItem(value: f.id, label: f.name),
       ],
       onSelected: (v) => switch (v) {
@@ -293,13 +299,13 @@ class _EmptyList extends StatelessWidget {
       return FFEmptyState.compact(
         colors: colors,
         icon: FontAwesomeIcons.key,
-        title: 'Add your first password',
-        body:
-            'Logins, cards, Wi-Fi and secure notes — encrypted on this '
-            'device with your master PIN.',
-        ctaLabel: 'Add password',
+        title: tr('Add your first password'),
+        body: tr(
+          'Logins, cards, Wi-Fi and secure notes — encrypted on this device with your master PIN.',
+        ),
+        ctaLabel: tr('Add password'),
         onCta: () => unawaited(context.push(AppRoutes.newVaultItem())),
-        hint: 'Import from Bitwarden / 1Password CSV',
+        hint: tr('Import from Bitwarden / 1Password CSV'),
         onHint: () => unawaited(context.push(AppRoutes.settingsImportExport)),
       );
     }
@@ -308,10 +314,10 @@ class _EmptyList extends StatelessWidget {
       icon: favourites
           ? FontAwesomeIcons.solidHeart
           : FontAwesomeIcons.magnifyingGlass,
-      title: favourites ? 'No favourites yet' : 'Nothing matches',
+      title: favourites ? tr('No favourites yet') : tr('Nothing matches'),
       body: favourites
-          ? 'Swipe a password or use its menu to add it to Favourites.'
-          : 'Try another search, category or folder.',
+          ? tr('Swipe a password or use its menu to add it to Favourites.')
+          : tr('Try another search, category or folder.'),
     );
   }
 }

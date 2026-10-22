@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -38,7 +39,7 @@ Future<Picked<DateTime?>?> showDueDateSheet(
   required DateTime today,
   required int weekStartsOn,
   DateTime? current,
-  String title = 'Reschedule',
+  String? title,
   String? subtitle,
   bool allowNoDate = true,
 }) {
@@ -48,7 +49,7 @@ Future<Picked<DateTime?>?> showDueDateSheet(
       today: DateUtilsX.dateOnly(today),
       weekStartsOn: weekStartsOn,
       current: current == null ? null : DateUtilsX.dateOnly(current),
-      title: title,
+      title: title ?? tr('Reschedule'),
       subtitle: subtitle,
       allowNoDate: allowNoDate,
     ),
@@ -102,7 +103,7 @@ class _DueDateSheetState extends State<_DueDateSheet> {
           dividerIndent: AppSpacing.lg,
           children: [
             OptionRow(
-              label: 'Today',
+              label: tr('Today'),
               subtitle: dayFmt.format(today),
               icon: FontAwesomeIcons.solidSun,
               colors: TagPalette.finance,
@@ -110,7 +111,7 @@ class _DueDateSheetState extends State<_DueDateSheet> {
               onTap: () => _pop(today),
             ),
             OptionRow(
-              label: 'Tomorrow',
+              label: tr('Tomorrow'),
               subtitle: dayFmt.format(tomorrow),
               icon: FontAwesomeIcons.cloudSun,
               colors: TagPalette.work,
@@ -118,7 +119,7 @@ class _DueDateSheetState extends State<_DueDateSheet> {
               onTap: () => _pop(tomorrow),
             ),
             OptionRow(
-              label: 'Next week',
+              label: tr('Next week'),
               subtitle: dayFmt.format(nextWeek),
               icon: FontAwesomeIcons.calendarWeek,
               colors: TagPalette.design,
@@ -126,7 +127,7 @@ class _DueDateSheetState extends State<_DueDateSheet> {
               onTap: () => _pop(nextWeek),
             ),
             OptionRow(
-              label: 'Pick a date…',
+              label: tr('Pick a date…'),
               subtitle: pickedOther ? dayFmt.format(current) : null,
               icon: FontAwesomeIcons.calendarDays,
               colors: TagPalette.ideas,
@@ -135,7 +136,7 @@ class _DueDateSheetState extends State<_DueDateSheet> {
             ),
             if (widget.allowNoDate)
               OptionRow(
-                label: 'No date',
+                label: tr('No date'),
                 icon: FontAwesomeIcons.calendarXmark,
                 colors: ActionTints.lock,
                 selected: false,

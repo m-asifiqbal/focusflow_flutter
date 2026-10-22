@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -52,7 +53,7 @@ class HabitStreaksCard extends StatelessWidget {
                 child: Semantics(
                   header: true,
                   child: Text(
-                    'Habit streaks',
+                    tr('Habit streaks'),
                     style: context.text.sectionTitle.copyWith(
                       fontSize: InsightsDimens.cardTitle,
                     ),
@@ -67,9 +68,9 @@ class HabitStreaksCard extends StatelessWidget {
             FFEmptyState.compact(
               colors: ModuleStyle.habits.colors,
               icon: ModuleStyle.habits.icon,
-              title: 'No habits yet',
-              body: 'Build a habit to start a streak.',
-              ctaLabel: 'New habit',
+              title: tr('No habits yet'),
+              body: tr('Build a habit to start a streak.'),
+              ctaLabel: tr('New habit'),
               onCta: () => context.push(AppRoutes.newHabit()),
             )
           else
@@ -90,7 +91,7 @@ class _ViewAll extends StatelessWidget {
     final ff = context.ff;
     return Semantics(
       button: true,
-      label: 'View all habits',
+      label: tr('View all habits'),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,
@@ -107,7 +108,7 @@ class _ViewAll extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadii.tile),
               ),
               child: Text(
-                'VIEW ALL',
+                tr('VIEW ALL'),
                 style: context.text.tag.copyWith(
                   fontSize: InsightsDimens.kpiDelta,
                   color: ff.primary,
@@ -131,7 +132,10 @@ class _StreakTile extends StatelessWidget {
     final ff = context.ff;
     final colors = HabitPalette.forHex(row.colorHex);
     return Semantics(
-      label: '${row.name}, ${InsightsFormat.streakLong(row.streak)} streak',
+      label: tr('{name}, {streakLong} streak', {
+        'name': row.name,
+        'streakLong': InsightsFormat.streakLong(row.streak),
+      }),
       button: true,
       excludeSemantics: true,
       child: FFOpenOriginTracker(

@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -25,10 +26,14 @@ import 'package:go_router/go_router.dart';
 class ConnectDriveCard extends ConsumerWidget {
   const ConnectDriveCard({super.key});
 
-  static const _benefits = [
-    (FontAwesomeIcons.lock, 'Encrypted backups in a private app folder'),
-    (FontAwesomeIcons.mobileScreen, 'Sync between your phones and tablets'),
-    (FontAwesomeIcons.clockRotateLeft, 'Restore everything on a new device'),
+  // A getter, not a const list: the copy follows the language.
+  static List<(IconData, String)> get _benefits => [
+    (FontAwesomeIcons.lock, tr('Encrypted backups in a private app folder')),
+    (FontAwesomeIcons.mobileScreen, tr('Sync between your phones and tablets')),
+    (
+      FontAwesomeIcons.clockRotateLeft,
+      tr('Restore everything on a new device'),
+    ),
   ];
 
   @override
@@ -59,12 +64,12 @@ class ConnectDriveCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Connect Google Drive',
+                      tr('Connect Google Drive'),
                       style: text.cardTitle.copyWith(fontSize: 17),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
-                      'Optional · FocusFlow works fully offline',
+                      tr('Optional · FocusFlow works fully offline'),
                       style: text.bodySmall.copyWith(fontSize: 13),
                     ),
                   ],
@@ -85,16 +90,16 @@ class ConnectDriveCard extends ConsumerWidget {
               ),
             ),
           if (!available) ...[
-            const FFInfoBanner(
+            FFInfoBanner(
               icon: FontAwesomeIcons.circleInfo,
-              text:
-                  'Google Drive is not set up in this build. Local backups '
-                  'still work.',
+              text: tr(
+                'Google Drive is not set up in this build. Local backups still work.',
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
           ],
           FFPrimaryButton(
-            label: 'Connect Google Drive',
+            label: tr('Connect Google Drive'),
             icon: FontAwesomeIcons.google,
             height: 50,
             onPressed: available ? () => context.push(AppRoutes.signIn) : null,

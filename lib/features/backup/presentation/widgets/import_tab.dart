@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -24,15 +25,19 @@ import 'package:focusflow/features/backup/presentation/notifiers/import_export_c
 import 'package:focusflow/features/backup/presentation/widgets/restore_sheets.dart';
 import 'package:focusflow/features/vault/presentation/vault_gate.dart';
 
-/// Supported sources shown before a file is picked.
-const List<(String, String)> kImportFormats = [
-  ('FocusFlow backup', '.ffbackup — restore with Merge or Replace'),
-  ('FocusFlow JSON / CSV', 'Your own exports, or any CSV with a title column'),
-  ('Google Keep', 'Google Takeout zip or note .json files'),
-  ('Todoist', 'Project CSV export'),
-  ('Bitwarden / 1Password', 'CSV export — encrypted into your vault'),
-  ('Loop Habit Tracker', 'Export zip (habits + checkmarks)'),
-  ('Evernote', '.enex notebook export'),
+/// Supported sources shown before a file is picked (a getter: the
+/// descriptions follow the language; product / format names stay as they are).
+List<(String, String)> get kImportFormats => [
+  (tr('FocusFlow backup'), tr('.ffbackup — restore with Merge or Replace')),
+  (
+    'FocusFlow JSON / CSV',
+    tr('Your own exports, or any CSV with a title column'),
+  ),
+  ('Google Keep', tr('Google Takeout zip or note .json files')),
+  ('Todoist', tr('Project CSV export')),
+  ('Bitwarden / 1Password', tr('CSV export — encrypted into your vault')),
+  ('Loop Habit Tracker', tr('Export zip (habits + checkmarks)')),
+  ('Evernote', tr('.enex notebook export')),
 ];
 
 class ImportTab extends ConsumerWidget {
@@ -67,9 +72,9 @@ class ImportTab extends ConsumerWidget {
     final c = ref.read(importControllerProvider.notifier);
     return switch (s.phase) {
       ImportPhase.idle => _Intro(onPick: () => _pick(context, ref)),
-      ImportPhase.reading => const Padding(
+      ImportPhase.reading => Padding(
         padding: EdgeInsetsDirectional.only(top: AppSpacing.xxxl),
-        child: FFLoadingView(message: 'Reading file…'),
+        child: FFLoadingView(message: tr('Reading file…')),
       ),
       ImportPhase.preview => _Preview(
         state: s,
@@ -82,8 +87,8 @@ class ImportTab extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FFErrorBanner(
-            message: s.error ?? 'This file could not be read.',
-            retryLabel: 'Choose another',
+            message: s.error ?? tr('This file could not be read.'),
+            retryLabel: tr('Choose another'),
             onRetry: () => _pick(context, ref),
           ),
           const SizedBox(height: AppSpacing.section),
@@ -108,16 +113,17 @@ class _Intro extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Import a file', style: context.text.cardTitle),
+            Text(tr('Import a file'), style: context.text.cardTitle),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'FocusFlow detects the format, shows what it found and skips '
-              'items you already have (same title and date).',
+              tr(
+                'FocusFlow detects the format, shows what it found and skips items you already have (same title and date).',
+              ),
               style: context.text.bodySmall,
             ),
             const SizedBox(height: AppSpacing.lg),
             FFPrimaryButton(
-              label: 'Choose file…',
+              label: tr('Choose file…'),
               icon: FontAwesomeIcons.fileImport,
               onPressed: onPick,
             ),
@@ -126,7 +132,7 @@ class _Intro extends StatelessWidget {
       ),
       const SizedBox(height: AppSpacing.section),
       FFGroupedList(
-        label: 'Supported',
+        label: tr('Supported'),
         children: [
           for (final (title, sub) in kImportFormats)
             FFListRow(title: title, subtitle: sub),
@@ -153,17 +159,17 @@ class _Preview extends StatelessWidget {
     final m = state.archive?.manifest;
     final rows = <(ModuleStyle, String, int)>[
       if (b != null) ...[
-        (ModuleStyle.notes, 'Notes', b.notes.length),
-        (ModuleStyle.tasks, 'Tasks', b.tasks.length),
-        (ModuleStyle.reminders, 'Reminders', b.reminders.length),
-        (ModuleStyle.habits, 'Habits', b.habits.length),
-        (ModuleStyle.vault, 'Passwords', b.logins.length),
+        (ModuleStyle.notes, tr('Notes'), b.notes.length),
+        (ModuleStyle.tasks, tr('Tasks'), b.tasks.length),
+        (ModuleStyle.reminders, tr('Reminders'), b.reminders.length),
+        (ModuleStyle.habits, tr('Habits'), b.habits.length),
+        (ModuleStyle.vault, tr('Passwords'), b.logins.length),
       ] else if (m != null) ...[
-        (ModuleStyle.notes, 'Notes', m.counts['notes'] ?? 0),
-        (ModuleStyle.tasks, 'Tasks', m.counts['tasks'] ?? 0),
-        (ModuleStyle.reminders, 'Reminders', m.counts['reminders'] ?? 0),
-        (ModuleStyle.habits, 'Habits', m.counts['habits'] ?? 0),
-        (ModuleStyle.vault, 'Vault', m.counts['vault_items'] ?? 0),
+        (ModuleStyle.notes, tr('Notes'), m.counts['notes'] ?? 0),
+        (ModuleStyle.tasks, tr('Tasks'), m.counts['tasks'] ?? 0),
+        (ModuleStyle.reminders, tr('Reminders'), m.counts['reminders'] ?? 0),
+        (ModuleStyle.habits, tr('Habits'), m.counts['habits'] ?? 0),
+        (ModuleStyle.vault, tr('Vault'), m.counts['vault_items'] ?? 0),
       ],
     ]..removeWhere((r) => r.$3 == 0);
     final total = b?.itemCount ?? m?.itemCount ?? 0;
@@ -172,7 +178,7 @@ class _Preview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FFGroupedList(
-          label: 'Detected · $source',
+          label: tr('Detected · {source}', {'source': source}),
           footer: state.fileName,
           children: [
             for (final (style, label, n) in rows)
@@ -197,23 +203,25 @@ class _Preview extends StatelessWidget {
         ],
         if (b != null && b.logins.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
-          const FFInfoBanner(
+          FFInfoBanner(
             icon: FontAwesomeIcons.lock,
-            text:
-                'Passwords are encrypted into your vault as they are '
-                'imported. Delete the CSV file afterwards.',
+            text: tr(
+              'Passwords are encrypted into your vault as they are imported. Delete the CSV file afterwards.',
+            ),
           ),
         ],
         const SizedBox(height: AppSpacing.xxl),
         FFPrimaryButton(
           label: m != null
-              ? 'Restore $total items…'
-              : 'Import $total ${total == 1 ? 'item' : 'items'}',
+              ? tr('Restore {total} items…', {'total': total})
+              : tr('Import {count, plural, one {# item} other {# items}}', {
+                  'count': total,
+                }),
           icon: FontAwesomeIcons.fileImport,
           onPressed: total == 0 ? null : onImport,
         ),
         const SizedBox(height: AppSpacing.sm),
-        FFTextButton(label: 'Cancel', onPressed: onCancel),
+        FFTextButton(label: tr('Cancel'), onPressed: onCancel),
       ],
     );
   }
@@ -236,7 +244,13 @@ class _Progress extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Importing $done of $total…', style: context.text.cardTitle),
+            Text(
+              tr('Importing {done} of {total}…', {
+                'done': done,
+                'total': total,
+              }),
+              style: context.text.cardTitle,
+            ),
             const SizedBox(height: AppSpacing.md),
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -283,10 +297,10 @@ class _Summary extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Text(
                 r == null
-                    ? 'Restore complete'
+                    ? tr('Restore complete')
                     : failed
-                    ? 'Imported with some problems'
-                    : 'Import complete',
+                    ? tr('Imported with some problems')
+                    : tr('Import complete'),
                 style: context.text.sectionTitle,
                 textAlign: TextAlign.center,
               ),
@@ -295,10 +309,13 @@ class _Summary extends StatelessWidget {
                 r == null
                     ? (state.summary ?? '')
                     : [
-                        '${r.imported} imported',
+                        tr('{count} imported', {'count': r.imported}),
                         if (r.duplicates > 0)
-                          '${r.duplicates} duplicates skipped',
-                        if (r.failed > 0) '${r.failed} failed',
+                          tr('{count} duplicates skipped', {
+                            'count': r.duplicates,
+                          }),
+                        if (r.failed > 0)
+                          tr('{count} failed', {'count': r.failed}),
                       ].join(' · '),
                 textAlign: TextAlign.center,
                 style: context.text.bodySmall,
@@ -313,7 +330,7 @@ class _Summary extends StatelessWidget {
         if (failed) ...[
           const SizedBox(height: AppSpacing.section),
           FFGroupedList(
-            label: "Couldn't import",
+            label: tr('Couldn\'t import'),
             children: [
               for (final f in r.failures.take(20))
                 FFListRow(
@@ -328,7 +345,7 @@ class _Summary extends StatelessWidget {
           ),
         ],
         const SizedBox(height: AppSpacing.xxl),
-        FFSecondaryButton(label: 'Done', onPressed: onDone),
+        FFSecondaryButton(label: tr('Done'), onPressed: onDone),
       ],
     );
   }

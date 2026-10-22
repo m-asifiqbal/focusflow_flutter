@@ -16,6 +16,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -127,7 +128,7 @@ Widget _withDots(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       FFErrorBanner(
-        message: "Couldn't load the calendar.",
+        message: tr('Couldn\'t load the calendar.'),
         onRetry: () => retryCalendarDots(ref, range),
       ),
       const SizedBox(height: AppSpacing.md),
@@ -201,7 +202,7 @@ class _DragHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Long-press a task and drop it on a day to reschedule',
+      tr('Long-press a task and drop it on a day to reschedule'),
       textAlign: TextAlign.center,
       style: context.text.caption,
     );

@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -53,14 +54,16 @@ class AppLockScreen extends StatelessWidget {
               Semantics(
                 header: true,
                 child: Text(
-                  '${AppInfo.name} is locked',
+                  tr('{name} is locked', {'name': AppInfo.name}),
                   textAlign: TextAlign.center,
                   style: context.text.title,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Unlock with $methodLabel to continue.',
+                tr('Unlock with {methodLabel} to continue.', {
+                  'methodLabel': methodLabel,
+                }),
                 textAlign: TextAlign.center,
                 style: context.text.body.copyWith(color: ff.inkMuted),
               ),
@@ -74,7 +77,9 @@ class AppLockScreen extends StatelessWidget {
               ],
               const Spacer(flex: 4),
               FFPrimaryButton(
-                label: 'Unlock with $methodLabel',
+                label: tr('Unlock with {methodLabel}', {
+                  'methodLabel': methodLabel,
+                }),
                 icon: FontAwesomeIcons.lockOpen,
                 onPressed: busy ? null : onUnlock,
               ),

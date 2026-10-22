@@ -12,16 +12,20 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// Which calendar layout is shown (segmented control).
 enum CalendarMode {
-  week('Week'),
-  month('Month'),
-  agenda('Agenda');
+  week,
+  month,
+  agenda;
 
-  const CalendarMode(this.label);
-
-  final String label;
+  /// Segment text in the active language (a getter: it follows a switch).
+  String get label => switch (this) {
+    week => tr('Week'),
+    month => tr('Month'),
+    agenda => tr('Agenda'),
+  };
 }
 
 @immutable

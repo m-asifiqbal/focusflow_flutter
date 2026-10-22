@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
@@ -51,7 +52,7 @@ class RestoreScreen extends ConsumerWidget {
     if (f == null) return null;
     try {
       if (!ImportDetector.isFfBackup(f.name, f.bytes)) {
-        throw const FormatException('Choose a FocusFlow .ffbackup file');
+        throw FormatException(tr('Choose a FocusFlow .ffbackup file'));
       }
       return ref.read(backupEngineProvider).inspect(f.bytes);
     } finally {
@@ -78,9 +79,9 @@ class RestoreScreen extends ConsumerWidget {
         title: BackupLabels.when(c.createdAt, now),
         subtitle: [
           if (c.deviceName.isNotEmpty) c.deviceName,
-          '${c.itemCount} items',
+          tr('{count} items', {'count': c.itemCount}),
           BackupLabels.size(c.sizeBytes),
-          if (c.isEncrypted) 'encrypted',
+          if (c.isEncrypted) tr('encrypted'),
         ].join(' · '),
         onTap: () => _restore(context, ref, () => actions.open(c)),
       );
@@ -89,9 +90,9 @@ class RestoreScreen extends ConsumerWidget {
     return FFScaffold(
       body: Column(
         children: [
-          const FFNavHeader(
-            leading: FFBackButton(label: 'Backup'),
-            title: 'Restore',
+          FFNavHeader(
+            leading: FFBackButton(label: tr('Backup')),
+            title: tr('Restore'),
           ),
           Expanded(
             child: ListView(
@@ -110,7 +111,7 @@ class RestoreScreen extends ConsumerWidget {
                   ],
                   error: (e, _) => [
                     FFErrorBanner(
-                      message: "Couldn't list your backups",
+                      message: tr('Couldn\'t list your backups'),
                       onRetry: () => ref.invalidate(restoreCandidatesProvider),
                     ),
                   ],
@@ -135,21 +136,21 @@ class RestoreScreen extends ConsumerWidget {
                           compact: true,
                           colors: ModuleStyle.notes.colors,
                           icon: FontAwesomeIcons.clockRotateLeft,
-                          title: 'No backups found',
-                          body:
-                              'Back up from Backup & Sync, or choose a '
-                              '.ffbackup file below.',
+                          title: tr('No backups found'),
+                          body: tr(
+                            'Back up from Backup & Sync, or choose a .ffbackup file below.',
+                          ),
                         ),
                       if (drive.isNotEmpty) ...[
                         FFGroupedList(
-                          label: 'Google Drive',
+                          label: tr('Google Drive'),
                           children: [for (final c in drive) row(c)],
                         ),
                         const SizedBox(height: AppSpacing.section),
                       ],
                       if (local.isNotEmpty) ...[
                         FFGroupedList(
-                          label: 'On this device',
+                          label: tr('On this device'),
                           children: [for (final c in local) row(c)],
                         ),
                         const SizedBox(height: AppSpacing.section),
@@ -166,7 +167,7 @@ class RestoreScreen extends ConsumerWidget {
                         colors: BackupTints.location,
                         size: AppSizes.iconTileSm,
                       ),
-                      title: 'Choose a backup file…',
+                      title: tr('Choose a backup file…'),
                       onTap: () => _restore(context, ref, () => _pickFile(ref)),
                     ),
                   ],

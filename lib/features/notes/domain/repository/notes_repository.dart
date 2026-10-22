@@ -9,19 +9,25 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
 
 /// Sort control of the notes list (pinned always first).
 enum NotesSort {
-  lastEdited('Last edited'),
-  created('Created'),
-  titleAz('Title A–Z'),
-  colour('Colour'),
-  manual('Manual');
+  lastEdited,
+  created,
+  titleAz,
+  colour,
+  manual;
 
-  const NotesSort(this.label);
-
-  final String label;
+  /// Menu / header text in the active language.
+  String get label => switch (this) {
+    NotesSort.lastEdited => tr('Last edited'),
+    NotesSort.created => tr('Created'),
+    NotesSort.titleAz => tr('Title A–Z'),
+    NotesSort.colour => tr('Colour'),
+    NotesSort.manual => tr('Manual'),
+  };
 }
 
 @immutable

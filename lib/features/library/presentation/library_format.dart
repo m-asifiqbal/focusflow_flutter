@@ -16,7 +16,9 @@ import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_summary.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/library_counts.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/vault/presentation/state/vault_session_state.dart';
 
 /// The three text lines of one module card.
@@ -39,12 +41,14 @@ class LibraryCardLines {
 
 abstract final class LibraryFormat {
   /// Copy of an empty module ("0 Notes · Create your first").
-  static const String createFirst = 'Create your first';
+  static String get createFirst => tr('Create your first');
 
   /// "113 items across 5 spaces".
-  static String headerSubtitle(int items, {int spaces = 5}) =>
-      '$items ${items == 1 ? 'item' : 'items'} across $spaces '
-      '${spaces == 1 ? 'space' : 'spaces'}';
+  static String headerSubtitle(int items, {int spaces = 5}) => tr(
+    '{items, plural, one {# item} other {# items}} across '
+    '{spaces, plural, one {# space} other {# spaces}}',
+    {'items': items, 'spaces': spaces},
+  );
 
   /// Card lines of [type] for [c]. [now] is the device time; [vault] the
   /// live lock state (vault card only).
@@ -60,10 +64,10 @@ abstract final class LibraryFormat {
       highlight: c.notesTotal == 0
           ? createFirst
           : c.notesPinned > 0
-          ? '${c.notesPinned} pinned'
-          : 'None pinned',
+          ? tr('{n} pinned', {'n': c.notesPinned})
+          : tr('None pinned'),
       meta: c.notesLastEditedAt == null
-          ? 'No notes yet'
+          ? tr('No notes yet')
           : edited(c.notesLastEditedAt!, now),
     ),
     ItemType.task => LibraryCardLines(
@@ -71,60 +75,65 @@ abstract final class LibraryFormat {
       highlight: c.tasksTotal == 0
           ? createFirst
           : c.tasksDueToday > 0
-          ? '${c.tasksDueToday} due today'
+          ? tr('{n} due today', {'n': c.tasksDueToday})
           : c.tasksOpen > 0
-          ? '${c.tasksOpen} open'
-          : 'All done',
+          ? tr('{n} open', {'n': c.tasksOpen})
+          : tr('All done'),
       meta: c.tasksTotal == 0
-          ? 'No tasks yet'
+          ? tr('No tasks yet')
           : c.tasksOverdue > 0
-          ? '${c.tasksOverdue} overdue'
+          ? tr('{n} overdue', {'n': c.tasksOverdue})
           : c.tasksDueToday > 0
-          ? '${c.tasksOpen} open'
-          : '${c.tasksDone} done',
+          ? tr('{n} open', {'n': c.tasksOpen})
+          : tr('{n} done', {'n': c.tasksDone}),
     ),
     ItemType.reminder => LibraryCardLines(
       count: c.remindersTotal,
       highlight: c.remindersTotal == 0
           ? createFirst
           : c.remindersToday > 0
-          ? '${c.remindersToday} today'
-          : 'None today',
+          ? tr('{n} today', {'n': c.remindersToday})
+          : tr('None today'),
       meta: c.remindersNextAt == null
-          ? 'Nothing upcoming'
-          : 'Next ${nextTime(c.remindersNextAt!, now, use24h: use24h)}',
+          ? tr('Nothing upcoming')
+          : tr('Next {time}', {
+              'time': nextTime(c.remindersNextAt!, now, use24h: use24h),
+            }),
     ),
     ItemType.habit => LibraryCardLines(
       count: c.habitsTotal,
       highlight: c.habitsTotal == 0
           ? createFirst
           : c.habitsScheduledToday > 0
-          ? '${c.habitsDoneToday}/${c.habitsScheduledToday} done today'
-          : 'Rest day',
+          ? tr('{done}/{total} done today', {
+              'done': c.habitsDoneToday,
+              'total': c.habitsScheduledToday,
+            })
+          : tr('Rest day'),
       meta: c.habitsBestStreak > 0
-          ? 'Best streak ${c.habitsBestStreak}d'
-          : 'No streak yet',
+          ? tr('Best streak {n}d', {'n': c.habitsBestStreak})
+          : tr('No streak yet'),
     ),
     ItemType.vault => LibraryCardLines(
       count: c.vaultTotal,
       highlight: vault == VaultStatus.notSetUp
-          ? 'Set up your vault'
+          ? tr('Set up your vault')
           : c.vaultTotal == 0
           ? createFirst
           : c.vaultBreached > 0
-          ? '${c.vaultBreached} breached'
+          ? tr('{n} breached', {'n': c.vaultBreached})
           : c.vaultWeak > 0
-          ? '${c.vaultWeak} weak'
-          : 'All strong',
+          ? tr('{n} weak', {'n': c.vaultWeak})
+          : tr('All strong'),
       meta: vaultState(vault),
     ),
   };
 
   /// "Locked" / "Unlocked" / "Not set up".
   static String vaultState(VaultStatus s) => switch (s) {
-    VaultStatus.locked => 'Locked',
-    VaultStatus.unlocked => 'Unlocked',
-    VaultStatus.notSetUp => 'Not set up',
+    VaultStatus.locked => tr('Locked'),
+    VaultStatus.unlocked => tr('Unlocked'),
+    VaultStatus.notSetUp => tr('Not set up'),
   };
 
   /// "10:00 AM" today, "Tomorrow 9:00 AM", else "Jun 3".
@@ -132,16 +141,25 @@ abstract final class LibraryFormat {
     final days = DateUtilsX.daysBetween(now, at);
     final time = _time(at, use24h);
     if (days == 0) return time;
-    if (days == 1) return 'tomorrow $time';
+    if (days == 1) return tr('tomorrow {time}', {'time': time});
     return DateUtilsX.relativeDay(at, now).replaceFirst(RegExp(r'^\w+, '), '');
   }
 
   /// "Edited 2h ago", "Edited just now", "Edited yesterday" (sentence
   /// case mid-line), "Edited Jun 3".
   static String edited(DateTime t, DateTime now) {
-    final ago = DateUtilsX.ago(t, now);
-    final mid = ago == 'Just now' || ago == 'Yesterday';
-    return 'Edited ${mid ? ago.toLowerCase() : ago}';
+    // The two day-level phrases read lowercase mid-line. Decided from the
+    // dates (mirrors DateUtilsX.ago), never by comparing its text, so it holds
+    // in every language.
+    final diff = now.difference(t);
+    if (diff.inMinutes < 1) return tr('Edited just now');
+    final recent =
+        diff.inMinutes < 60 ||
+        (diff.inHours < 24 && DateUtilsX.isSameDay(t, now));
+    if (!recent && DateUtilsX.isSameDay(t, DateUtilsX.addDays(now, -1))) {
+      return tr('Edited yesterday');
+    }
+    return tr('Edited {when}', {'when': DateUtilsX.ago(t, now)});
   }
 
   /// Meta of a mixed-list row: "Note · Edited 2h ago", "Task · Due Today
@@ -150,15 +168,20 @@ abstract final class LibraryFormat {
     final parts = <String>[s.type.label];
     final at = s.scheduledAt;
     if (s.isCompleted) {
-      parts.add('completed');
+      parts.add(tr('completed'));
     } else if (at != null) {
       final day = DateUtilsX.relativeDay(at, now);
-      final when = day == 'Today' || day == 'Tomorrow'
-          ? '$day ${_time(at, use24h)}'
-          : day;
-      parts.add(s.type == ItemType.task ? 'Due $when' : when);
+      // Today / tomorrow (the words relativeDay uses) get the time appended.
+      final days = DateUtilsX.daysBetween(now, at);
+      final when = days == 0 || days == 1 ? '$day ${_time(at, use24h)}' : day;
+      parts.add(
+        s.type == ItemType.task ? tr('Due {when}', {'when': when}) : when,
+      );
     } else if (s.type == ItemType.vault || s.type == ItemType.habit) {
-      if (s.meta.isNotEmpty) parts.add(s.meta);
+      if (s.meta.isNotEmpty) {
+        // A habit's category is stored in English; shown in the active language.
+        parts.add(s.type == ItemType.habit ? HabitWords.shown(s.meta) : s.meta);
+      }
     } else {
       parts.add(edited(s.updatedAt, now));
     }
@@ -169,7 +192,8 @@ abstract final class LibraryFormat {
   }
 
   /// "9 items" / "1 item".
-  static String items(int n) => '$n ${n == 1 ? 'item' : 'items'}';
+  static String items(int n) =>
+      tr('{count, plural, one {# item} other {# items}}', {'count': n});
 
   static String _time(DateTime t, bool use24h) {
     final s = DateUtilsX.time(t, use24h: use24h);

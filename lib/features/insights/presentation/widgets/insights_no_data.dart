@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -39,7 +40,7 @@ class InsightsNoData extends StatelessWidget {
           Icon(icon, size: InsightsDimens.noDataIcon, color: ff.inkFaint),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Not enough data',
+            tr('Not enough data'),
             textAlign: TextAlign.center,
             style: context.text.cardTitle,
           ),

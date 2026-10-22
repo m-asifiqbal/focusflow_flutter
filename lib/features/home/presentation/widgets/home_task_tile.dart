@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -43,7 +44,7 @@ class HomeTaskTile extends StatelessWidget {
 
   /// The single pill of the meta line: (label, colours) or null.
   static (String, ModuleColors)? pillOf(TaskItem t) {
-    if (t.priority == TaskPriority.high) return ('High', TagPalette.high);
+    if (t.priority == TaskPriority.high) return (tr('High'), TagPalette.high);
     if (t.tags.isNotEmpty) {
       final tag = t.tags.first;
       return (tag.name, TaskStyle.labelColors(tag.name, hex: tag.colorHex));
@@ -59,10 +60,10 @@ class HomeTaskTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ff = context.ff;
     final done = task.isCompleted;
-    final title = task.title.trim().isEmpty ? 'Untitled task' : task.title;
+    final title = task.title.trim().isEmpty ? tr('Untitled task') : task.title;
     final minutes = task.dueTimeMinutes;
     final time = minutes == null
-        ? 'Any time'
+        ? tr('Any time')
         : DateUtilsX.minutesToTime(minutes, use24h: use24h);
     final pill = pillOf(task);
     // The mockup tints the time line with the accent (muted).
@@ -136,7 +137,9 @@ class HomeTaskTile extends StatelessWidget {
             checked: done,
             size: HomeDimens.taskCheck,
             color: ff.primary,
-            semanticLabel: done ? 'Mark $title as not done' : 'Complete $title',
+            semanticLabel: done
+                ? tr('Mark {title} as not done', {'title': title})
+                : tr('Complete {title}', {'title': title}),
             onChanged: onCheck,
           ),
           const SizedBox(width: AppSpacing.xs),

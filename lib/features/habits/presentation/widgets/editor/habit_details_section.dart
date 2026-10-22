@@ -13,12 +13,14 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
+import 'package:focusflow/features/habits/domain/services/habit_words.dart';
 import 'package:focusflow/features/habits/presentation/habit_editor_actions.dart';
 import 'package:focusflow/features/habits/presentation/habit_format.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
@@ -74,9 +76,9 @@ class HabitDetailsSection extends ConsumerWidget {
     Future<void> editName() async {
       final v = await showHabitTextSheet(
         context,
-        title: 'Habit name',
+        title: tr('Habit name'),
         initial: draft.name,
-        hint: 'e.g. Drink Water',
+        hint: tr('e.g. Drink Water'),
       );
       if (v != null) c.setName(v);
     }
@@ -84,9 +86,12 @@ class HabitDetailsSection extends ConsumerWidget {
     Future<void> pickCategory() async {
       final v = await showHabitOptionSheet<String>(
         context,
-        title: 'Category',
+        title: tr('Category'),
         selected: draft.category,
-        options: [for (final k in HabitCategories.all) HabitOption(k, k)],
+        options: [
+          for (final k in HabitCategories.all)
+            HabitOption(k, HabitWords.shown(k)),
+        ],
       );
       if (v != null) c.setCategory(v);
     }
@@ -94,18 +99,18 @@ class HabitDetailsSection extends ConsumerWidget {
     Future<void> pickKind() async {
       final v = await showHabitOptionSheet<HabitKind>(
         context,
-        title: 'Habit type',
+        title: tr('Habit type'),
         selected: draft.kind,
         options: [
           HabitOption(
             HabitKind.build,
             HabitFormat.kind(HabitKind.build),
-            subtitle: 'Check in when you do it',
+            subtitle: tr('Check in when you do it'),
           ),
           HabitOption(
             HabitKind.quit,
             HabitFormat.kind(HabitKind.quit),
-            subtitle: 'Log a slip when it happens',
+            subtitle: tr('Log a slip when it happens'),
           ),
         ],
       );
@@ -117,7 +122,7 @@ class HabitDetailsSection extends ConsumerWidget {
     Future<void> pickPartOfDay() async {
       final v = await showHabitOptionSheet<PartOfDay>(
         context,
-        title: 'Time of day',
+        title: tr('Time of day'),
         selected: draft.partOfDay,
         options: [
           for (final p in PartOfDay.values)
@@ -128,12 +133,12 @@ class HabitDetailsSection extends ConsumerWidget {
     }
 
     return FFGroupedList(
-      label: 'Details',
+      label: tr('Details'),
       children: [
         FFListRow(
           leading: const HabitRowTile(FontAwesomeIcons.pen),
-          title: 'Name',
-          value: name.isEmpty ? 'Add a name' : name,
+          title: tr('Name'),
+          value: name.isEmpty ? tr('Add a name') : name,
           valueColor: name.isEmpty ? ff.inkFaint : null,
           onTap: editName,
         ),
@@ -143,20 +148,20 @@ class HabitDetailsSection extends ConsumerWidget {
         ),
         FFListRow(
           leading: const HabitRowTile(FontAwesomeIcons.layerGroup),
-          title: 'Category',
-          value: draft.category,
+          title: tr('Category'),
+          value: HabitWords.shown(draft.category),
           valueColor: ff.primary,
           onTap: pickCategory,
         ),
         FFListRow(
           leading: const HabitRowTile(FontAwesomeIcons.arrowsUpDown),
-          title: 'Habit type',
+          title: tr('Habit type'),
           value: HabitFormat.kind(draft.kind),
           onTap: pickKind,
         ),
         FFListRow(
           leading: const HabitRowTile(FontAwesomeIcons.cloudSun),
-          title: 'Time of day',
+          title: tr('Time of day'),
           value: HabitFormat.partOfDay(draft.partOfDay),
           onTap: pickPartOfDay,
         ),
@@ -190,7 +195,7 @@ class _ColourRow extends StatelessWidget {
                 HabitDimens.rowTile + AppSpacing.md + AppSpacing.xxs;
             final style = context.text.rowTitle;
             final painter = TextPainter(
-              text: TextSpan(text: 'Colour', style: style),
+              text: TextSpan(text: tr('Colour'), style: style),
               textDirection: Directionality.of(context),
               textScaler: MediaQuery.textScalerOf(context),
               maxLines: 1,
@@ -219,7 +224,7 @@ class _ColourRow extends StatelessWidget {
                 const SizedBox(width: leading - HabitDimens.rowTile),
                 Expanded(
                   child: Text(
-                    'Colour',
+                    tr('Colour'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: style,

@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 
 class ArchiveHeader extends StatelessWidget {
@@ -36,14 +37,17 @@ class ArchiveHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FFNavHeader(
     leading: selecting
-        ? FFNavAction(label: 'Cancel', onPressed: onCancel)
-        : const FFBackButton(label: 'Library'),
+        ? FFNavAction(label: tr('Cancel'), onPressed: onCancel)
+        : FFBackButton(label: tr('Library')),
     title: title,
     trailing: [
       if (selecting)
-        FFNavAction(label: allSelected ? 'None' : 'All', onPressed: onToggleAll)
+        FFNavAction(
+          label: allSelected ? tr('None') : tr('All'),
+          onPressed: onToggleAll,
+        )
       else if (canSelect)
-        FFNavAction(label: 'Select', onPressed: onSelect),
+        FFNavAction(label: tr('Select'), onPressed: onSelect),
     ],
   );
 }

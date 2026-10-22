@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -48,10 +49,10 @@ class _NameSheetState extends State<_NameSheet> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     mainAxisSize: MainAxisSize.min,
     children: [
-      Text('Display name', style: context.text.title),
+      Text(tr('Display name'), style: context.text.title),
       const SizedBox(height: AppSpacing.sm),
       Text(
-        'Used in greetings on Home. It stays on your devices.',
+        tr('Used in greetings on Home. It stays on your devices.'),
         style: context.text.bodySmall,
       ),
       const SizedBox(height: AppSpacing.lg),
@@ -62,13 +63,10 @@ class _NameSheetState extends State<_NameSheet> {
         textCapitalization: TextCapitalization.words,
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => _save(),
-        decoration: const InputDecoration(
-          hintText: 'Your name',
-          counterText: '',
-        ),
+        decoration: InputDecoration(hintText: tr('Your name'), counterText: ''),
       ),
       const SizedBox(height: AppSpacing.lg),
-      FFPrimaryButton(label: 'Save', onPressed: _save),
+      FFPrimaryButton(label: tr('Save'), onPressed: _save),
     ],
   );
 }
@@ -101,11 +99,12 @@ class _GoalSheetState extends State<_GoalSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('Daily focus goal', style: text.title),
+        Text(tr('Daily focus goal'), style: text.title),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'How many tasks you aim to finish each day. It fills the ring on '
-          'Home.',
+          tr(
+            'How many tasks you aim to finish each day. It fills the ring on Home.',
+          ),
           style: text.bodySmall,
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -114,7 +113,7 @@ class _GoalSheetState extends State<_GoalSheet> {
           children: [
             FFRoundIconButton(
               icon: FontAwesomeIcons.minus,
-              semanticLabel: 'Fewer tasks',
+              semanticLabel: tr('Fewer tasks'),
               onPressed: _goal > _min ? () => setState(() => _goal--) : null,
             ),
             Expanded(
@@ -123,21 +122,26 @@ class _GoalSheetState extends State<_GoalSheet> {
                 child: Column(
                   children: [
                     Text('$_goal', style: text.bigStat),
-                    Text(_goal == 1 ? 'task' : 'tasks', style: text.meta),
+                    Text(
+                      tr('{count, plural, one {task} other {tasks}}', {
+                        'count': _goal,
+                      }),
+                      style: text.meta,
+                    ),
                   ],
                 ),
               ),
             ),
             FFRoundIconButton(
               icon: FontAwesomeIcons.plus,
-              semanticLabel: 'More tasks',
+              semanticLabel: tr('More tasks'),
               onPressed: _goal < _max ? () => setState(() => _goal++) : null,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xl),
         FFPrimaryButton(
-          label: 'Save',
+          label: tr('Save'),
           onPressed: () => Navigator.of(context).pop(_goal),
         ),
       ],
@@ -200,10 +204,10 @@ class _ZoneSheetState extends State<_ZoneSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('Time zone', style: context.text.title),
+        Text(tr('Time zone'), style: context.text.title),
         const SizedBox(height: AppSpacing.md),
         FFSearchField(
-          hint: 'Search city or region',
+          hint: tr('Search city or region'),
           onChanged: (v) => setState(() => _query = v),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -214,7 +218,7 @@ class _ZoneSheetState extends State<_ZoneSheet> {
             itemBuilder: (context, i) {
               if (i == 0) {
                 return FFListRow(
-                  title: 'Follow device',
+                  title: tr('Follow device'),
                   subtitle: widget.deviceZone,
                   trailing: check(widget.current == null),
                   onTap: () =>

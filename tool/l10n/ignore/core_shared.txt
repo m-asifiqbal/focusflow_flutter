@@ -1,0 +1,115 @@
+# lib/core + lib/shared: literals that are not user-facing (ids, SQL, dev/exception text never shown, brand/product names, persisted data).
+lib/core/constants/app_info.dart	FocusFlow
+lib/core/crypto/argon2_runner.dart	parameters out of range
+lib/core/crypto/breach_check.dart	Breach service error {}
+lib/core/crypto/breach_check.dart	BreachCheckException: {}
+lib/core/crypto/breach_check.dart	Could not reach the breach service
+lib/core/crypto/crypto_bytes.dart	Not a base32 string
+lib/core/crypto/password_generator.dart	Il1O0o|`'"
+lib/core/crypto/pin_kdf.dart	Unsupported KDF cost {}
+lib/core/crypto/pin_kdf.dart	Unsupported KDF {}
+lib/core/crypto/vault_cipher.dart	Authentication failed
+lib/core/crypto/vault_cipher.dart	Ciphertext too short
+lib/core/crypto/vault_cipher.dart	VaultCryptoException: {}
+lib/core/database/daos/dao_support.dart	({} = '{}' AND EXISTS (SELECT 1 FROM {} li WHERE li.id = {} AND {}))
+lib/core/database/daos/dao_support.dart	({}.linked_item_id IS NULL OR {}.linked_item_type IS NULL OR {}.linked_item_type = 'reminder' OR {})
+lib/core/database/daos/dao_support.dart	sync_version + 1
+lib/core/database/daos/dao_support.dart	{}archived_at IS NULL AND {}deleted_at IS NULL
+lib/core/database/daos/habits_dao.dart	h.is_pinned DESC, h.sort_order ASC, h.created_at ASC
+lib/core/database/daos/items_dao.dart	(SELECT COUNT(*) FROM {} WHERE {}{}{})
+lib/core/database/daos/items_dao.dart	(i.item_type <> 'reminder' OR {})
+lib/core/database/daos/notes_dao.dart	((n.is_locked = 0 AND n.rowid IN (SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?)) OR (n.is_locked = 1 AND n.rowid IN (SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?)))
+lib/core/database/daos/notes_dao.dart	f.name AS folder_name, CASE WHEN r.id IS NULL THEN NULL ELSE COALESCE(r.snoozed_until, r.trigger_at) END AS reminder_at FROM notes n LEFT JOIN folders f ON f.id = n.folder_id AND f.deleted_at IS NULL LEFT JOIN reminders r ON r.id = n.reminder_id AND r.deleted_at IS NULL AND r.archived_at IS NULL
+lib/core/database/daos/notes_dao.dart	n.folder_id = ?
+lib/core/database/daos/notes_dao.dart	n.is_pinned = 1
+lib/core/database/daos/notes_dao.dart	n.sort_order ASC, n.created_at DESC
+lib/core/database/daos/reminders_dao.dart	(r.linked_item_id IS NULL OR r.linked_item_type IS NULL OR r.linked_item_type = 'reminder' OR {})
+lib/core/database/daos/search_dao.dart	(x.is_locked = 0 OR x.rowid IN (SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?))
+lib/core/database/daos/search_dao.dart	(x.linked_item_id IS NULL OR x.linked_item_type IS NULL OR x.linked_item_type = 'reminder' OR {})
+lib/core/database/daos/search_dao.dart	, COALESCE(x.snoozed_until, x.trigger_at) AS trigger_at
+lib/core/database/daos/search_dao.dart	, x.priority AS priority, x.due_date AS due_date, x.due_time_minutes AS due_minutes, x.completed_at AS completed_at
+lib/core/database/daos/search_dao.dart	x.archived_at IS NULL
+lib/core/database/daos/search_dao.dart	x.deleted_at IS NULL
+lib/core/database/daos/search_dao.dart	x.priority >= ?
+lib/core/database/daos/search_dao.dart	x.updated_at < ?
+lib/core/database/daos/search_dao.dart	x.updated_at >= ?
+lib/core/database/daos/search_dao.dart	{} MATCH ?
+lib/core/database/daos/tasks_dao.dart	{} AND t.completed_at IS NOT NULL AND t.completed_at >= ? AND t.completed_at < ?
+lib/core/database/daos/vault_dao.dart	v.title COLLATE NOCASE ASC
+lib/core/database/sync_tombstones.dart	{r}.habit_id || '|' || {r}.date
+lib/core/database/tables.dart	Health
+lib/core/items/data/folders_repository_impl.dart	Folder name is empty
+lib/core/items/data/items_repository_impl.dart	i.archived_at DESC, i.updated_at DESC
+lib/core/items/data/items_repository_impl.dart	i.archived_at IS NOT NULL
+lib/core/items/data/items_repository_impl.dart	i.deleted_at DESC, i.updated_at DESC
+lib/core/items/data/items_repository_impl.dart	i.deleted_at IS NOT NULL
+lib/core/items/data/items_repository_impl.dart	i.deleted_at IS NULL
+lib/core/items/data/items_repository_impl.dart	i.item_type = ?
+lib/core/items/data/items_repository_impl.dart	i.item_type = ? AND i.id = ?
+lib/core/items/data/items_repository_impl.dart	i.title LIKE ? ESCAPE '\'
+lib/core/items/data/items_repository_impl.dart	sort_order + 0.5
+lib/core/items/data/items_repository_impl.dart	{} AND {} AND EXISTS (SELECT 1 FROM item_tags it WHERE it.item_type = i.item_type AND it.item_id = i.id AND it.tag_id = ?)
+lib/core/items/data/items_repository_impl.dart	{} AND {} AND i.is_favorite = 1
+lib/core/items/data/items_repository_impl.dart	{} AND {} AND i.is_pinned = 1
+lib/core/items/data/items_repository_impl.dart	{}, i.updated_at DESC
+lib/core/items/data/tags_repository_impl.dart	Tag name is empty
+lib/core/notifications/background_delivery.dart	Honor
+lib/core/notifications/background_delivery.dart	Huawei
+lib/core/notifications/background_delivery.dart	Infinix
+lib/core/notifications/background_delivery.dart	Lenovo
+lib/core/notifications/background_delivery.dart	Meizu
+lib/core/notifications/background_delivery.dart	Nokia
+lib/core/notifications/background_delivery.dart	Oppo
+lib/core/notifications/background_delivery.dart	Realme
+lib/core/notifications/background_delivery.dart	Samsung
+lib/core/notifications/background_delivery.dart	Tecno
+lib/core/notifications/background_delivery.dart	Vivo
+lib/core/notifications/background_delivery.dart	Xiaomi
+lib/core/storage/secure_store.dart	DatabaseKeyUnavailable{}
+lib/core/sync/backup_crypto.dart	AES-256-GCM
+lib/core/sync/backup_crypto.dart	WrongBackupPin
+lib/core/sync/backup_format.dart	Device
+lib/core/sync/backup_key_policy.dart	BackupKeyUnavailable{}
+lib/core/sync/backup_key_policy.dart	BackupPinRequired
+lib/core/sync/cloud_account_controller.dart	Apple ID
+lib/core/sync/device_profile.dart	Android {}
+lib/core/sync/device_profile.dart	This device
+lib/core/sync/google_account.dart	CloudAuthException: {}
+lib/core/sync/google_drive_store.dart	Bearer {}
+lib/core/sync/local_backups.dart	FileSystemFailure: {}
+lib/core/sync/local_backups.dart	FocusFlow
+lib/core/sync/local_data_eraser.dart	FocusFlow
+lib/core/sync/vault_bridge.dart	VaultUnavailable: {}
+lib/core/theme/app_colors.dart	FF{}
+lib/core/theme/app_typography.dart	Courier
+lib/core/theme/app_typography.dart	LexendDeca
+lib/core/theme/app_typography.dart	Menlo
+lib/core/theme/app_typography.dart	NunitoSans
+lib/core/theme/app_typography.dart	Roboto Mono
+lib/core/utils/recurrence.dart	BYDAY ordinal must not be 0
+lib/core/utils/recurrence.dart	Bad BYDAY
+lib/core/utils/recurrence.dart	Bad BYMONTH
+lib/core/utils/recurrence.dart	Bad BYMONTHDAY
+lib/core/utils/recurrence.dart	Bad COUNT
+lib/core/utils/recurrence.dart	Bad INTERVAL
+lib/core/utils/recurrence.dart	Bad UNTIL "{}"
+lib/core/utils/recurrence.dart	COUNT must be >= 1
+lib/core/utils/recurrence.dart	Duplicate {}
+lib/core/utils/recurrence.dart	INTERVAL must be >= 1
+lib/core/utils/recurrence.dart	Malformed part "{}"
+lib/core/utils/recurrence.dart	Missing FREQ
+lib/core/utils/recurrence.dart	Unsupported FREQ "{}"
+lib/core/utils/recurrence.dart	Unsupported {}
+lib/core/utils/recurrence.dart	must be 1 (Mon)..7
+lib/core/utils/recurrence.dart	must be ±1..31
+lib/core/crypto/argon2_runner.dart	unexpected reply
+lib/core/crypto/argon2_runner.dart	worker error
+lib/core/crypto/argon2_runner.dart	worker stopped
+lib/core/crypto/argon2_runner.dart	timed out
+lib/core/settings/app_settings.dart	MMM d, y
+lib/core/sync/google_drive_store.dart	no token
+lib/core/sync/background_jobs.dart	local backup
+lib/core/sync/background_jobs.dart	drive backup
+lib/core/sync/device_profile.dart	iOS {}
+lib/core/notifications/background_delivery.dart	OnePlus
+lib/core/notifications/background_delivery.dart	Asus

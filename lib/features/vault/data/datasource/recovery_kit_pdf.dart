@@ -17,6 +17,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -50,7 +51,7 @@ abstract final class RecoveryKitPdf {
         '${createdAt.year}-${_two(createdAt.month)}-${_two(createdAt.day)} '
         '${_two(createdAt.hour)}:${_two(createdAt.minute)}';
     final doc = pw.Document(
-      title: '${AppInfo.name} Recovery Kit',
+      title: trPrint('{name} Recovery Kit', {'name': AppInfo.name}),
       author: AppInfo.name,
       creator: AppInfo.name,
     );
@@ -71,7 +72,7 @@ abstract final class RecoveryKitPdf {
             pw.Container(width: 40, height: 4, color: accent),
             pw.SizedBox(height: 16),
             pw.Text(
-              '${AppInfo.name} Vault Recovery Kit',
+              trPrint('{name} Vault Recovery Kit', {'name': AppInfo.name}),
               style: pw.TextStyle(
                 fontSize: 24,
                 fontWeight: pw.FontWeight.bold,
@@ -80,15 +81,14 @@ abstract final class RecoveryKitPdf {
             ),
             pw.SizedBox(height: 6),
             pw.Text(
-              'Created $made',
+              trPrint('Created {made}', {'made': made}),
               style: const pw.TextStyle(fontSize: 11, color: muted),
             ),
             pw.SizedBox(height: 28),
             para(
-              'If you forget your master PIN, this code is the only way to '
-              'open your vault. Your passwords are encrypted on your device '
-              '(AES-256-GCM, key derived with Argon2id); nobody, including '
-              'us, can reset the PIN for you.',
+              trPrint(
+                'If you forget your master PIN, this code is the only way to open your vault. Your passwords are encrypted on your device (AES-256-GCM, key derived with Argon2id); nobody, including us, can reset the PIN for you.',
+              ),
             ),
             pw.SizedBox(height: 16),
             pw.Container(
@@ -105,7 +105,7 @@ abstract final class RecoveryKitPdf {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    'RECOVERY CODE',
+                    trPrint('RECOVERY CODE'),
                     style: pw.TextStyle(
                       fontSize: 9,
                       letterSpacing: 1.5,
@@ -131,7 +131,7 @@ abstract final class RecoveryKitPdf {
             ),
             pw.SizedBox(height: 24),
             pw.Text(
-              'How to use it',
+              trPrint('How to use it'),
               style: pw.TextStyle(
                 fontSize: 13,
                 fontWeight: pw.FontWeight.bold,
@@ -139,18 +139,22 @@ abstract final class RecoveryKitPdf {
               ),
             ),
             pw.SizedBox(height: 8),
-            para('1. Open the Vault and tap "Forgot PIN?" on the lock screen.'),
-            para('2. Enter this code, then choose a new master PIN.'),
             para(
-              '3. Make a new Recovery Kit afterwards. Creating a kit '
-              'replaces the previous code, so older kits stop working.',
+              trPrint('1. Open the Vault and tap "Forgot PIN?" on the lock screen.'),
+            ),
+            para(trPrint('2. Enter this code, then choose a new master PIN.')),
+            para(
+              trPrint(
+                '3. Make a new Recovery Kit afterwards. Creating a kit replaces the previous code, so older kits stop working.',
+              ),
             ),
             pw.Spacer(),
             pw.Divider(color: muted, thickness: 0.5),
             pw.SizedBox(height: 8),
             pw.Text(
-              'Print this page or store it somewhere safe and offline. '
-              'Anyone with this code and your device can open your vault.',
+              trPrint(
+                'Print this page or store it somewhere safe and offline. Anyone with this code and your device can open your vault.',
+              ),
               style: const pw.TextStyle(fontSize: 9, color: muted),
             ),
           ],
@@ -201,7 +205,7 @@ class RecoveryKitShare {
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path, mimeType: 'application/pdf')],
-          subject: '${AppInfo.name} Recovery Kit',
+          subject: trPrint('{name} Recovery Kit', {'name': AppInfo.name}),
         ),
       );
       return result.status != ShareResultStatus.dismissed;

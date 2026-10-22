@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/reminders/presentation/widgets/reminder_reliability_banners.dart';
@@ -57,9 +58,9 @@ class _NotificationsSettingsScreenState
     return FFScaffold(
       body: Column(
         children: [
-          const FFNavHeader(
-            leading: FFBackButton(label: 'Settings'),
-            title: 'Notifications',
+          FFNavHeader(
+            leading: FFBackButton(label: tr('Settings')),
+            title: tr('Notifications'),
           ),
           Expanded(
             child: ListView(

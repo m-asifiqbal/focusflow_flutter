@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/reminders/presentation/state/reminder_alert_options.dart';
@@ -29,15 +30,17 @@ class NotificationModuleSection extends ConsumerWidget {
     final c = ref.read(notificationSettingsControllerProvider);
     final sound = ReminderAlertOptions.soundLabel(s.remindersDefaultSound);
     return FFGroupedList(
-      label: 'BY MODULE',
+      label: tr('BY MODULE'),
       children: [
         FFListRow.toggle(
           leading: NotificationRowTile(
             FontAwesomeIcons.solidBell,
             NotificationTints.reminders,
           ),
-          title: 'Reminders',
-          subtitle: 'Sound: $sound · Alarm-style for high priority',
+          title: tr('Reminders'),
+          subtitle: tr('Sound: {sound} · Alarm-style for high priority', {
+            'sound': sound,
+          }),
           value: s.notifyReminders,
           onChanged: c.setReminders,
         ),
@@ -46,7 +49,7 @@ class NotificationModuleSection extends ConsumerWidget {
             FontAwesomeIcons.checkDouble,
             NotificationTints.tasks,
           ),
-          title: 'Task due & overdue',
+          title: tr('Task due & overdue'),
           value: s.notifyTasks,
           onChanged: c.setTasks,
         ),
@@ -55,8 +58,8 @@ class NotificationModuleSection extends ConsumerWidget {
             FontAwesomeIcons.repeat,
             NotificationTints.habits,
           ),
-          title: 'Habit check-ins',
-          subtitle: "At each habit's scheduled times",
+          title: tr('Habit check-ins'),
+          subtitle: tr('At each habit\'s scheduled times'),
           value: s.notifyHabits,
           onChanged: c.setHabits,
         ),
@@ -65,7 +68,7 @@ class NotificationModuleSection extends ConsumerWidget {
             FontAwesomeIcons.fire,
             NotificationTints.streak,
           ),
-          title: 'Streak at risk',
+          title: tr('Streak at risk'),
           value: s.notifyStreakRisk,
           onChanged: c.setStreakRisk,
         ),
@@ -74,7 +77,7 @@ class NotificationModuleSection extends ConsumerWidget {
             FontAwesomeIcons.shieldHalved,
             NotificationTints.security,
           ),
-          title: 'Vault security alerts',
+          title: tr('Vault security alerts'),
           value: s.notifyVault,
           onChanged: c.setVault,
         ),
@@ -83,7 +86,7 @@ class NotificationModuleSection extends ConsumerWidget {
             FontAwesomeIcons.cloud,
             NotificationTints.sky,
           ),
-          title: 'Backup & sync status',
+          title: tr('Backup & sync status'),
           value: s.notifySync,
           onChanged: c.setSync,
         ),

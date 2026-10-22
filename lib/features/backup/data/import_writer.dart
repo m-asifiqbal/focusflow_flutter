@@ -28,6 +28,7 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:focusflow/core/database/app_database.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/items_repository.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/snapshot.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
 import 'package:focusflow/core/utils/clock.dart';
@@ -155,7 +156,9 @@ class ImportWriter {
         imported++;
       } catch (e) {
         failures.add(
-          '$label: ${e is ImportFormatException ? e.message : 'could not be saved'}',
+          e is ImportFormatException
+              ? tr('{label}: {reason}', {'label': label, 'reason': e.message})
+              : tr('{label}: could not be saved', {'label': label}),
         );
       }
       tick();
@@ -180,15 +183,20 @@ class ImportWriter {
           if (saved == 1) {
             imported++;
           } else {
-            failures.add('${_label(l)}: could not be saved');
+            failures.add(
+              tr('{label}: could not be saved', {'label': _label(l)}),
+            );
           }
         } on VaultUnavailable catch (e) {
           // Nothing written yet → the caller unlocks and retries.
           if (i == 0) rethrow;
           final left = fresh.length - i;
           failures.add(
-            '$left ${left == 1 ? 'password was' : 'passwords were'} not '
-            'imported: ${e.message}',
+            tr(
+              '{count, plural, one {# password was} other {# passwords were}} '
+              'not imported: {reason}',
+              {'count': left, 'reason': e.message},
+            ),
           );
           for (var j = i; j < fresh.length; j++) {
             tick();
@@ -196,7 +204,7 @@ class ImportWriter {
           break;
         } on Object {
           if (i == 0) rethrow;
-          failures.add('${_label(l)}: could not be saved');
+          failures.add(tr('{label}: could not be saved', {'label': _label(l)}));
         }
         tick();
       }
@@ -211,7 +219,7 @@ class ImportWriter {
         tick();
         continue;
       }
-      await guard(n.title.isEmpty ? 'Untitled note' : n.title, () async {
+      await guard(n.title.isEmpty ? tr('Untitled note') : n.title, () async {
         final id = await notes.createEmpty(
           title: n.title,
           initialText: n.text,
@@ -326,5 +334,5 @@ class ImportWriter {
 
   /// A login's name for the failure list (never its secrets).
   static String _label(ImportedLogin l) =>
-      l.title.trim().isEmpty ? 'Imported login' : l.title.trim();
+      l.title.trim().isEmpty ? tr('Imported login') : l.title.trim();
 }

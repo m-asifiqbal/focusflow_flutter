@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -87,7 +88,7 @@ class InboxGroup extends StatelessWidget {
     final ff = context.ff;
     return Semantics(
       customSemanticsActions: {
-        const CustomSemanticsAction(label: 'Dismiss'): () => onDismiss(e),
+        CustomSemanticsAction(label: tr('Dismiss')): () => onDismiss(e),
       },
       child: Dismissible(
         key: ValueKey('inbox-${e.id}'),
@@ -108,7 +109,7 @@ class InboxGroup extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'Dismiss',
+                tr('Dismiss'),
                 style: context.text.meta.copyWith(color: ff.inkMuted),
               ),
             ],
@@ -168,8 +169,10 @@ class _DayBarDelegate extends SliverPersistentHeaderDelegate {
               ),
             ),
             FFTextButton(
-              label: 'Clear all',
-              semanticLabel: 'Clear all notifications from $label',
+              label: tr('Clear all'),
+              semanticLabel: tr('Clear all notifications from {label}', {
+                'label': label,
+              }),
               onPressed: onClear,
               padding: const EdgeInsetsDirectional.only(start: AppSpacing.md),
               style: context.text.buttonSmall.copyWith(

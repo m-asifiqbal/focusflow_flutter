@@ -19,6 +19,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -53,29 +54,28 @@ class VaultUnreadableView extends ConsumerWidget {
         Semantics(
           header: true,
           child: Text(
-            "Your vault key can't be read",
+            tr('Your vault key can\'t be read'),
             textAlign: TextAlign.center,
             style: context.text.title.copyWith(color: ff.vaultInk),
           ),
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'Your encrypted items are still here, but the key that opens them '
-          'is damaged or missing on this device. Unlock with your Recovery '
-          'Kit code to repair it, or restore a backup from Settings › '
-          'Backup & sync. Contact support if you need help.',
+          tr(
+            'Your encrypted items are still here, but the key that opens them is damaged or missing on this device. Unlock with your Recovery Kit code to repair it, or restore a backup from Settings › Backup & sync. Contact support if you need help.',
+          ),
           textAlign: TextAlign.center,
           style: context.text.body.copyWith(color: ff.vaultInkMuted),
         ),
         const SizedBox(height: AppSpacing.xxl),
         FFPrimaryButton(
-          label: 'Unlock with recovery code',
+          label: tr('Unlock with recovery code'),
           icon: FontAwesomeIcons.key,
           onPressed: () => unawaited(showVaultRecoveryDialog(context)),
         ),
         const SizedBox(height: AppSpacing.md),
         FFTextButton(
-          label: 'Erase vault and start over',
+          label: tr('Erase vault and start over'),
           color: ff.vaultInkMuted,
           onPressed: () => unawaited(_erase(context, ref)),
         ),
@@ -90,7 +90,9 @@ class VaultUnreadableView extends ConsumerWidget {
     );
     if (ok != true) return;
     await ref.read(vaultSessionProvider.notifier).wipe();
-    if (context.mounted) showFFToast(context, 'Vault erased on this device');
+    if (context.mounted) {
+      showFFToast(context, tr('Vault erased on this device'));
+    }
   }
 }
 
@@ -116,11 +118,11 @@ class _VaultEraseDialogState extends State<VaultEraseDialog> {
   @override
   Widget build(BuildContext context) => FFDialog(
     icon: FontAwesomeIcons.trashCan,
-    title: 'Erase the vault?',
-    message:
-        'Every vault item and its key are deleted from this device. This '
-        'cannot be undone. Backups are not touched. Type $vaultEraseWord to '
-        'confirm.',
+    title: tr('Erase the vault?'),
+    message: tr(
+      'Every vault item and its key are deleted from this device. This cannot be undone. Backups are not touched. Type {vaultEraseWord} to confirm.',
+      {'vaultEraseWord': vaultEraseWord},
+    ),
     content: TextField(
       controller: _c,
       autocorrect: false,
@@ -132,11 +134,11 @@ class _VaultEraseDialogState extends State<VaultEraseDialog> {
     ),
     actions: [
       FFPrimaryButton(
-        label: 'Erase vault',
+        label: tr('Erase vault'),
         onPressed: _matches ? () => Navigator.of(context).pop(true) : null,
       ),
       FFTextButton(
-        label: 'Cancel',
+        label: tr('Cancel'),
         onPressed: () => Navigator.of(context).pop(false),
       ),
     ],

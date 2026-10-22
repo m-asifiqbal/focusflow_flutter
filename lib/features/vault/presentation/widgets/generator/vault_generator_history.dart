@@ -14,6 +14,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -30,10 +31,10 @@ import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 /// "now", "2m ago", "1h ago", "3d ago".
 String vaultShortAgo(DateTime t, DateTime now) {
   final d = now.difference(t);
-  if (d.inMinutes < 1) return 'now';
-  if (d.inHours < 1) return '${d.inMinutes}m ago';
-  if (d.inDays < 1) return '${d.inHours}h ago';
-  return '${d.inDays}d ago';
+  if (d.inMinutes < 1) return tr('now');
+  if (d.inHours < 1) return tr('{n}m ago', {'n': d.inMinutes});
+  if (d.inDays < 1) return tr('{n}h ago', {'n': d.inHours});
+  return tr('{n}d ago', {'n': d.inDays});
 }
 
 /// Copies [value] from the history (toast + haptic).
@@ -51,7 +52,7 @@ Future<void> copyGeneratedValue(
   }
   showFFToast(
     context,
-    seconds > 0 ? 'Copied · clears in ${seconds}s' : 'Copied',
+    seconds > 0 ? tr('Copied · clears in {s}s', {'s': seconds}) : tr('Copied'),
     icon: FontAwesomeIcons.solidCircleCheck,
   );
 }
@@ -68,7 +69,7 @@ class VaultRecentGenerated extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const VaultSectionLabel('Recently generated'),
+        VaultSectionLabel(tr('Recently generated')),
         DecoratedBox(
           decoration: BoxDecoration(
             color: context.ff.vaultSurface,
@@ -128,7 +129,7 @@ class _HistoryRow extends ConsumerWidget {
             ),
             Semantics(
               button: true,
-              label: 'Copy value generated $when',
+              label: tr('Copy value generated {when}', {'when': when}),
               excludeSemantics: true,
               child: FFPressable(
                 onTap: () => copyGeneratedValue(context, ref, entry.value),
@@ -177,13 +178,14 @@ class _HistorySheet extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Generator history',
+            tr('Generator history'),
             style: context.text.sectionTitle.copyWith(color: ff.vaultInk),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'The last 10 values you copied or saved · encrypted on this '
-            'device only.',
+            tr(
+              'The last 10 values you copied or saved · encrypted on this device only.',
+            ),
             style: context.text.bodySmall.copyWith(color: ff.vaultInkMuted),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -193,8 +195,8 @@ class _HistorySheet extends ConsumerWidget {
             FFEmptyState.compact(
               colors: ModuleStyle.vault.colors,
               icon: FontAwesomeIcons.clockRotateLeft,
-              title: 'Nothing yet',
-              body: 'Values you copy or save show up here.',
+              title: tr('Nothing yet'),
+              body: tr('Values you copy or save show up here.'),
             )
           else ...[
             VaultCard(
@@ -204,7 +206,7 @@ class _HistorySheet extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             FFTextButton(
-              label: 'Clear history',
+              label: tr('Clear history'),
               color: ff.vaultDanger.fg,
               onPressed: () async {
                 await ref

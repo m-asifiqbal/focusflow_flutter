@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart' as settings;
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -42,7 +43,7 @@ class NotesHeader extends ConsumerWidget {
     final counts = ref.watch(notesCountsProvider).valueOrNull;
     final grid = ref.watch(notesViewProvider) == settings.NotesView.grid;
     return FFLargeHeader(
-      title: 'Notes',
+      title: tr('Notes'),
       leading: const FFBackButton(),
       padding: _padding,
       subtitle: counts == null
@@ -53,7 +54,7 @@ class NotesHeader extends ConsumerWidget {
           icon: grid
               ? FontAwesomeIcons.tableCellsLarge
               : FontAwesomeIcons.listUl,
-          semanticLabel: grid ? 'Show as list' : 'Show as grid',
+          semanticLabel: grid ? tr('Show as list') : tr('Show as grid'),
           onPressed: () => setNotesView(
             ref,
             grid ? settings.NotesView.list : settings.NotesView.grid,
@@ -61,7 +62,7 @@ class NotesHeader extends ConsumerWidget {
         ),
         FFRoundIconButton(
           icon: FontAwesomeIcons.ellipsis,
-          semanticLabel: 'More options',
+          semanticLabel: tr('More options'),
           onPressed: () => showNotesMoreMenu(context, ref),
         ),
       ],
@@ -82,15 +83,17 @@ class _SelectionHeader extends ConsumerWidget {
         visible.isNotEmpty && visible.every((n) => sel.contains(n.ref));
     return FFNavHeader(
       leading: FFNavAction(
-        label: 'Done',
+        label: tr('Done'),
         emphasized: true,
         onPressed: selector.clear,
       ),
-      title: sel.count == 0 ? 'Select notes' : '${sel.count} selected',
+      title: sel.count == 0
+          ? tr('Select notes')
+          : tr('{count} selected', {'count': sel.count}),
       trailing: [
         FFRoundIconButton(
           icon: FontAwesomeIcons.ellipsis,
-          semanticLabel: 'Actions for selected notes',
+          semanticLabel: tr('Actions for selected notes'),
           onPressed: sel.count == 0
               ? null
               : () => showSelectionActions(
@@ -101,7 +104,7 @@ class _SelectionHeader extends ConsumerWidget {
                 ),
         ),
         FFNavAction(
-          label: allSelected ? 'None' : 'All',
+          label: allSelected ? tr('None') : tr('All'),
           onPressed: () => allSelected
               ? selector.selectAll(const [])
               : selector.selectAll(visible.map((n) => n.ref)),

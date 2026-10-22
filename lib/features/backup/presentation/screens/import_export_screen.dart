@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/backup/presentation/notifiers/import_export_controllers.dart';
@@ -46,9 +47,9 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     return FFScaffold(
       body: Column(
         children: [
-          const FFNavHeader(
-            leading: FFBackButton(label: 'Settings'),
-            title: 'Import & Export',
+          FFNavHeader(
+            leading: FFBackButton(label: tr('Settings')),
+            title: tr('Import & Export'),
           ),
           Expanded(
             child: ListView(
@@ -60,9 +61,15 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
               ),
               children: [
                 FFSegmented<ImportExportTab>(
-                  segments: const [
-                    FFSegment(value: ImportExportTab.export, label: 'Export'),
-                    FFSegment(value: ImportExportTab.import, label: 'Import'),
+                  segments: [
+                    FFSegment(
+                      value: ImportExportTab.export,
+                      label: tr('Export'),
+                    ),
+                    FFSegment(
+                      value: ImportExportTab.import,
+                      label: tr('Import'),
+                    ),
                   ],
                   value: _tab,
                   onChanged: (t) => setState(() => _tab = t),

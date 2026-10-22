@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/features/habits/domain/services/habits_day_summary.dart';
@@ -23,9 +24,9 @@ class HabitsHeroCard extends StatelessWidget {
 
   /// The headline for [s].
   static String headline(HabitsDaySummary s) {
-    if (s.isPerfect) return 'Perfect day!';
-    if (s.due == 0) return s.total == 0 ? 'Start a chain' : 'Rest day';
-    return 'Keep the chain going!';
+    if (s.isPerfect) return tr('Perfect day!');
+    if (s.due == 0) return s.total == 0 ? tr('Start a chain') : tr('Rest day');
+    return tr('Keep the chain going!');
   }
 
   @override
@@ -42,8 +43,11 @@ class HabitsHeroCard extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label:
-          '${headline(summary)} ${summary.done} of ${summary.due} done today',
+      label: tr('{headline} {done} of {due} done today', {
+        'headline': headline(summary),
+        'done': summary.done,
+        'due': summary.due,
+      }),
       child: Container(
         padding: const EdgeInsetsDirectional.all(HabitDimens.heroPadding),
         decoration: BoxDecoration(
@@ -93,12 +97,12 @@ class HabitsHeroCard extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs + AppSpacing.xxs),
                     Text.rich(
                       longest == null
-                          ? const TextSpan(
-                              text: 'Check in today to start a streak',
+                          ? TextSpan(
+                              text: tr('Check in today to start a streak'),
                             )
                           : TextSpan(
                               children: [
-                                const TextSpan(text: 'Longest active streak: '),
+                                TextSpan(text: tr('Longest active streak: ')),
                                 TextSpan(
                                   text: longest.streak.label,
                                   style: const TextStyle(

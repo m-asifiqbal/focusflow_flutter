@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -45,8 +46,8 @@ class HabitDetailHero extends StatelessWidget {
     final skipped = todayLog?.skipped ?? false;
     final ringValue = HabitFormat.ring(habit, todayLog);
     final meta = [
-      if (habit.isPaused) 'Paused',
-      if (habit.isArchived) 'Archived',
+      if (habit.isPaused) tr('Paused'),
+      if (habit.isArchived) tr('Archived'),
       HabitFormat.meta(habit),
     ].join(' · ');
 
@@ -58,7 +59,10 @@ class HabitDetailHero extends StatelessWidget {
           stroke: HabitDimens.detailRingStroke,
           color: colors.solid,
           trackColor: colors.softFor(ff.brightness),
-          semanticLabel: 'Today ${habit.name}: $ringValue',
+          semanticLabel: tr('Today {name}: {ringValue}', {
+            'name': habit.name,
+            'ringValue': ringValue,
+          }),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -123,7 +127,7 @@ class HabitDetailHero extends StatelessWidget {
               onTap: onLog,
             ),
             _ActionButton(
-              label: skipped ? 'Unskip' : 'Skip today',
+              label: skipped ? tr('Unskip') : tr('Skip today'),
               icon: skipped
                   ? FontAwesomeIcons.rotateLeft
                   : FontAwesomeIcons.forward,

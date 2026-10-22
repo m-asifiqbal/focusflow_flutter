@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/items/item_summary.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -86,7 +87,7 @@ class ItemSummaryRow extends StatelessWidget {
       label:
           '${item.displayTitle}${item.isLocked ? ', locked' : ''}. $meta'
           '${semanticsSuffix == null ? '' : ', $semanticsSuffix'}',
-      onLongPressHint: onLongPress == null ? null : 'More actions',
+      onLongPressHint: onLongPress == null ? null : tr('More actions'),
       // The texts are in [label]; a [trailing] button keeps its own node.
       child: InkWell(
         onTap: onTap,

@@ -61,6 +61,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/engine/alarm_driver.dart';
 import 'package:focusflow/core/notifications/engine/background_handler.dart';
 import 'package:focusflow/core/notifications/engine/notification_gateway.dart';
@@ -164,8 +165,8 @@ class LocalNotificationsGateway implements NotificationGateway {
 
   /// Generic text of every notification while "Show on lock screen" is
   /// Hidden (the inbox keeps the real one, behind the app lock).
-  static const String hiddenTitle = 'Reminder';
-  static const String hiddenBody = 'Open ${AppInfo.name}';
+  static String get hiddenTitle => tr('Reminder');
+  static String get hiddenBody => tr('Open {name}', {'name': AppInfo.name});
 
   /// (title, body) the OS shows for [n].
   static (String, String?) _text(PlannedNotification n, DeliveryOptions o) =>
@@ -485,10 +486,10 @@ class LocalNotificationsGateway implements NotificationGateway {
   }
 
   static String _label(NotificationButton b) => switch (b) {
-    NotificationButton.done => 'Done',
-    NotificationButton.snooze => 'Snooze',
-    NotificationButton.checkIn => 'Check in',
-    NotificationButton.open => 'Open',
+    NotificationButton.done => tr('Done'),
+    NotificationButton.snooze => tr('Snooze'),
+    NotificationButton.checkIn => tr('Check in'),
+    NotificationButton.open => tr('Open'),
   };
 
   @override

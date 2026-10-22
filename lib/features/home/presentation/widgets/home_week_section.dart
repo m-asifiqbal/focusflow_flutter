@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
@@ -46,7 +47,7 @@ class HomeWeekSection extends ConsumerWidget {
         FFSectionHeader(
           title: DateFormat.yMMMM().format(day),
           trailing: HomeSectionLink(
-            'View Monthly',
+            tr('View Monthly'),
             onPressed: () => context.push(AppRoutes.calendarOn(day)),
           ),
           padding: const EdgeInsetsDirectional.symmetric(

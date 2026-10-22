@@ -11,32 +11,39 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 /// A bundled third-party asset and the file holding its licence.
 typedef BundledLicense = ({
   String name,
   String use,
+  bool icons,
   String license,
   String asset,
 });
 
-/// Every bundled asset family credited on the About page.
-const bundledLicenses = <BundledLicense>[
+/// Every bundled asset family credited on the About page. A getter, so the
+/// "use" descriptions follow the active language (names and licence ids are
+/// proper names and stay as they are).
+List<BundledLicense> get bundledLicenses => [
   (
     name: 'Font Awesome Free 6',
-    use: 'Icons',
+    use: tr('Icons'),
+    icons: true,
     license: 'CC BY 4.0 · SIL OFL 1.1 · MIT',
     asset: 'assets/licenses/FontAwesome-LICENSE.txt',
   ),
   (
     name: 'Lexend Deca',
-    use: 'Headings & numbers',
+    use: tr('Headings & numbers'),
+    icons: false,
     license: 'SIL OFL 1.1',
     asset: 'assets/licenses/OFL-LexendDeca.txt',
   ),
   (
     name: 'Nunito Sans',
-    use: 'Body text',
+    use: tr('Body text'),
+    icons: false,
     license: 'SIL OFL 1.1',
     asset: 'assets/licenses/OFL-NunitoSans.txt',
   ),

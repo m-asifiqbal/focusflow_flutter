@@ -23,6 +23,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
@@ -124,14 +125,23 @@ class AccountActionsController extends AutoDisposeNotifier<AccountAction?> {
             driveFiles = await ref.read(driveSyncProvider).deleteAllCloudData();
           } on CloudDeleteIncomplete catch (e) {
             throw AccountActionFailure(
-              'Deleted ${e.deleted} of ${e.total} files from Google Drive; '
-              '${e.remaining} could not be deleted. Your local data was not '
-              'erased. Try again to finish.',
+              tr(
+                'Deleted {deleted} of {total} files from Google Drive; '
+                '{remaining} could not be deleted. Your local data was not '
+                'erased. Try again to finish.',
+                {
+                  'deleted': e.deleted,
+                  'total': e.total,
+                  'remaining': e.remaining,
+                },
+              ),
             );
           } on Object {
-            throw const AccountActionFailure(
-              "Couldn't reach Google Drive — nothing was deleted and your "
-              'local data was not erased. Try again when online.',
+            throw AccountActionFailure(
+              tr(
+                "Couldn't reach Google Drive — nothing was deleted and your "
+                'local data was not erased. Try again when online.',
+              ),
             );
           }
         }
@@ -139,9 +149,12 @@ class AccountActionsController extends AutoDisposeNotifier<AccountAction?> {
           await _eraseEverything(revoke: true);
         } on Object {
           throw AccountActionFailure(
-            '${driveFiles == 1 ? '1 file was' : '$driveFiles files were'} '
-            'deleted from Google Drive, but erasing this device did not '
-            'finish. Try again to finish.',
+            tr(
+              '{count, plural, one {# file was} other {# files were}} '
+              'deleted from Google Drive, but erasing this device did not '
+              'finish. Try again to finish.',
+              {'count': driveFiles},
+            ),
           );
         }
       });

@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -79,8 +80,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: Align(
               alignment: AlignmentDirectional.centerEnd,
               child: FFTextButton(
-                label: 'Skip',
-                semanticLabel: 'Skip introduction',
+                label: tr('Skip'),
+                semanticLabel: tr('Skip introduction'),
                 style: context.text.button.copyWith(
                   fontWeight: FontWeight.w700,
                   color: ff.primary,
@@ -110,7 +111,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               horizontal: AppSpacing.screen,
             ),
             child: FFPrimaryButton(
-              label: last ? 'Continue' : 'Get Started',
+              label: last ? tr('Continue') : tr('Get Started'),
               onPressed: _next,
             ),
           ),
@@ -135,7 +136,7 @@ class _Dots extends StatelessWidget {
     final ff = context.ff;
     final duration = context.reduceMotion ? Duration.zero : AppMotion.normal;
     return Semantics(
-      label: 'Page ${index + 1} of $count',
+      label: tr('Page {v} of {count}', {'v': index + 1, 'count': count}),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -161,6 +162,20 @@ class _Dots extends StatelessWidget {
   }
 }
 
+// Private-use character that stands in for the "Restore" word.
+const _restoreMark = '\uE000';
+
+/// [sentence] with the marker replaced by [restore].
+List<InlineSpan> _withRestore(String sentence, InlineSpan restore) {
+  final at = sentence.indexOf(_restoreMark);
+  if (at < 0) return [TextSpan(text: sentence)];
+  return [
+    if (at > 0) TextSpan(text: sentence.substring(0, at)),
+    restore,
+    if (at + 1 < sentence.length) TextSpan(text: sentence.substring(at + 1)),
+  ];
+}
+
 /// "Already have a backup? Restore" — the whole line is the tap target.
 class _RestoreLink extends StatelessWidget {
   const _RestoreLink({required this.onTap});
@@ -173,7 +188,7 @@ class _RestoreLink extends StatelessWidget {
     final style = context.text.body.copyWith(height: 1.3);
     return Semantics(
       button: true,
-      label: 'Already have a backup? Restore',
+      label: tr('Already have a backup? {restore}', {'restore': tr('Restore')}),
       excludeSemantics: true,
       child: FFPressable(
         onTap: onTap,
@@ -187,16 +202,20 @@ class _RestoreLink extends StatelessWidget {
               ),
               child: Text.rich(
                 TextSpan(
-                  children: [
-                    const TextSpan(text: 'Already have a backup? '),
+                  // One sentence: the word "Restore" is marked inside the
+                  // translated text so it keeps its colour in any word order.
+                  children: _withRestore(
+                    tr('Already have a backup? {restore}', {
+                      'restore': _restoreMark,
+                    }),
                     TextSpan(
-                      text: 'Restore',
+                      text: tr('Restore'),
                       style: TextStyle(
                         color: ff.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ],
+                  ),
                 ),
                 textAlign: TextAlign.center,
                 style: style,

@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -42,9 +43,9 @@ class QuickCapturePreviewRow extends ConsumerWidget {
     final module = styleOf(capture.kind);
     return Semantics(
       liveRegion: true,
-      label:
-          'Will create: '
-          '${QuickCapturePreview.summary(capture, now, use24h: use24h)}',
+      label: tr('Will create: {summary}', {
+        'summary': QuickCapturePreview.summary(capture, now, use24h: use24h),
+      }),
       excludeSemantics: true,
       child: Wrap(
         spacing: AppSpacing.xs + AppSpacing.xxs,

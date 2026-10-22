@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/notifications/notification_permissions.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -38,7 +39,7 @@ class RemindersToolbar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final subtitle = ref.watch(remindersSubtitleProvider);
     return FFLargeHeader(
-      title: 'Reminders',
+      title: tr('Reminders'),
       leading: const FFBackButton(),
       fitTitle: true,
       subtitle: subtitle ?? ' ',
@@ -51,12 +52,12 @@ class RemindersToolbar extends ConsumerWidget {
       actions: [
         FFRoundIconButton(
           icon: FontAwesomeIcons.solidCalendarDays,
-          semanticLabel: 'Open calendar',
+          semanticLabel: tr('Open calendar'),
           onPressed: () => context.push(AppRoutes.calendar),
         ),
         FFRoundIconButton(
           icon: FontAwesomeIcons.ellipsis,
-          semanticLabel: 'More options',
+          semanticLabel: tr('More options'),
           onPressed: () => _showMore(context),
         ),
       ],
@@ -70,19 +71,19 @@ class RemindersToolbar extends ConsumerWidget {
         actions: [
           FFActionItem(
             icon: FontAwesomeIcons.plus,
-            label: 'New reminder',
+            label: tr('New reminder'),
             colors: ModuleStyle.reminders.colors,
             onTap: () => context.push(AppRoutes.newReminder()),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.solidBell,
-            label: 'Notification settings',
+            label: tr('Notification settings'),
             colors: ModuleStyle.tasks.colors,
             onTap: () => context.push(AppRoutes.settingsNotifications),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.boxArchive,
-            label: 'Archived reminders',
+            label: tr('Archived reminders'),
             colors: ModuleStyle.habits.colors,
             onTap: () => context.push(AppRoutes.archive),
           ),
@@ -116,8 +117,8 @@ class RemindersHeader extends ConsumerWidget {
             child: FFInfoBanner(
               icon: FontAwesomeIcons.solidBellSlash,
               colors: ModuleStyle.reminders.colors,
-              text: 'Notifications are off — reminders can\'t alert you.',
-              actionLabel: 'Enable',
+              text: tr('Notifications are off — reminders can\'t alert you.'),
+              actionLabel: tr('Enable'),
               onAction: () => enableReminderNotifications(ref),
             ),
           ),

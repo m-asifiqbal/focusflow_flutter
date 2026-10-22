@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/features/search/domain/entities/search_query.dart';
 import 'package:focusflow/features/search/presentation/providers/search_providers.dart';
@@ -34,36 +35,40 @@ class SearchFiltersSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SearchSectionLabel('Search filters'),
+        SearchSectionLabel(tr('Search filters')),
         SearchPillWrap(
           children: [
             SearchPill(
               label: searchDateRangeLabel(f),
               icon: FontAwesomeIcons.solidCalendar,
               active: f.hasDateRange,
-              semanticLabel: 'Date range filter, ${searchDateRangeLabel(f)}',
+              semanticLabel: tr('Date range filter, {searchDateRangeLabel}', {
+                'searchDateRangeLabel': searchDateRangeLabel(f),
+              }),
               onTap: () => apply(
                 pickSearchDateRange(context, f, ref.read(clockProvider).now()),
               ),
             ),
             SearchPill(
-              label: f.tagName == null ? 'Tag' : '#${f.tagName}',
+              label: f.tagName == null ? tr('Tag') : '#${f.tagName}',
               icon: FontAwesomeIcons.tag,
               active: f.tagId != null,
               semanticLabel: f.tagName == null
-                  ? 'Tag filter'
-                  : 'Tag filter, ${f.tagName}',
+                  ? tr('Tag filter')
+                  : tr('Tag filter, {tagName}', {'tagName': f.tagName}),
               onTap: () => apply(pickSearchTag(context, ref, f)),
             ),
             SearchPill(
               label: searchPriorityLabel(f),
               icon: FontAwesomeIcons.solidFlag,
               active: f.minPriority != null,
-              semanticLabel: 'Priority filter, ${searchPriorityLabel(f)}',
+              semanticLabel: tr('Priority filter, {searchPriorityLabel}', {
+                'searchPriorityLabel': searchPriorityLabel(f),
+              }),
               onTap: () => apply(pickSearchPriority(context, f)),
             ),
             SearchPill(
-              label: 'Include archived',
+              label: tr('Include archived'),
               icon: FontAwesomeIcons.boxArchive,
               active: f.includeArchived,
               onTap: () => ctl.setFilters(

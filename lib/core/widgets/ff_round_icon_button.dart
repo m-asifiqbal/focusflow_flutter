@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
@@ -84,7 +85,9 @@ class FFRoundIconButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: onPressed != null,
-      label: badge ? '$semanticLabel, new' : semanticLabel,
+      label: badge
+          ? tr('{semanticLabel}, new', {'semanticLabel': semanticLabel})
+          : semanticLabel,
       excludeSemantics: true,
       child: FFPressable(
         onTap: onPressed,

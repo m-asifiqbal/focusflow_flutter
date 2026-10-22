@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -31,13 +32,20 @@ import 'package:focusflow/features/settings/presentation/widgets/root/settings_s
 import 'package:focusflow/features/settings/presentation/widgets/settings_option_sheet.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
-/// Labels of [NoteColors.hexes], same order.
-const noteColorNames = ['White', 'Mint', 'Amber', 'Blue', 'Pink', 'Violet'];
+/// Labels of [NoteColors.hexes], same order (a getter: follows the language).
+List<String> get noteColorNames => [
+  tr('White'),
+  tr('Mint'),
+  tr('Amber'),
+  tr('Blue'),
+  tr('Pink'),
+  tr('Violet'),
+];
 
 /// "White" for null / unknown, else the palette name.
 String noteColorLabel(String? hex) {
   final i = NoteColors.hexes.indexOf((hex ?? 'FFFFFF').toUpperCase());
-  return i < 0 ? 'White' : noteColorNames[i];
+  return i < 0 ? tr('White') : noteColorNames[i];
 }
 
 /// Snooze lengths offered (minutes).
@@ -56,20 +64,20 @@ class NotesDefaultsSection extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final editor = ref.read(settingsEditorProvider);
     return FFGroupedList(
-      label: 'Notes',
-      footer: 'The view and sort can also be changed from the Notes list.',
+      label: tr('Notes'),
+      footer: tr('The view and sort can also be changed from the Notes list.'),
       children: [
         FFListRow(
           leading: _tile(
             FontAwesomeIcons.tableCellsLarge,
             SettingsTints.emerald,
           ),
-          title: 'Default view',
+          title: tr('Default view'),
           value: SettingsLabels.notesView(s.notesView),
           onTap: () async {
             final v = await pickSetting<NotesView>(
               context,
-              title: 'Default view',
+              title: tr('Default view'),
               selected: s.notesView,
               options: [
                 for (final n in NotesView.values)
@@ -84,12 +92,12 @@ class NotesDefaultsSection extends ConsumerWidget {
             FontAwesomeIcons.arrowDownWideShort,
             SettingsTints.blue,
           ),
-          title: 'Sort by',
+          title: tr('Sort by'),
           value: SettingsLabels.notesSort(s.notesSort),
           onTap: () async {
             final v = await pickSetting<NotesSort>(
               context,
-              title: 'Sort notes by',
+              title: tr('Sort notes by'),
               selected: s.notesSort,
               options: [
                 for (final n in NotesSort.values)
@@ -101,12 +109,12 @@ class NotesDefaultsSection extends ConsumerWidget {
         ),
         FFListRow(
           leading: _tile(FontAwesomeIcons.palette, SettingsTints.pink),
-          title: 'Colour of new notes',
+          title: tr('Colour of new notes'),
           value: noteColorLabel(s.notesDefaultColor),
           onTap: () async {
             final v = await pickSetting<String>(
               context,
-              title: 'Colour of new notes',
+              title: tr('Colour of new notes'),
               selected: (s.notesDefaultColor ?? 'FFFFFF').toUpperCase(),
               options: [
                 for (var i = 0; i < NoteColors.hexes.length; i++)
@@ -135,37 +143,37 @@ class TasksDefaultsSection extends ConsumerWidget {
         ?.where((f) => f.id == s.tasksDefaultListId)
         .firstOrNull;
     return FFGroupedList(
-      label: 'Tasks',
+      label: tr('Tasks'),
       children: [
         FFListRow.toggle(
           leading: _tile(
             FontAwesomeIcons.wandMagicSparkles,
             SettingsTints.violet,
           ),
-          title: 'Smart lists',
-          subtitle: 'Today, Upcoming and Overdue strip · coming soon',
+          title: tr('Smart lists'),
+          subtitle: tr('Today, Upcoming and Overdue strip · coming soon'),
           value: s.tasksSmartLists,
           onChanged: editor.setTasksSmartLists,
         ),
         FFListRow.toggle(
           leading: _tile(FontAwesomeIcons.circleCheck, SettingsTints.emerald),
-          title: 'Show completed',
-          subtitle: 'Keep finished tasks visible in lists',
+          title: tr('Show completed'),
+          subtitle: tr('Keep finished tasks visible in lists'),
           value: s.tasksShowCompleted,
           onChanged: editor.setTasksShowCompleted,
         ),
         FFListRow(
           leading: _tile(FontAwesomeIcons.listUl, SettingsTints.blue),
-          title: 'Default list',
-          value: current?.name ?? 'None',
+          title: tr('Default list'),
+          value: current?.name ?? tr('None'),
           onTap: () async {
             final v = await pickSetting<String>(
               context,
-              title: 'Default list',
-              subtitle: 'New tasks go here unless you pick another list.',
+              title: tr('Default list'),
+              subtitle: tr('New tasks go here unless you pick another list.'),
               selected: current?.id ?? '',
               options: [
-                option('', 'None'),
+                option('', tr('None')),
                 if (lists != null)
                   for (final f in lists) option(f.id, f.name),
               ],
@@ -188,31 +196,34 @@ class RemindersDefaultsSection extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final editor = ref.read(settingsEditorProvider);
     return FFGroupedList(
-      label: 'Reminders',
-      footer: 'Each reminder can override these in its editor.',
+      label: tr('Reminders'),
+      footer: tr('Each reminder can override these in its editor.'),
       children: [
         FFListRow(
           leading: _tile(FontAwesomeIcons.solidClock, SettingsTints.orange),
-          title: 'Default snooze',
-          value: '${s.defaultSnoozeMinutes} min',
+          title: tr('Default snooze'),
+          value: tr('{minutes} min', {'minutes': s.defaultSnoozeMinutes}),
           onTap: () async {
             final v = await pickSetting<int>(
               context,
-              title: 'Default snooze',
+              title: tr('Default snooze'),
               selected: s.defaultSnoozeMinutes,
-              options: [for (final m in snoozeChoices) option(m, '$m min')],
+              options: [
+                for (final m in snoozeChoices)
+                  option(m, tr('{minutes} min', {'minutes': m})),
+              ],
             );
             if (v != null) await editor.setDefaultSnooze(v);
           },
         ),
         FFListRow(
           leading: _tile(FontAwesomeIcons.solidBell, SettingsTints.amber),
-          title: 'Reminder sound',
+          title: tr('Reminder sound'),
           value: ReminderAlertOptions.soundLabel(s.remindersDefaultSound),
           onTap: () async {
             final v = await pickSetting<String>(
               context,
-              title: 'Reminder sound',
+              title: tr('Reminder sound'),
               selected: s.remindersDefaultSound,
               options: [
                 for (final o in ReminderAlertOptions.sounds)
@@ -236,23 +247,28 @@ class HabitsDefaultsSection extends ConsumerWidget {
     final editor = ref.read(settingsEditorProvider);
     String time(int m) => SettingsLabels.clockTime(m, use24h: s.use24HourTime);
     return FFGroupedList(
-      label: 'Habits',
-      footer:
-          'Check-ins made before the reset time count for the previous '
-          'day — handy for night owls.',
+      label: tr('Habits'),
+      footer: tr(
+        'Check-ins made before the reset time count for the previous day — handy for night owls.',
+      ),
       children: [
         FFListRow(
           leading: _tile(FontAwesomeIcons.rotate, ModuleStyle.habits.colors),
-          title: 'Day resets at',
+          title: tr('Day resets at'),
           value: time(s.habitResetMinutes),
           onTap: () async {
             final v = await pickSetting<int>(
               context,
-              title: 'Day resets at',
+              title: tr('Day resets at'),
               selected: s.habitResetMinutes,
               options: [
                 for (final m in habitResetChoices)
-                  option(m, m == 0 ? 'Midnight (${time(m)})' : time(m)),
+                  option(
+                    m,
+                    m == 0
+                        ? tr('Midnight ({time})', {'time': time(m)})
+                        : time(m),
+                  ),
               ],
             );
             if (v != null) await editor.setHabitResetMinutes(v);
@@ -260,8 +276,8 @@ class HabitsDefaultsSection extends ConsumerWidget {
         ),
         FFListRow(
           leading: _tile(FontAwesomeIcons.solidCalendar, SettingsTints.violet),
-          title: 'Week starts on',
-          subtitle: 'Also used by the calendar and insights',
+          title: tr('Week starts on'),
+          subtitle: tr('Also used by the calendar and insights'),
           value: SettingsLabels.weekday(s.weekStartsOn),
           onTap: () =>
               runRootAction(context, ref, SettingsRootAction.weekStart),

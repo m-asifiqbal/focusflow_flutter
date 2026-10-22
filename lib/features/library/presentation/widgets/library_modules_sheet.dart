@@ -14,6 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -90,8 +91,8 @@ class LibraryModulesSheet extends ConsumerWidget {
                 index: i,
                 child: Semantics(
                   container: true,
-                  label: 'Reorder ${t.plural}',
-                  hint: 'Drag to move',
+                  label: tr('Reorder {plural}', {'plural': t.plural}),
+                  hint: tr('Drag to move'),
                   child: SizedBox.square(
                     dimension: AppSizes.minTap,
                     child: Icon(
@@ -116,12 +117,13 @@ class LibraryModulesSheet extends ConsumerWidget {
       children: [
         Semantics(
           header: true,
-          child: Text('Spaces on Library', style: context.text.title),
+          child: Text(tr('Spaces on Library'), style: context.text.title),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Drag to reorder. Hidden spaces keep their items; open them from '
-          'search or Home.',
+          tr(
+            'Drag to reorder. Hidden spaces keep their items; open them from search or Home.',
+          ),
           style: context.text.bodySmall,
         ),
         const SizedBox(height: AppSpacing.lg),

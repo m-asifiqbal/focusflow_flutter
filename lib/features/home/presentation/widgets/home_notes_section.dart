@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -42,9 +43,9 @@ class HomeNotesSection extends ConsumerWidget {
           ? HomeEmptyCard(
               colors: ModuleStyle.notes.colors,
               icon: ModuleStyle.notes.icon,
-              title: 'No notes yet',
-              body: 'Jot down an idea — it will show up here.',
-              ctaLabel: 'New note',
+              title: tr('No notes yet'),
+              body: tr('Jot down an idea — it will show up here.'),
+              ctaLabel: tr('New note'),
               onCta: () => context.push(AppRoutes.newNote),
             )
           : _NotesGrid(notes: value),
@@ -54,9 +55,9 @@ class HomeNotesSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FFSectionHeader(
-          title: 'Recent Notes',
+          title: tr('Recent Notes'),
           trailing: HomeSectionLink(
-            'See All',
+            tr('See All'),
             onPressed: () => context.push(AppRoutes.notes),
           ),
         ),

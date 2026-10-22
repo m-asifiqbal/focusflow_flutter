@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -42,15 +43,15 @@ Future<void> showNotesMoreMenu(BuildContext context, WidgetRef ref) =>
       context,
       FFActionSheetData(
         header: FFActionSheetHeader(
-          title: 'Notes',
+          title: tr('Notes'),
           icon: ModuleStyle.notes.icon,
           colors: ModuleStyle.notes.colors,
-          meta: 'View options',
+          meta: tr('View options'),
         ),
         actions: [
           FFActionItem(
             icon: FontAwesomeIcons.plus,
-            label: 'Add new note',
+            label: tr('Add new note'),
             colors: ModuleStyle.notes.colors,
             // Into the folder being viewed, like the screen's own New note.
             onTap: () => context.push(
@@ -61,7 +62,7 @@ Future<void> showNotesMoreMenu(BuildContext context, WidgetRef ref) =>
           ),
           FFActionItem(
             icon: FontAwesomeIcons.solidSquareCheck,
-            label: 'Select notes',
+            label: tr('Select notes'),
             colors: ModuleStyle.notes.colors,
             onTap: () => ref
                 .read(itemSelectionProvider(notesSelectionScope).notifier)
@@ -69,31 +70,31 @@ Future<void> showNotesMoreMenu(BuildContext context, WidgetRef ref) =>
           ),
           FFActionItem(
             icon: FontAwesomeIcons.arrowDownWideShort,
-            label: 'Sort by…',
+            label: tr('Sort by…'),
             colors: TagPalette.design,
             onTap: () => pickNotesSort(context, ref),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.folderPlus,
-            label: 'New folder',
+            label: tr('New folder'),
             colors: TagPalette.work,
             onTap: () => promptNewNoteFolder(context, ref),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.tags,
-            label: 'Tags & folders',
+            label: tr('Tags & folders'),
             colors: TagPalette.travel,
             onTap: () => context.push(AppRoutes.tags),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.boxArchive,
-            label: 'Archive',
+            label: tr('Archive'),
             colors: ActionTints.lock,
             onTap: () => context.push(AppRoutes.archive),
           ),
           FFActionItem(
             icon: FontAwesomeIcons.trashCan,
-            label: 'Recently deleted',
+            label: tr('Recently deleted'),
             colors: TagPalette.high,
             onTap: () => context.push(AppRoutes.trash),
           ),
@@ -106,17 +107,17 @@ Future<void> pickNotesSort(BuildContext context, WidgetRef ref) async {
   final current = ref.read(notesSortProvider);
   final choice = await showChoiceSheet<NotesSort>(
     context,
-    title: 'Sort notes',
+    title: tr('Sort notes'),
     selected: current,
     options: [
       for (final s in NotesSort.values)
         ChoiceOption(
           value: s,
-          label: s == NotesSort.manual ? 'Manual (drag)' : s.label,
+          label: s == NotesSort.manual ? tr('Manual (drag)') : s.label,
           icon: notesSortIcon(s),
           colors: ModuleStyle.notes.colors,
           subtitle: s == NotesSort.manual
-              ? 'Long-press and drag a note to move it'
+              ? tr('Long-press and drag a note to move it')
               : null,
         ),
     ],
@@ -132,12 +133,12 @@ Future<void> pickNotesTagFilter(BuildContext context, WidgetRef ref) async {
   final current = ref.read(notesListFilterProvider).tagId;
   final choice = await showChoiceSheet<String?>(
     context,
-    title: 'Filter by tag',
+    title: tr('Filter by tag'),
     selected: current,
     options: [
-      const ChoiceOption(
+      ChoiceOption(
         value: null,
-        label: 'Any tag',
+        label: tr('Any tag'),
         icon: FontAwesomeIcons.tags,
         colors: TagPalette.ideas,
       ),
@@ -158,9 +159,9 @@ Future<void> pickNotesTagFilter(BuildContext context, WidgetRef ref) async {
 Future<void> promptNewNoteFolder(BuildContext context, WidgetRef ref) async {
   final name = await showTextInputSheet(
     context,
-    title: 'New folder',
-    hint: 'Folder name',
-    confirmLabel: 'Create folder',
+    title: tr('New folder'),
+    hint: tr('Folder name'),
+    confirmLabel: tr('Create folder'),
   );
   if (name == null) return;
   await createNoteFolder(ref, name);

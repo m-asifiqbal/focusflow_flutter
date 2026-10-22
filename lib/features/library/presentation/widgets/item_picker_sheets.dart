@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/folder.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -86,7 +87,7 @@ class _TagPickerSheetState extends ConsumerState<TagPickerSheet> {
       footer: ListenableBuilder(
         listenable: _field,
         builder: (context, _) => FFPrimaryButton(
-          label: 'Add tags',
+          label: tr('Add tags'),
           icon: FontAwesomeIcons.tag,
           onPressed: _picked.isEmpty && _clean(_field.text).isEmpty
               ? null
@@ -96,18 +97,18 @@ class _TagPickerSheetState extends ConsumerState<TagPickerSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Add tags', style: context.text.title),
+          Text(tr('Add tags'), style: context.text.title),
           const SizedBox(height: AppSpacing.lg),
           FFSearchField(
             controller: _field,
-            hint: 'New tag',
+            hint: tr('New tag'),
             autofocus: true,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _done(),
           ),
           if (suggestions.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.xl),
-            const FFSectionLabel('Your tags'),
+            FFSectionLabel(tr('Your tags')),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -135,13 +136,15 @@ class FolderPickerSheet extends ConsumerWidget {
   const FolderPickerSheet({
     required this.module,
     this.current,
-    this.title = 'Move to folder',
+    this.title,
     super.key,
   });
 
   final ItemType module;
   final String? current;
-  final String title;
+
+  /// Heading of the sheet; "Move to folder" when null.
+  final String? title;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -165,12 +168,12 @@ class FolderPickerSheet extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title, style: context.text.title),
+          Text(title ?? tr('Move to folder'), style: context.text.title),
           const SizedBox(height: AppSpacing.lg),
           switch (folders) {
             AsyncData(:final value) => FFGroupedList(
               children: [
-                row(null, 'No folder', ff.inkMuted),
+                row(null, tr('No folder'), ff.inkMuted),
                 for (final f in value)
                   row(
                     f.id,
@@ -180,8 +183,8 @@ class FolderPickerSheet extends ConsumerWidget {
                   ),
               ],
             ),
-            AsyncError() => const FFErrorBanner(
-              message: "Couldn't load folders",
+            AsyncError() => FFErrorBanner(
+              message: tr('Couldn\'t load folders'),
             ),
             _ => const FFSkeletonRow(),
           },
@@ -200,7 +203,14 @@ class ColourPickerSheet extends StatelessWidget {
 
   final String? current;
 
-  static const _names = ['White', 'Mint', 'Amber', 'Blue', 'Pink', 'Violet'];
+  List<String> get _names => [
+    tr('White'),
+    tr('Mint'),
+    tr('Amber'),
+    tr('Blue'),
+    tr('Pink'),
+    tr('Violet'),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +221,7 @@ class ColourPickerSheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Change colour', style: context.text.title),
+          Text(tr('Change colour'), style: context.text.title),
           const SizedBox(height: AppSpacing.xl),
           Wrap(
             spacing: AppSpacing.md,
@@ -221,7 +231,7 @@ class ColourPickerSheet extends StatelessWidget {
                 Semantics(
                   button: true,
                   selected: NoteColors.hexes[i] == selected,
-                  label: '${_names[i]} colour',
+                  label: tr('{v} colour', {'v': _names[i]}),
                   excludeSemantics: true,
                   child: FFPressable(
                     onTap: () => Navigator.of(context).pop<ColourChoice>((

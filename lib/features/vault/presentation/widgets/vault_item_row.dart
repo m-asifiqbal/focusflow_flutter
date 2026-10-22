@@ -14,6 +14,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -78,13 +79,13 @@ class VaultItemRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ff = context.ff;
     final r = entry.record;
-    final title = r.title.isEmpty ? 'Untitled' : r.title;
+    final title = r.title.isEmpty ? tr('Untitled') : r.title;
     final row = Semantics(
       container: true,
       button: true,
       label: [
         title,
-        if (r.isFavorite) 'favourite',
+        if (r.isFavorite) tr('favourite'),
         if (entry.subtitle.isNotEmpty) entry.subtitle,
         if (entry.badge != null) _badgeText(entry.badge!).toLowerCase(),
       ].join(', '),
@@ -158,7 +159,7 @@ class VaultItemRow extends ConsumerWidget {
               ],
               const SizedBox(width: VaultSizes.gapSm),
               _CopyButton(
-                label: 'Copy password for $title',
+                label: tr('Copy password for {title}', {'title': title}),
                 onTap: () => unawaited(copyVaultSecret(context, ref, r)),
               ),
             ],
@@ -179,11 +180,11 @@ class VaultItemRow extends ConsumerWidget {
 }
 
 String _badgeText(VaultBadge b) => switch (b) {
-  VaultBadge.strong => 'STRONG',
-  VaultBadge.fair => 'FAIR',
-  VaultBadge.weak => 'WEAK',
-  VaultBadge.reused => 'REUSED',
-  VaultBadge.breached => 'BREACHED',
+  VaultBadge.strong => tr('STRONG'),
+  VaultBadge.fair => tr('FAIR'),
+  VaultBadge.weak => tr('WEAK'),
+  VaultBadge.reused => tr('REUSED'),
+  VaultBadge.breached => tr('BREACHED'),
 };
 
 /// Small uppercase status pill.

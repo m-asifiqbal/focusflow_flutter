@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -33,11 +34,11 @@ class ModuleSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (title, section) = switch (module) {
-      'notes' => ('Notes', const NotesDefaultsSection()),
-      'tasks' => ('Tasks', const TasksDefaultsSection()),
-      'reminders' => ('Reminders', const RemindersDefaultsSection()),
-      'habits' => ('Habits', const HabitsDefaultsSection()),
-      _ => ('Module', null),
+      'notes' => (tr('Notes'), const NotesDefaultsSection()),
+      'tasks' => (tr('Tasks'), const TasksDefaultsSection()),
+      'reminders' => (tr('Reminders'), const RemindersDefaultsSection()),
+      'habits' => (tr('Habits'), const HabitsDefaultsSection()),
+      _ => (tr('Module'), null),
     };
     if (section == null) {
       return SettingsPage(
@@ -46,9 +47,9 @@ class ModuleSettingsScreen extends StatelessWidget {
           FFEmptyState.compact(
             colors: SettingsTints.slate,
             icon: FontAwesomeIcons.circleQuestion,
-            title: 'Nothing to set here',
-            body: 'This module has no settings page.',
-            ctaLabel: 'Back to Settings',
+            title: tr('Nothing to set here'),
+            body: tr('This module has no settings page.'),
+            ctaLabel: tr('Back to Settings'),
             ctaIcon: FontAwesomeIcons.arrowLeft,
             onCta: () => context.go(AppRoutes.settings),
           ),
@@ -60,7 +61,7 @@ class ModuleSettingsScreen extends StatelessWidget {
       children: [
         section,
         FFGroupedList(
-          label: 'Related',
+          label: tr('Related'),
           children: [
             if (module != 'notes')
               FFListRow(
@@ -68,7 +69,7 @@ class ModuleSettingsScreen extends StatelessWidget {
                   FontAwesomeIcons.solidBell,
                   ModuleStyle.reminders.colors,
                 ),
-                title: 'Notifications',
+                title: tr('Notifications'),
                 onTap: () => context.push(AppRoutes.settingsNotifications),
               ),
             FFListRow(
@@ -76,7 +77,7 @@ class ModuleSettingsScreen extends StatelessWidget {
                 FontAwesomeIcons.solidHandPointer,
                 SettingsTints.amber,
               ),
-              title: 'Gestures & swipe actions',
+              title: tr('Gestures & swipe actions'),
               onTap: () => context.push(AppRoutes.settingsGestures),
             ),
             if (module == 'notes' || module == 'tasks')
@@ -85,7 +86,7 @@ class ModuleSettingsScreen extends StatelessWidget {
                   FontAwesomeIcons.layerGroup,
                   SettingsTints.slate,
                 ),
-                title: 'Tags & folders',
+                title: tr('Tags & folders'),
                 onTap: () => context.push(AppRoutes.settingsTagsFolders),
               ),
           ],

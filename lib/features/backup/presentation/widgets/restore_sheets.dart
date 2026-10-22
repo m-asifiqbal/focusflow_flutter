@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/argon2_runner.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
@@ -76,11 +77,11 @@ class _PinSheetState extends State<_PinSheet> {
   void _submit() {
     final pin = _pin.text;
     if (pin.length < 4) {
-      setState(() => _error = 'Use at least 4 digits');
+      setState(() => _error = tr('Use at least 4 digits'));
       return;
     }
     if (widget.confirm && pin != _again.text) {
-      setState(() => _error = "The PINs don't match");
+      setState(() => _error = tr("The PINs don't match"));
       return;
     }
     Navigator.of(context).pop(pin);
@@ -108,7 +109,7 @@ class _PinSheetState extends State<_PinSheet> {
           obscureText: true,
           keyboardType: TextInputType.number,
           inputFormatters: digits,
-          decoration: _field('Backup PIN'),
+          decoration: _field(tr('Backup PIN')),
           onSubmitted: (_) => widget.confirm ? null : _submit(),
         ),
         if (widget.confirm) ...[
@@ -118,7 +119,7 @@ class _PinSheetState extends State<_PinSheet> {
             obscureText: true,
             keyboardType: TextInputType.number,
             inputFormatters: digits,
-            decoration: _field('Repeat PIN'),
+            decoration: _field(tr('Repeat PIN')),
             onSubmitted: (_) => _submit(),
           ),
         ],
@@ -130,7 +131,7 @@ class _PinSheetState extends State<_PinSheet> {
           ),
         ],
         const SizedBox(height: AppSpacing.xl),
-        FFPrimaryButton(label: 'Continue', onPressed: _submit),
+        FFPrimaryButton(label: tr('Continue'), onPressed: _submit),
       ],
     );
   }
@@ -157,23 +158,23 @@ class _PreviewSheet extends StatelessWidget {
     final text = context.text;
     final m = manifest;
     final rows = [
-      (ModuleStyle.notes, 'Notes', m.counts['notes'] ?? 0),
-      (ModuleStyle.tasks, 'Tasks', m.counts['tasks'] ?? 0),
-      (ModuleStyle.reminders, 'Reminders', m.counts['reminders'] ?? 0),
-      (ModuleStyle.habits, 'Habits', m.counts['habits'] ?? 0),
-      (ModuleStyle.vault, 'Vault', m.counts['vault_items'] ?? 0),
+      (ModuleStyle.notes, tr('Notes'), m.counts['notes'] ?? 0),
+      (ModuleStyle.tasks, tr('Tasks'), m.counts['tasks'] ?? 0),
+      (ModuleStyle.reminders, tr('Reminders'), m.counts['reminders'] ?? 0),
+      (ModuleStyle.habits, tr('Habits'), m.counts['habits'] ?? 0),
+      (ModuleStyle.vault, tr('Vault'), m.counts['vault_items'] ?? 0),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('Restore this backup?', style: text.title),
+        Text(tr('Restore this backup?'), style: text.title),
         const SizedBox(height: AppSpacing.xs),
         Text(
           [
             BackupLabels.when(m.createdAt.toLocal(), now),
             if (m.deviceName.isNotEmpty) m.deviceName,
-            if (m.isEncrypted) 'Encrypted',
+            if (m.isEncrypted) tr('Encrypted'),
           ].join(' · '),
           style: text.bodySmall,
         ),
@@ -197,29 +198,30 @@ class _PreviewSheet extends StatelessWidget {
                   colors: BackupTints.settings,
                   size: AppSizes.iconTileSm,
                 ),
-                title: 'App settings',
-                value: 'Included',
+                title: tr('App settings'),
+                value: tr('Included'),
               ),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
         FFPrimaryButton(
-          label: 'Merge with this phone',
+          label: tr('Merge with this phone'),
           icon: FontAwesomeIcons.codeMerge,
           onPressed: () => Navigator.of(context).pop(RestoreMode.merge),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           m.hasSettings
-              ? 'Adds what is missing; the newest edit of each item wins. '
-                    'Settings you changed on this phone stay.'
-              : 'Adds what is missing; the newest edit of each item wins.',
+              ? tr(
+                  'Adds what is missing; the newest edit of each item wins. Settings you changed on this phone stay.',
+                )
+              : tr('Adds what is missing; the newest edit of each item wins.'),
           textAlign: TextAlign.center,
           style: text.meta.copyWith(fontWeight: FontWeight.w400),
         ),
         const SizedBox(height: AppSpacing.md),
         FFSoftDangerButton(
-          label: 'Replace everything',
+          label: tr('Replace everything'),
           icon: FontAwesomeIcons.rotateLeft,
           onPressed: () => Navigator.of(context).pop(RestoreMode.replace),
         ),
@@ -243,16 +245,18 @@ Future<String?> runRestoreFlow(
   );
   if (mode == null || !context.mounted) return null;
   if (mode == RestoreMode.replace) {
-    final withSettings = archive.manifest.hasSettings
-        ? ' Settings are restored too.'
-        : '';
     final ok = await showFFConfirm(
       context,
-      title: 'Replace all data?',
-      message:
-          "Everything on this phone is replaced by the backup. Items that "
-          "aren't in the backup are removed.$withSettings",
-      confirmLabel: 'Replace',
+      title: tr('Replace all data?'),
+      // Two whole sentences (not a sentence + a tacked-on fragment).
+      message: archive.manifest.hasSettings
+          ? tr(
+              'Everything on this phone is replaced by the backup. Items that aren\'t in the backup are removed. Settings are restored too.',
+            )
+          : tr(
+              'Everything on this phone is replaced by the backup. Items that aren\'t in the backup are removed.',
+            ),
+      confirmLabel: tr('Replace'),
       destructive: true,
       icon: FontAwesomeIcons.triangleExclamation,
     );
@@ -266,8 +270,10 @@ Future<String?> runRestoreFlow(
     if (archive.manifest.isEncrypted) {
       pin = await showBackupPinSheet(
         context,
-        title: 'Enter backup PIN',
-        message: 'This backup is encrypted. Enter the PIN it was made with.',
+        title: tr('Enter backup PIN'),
+        message: tr(
+          'This backup is encrypted. Enter the PIN it was made with.',
+        ),
         error: error,
       );
       if (pin == null || !context.mounted) return null;
@@ -276,9 +282,9 @@ Future<String?> runRestoreFlow(
     showFFDialog<void>(
       context,
       barrierDismissible: false,
-      builder: (_) => const PopScope(
+      builder: (_) => PopScope(
         canPop: false,
-        child: FFDialog(content: FFLoadingView(message: 'Restoring…')),
+        child: FFDialog(content: FFLoadingView(message: tr('Restoring…'))),
       ),
     );
     try {
@@ -287,14 +293,15 @@ Future<String?> runRestoreFlow(
       return restoreSummary(r);
     } on WrongBackupPin {
       nav.pop();
-      error = 'Wrong PIN. Try again.';
+      error = tr('Wrong PIN. Try again.');
     } on Argon2Failure {
       // The PIN could not even be checked: this phone ran out of memory or
       // was too slow for the backup's key settings. Nothing was changed.
       nav.pop();
-      error =
-          "This phone couldn't check the PIN (low memory). Close other apps "
-          'and try again.';
+      error = tr(
+        "This phone couldn't check the PIN (low memory). Close other apps "
+        'and try again.',
+      );
     } on FormatException catch (e) {
       // Damaged / newer-version backups fail before anything changes.
       nav.pop();
@@ -305,7 +312,7 @@ Future<String?> runRestoreFlow(
     } on Object {
       // Everything else fails before writing (PIN / file checks).
       nav.pop();
-      return "Restore failed. Your data wasn't changed.";
+      return tr("Restore failed. Your data wasn't changed.");
     }
   }
 }
@@ -318,17 +325,27 @@ String restoreSummary(RestoreResult r) {
   final rep = r.report;
   final parts = <String>[
     if (r.mode == RestoreMode.replace)
-      'Restored ${rep.added} ${rep.added == 1 ? 'item' : 'items'}'
+      tr('Restored {count, plural, one {# item} other {# items}}', {
+        'count': rep.added,
+      })
     else
-      'Restore done · ${rep.added} added · ${rep.updated} updated',
-    if (r.settingsRestored) 'Settings restored',
+      tr('Restore done · {added} added · {updated} updated', {
+        'added': rep.added,
+        'updated': rep.updated,
+      }),
+    if (r.settingsRestored) tr('Settings restored'),
     if (!r.vaultRestored)
-      "Vault items weren't restored — this phone's vault uses a different "
-          'PIN',
+      tr(
+        "Vault items weren't restored — this phone's vault uses a different "
+        'PIN',
+      ),
     if (r.filesMissing > 0)
-      '${r.filesMissing} ${r.filesMissing == 1 ? 'attachment is' : 'attachments are'} '
-          'missing',
-    if (r.settingsFailed) "Settings couldn't be restored",
+      tr(
+        '{count, plural, one {# attachment is} other {# attachments are}} '
+        'missing',
+        {'count': r.filesMissing},
+      ),
+    if (r.settingsFailed) tr("Settings couldn't be restored"),
   ];
   return parts.join(' · ');
 }
@@ -336,6 +353,8 @@ String restoreSummary(RestoreResult r) {
 /// Exactly what a failed restore left behind (see RestoreFailed).
 @visibleForTesting
 String restoreFailedMessage(RestoreFailed e) => e.vaultKeyChanged
-    ? "Restore failed — your items weren't changed, but your vault now "
-          "opens with the backup's PIN."
-    : "Restore failed. Your data wasn't changed.";
+    ? tr(
+        "Restore failed — your items weren't changed, but your vault now "
+        "opens with the backup's PIN.",
+      )
+    : tr("Restore failed. Your data wasn't changed.");

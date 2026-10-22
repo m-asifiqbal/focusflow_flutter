@@ -18,6 +18,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -97,7 +98,7 @@ class _VaultNewPinPanelState extends ConsumerState<VaultNewPinPanel> {
           Semantics(
             header: true,
             child: Text(
-              confirming ? 'Confirm new PIN' : 'Set a new PIN',
+              confirming ? tr('Confirm new PIN') : tr('Set a new PIN'),
               textAlign: TextAlign.center,
               style: context.text.sectionTitle.copyWith(color: ff.vaultInk),
             ),
@@ -105,9 +106,10 @@ class _VaultNewPinPanelState extends ConsumerState<VaultNewPinPanel> {
           const SizedBox(height: AppSpacing.sm),
           Text(
             confirming
-                ? 'Enter the same 6 digits again.'
-                : 'Your vault was opened with the recovery code. Choose a '
-                      'new 6-digit master PIN to finish.',
+                ? tr('Enter the same 6 digits again.')
+                : tr(
+                    'Your vault was opened with the recovery code. Choose a new 6-digit master PIN to finish.',
+                  ),
             textAlign: TextAlign.center,
             style: context.text.body.copyWith(color: ff.vaultSubtitle),
           ),
@@ -120,7 +122,7 @@ class _VaultNewPinPanelState extends ConsumerState<VaultNewPinPanel> {
           const SizedBox(height: AppSpacing.sm),
           if (confirming)
             FFTextButton(
-              label: 'Start over',
+              label: tr('Start over'),
               onPressed: () =>
                   ref.read(vaultPinPadProvider.notifier).restartSetup(),
             )
@@ -175,14 +177,19 @@ class _VaultNewRecoveryCodeState extends ConsumerState<VaultNewRecoveryCode> {
     if (!mounted) return;
     showFFToast(
       context,
-      ok ? 'New PIN and recovery code saved' : "Couldn't save the new code",
+      ok
+          ? tr('New PIN and recovery code saved')
+          : tr("Couldn't save the new code"),
     );
     widget.onFinished();
   }
 
   void _keepOld() {
     ref.read(vaultSessionProvider.notifier).discardRecoveryCode();
-    showFFToast(context, 'New PIN saved · your old recovery code still works');
+    showFFToast(
+      context,
+      tr('New PIN saved · your old recovery code still works'),
+    );
     widget.onFinished();
   }
 
@@ -196,15 +203,16 @@ class _VaultNewRecoveryCodeState extends ConsumerState<VaultNewRecoveryCode> {
         Semantics(
           header: true,
           child: Text(
-            'Your new recovery code',
+            tr('Your new recovery code'),
             textAlign: TextAlign.center,
             style: context.text.sectionTitle.copyWith(color: ff.vaultInk),
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Write it down or print a new Recovery Kit. Once you confirm, the '
-          'code you just used stops working.',
+          tr(
+            'Write it down or print a new Recovery Kit. Once you confirm, the code you just used stops working.',
+          ),
           textAlign: TextAlign.center,
           style: context.text.body.copyWith(color: ff.vaultSubtitle),
         ),
@@ -219,24 +227,24 @@ class _VaultNewRecoveryCodeState extends ConsumerState<VaultNewRecoveryCode> {
         ),
         const SizedBox(height: AppSpacing.md),
         FFSecondaryButton(
-          label: 'Copy code',
+          label: tr('Copy code'),
           icon: FontAwesomeIcons.solidCopy,
           onPressed: () async {
             await ref
                 .read(secureClipboardProvider)
                 .copy(widget.code, clearAfter: const Duration(seconds: 60));
             if (context.mounted) {
-              showFFToast(context, 'Recovery code copied · clears in 60s');
+              showFFToast(context, tr('Recovery code copied · clears in 60s'));
             }
           },
         ),
         const SizedBox(height: AppSpacing.sm),
         FFPrimaryButton(
-          label: "I've saved it",
+          label: tr('I\'ve saved it'),
           loading: _busy,
           onPressed: _busy ? null : _commit,
         ),
-        FFTextButton(label: 'Keep my old code', onPressed: _keepOld),
+        FFTextButton(label: tr('Keep my old code'), onPressed: _keepOld),
       ],
     );
   }

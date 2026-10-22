@@ -116,6 +116,9 @@ flutter:
     - assets/images/
     - assets/wordlists/
     - assets/licenses/
+    # Translation packs (core/l10n): text only; unused until the user adds the
+    # language in Settings › Language. en.json is the catalogue (tool/l10n).
+    - assets/l10n/
     # Reminder tones (tool/sounds/generate_sounds.py); iOS copies them to
     # Library/Sounds at start-up (Android uses res/raw copies).
     - assets/sounds/

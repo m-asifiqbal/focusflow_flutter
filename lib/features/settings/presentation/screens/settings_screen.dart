@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -52,7 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // Toolbar stays put; only the settings list scrolls beneath it.
       body: Column(
         children: [
-          const FFLargeHeader(title: 'Settings', fitTitle: true),
+          FFLargeHeader(title: tr('Settings'), fitTitle: true),
           Expanded(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
@@ -73,7 +74,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     child: FFSearchField(
                       controller: _search,
-                      hint: 'Search settings…',
+                      hint: tr('Search settings…'),
                       onChanged: ref.read(settingsQueryProvider.notifier).set,
                       onClear: () {
                         _search.clear();
@@ -111,7 +112,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ],
                               const SizedBox(height: AppSpacing.xxl),
                               Text(
-                                'Made with care · Your data stays yours',
+                                tr('Made with care · Your data stays yours'),
                                 textAlign: TextAlign.center,
                                 style: context.text.meta.copyWith(
                                   color: context.ff.inkFaint,
@@ -147,9 +148,9 @@ class _SignOutButton extends StatelessWidget {
       ),
       radius: AppRadii.row,
       onTap: onPressed,
-      semanticLabel: 'Sign out',
+      semanticLabel: tr('Sign out'),
       child: Text(
-        'Sign out',
+        tr('Sign out'),
         textAlign: TextAlign.center,
         style: context.text.button.copyWith(color: ff.danger),
       ),

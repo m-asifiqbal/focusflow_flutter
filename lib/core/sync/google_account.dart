@@ -19,6 +19,7 @@ library;
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -128,7 +129,7 @@ class PluginGoogleAuthGateway implements GoogleAuthGateway {
   @override
   Future<GoogleProfile?> signIn() async {
     if (!config.isConfigured) {
-      throw const CloudAuthException('Google sign-in is not set up');
+      throw CloudAuthException(tr('Google sign-in is not set up'));
     }
     await _ensureInit();
     try {

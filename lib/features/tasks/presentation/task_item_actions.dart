@@ -14,6 +14,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_summary.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -37,7 +38,7 @@ Future<ModuleItemActions> taskItemActions(
         icon: task.isCompleted
             ? FontAwesomeIcons.arrowRotateLeft
             : FontAwesomeIcons.solidCircleCheck,
-        label: task.isCompleted ? 'Mark as not done' : 'Complete',
+        label: task.isCompleted ? tr('Mark as not done') : tr('Complete'),
         colors: ModuleStyle.tasks.colors,
         onTap: () {
           if (!context.mounted) return;
@@ -50,18 +51,20 @@ Future<ModuleItemActions> taskItemActions(
       ),
       FFActionItem(
         icon: FontAwesomeIcons.calendarDays,
-        label: task.dueDate == null ? 'Set due date' : 'Change due date',
+        label: task.dueDate == null
+            ? tr('Set due date')
+            : tr('Change due date'),
         colors: TagPalette.work,
         onTap: () {
           if (context.mounted) {
-            rescheduleTasks(context, ref, [task], title: 'Due date');
+            rescheduleTasks(context, ref, [task], title: tr('Due date'));
           }
         },
       ),
       if (!task.isCompleted)
         FFActionItem(
           icon: FontAwesomeIcons.stopwatch,
-          label: 'Focus on this task',
+          label: tr('Focus on this task'),
           colors: ModuleStyle.notes.colors,
           onTap: () {
             if (context.mounted) {
@@ -72,7 +75,7 @@ Future<ModuleItemActions> taskItemActions(
         ),
       FFActionItem(
         icon: FontAwesomeIcons.solidFlag,
-        label: 'Priority',
+        label: tr('Priority'),
         colors: priorityTint(task.priority),
         onTap: () {
           if (context.mounted) {

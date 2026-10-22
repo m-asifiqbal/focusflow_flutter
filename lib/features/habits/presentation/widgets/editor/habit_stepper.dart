@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -44,7 +45,9 @@ class HabitStepper extends StatelessWidget {
       children: [
         _StepButton(
           icon: FontAwesomeIcons.minus,
-          label: 'Decrease $semanticLabel',
+          label: tr('Decrease {semanticLabel}', {
+            'semanticLabel': semanticLabel,
+          }),
           onTap: change != null && value > min ? () => change(value - 1) : null,
         ),
         ConstrainedBox(
@@ -65,7 +68,9 @@ class HabitStepper extends StatelessWidget {
         ),
         _StepButton(
           icon: FontAwesomeIcons.plus,
-          label: 'Increase $semanticLabel',
+          label: tr('Increase {semanticLabel}', {
+            'semanticLabel': semanticLabel,
+          }),
           onTap: change != null && value < max ? () => change(value + 1) : null,
         ),
       ],

@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -57,18 +58,26 @@ List<ReminderPreset> reminderPresets(DateTime now) {
   final weekday = now.weekday; // Mon = 1 … Sun = 7
   return [
     if (DateUtilsX.isSameDay(later, now) && later.hour <= 21)
-      (label: 'Later today', icon: FontAwesomeIcons.clock, at: later),
+      (label: tr('Later today'), icon: FontAwesomeIcons.clock, at: later),
     if (now.hour < 17)
-      (label: 'This evening', icon: FontAwesomeIcons.solidMoon, at: at(0, 18)),
-    (label: 'Tomorrow morning', icon: FontAwesomeIcons.solidSun, at: at(1, 9)),
+      (
+        label: tr('This evening'),
+        icon: FontAwesomeIcons.solidMoon,
+        at: at(0, 18),
+      ),
+    (
+      label: tr('Tomorrow morning'),
+      icon: FontAwesomeIcons.solidSun,
+      at: at(1, 9),
+    ),
     if (weekday < DateTime.friday)
       (
-        label: 'This weekend',
+        label: tr('This weekend'),
         icon: FontAwesomeIcons.mugHot,
         at: at(DateTime.saturday - weekday, 10),
       ),
     (
-      label: 'Next week',
+      label: tr('Next week'),
       icon: FontAwesomeIcons.calendarWeek,
       at: at(8 - weekday, 9),
     ),
@@ -79,8 +88,8 @@ List<ReminderPreset> reminderPresets(DateTime now) {
 String reminderWhenLabel(DateTime at, DateTime now, {bool use24h = false}) {
   final diff = DateUtilsX.daysBetween(now, at);
   final day = switch (diff) {
-    0 => 'Today',
-    1 => 'Tomorrow',
+    0 => tr('Today'),
+    1 => tr('Tomorrow'),
     _ when diff > 1 && diff < 7 => DateFormats.of('EEE').format(at),
     _ => DateFormats.of('MMM d').format(at),
   };
@@ -131,12 +140,18 @@ class ReminderQuickSheet extends StatelessWidget {
         children: [
           Semantics(
             header: true,
-            child: Text('Set reminder', style: context.text.title),
+            child: Text(tr('Set reminder'), style: context.text.title),
           ),
           if (when != null) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Currently ${reminderWhenLabel(when, now, use24h: use24h)}',
+              tr('Currently {reminderWhenLabel}', {
+                'reminderWhenLabel': reminderWhenLabel(
+                  when,
+                  now,
+                  use24h: use24h,
+                ),
+              }),
               style: context.text.meta.copyWith(color: ff.inkMuted),
             ),
           ],
@@ -157,20 +172,20 @@ class ReminderQuickSheet extends StatelessWidget {
             children: [
               row(
                 FontAwesomeIcons.calendarDays,
-                'Pick date & time',
+                tr('Pick date & time'),
                 tint: TagPalette.work,
                 choice: const ReminderPickCustom(),
               ),
               row(
                 FontAwesomeIcons.sliders,
-                'More options',
+                tr('More options'),
                 tint: ActionTints.lock,
                 choice: const ReminderMoreOptions(),
               ),
               if (when != null)
                 row(
                   FontAwesomeIcons.bellSlash,
-                  'Remove reminder',
+                  tr('Remove reminder'),
                   tint: TagPalette.high,
                   destructive: true,
                   choice: const ReminderRemove(),

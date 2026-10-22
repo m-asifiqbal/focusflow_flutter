@@ -16,8 +16,13 @@
 /// ============================================================
 library;
 
+// A nullable preset label resolves to tr() when read (it must follow the
+// language), and a private field cannot be a named initializing formal.
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -34,45 +39,61 @@ enum _Tone { custom, archive, delete, complete, pin }
 class FFSwipeAction {
   const FFSwipeAction({
     required this.icon,
-    required this.label,
+    required String label,
     required this.onTap,
     required Color this.color,
-  }) : _tone = _Tone.custom;
+  }) : _label = label,
+       _tone = _Tone.custom;
 
   /// Slate "Archive".
   const FFSwipeAction.archive({
     required this.onTap,
-    this.label = 'Archive',
+    String? label,
     this.icon = FontAwesomeIcons.boxArchive,
   }) : color = null,
+       _label = label,
        _tone = _Tone.archive;
 
   /// Rose "Delete".
   const FFSwipeAction.delete({
     required this.onTap,
-    this.label = 'Delete',
+    String? label,
     this.icon = FontAwesomeIcons.trashCan,
   }) : color = null,
+       _label = label,
        _tone = _Tone.delete;
 
   /// Primary "Complete".
   const FFSwipeAction.complete({
     required this.onTap,
-    this.label = 'Complete',
+    String? label,
     this.icon = FontAwesomeIcons.check,
   }) : color = null,
+       _label = label,
        _tone = _Tone.complete;
 
   /// Amber "Pin".
   const FFSwipeAction.pin({
     required this.onTap,
-    this.label = 'Pin',
+    String? label,
     this.icon = FontAwesomeIcons.thumbtack,
   }) : color = null,
+       _label = label,
        _tone = _Tone.pin;
 
   final IconData icon;
-  final String label;
+  final String? _label;
+
+  /// The given label, else the preset's own text in the active language.
+  String get label =>
+      _label ??
+      switch (_tone) {
+        _Tone.archive => tr('Archive'),
+        _Tone.delete => tr('Delete'),
+        _Tone.complete => tr('Complete'),
+        _Tone.pin => tr('Pin'),
+        _Tone.custom => '',
+      };
   final VoidCallback onTap;
   final Color? color;
   final _Tone _tone;

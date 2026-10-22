@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/crypto/password_generator.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 
 @immutable
 class VaultGeneratorState {
@@ -68,15 +69,22 @@ class VaultGeneratorState {
 
 /// Meter level (1–4 bars) and label for an entropy figure.
 enum GeneratorStrength {
-  weak('Weak', 1),
-  fair('Fair', 2),
-  strong('Strong', 3),
-  veryStrong('Very strong', 4);
+  weak(1),
+  fair(2),
+  strong(3),
+  veryStrong(4);
 
-  const GeneratorStrength(this.label, this.bars);
+  const GeneratorStrength(this.bars);
 
-  final String label;
   final int bars;
+
+  /// Display name (a getter, so it follows the active language).
+  String get label => switch (this) {
+    weak => tr('Weak'),
+    fair => tr('Fair'),
+    strong => tr('Strong'),
+    veryStrong => tr('Very strong'),
+  };
 
   /// < 40 bits weak · < 60 fair · < 80 strong · ≥ 80 very strong
   /// (offline-attack thresholds for a random secret).

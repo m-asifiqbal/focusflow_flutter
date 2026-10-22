@@ -12,6 +12,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
@@ -43,12 +44,12 @@ class VaultProtectionCard extends ConsumerWidget {
         _Row(
           child: Row(
             children: [
-              Expanded(child: Text('Breach monitoring', style: labelStyle)),
+              Expanded(child: Text(tr('Breach monitoring'), style: labelStyle)),
               const SizedBox(width: AppSpacing.md),
               FFSwitch(
                 vault: true,
                 value: monitoring,
-                semanticLabel: 'Breach monitoring',
+                semanticLabel: tr('Breach monitoring'),
                 onChanged: (on) =>
                     unawaited(setBreachMonitoring(context, ref, on)),
               ),
@@ -60,7 +61,7 @@ class VaultProtectionCard extends ConsumerWidget {
             child: MergeSemantics(
               child: Row(
                 children: [
-                  Expanded(child: Text('2FA coverage', style: labelStyle)),
+                  Expanded(child: Text(tr('2FA coverage'), style: labelStyle)),
                   const SizedBox(width: AppSpacing.md),
                   Text(
                     '${report.loginsWithTotp} / ${report.logins}',

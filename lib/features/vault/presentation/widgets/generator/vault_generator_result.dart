@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/crypto/password_generator.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -64,8 +65,10 @@ class VaultGeneratorResult extends StatelessWidget {
     };
     final caption = v == null
         ? ''
-        : '${strength!.label.toUpperCase()} · '
-              '${v.entropyBits.round()} bits entropy';
+        : tr('{label} · {bits} bits entropy', {
+            'label': strength!.label.toUpperCase(),
+            'bits': v.entropyBits.round(),
+          });
     return Container(
       padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.xxl,
@@ -91,7 +94,11 @@ class VaultGeneratorResult extends StatelessWidget {
                     height: VaultType.title,
                   )
                 : Semantics(
-                    label: 'Generated ${v.mode.name}',
+                    label: switch (v.mode) {
+                      GeneratorMode.password => tr('Generated password'),
+                      GeneratorMode.passphrase => tr('Generated passphrase'),
+                      GeneratorMode.pin => tr('Generated pin'),
+                    },
                     value: v.value,
                     child: ExcludeSemantics(
                       child: VaultSecretText(
@@ -153,7 +160,7 @@ class VaultGeneratorResult extends StatelessWidget {
             children: [
               Expanded(
                 child: _CardButton(
-                  label: 'Regenerate',
+                  label: tr('Regenerate'),
                   icon: FontAwesomeIcons.arrowsRotate,
                   onTap: onRegenerate,
                 ),
@@ -161,7 +168,7 @@ class VaultGeneratorResult extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _CardButton(
-                  label: 'Copy',
+                  label: tr('Copy'),
                   icon: FontAwesomeIcons.solidCopy,
                   onTap: onCopy,
                   primary: true,

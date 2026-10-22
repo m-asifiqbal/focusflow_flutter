@@ -15,6 +15,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/constants/app_info.dart';
+import 'package:focusflow/core/l10n/tr.dart';
+import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/google_account.dart';
@@ -52,22 +54,13 @@ Future<void> runRootAction(
   final editor = ref.read(settingsEditorProvider);
   switch (action) {
     case SettingsRootAction.language:
-      final c = await showNotificationOptionSheet<String>(
-        context,
-        title: 'Language',
-        subtitle: 'More languages are coming in a future update.',
-        selected: s.languageCode,
-        options: [
-          for (final e in SettingsLabels.languages.entries)
-            NotificationOption(value: e.key, label: e.value),
-        ],
-      );
-      if (c?.value != null) await editor.setLanguage(c!.value!);
+      // Its own page: English plus the packs the user adds (core/l10n).
+      await context.push(AppRoutes.settingsLanguage);
     case SettingsRootAction.startScreen:
       final c = await showNotificationOptionSheet<StartScreen>(
         context,
-        title: 'Start screen',
-        subtitle: 'The tab FocusFlow opens on.',
+        title: tr('Start screen'),
+        subtitle: tr('The tab FocusFlow opens on.'),
         selected: s.startScreen,
         options: [
           for (final v in StartScreen.values)
@@ -78,8 +71,8 @@ Future<void> runRootAction(
     case SettingsRootAction.weekStart:
       final c = await showNotificationOptionSheet<int>(
         context,
-        title: 'Week starts on',
-        subtitle: 'Used by the calendar, week strips, habits and insights.',
+        title: tr('Week starts on'),
+        subtitle: tr('Used by the calendar, week strips, habits and insights.'),
         selected: s.weekStartsOn,
         options: [
           for (final d in const [
@@ -94,15 +87,19 @@ Future<void> runRootAction(
     case SettingsRootAction.dateTimeFormat:
       final c = await showNotificationOptionSheet<bool>(
         context,
-        title: 'Date & time format',
+        title: tr('Date & time format'),
         selected: s.use24HourTime,
-        options: const [
+        options: [
           NotificationOption(
             value: false,
-            label: '12-hour',
-            subtitle: '9:41 PM',
+            label: tr('12-hour'),
+            subtitle: tr('9:41 PM'),
           ),
-          NotificationOption(value: true, label: '24-hour', subtitle: '21:41'),
+          NotificationOption(
+            value: true,
+            label: tr('24-hour'),
+            subtitle: '21:41',
+          ),
         ],
       );
       if (c?.value != null) await editor.setUse24Hour(c!.value!);
@@ -112,8 +109,8 @@ Future<void> runRootAction(
         showFFToast(
           context,
           s.hideInAppSwitcher
-              ? 'Content shown in the app switcher'
-              : 'Content hidden in the app switcher',
+              ? tr('Content shown in the app switcher')
+              : tr('Content hidden in the app switcher'),
           icon: FontAwesomeIcons.solidEyeSlash,
         );
       }
@@ -125,7 +122,9 @@ Future<void> runRootAction(
     case SettingsRootAction.rate:
       showFFToast(
         context,
-        'Thank you! Rating opens once ${AppInfo.name} is in the store.',
+        tr('Thank you! Rating opens once {name} is in the store.', {
+          'name': AppInfo.name,
+        }),
         icon: FontAwesomeIcons.solidStar,
       );
   }
@@ -146,7 +145,9 @@ Future<void> _mail(BuildContext context, {required String subject}) async {
   if (!opened && context.mounted) {
     showFFToast(
       context,
-      'No mail app found. Write to ${AppInfo.supportEmail}',
+      tr('No mail app found. Write to {supportEmail}', {
+        'supportEmail': AppInfo.supportEmail,
+      }),
       icon: FontAwesomeIcons.solidEnvelope,
     );
   }
@@ -156,18 +157,22 @@ Future<void> _mail(BuildContext context, {required String subject}) async {
 Future<void> confirmSignOut(BuildContext context, WidgetRef ref) async {
   final ok = await showFFConfirm(
     context,
-    title: 'Sign out?',
-    message:
-        'Your notes, tasks and vault stay on this device. Backups to Google '
-        'Drive pause until you sign in again.',
-    confirmLabel: 'Sign out',
+    title: tr('Sign out?'),
+    message: tr(
+      'Your notes, tasks and vault stay on this device. Backups to Google Drive pause until you sign in again.',
+    ),
+    confirmLabel: tr('Sign out'),
     destructive: true,
     icon: FontAwesomeIcons.rightFromBracket,
   );
   if (!ok) return;
   await ref.read(cloudAccountControllerProvider).signOut();
   if (context.mounted) {
-    showFFToast(context, 'Signed out', icon: FontAwesomeIcons.solidCircleCheck);
+    showFFToast(
+      context,
+      tr('Signed out'),
+      icon: FontAwesomeIcons.solidCircleCheck,
+    );
   }
 }
 
@@ -178,7 +183,7 @@ Future<void> signInWithGoogle(BuildContext context, WidgetRef ref) async {
   if (!controller.googleAvailable) {
     showFFToast(
       context,
-      'Google Drive is not set up in this build',
+      tr('Google Drive is not set up in this build'),
       icon: FontAwesomeIcons.circleInfo,
     );
     return;
@@ -189,7 +194,7 @@ Future<void> signInWithGoogle(BuildContext context, WidgetRef ref) async {
     if (context.mounted) showFFToast(context, e.message);
   } on Object {
     if (context.mounted) {
-      showFFToast(context, "Couldn't sign in. Check your connection.");
+      showFFToast(context, tr("Couldn't sign in. Check your connection."));
     }
   }
 }

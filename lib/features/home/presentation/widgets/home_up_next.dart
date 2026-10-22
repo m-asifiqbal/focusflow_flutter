@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -61,9 +62,11 @@ class HomeUpNextSection extends ConsumerWidget {
           : HomeEmptyCard(
               colors: style.colors,
               icon: FontAwesomeIcons.solidBell,
-              title: isToday ? 'Nothing coming up' : 'No reminders this day',
-              body: 'Set a reminder so nothing slips through.',
-              ctaLabel: 'Add reminder',
+              title: isToday
+                  ? tr('Nothing coming up')
+                  : tr('No reminders this day'),
+              body: tr('Set a reminder so nothing slips through.'),
+              ctaLabel: tr('Add reminder'),
               onCta: () => context.push(
                 AppRoutes.newReminder(
                   at: isToday ? null : DateUtilsX.atMinutes(day, 9 * 60),
@@ -76,9 +79,9 @@ class HomeUpNextSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FFSectionHeader(
-          title: 'Up Next',
+          title: tr('Up Next'),
           trailing: HomeSectionLink(
-            'All Reminders',
+            tr('All Reminders'),
             onPressed: () => context.push(AppRoutes.reminders),
           ),
         ),
@@ -114,7 +117,7 @@ class _UpNextCard extends ConsumerWidget {
     final meta =
         '${HomeRules.relative(occurrence.at, now)} · '
         '${DateUtilsX.time(occurrence.at, use24h: use24h)}';
-    final title = r.title.trim().isEmpty ? 'Reminder' : r.title.trim();
+    final title = r.title.trim().isEmpty ? tr('Reminder') : r.title.trim();
 
     // Light: the module tint over white (not over the mint canvas) with a
     // hairline in the module colour, as in the mockup.
@@ -206,7 +209,7 @@ class _SnoozePill extends StatelessWidget {
     final ff = context.ff;
     return FFPressable(
       onTap: onTap,
-      semanticLabel: 'Snooze for $minutes minutes',
+      semanticLabel: tr('Snooze for {minutes} minutes', {'minutes': minutes}),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: AppSizes.minTap),
         child: Center(
@@ -222,7 +225,7 @@ class _SnoozePill extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.pill),
             ),
             child: Text(
-              'Snooze',
+              tr('Snooze'),
               style: context.text.buttonSmall.copyWith(
                 fontSize: HomeDimens.snoozeText,
                 color: color,

@@ -10,7 +10,12 @@
 /// ============================================================
 library;
 
+// A nullable preset label resolves to tr() when read (it must follow the
+// language), and a private field cannot be a named initializing formal.
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/widgets/ff_buttons.dart';
@@ -207,16 +212,19 @@ class FFBackButton extends StatelessWidget {
   const FFBackButton({
     this.onPressed,
     this.label,
-    this.semanticLabel = 'Back',
+    String? semanticLabel,
     this.dark = false,
     super.key,
-  });
+  }) : _semanticLabel = semanticLabel;
 
   final VoidCallback? onPressed;
 
   /// Previous screen's title ("Settings"); null = round chevron button.
   final String? label;
-  final String semanticLabel;
+  final String? _semanticLabel;
+
+  /// The given label, else "Back" in the active language.
+  String get semanticLabel => _semanticLabel ?? tr('Back');
 
   /// Vault glass variant of the round button.
   final bool dark;
@@ -242,7 +250,10 @@ class FFBackButton extends StatelessWidget {
       label: label!,
       icon: chevron,
       onPressed: tap,
-      semanticLabel: '$semanticLabel to $label',
+      semanticLabel: tr('{semanticLabel} to {label}', {
+        'semanticLabel': semanticLabel,
+        'label': label,
+      }),
       padding: EdgeInsetsDirectional.zero,
       style: context.text.buttonSmall.copyWith(
         fontSize: 17,
