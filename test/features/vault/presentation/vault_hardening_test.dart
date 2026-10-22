@@ -232,6 +232,50 @@ void main() {
       expect(await c.setBiometrics(true), isTrue);
       expect(h.read(settingsProvider).vaultBiometrics, isTrue);
     });
+
+    test('unlockWithPin does not auto-enroll biometrics when copy is missing', () async {
+      final gated = FakeOsGatedVaultStorage(writePrompts: true);
+      await create(
+        biometric: gated,
+        settings: (s) => s.copyWith(vaultBiometrics: true),
+      );
+      await setUpVault();
+      // Drop biometric copy to simulate recovered database without device-local biometric key
+      await keys().disableBiometrics();
+      await session().lock();
+      await session().refresh();
+      expect(await keys().hasBiometricCopy(), isFalse);
+
+      // PIN unlock should succeed immediately without prompting or writing biometric copy
+      expect(await session().unlockWithPin('582914'), UnlockResult.success);
+      expect(state().isUnlocked, isTrue);
+      expect(gated.values, isEmpty, reason: 'PIN unlock should never auto-enroll biometrics');
+    });
+
+    test('concurrent biometric and PIN unlock preserves active session key', () async {
+      final gated = FakeOsGatedVaultStorage();
+      await create(biometric: gated);
+      await setUpVault();
+      await session().lock();
+
+      // Start biometric unlock but do not await immediately
+      final bioUnlockFuture = session().unlockWithBiometrics();
+
+      // User enters PIN while biometrics is in-flight
+      final pinResult = await session().unlockWithPin('582914');
+      expect(pinResult, UnlockResult.success);
+      final activeKey = state().requireKey();
+      expect(activeKey.isDestroyed, isFalse);
+
+      // Complete biometrics
+      final bioResult = await bioUnlockFuture;
+      expect(bioResult, UnlockResult.success);
+
+      // Active key must NOT have been destroyed or corrupted
+      expect(state().isUnlocked, isTrue);
+      expect(state().requireKey().isDestroyed, isFalse);
+      expect(identical(state().requireKey(), activeKey), isTrue);
+    });
   });
 
   group('PIN attempts', () {

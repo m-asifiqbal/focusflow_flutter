@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui' show Tristate;
 
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/router/app_routes.dart';

@@ -174,4 +174,19 @@ void main() {
       );
     },
   );
+
+  test(
+    'acceptKeyEnvelope with matching keyId locks and refreshes the vault session',
+    () async {
+      await a.setUpVault();
+      expect(a.h.read(vaultSessionProvider).isUnlocked, isTrue);
+      final env = (await bridgeOf(a).exportKeyEnvelope())!;
+      expect(await bridgeOf(a).acceptKeyEnvelope(env), isTrue);
+      // Restoring a backup with matching keyId must lock session so restored state is clean
+      expect(a.h.read(vaultSessionProvider).isUnlocked, isFalse);
+      expect(a.h.read(vaultSessionProvider).phase, VaultPhase.locked);
+      expect(await a.session.unlockWithPin('123456'), UnlockResult.success);
+    },
+  );
 }
+

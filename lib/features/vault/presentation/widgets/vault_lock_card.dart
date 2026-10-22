@@ -65,11 +65,14 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
     await session.ready;
     if (!mounted) return;
     final s = ref.read(vaultSessionProvider);
-    if (!s.isUnlocked && s.biometricsReady) await _biometrics();
+    final pinDigits = ref.read(vaultPinPadProvider).length;
+    if (!s.isUnlocked && s.biometricsReady && !_pinOnly && pinDigits == 0) {
+      await _biometrics();
+    }
   }
 
   Future<void> _biometrics() async {
-    if (_prompting) return;
+    if (_prompting || !mounted) return;
     setState(() => _prompting = true);
     try {
       await ref.read(vaultSessionProvider.notifier).unlockWithBiometrics();
@@ -83,6 +86,7 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
     final ff = context.ff;
     final session = ref.watch(vaultSessionProvider);
     final step = ref.watch(vaultPinPadProvider.select((s) => s.step));
+    final pinDigits = ref.watch(vaultPinPadProvider.select((s) => s.length));
     final unlocking = step == VaultPadStep.unlock;
     final showBio = unlocking && session.biometricsReady && !_pinOnly;
     final bio = biometricName(session.biometricKind);
@@ -147,7 +151,7 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
           VaultPrimaryButton(
             label: 'Unlock with $bio',
             icon: FontAwesomeIcons.fingerprint,
-            loading: _prompting,
+            loading: _prompting && pinDigits == 0,
             onPressed: _biometrics,
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -181,7 +185,10 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
     final (label, onTap) = switch (step) {
       VaultPadStep.unlock when bioReady && !_pinOnly => (
         'Use master PIN instead',
-        () => setState(() => _pinOnly = true),
+        () => setState(() {
+          _pinOnly = true;
+          _prompting = false;
+        }),
       ),
       VaultPadStep.unlock => (
         'Forgot PIN?',

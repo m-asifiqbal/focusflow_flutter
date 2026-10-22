@@ -51,7 +51,7 @@ class NoteFileStore {
     final source = File(sourcePath);
     final ext = p.extension(sourcePath).toLowerCase();
     final safeExt = ext.isEmpty || ext.length > 6 ? '.jpg' : ext;
-    final relative = p.join(folder, '$id$safeExt');
+    final relative = p.posix.join(folder, '$id$safeExt');
     final target = File(p.join(root.path, relative));
     await target.parent.create(recursive: true);
     await source.copy(target.path);

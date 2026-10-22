@@ -218,7 +218,7 @@ class VaultSessionController extends Notifier<VaultSessionState> {
     }
     final key = await _keys.setUp(pin);
     await _guard.reset();
-    await _open(key);
+    await _open(key, isInitialSetUp: true);
   }
 
   /// Unlocks with the 6-digit master PIN.
@@ -288,7 +288,9 @@ class VaultSessionController extends Notifier<VaultSessionState> {
     String reason = 'Unlock your vault',
   }) async {
     if (state.isUnlocked) return UnlockResult.success;
-    if (!state.biometricsReady || _busy) return UnlockResult.unavailable;
+    if (!state.biometricsReady || _busy || _pinBusy) {
+      return UnlockResult.unavailable;
+    }
     if (!ref.read(settingsProvider).vaultBiometrics) {
       return UnlockResult.unavailable;
     }
@@ -298,14 +300,32 @@ class VaultSessionController extends Notifier<VaultSessionState> {
           !await _bio.authenticate(reason)) {
         return UnlockResult.cancelled;
       }
-      final read = await _keys.readBiometricCopy();
+      final read = await _keys
+          .readBiometricCopy()
+          .timeout(
+            const Duration(seconds: 25),
+            onTimeout: () =>
+                const BiometricCopyRead(BiometricCopyStatus.cancelled),
+          );
+      if (_disposed) {
+        read.key?.destroy();
+        return UnlockResult.unavailable;
+      }
+      // If PIN unlock or other method completed while waiting for biometrics,
+      // preserve the unlocked session and clean up the extra key.
+      if (state.isUnlocked) {
+        read.key?.destroy();
+        return UnlockResult.success;
+      }
       switch (read.status) {
         case BiometricCopyStatus.cancelled:
           return UnlockResult.cancelled;
         case BiometricCopyStatus.missing:
           // Gone / invalidated (biometrics re-enrolled): PIN from now on.
           await _keys.disableBiometrics();
-          state = state.copyWith(biometricsReady: false);
+          if (!state.isUnlocked && !_disposed) {
+            state = state.copyWith(biometricsReady: false);
+          }
           return UnlockResult.unavailable;
         case BiometricCopyStatus.unlocked:
           await _guard.reset();
@@ -344,7 +364,11 @@ class VaultSessionController extends Notifier<VaultSessionState> {
     return prepareRecoveryCode();
   }
 
-  Future<void> _open(VaultKey key, {bool pinReset = false}) async {
+  Future<void> _open(
+    VaultKey key, {
+    bool pinReset = false,
+    bool isInitialSetUp = false,
+  }) async {
     if (_disposed) {
       key.destroy();
       return;
@@ -354,9 +378,11 @@ class VaultSessionController extends Notifier<VaultSessionState> {
     try {
       if (settings.vaultBiometrics && await _bio.isAvailable()) {
         if (await _keys.hasLegacyBiometricCopy() ||
-            (!await _keys.hasBiometricCopy() && !_autoEnrollTried)) {
-          // Missing copy / migration of the legacy app-gated copy. On
-          // Android the OS-gated write prompts: try once per app run.
+            (isInitialSetUp &&
+                !await _keys.hasBiometricCopy() &&
+                !_autoEnrollTried)) {
+          // Migration of the legacy app-gated copy, or initial first-time set-up.
+          // Never auto-enroll during a routine PIN unlock.
           _autoEnrollTried = true;
           await _keys.enableBiometrics(key);
           await _keys.disableLegacyBiometrics();

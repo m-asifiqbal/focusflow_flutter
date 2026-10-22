@@ -74,7 +74,12 @@ class VaultSessionBackupBridge implements VaultBackupBridge {
     }
     final local = await _keys.exportBundle();
     if (local != null) {
-      if (idOf(local) == idOf(incoming)) return true;
+      if (idOf(local) == idOf(incoming)) {
+        final session = _ref.read(vaultSessionProvider.notifier);
+        await session.lock();
+        await session.refresh();
+        return true;
+      }
       final vault = _ref.read(vaultRepositoryProvider);
       if ((await vault.allItemIds()).isNotEmpty) return false;
       // Nothing to lose locally: use the backup's vault. Generator history
@@ -87,7 +92,11 @@ class VaultSessionBackupBridge implements VaultBackupBridge {
       return true;
     }
     final adopted = await _keys.adoptBundle(incoming);
-    if (adopted) await _ref.read(vaultSessionProvider.notifier).refresh();
+    if (adopted) {
+      final session = _ref.read(vaultSessionProvider.notifier);
+      await session.lock();
+      await session.refresh();
+    }
     return adopted;
   }
 
