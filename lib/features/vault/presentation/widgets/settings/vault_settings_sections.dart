@@ -2,7 +2,10 @@
 /// VAULT SETTINGS SECTIONS — UNLOCK + PROTECTION cards of screen 33
 /// ============================================================
 ///
-/// UNLOCK: Face ID / Fingerprint, Change master PIN, Auto-lock vault, Lock
+/// UNLOCK: Face ID / Fingerprint (shows whether biometric unlock really
+/// works — the setting AND a stored OS-protected key copy — and is
+/// disabled while its own PIN / system prompt is up), Change master PIN,
+/// Auto-lock vault, Lock
 /// when app goes to background. PROTECTION: Clear copied passwords, Block
 /// screenshots in Vault, Breach monitoring (k-anonymity), Wipe vault after
 /// 10 failed attempts, Ask for PIN to reveal. Every value reads
@@ -23,6 +26,7 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/presentation/notifiers/vault_security_settings_controller.dart';
+import 'package:focusflow/features/vault/presentation/notifiers/vault_session_controller.dart';
 import 'package:focusflow/features/vault/presentation/vault_gate.dart';
 import 'package:focusflow/features/vault/presentation/widgets/settings/vault_settings_style.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_reauth_sheet.dart';
@@ -31,12 +35,27 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 /// A getter, not a const: the text follows the active language.
 String get _reason => tr('Confirm to change Vault security settings');
 
-class VaultUnlockSection extends ConsumerWidget {
+class VaultUnlockSection extends ConsumerStatefulWidget {
   const VaultUnlockSection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VaultUnlockSection> createState() => _VaultUnlockSectionState();
+}
+
+class _VaultUnlockSectionState extends ConsumerState<VaultUnlockSection> {
+  /// The biometrics switch's flow is running (PIN sheet / system prompt).
+  bool _bioBusy = false;
+
+  @override
+  Widget build(BuildContext context) {
     final s = ref.watch(settingsProvider);
+    // On only when unlocking by biometrics really works: the setting can be
+    // on with no key copy behind it (copy invalidated, restore, a cancelled
+    // first prompt) — tapping it then turns it ON instead of asking for the
+    // PIN to turn "off" something that never worked.
+    final bioReady = ref.watch(
+      vaultSessionProvider.select((v) => v.biometricsReady),
+    );
     final c = ref.read(vaultSecuritySettingsControllerProvider);
     return FFGroupedList(
       label: tr('UNLOCK'),
@@ -47,8 +66,10 @@ class VaultUnlockSection extends ConsumerWidget {
             VaultSettingsTints.emerald,
           ),
           title: tr('Face ID / Fingerprint'),
-          value: s.vaultBiometrics,
-          onChanged: (on) => unawaited(_setBiometrics(context, ref, on)),
+          value: s.vaultBiometrics && bioReady,
+          onChanged: _bioBusy
+              ? null
+              : (on) => unawaited(_setBiometrics(context, ref, on)),
         ),
         FFListRow(
           leading: const VaultSettingsTile(
@@ -110,27 +131,33 @@ class VaultUnlockSection extends ConsumerWidget {
     WidgetRef ref,
     bool on,
   ) async {
-    final c = ref.read(vaultSecuritySettingsControllerProvider);
-    if (on && !await c.biometricsAvailable()) {
-      if (context.mounted) {
-        showFFToast(
-          context,
-          tr('Set up Face ID or a fingerprint on this device'),
-        );
+    if (_bioBusy || vaultReauthInFlight) return;
+    setState(() => _bioBusy = true);
+    try {
+      final c = ref.read(vaultSecuritySettingsControllerProvider);
+      if (on && !await c.biometricsAvailable()) {
+        if (context.mounted) {
+          showFFToast(
+            context,
+            tr('Set up Face ID or a fingerprint on this device'),
+          );
+        }
+        return;
       }
-      return;
+      if (!context.mounted) return;
+      // Turning it on stores the OS-protected biometric copy of the open
+      // vault key (the system may ask for the fingerprint / face once).
+      await withVaultReauth(context, ref, _reason, () async {
+        if (!await c.setBiometrics(on) && context.mounted) {
+          showFFToast(
+            context,
+            tr("Biometric unlock couldn't be turned on · use your PIN"),
+          );
+        }
+      }, needsKey: on);
+    } finally {
+      if (mounted) setState(() => _bioBusy = false);
     }
-    if (!context.mounted) return;
-    // Turning it on stores the OS-protected biometric copy of the open
-    // vault key (the system may ask for the fingerprint / face once).
-    await withVaultReauth(context, ref, _reason, () async {
-      if (!await c.setBiometrics(on) && context.mounted) {
-        showFFToast(
-          context,
-          tr("Biometric unlock couldn't be turned on · use your PIN"),
-        );
-      }
-    }, needsKey: on);
   }
 
   Future<void> _changePin(BuildContext context) async {

@@ -16,6 +16,7 @@ import android.util.Log
 import com.iqballab.focusflow.R
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * The foreground half of the alarm guard (see [AlarmGuard]).
@@ -36,6 +37,12 @@ import java.util.concurrent.Executors
  *    away — assume the alarms may be gone and re-arm everything.
  *  - [ACTION_BOOT]: after a reboot / update; the plugins' own receivers
  *    re-arm the alarms, this only brings the guard itself back.
+ *  - [ACTION_STOP]: stop now. Used instead of `stopService` while a
+ *    `startForegroundService` is still on its way ([startPending]): a service
+ *    stopped before it called `startForeground` makes Android kill the whole
+ *    app ("did not then call Service.startForeground()", Android 8–11) — the
+ *    restore crash, where the engine starts the guard for the restored
+ *    reminders and the restored settings stop it a moment later.
  */
 class AlarmGuardService : Service() {
     companion object {
@@ -45,6 +52,7 @@ class AlarmGuardService : Service() {
         const val ACTION_TICK = "com.iqballab.focusflow.guard.TICK"
         const val ACTION_HEAL = "com.iqballab.focusflow.guard.HEAL"
         const val ACTION_BOOT = "com.iqballab.focusflow.guard.BOOT"
+        const val ACTION_STOP = "com.iqballab.focusflow.guard.STOP"
 
         private const val CHANNEL_ID = "focusflow_alarm_guard"
         private const val NOTIFICATION_ID = 9_410_117
@@ -53,6 +61,23 @@ class AlarmGuardService : Service() {
         @Volatile
         var running = false
             private set
+
+        /** `startForegroundService` calls not yet answered by [promote]. */
+        private val pendingStarts = AtomicInteger(0)
+
+        /** A start is on its way: the service must not be stopped from outside. */
+        val startPending: Boolean
+            get() = pendingStarts.get() > 0
+
+        /** [AlarmGuard.start] is about to call `startForegroundService`. */
+        fun noteStartRequested() {
+            pendingStarts.incrementAndGet()
+        }
+
+        /** A start was answered by onStartCommand, or refused (exception). */
+        fun noteStartDone() {
+            pendingStarts.updateAndGet { if (it > 0) it - 1 else 0 }
+        }
     }
 
     private val main = Handler(Looper.getMainLooper())
@@ -65,12 +90,19 @@ class AlarmGuardService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!promote()) {
+        val promoted = promote()
+        noteStartDone() // this start is answered (either way)
+        if (!promoted) {
             stopSelf()
             return START_NOT_STICKY
         }
         // A null intent is the system restarting a sticky service it killed.
         val action = intent?.action ?: ACTION_HEAL
+        if (action == ACTION_STOP) {
+            // Foreground now, so stopping is safe.
+            shutdown()
+            return START_NOT_STICKY
+        }
         try {
             worker.execute {
                 try {

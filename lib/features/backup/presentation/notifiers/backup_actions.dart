@@ -37,6 +37,9 @@ class BackupActions {
 
   final Ref ref;
 
+  /// How long a restore waits for the notification re-plan.
+  static const Duration replanWait = Duration(seconds: 5);
+
   /// "Back up to device now".
   Future<BackupRecord> backUpToDevice() =>
       ref.read(localBackupsProvider).backupNow();
@@ -52,7 +55,7 @@ class BackupActions {
     if (bytes == null) {
       throw FormatException(tr('This backup file is no longer on device'));
     }
-    return engine.inspect(bytes);
+    return engine.inspectAsync(bytes);
   }
 
   /// Restores [archive]. Throws [WrongBackupPin] (wrong / missing PIN),
@@ -81,7 +84,9 @@ class BackupActions {
     if (result.photoRestored) ref.invalidate(profilePhotoProvider);
     await _noteRestored(archive.manifest, mode);
     try {
-      await ref.read(notificationEngineProvider).onResume();
+      // Awaited inside the "Restoring…" dialog: bounded, so a stalled
+      // notification plugin can't keep it up. The pass itself carries on.
+      await ref.read(notificationEngineProvider).onResume().timeout(replanWait);
     } on Object catch (e) {
       AppLogger.w('Re-plan after restore failed (${e.runtimeType})');
     }

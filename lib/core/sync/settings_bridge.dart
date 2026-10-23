@@ -16,7 +16,9 @@
 /// ============================================================
 library;
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/language_service.dart';
 import 'package:focusflow/core/settings/backup_settings.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
@@ -72,9 +74,30 @@ class AppSettingsBackupBridge implements SettingsBackupBridge {
     for (final e in writes.entries) {
       await _prefs.setString(e.key, e.value);
     }
-    await _ref
-        .read(settingsProvider.notifier)
-        .update((s) => incoming.applyTo(s, replace: replace));
+    // A restored language must be loaded before the app switches to it
+    // (like Settings › Language): otherwise the locale / text direction
+    // changed while every text stayed in the old pack.
+    final current = _ref.read(settingsProvider);
+    final language = storedLanguage(
+      incoming.applyTo(current, replace: replace),
+    );
+    String? activeCode;
+    if (language != storedLanguage(current)) {
+      activeCode = (await activateLanguage(language)).code;
+    }
+    await _ref.read(settingsProvider.notifier).update((s) {
+      final next = incoming.applyTo(s, replace: replace);
+      return activeCode == null
+          ? next
+          : next.copyWith(languageCode: activeCode);
+    });
+    if (activeCode != null) {
+      // Strings are read in build methods: rebuild everything once.
+      final binding = WidgetsBinding.instance;
+      binding
+        ..addPostFrameCallback((_) => rebuildEverything())
+        ..scheduleFrame();
+    }
   }
 }
 

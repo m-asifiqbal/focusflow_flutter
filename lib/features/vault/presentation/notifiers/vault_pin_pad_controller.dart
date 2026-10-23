@@ -109,6 +109,11 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
   bool _changePin = false;
   bool _resetMode = false;
 
+  /// Bumped whenever a sheet (re)starts the shared pad. A PIN check still
+  /// running for an earlier sheet (Argon2 takes ~1 s) must not finish the
+  /// new one — its result is dropped when the epoch moved on.
+  int _epoch = 0;
+
   VaultSessionController get _session =>
       ref.read(vaultSessionProvider.notifier);
 
@@ -136,6 +141,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
   /// Switches the pad to re-auth: the current PIN is checked without
   /// unlocking; with [changePin] a new PIN is then chosen and confirmed.
   void startReauth({bool changePin = false}) {
+    _epoch++;
     _digits.clear();
     _firstPin = null;
     _changePin = changePin;
@@ -146,11 +152,28 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
   /// Forgotten PIN (after a recovery-code unlock): choose and confirm a new
   /// PIN without the old one; finishing prepares a new recovery code.
   void startNewPin() {
+    _epoch++;
     _digits.clear();
     _firstPin = null;
     _changePin = false;
     _resetMode = true;
     state = const VaultPinPadState(step: VaultPadStep.changeNew);
+  }
+
+  /// Back to entering the master PIN (the unlock sheet opening): whatever
+  /// an earlier re-auth sheet left in the shared pad (a finished check, a
+  /// half-typed PIN) is dropped.
+  void startUnlock() {
+    final notSetUp =
+        ref.read(vaultSessionProvider).phase == VaultPhase.notSetUp;
+    _epoch++;
+    _digits.clear();
+    _firstPin = null;
+    _changePin = false;
+    _resetMode = false;
+    state = VaultPinPadState(
+      step: notSetUp ? VaultPadStep.create : VaultPadStep.unlock,
+    );
   }
 
   /// Rejects a guessable new PIN (true = rejected, message shown).
@@ -202,6 +225,9 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
 
   Future<void> _submit() async {
     final pin = _digits.toString();
+    final epoch = _epoch;
+    // After an await: the pad was restarted for another sheet meanwhile.
+    bool stale() => epoch != _epoch;
     _digits.clear();
     switch (state.step) {
       case VaultPadStep.create:
@@ -226,6 +252,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
         try {
           await _session.setUp(pin);
         } on Object {
+          if (stale()) return;
           _firstPin = null;
           state = VaultPinPadState(
             step: VaultPadStep.create,
@@ -245,6 +272,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
               ? _session.unlockWithPin(pin)
               : _session.verifyPin(pin),
         );
+        if (stale()) return;
         if (result == UnlockResult.success) {
           state = _changePin
               ? const VaultPinPadState(step: VaultPadStep.changeNew)
@@ -279,6 +307,7 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
             await _session.resetPin(pin);
           }
         } on Object catch (e) {
+          if (stale()) return;
           if (e is! VaultLockedException) {
             state = VaultPinPadState(
               step: _resetMode ? VaultPadStep.changeNew : VaultPadStep.verify,
@@ -304,10 +333,12 @@ class VaultPinPadController extends AutoDisposeNotifier<VaultPinPadState> {
           );
           return;
         }
+        if (stale()) return;
         state = state.copyWith(busy: false, done: true);
       case VaultPadStep.unlock:
         state = state.copyWith(busy: true);
         final result = await _checked(() => _session.unlockWithPin(pin));
+        if (stale()) return;
         if (result == UnlockResult.success) return; // view switches / closes
         _reject(result);
     }

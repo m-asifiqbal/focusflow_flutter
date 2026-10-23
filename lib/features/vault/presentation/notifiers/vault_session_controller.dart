@@ -72,6 +72,19 @@ class VaultSessionController extends Notifier<VaultSessionState> {
   bool _pinBusy = false;
   final Queue<Completer<void>> _pinWaiters = Queue();
   bool _autoEnrollTried = false;
+
+  /// Tail of the biometric-copy operations (enable from Settings, the
+  /// setting's listener): they run one after another, so a quick off → on
+  /// can't have the "off" delete what the "on" just wrote, and two writes
+  /// never prompt on the same Keystore entry at once.
+  Future<void> _bioTail = Future<void>.value();
+
+  Future<T> _bioSerial<T>(Future<T> Function() op) {
+    final run = _bioTail.then((_) => op());
+    _bioTail = run.then<void>((_) {}, onError: (Object _) {});
+    return run;
+  }
+
   PendingRecoveryCode? _pendingCode;
   Future<void>? _loading;
 
@@ -582,23 +595,35 @@ class VaultSessionController extends Notifier<VaultSessionState> {
   /// Writes the biometric copy of the open key now (Settings toggle). May
   /// show the system prompt (Android). False when the OS refused / the
   /// vault is locked.
-  Future<bool> enableBiometricCopy() async {
-    final key = state.key;
-    if (!state.isUnlocked || key == null) return false;
-    try {
-      if (!await _bio.isAvailable()) return false;
-      if (!await _keys.hasBiometricCopy() ||
-          await _keys.hasLegacyBiometricCopy()) {
+  ///
+  /// Always writes a fresh copy: the "present" marker can outlive the real
+  /// copy (Keystore key invalidated by a new fingerprint, data reset by the
+  /// plugin), and an explicit "turn on" must repair that. The system prompt
+  /// may pause the app on some phones: the background lock waits.
+  Future<bool> enableBiometricCopy() => _bioSerial(
+    () => keepUnlockedDuring(() async {
+      final key = state.key;
+      if (!state.isUnlocked || key == null) return false;
+      try {
+        if (!await _bio.isAvailable()) return false;
         if (!await _keys.enableBiometrics(key)) return false;
+      } on Object {
+        return false;
       }
-    } on Object {
-      return false;
-    }
-    if (!_disposed) state = state.copyWith(biometricsReady: true);
-    return true;
-  }
+      if (!_disposed) state = state.copyWith(biometricsReady: true);
+      return true;
+    }),
+  );
 
-  Future<void> _onBiometricSetting(bool enabled) async {
+  Future<void> _onBiometricSetting(bool enabled) =>
+      _bioSerial(() => _applyBiometricSetting(enabled));
+
+  Future<void> _applyBiometricSetting(bool enabled) async {
+    // Queued behind other biometric work: act on the setting as it is now
+    // (a quick off → on must not delete the copy "on" just wrote).
+    if (_disposed || ref.read(settingsProvider).vaultBiometrics != enabled) {
+      return;
+    }
     try {
       if (!enabled) {
         await _keys.disableBiometrics();

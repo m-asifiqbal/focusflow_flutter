@@ -354,6 +354,14 @@ class BackupEngine {
     return archive;
   }
 
+  /// [inspect] for the app: a large file is unzipped on a background
+  /// isolate ([BackupArchive.decodeAsync]).
+  Future<BackupArchive> inspectAsync(List<int> bytes) async {
+    final archive = await BackupArchive.decodeAsync(bytes);
+    archive.manifest.checkReadableBy(db.schemaVersion);
+    return archive;
+  }
+
   /// The key that opens [manifest]'s archive, derived from [pin]; null for
   /// an unencrypted backup.
   Future<BackupKey?> keyFor(BackupManifest manifest, String pin) async {
@@ -374,11 +382,29 @@ class BackupEngine {
       if (key == null) throw const WrongBackupPin();
       bytes = await BackupCipher.open(bytes, key);
     }
-    if (BackupArchive.sha256Hex(bytes) != archive.manifest.checksum) {
+    final checksum = archive.manifest.checksum;
+    // A large db.json is verified and parsed off the UI isolate.
+    final snapshot = bytes.length >= BackupArchive.backgroundDecodeBytes
+        ? await _verifiedSnapshotInBackground(bytes, checksum)
+        : _verifiedSnapshot(bytes, checksum);
+    if (snapshot == null) {
       throw FormatException(tr('The backup file is damaged'));
     }
-    return DbSnapshot.decode(bytes);
+    return snapshot;
   }
+
+  /// Static on purpose: a closure made inside an instance method can
+  /// capture `this` (and the database with it), which can't be sent.
+  static Future<DbSnapshot?> _verifiedSnapshotInBackground(
+    List<int> bytes,
+    String checksum,
+  ) => Isolate.run(() => _verifiedSnapshot(bytes, checksum));
+
+  /// The snapshot in [bytes], or null when they don't match [checksum].
+  static DbSnapshot? _verifiedSnapshot(List<int> bytes, String checksum) =>
+      BackupArchive.sha256Hex(bytes) == checksum
+      ? DbSnapshot.decode(bytes)
+      : null;
 
   // ────────────────────────────── Restore ──────────────────────────────
 

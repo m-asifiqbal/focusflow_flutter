@@ -200,15 +200,18 @@ object AlarmGuard {
 
     /** Starts the service with [action]; false when the platform refuses. */
     fun start(context: Context, action: String): Boolean {
+        val foreground = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
         return try {
             val intent = Intent(context, AlarmGuardService::class.java).setAction(action)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (foreground) {
+                AlarmGuardService.noteStartRequested()
                 context.startForegroundService(intent)
             } else {
                 context.startService(intent)
             }
             true
         } catch (e: Exception) {
+            if (foreground) AlarmGuardService.noteStartDone()
             // ForegroundServiceStartNotAllowedException (Android 12+) when the
             // app is in the background, SecurityException on an odd ROM.
             Log.w(TAG, "The guard could not be started: ${e.message}")
@@ -217,9 +220,13 @@ object AlarmGuard {
     }
 
     fun stop(context: Context) {
-        cancelWatchdog(context)
+        val app = context.applicationContext
+        cancelWatchdog(app)
+        // A start still on its way must reach startForeground() before the
+        // service stops, or Android kills the app: let the service stop itself.
+        if (AlarmGuardService.startPending && start(app, AlarmGuardService.ACTION_STOP)) return
         try {
-            context.stopService(Intent(context, AlarmGuardService::class.java))
+            app.stopService(Intent(app, AlarmGuardService::class.java))
         } catch (e: Exception) {
             Log.w(TAG, "The guard could not be stopped: ${e.message}")
         }

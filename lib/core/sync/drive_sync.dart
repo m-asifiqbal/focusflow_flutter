@@ -309,7 +309,9 @@ class DriveSync {
       }
       final from = b.deviceName.isEmpty ? tr('another device') : b.deviceName;
       try {
-        final archive = engine.inspect(await store.download(b.fileId));
+        final archive = await engine.inspectAsync(
+          await store.download(b.fileId),
+        );
         report(SyncPhase.merging);
         final result = await engine.restore(
           archive,

@@ -102,6 +102,7 @@ class VaultReauthPad extends ConsumerStatefulWidget {
 
 class _VaultReauthPadState extends ConsumerState<VaultReauthPad> {
   bool _ready = false;
+  bool _closed = false;
 
   @override
   void initState() {
@@ -117,9 +118,19 @@ class _VaultReauthPadState extends ConsumerState<VaultReauthPad> {
     });
   }
 
+  /// Closes THIS sheet, once. Never pops blindly: while another sheet is
+  /// still animating out, both see the shared pad finish, and a blind pop
+  /// took the Settings page away with it.
   void _close(bool ok) {
-    final nav = Navigator.of(context);
-    if (nav.canPop()) nav.pop(ok);
+    if (_closed || !mounted) return;
+    final route = ModalRoute.of(context);
+    if (route == null || !route.isActive) return;
+    _closed = true;
+    if (route.isCurrent) {
+      Navigator.of(context).pop(ok);
+    } else {
+      Navigator.of(context).removeRoute(route, ok);
+    }
   }
 
   @override
@@ -198,7 +209,13 @@ class _VaultReauthPadState extends ConsumerState<VaultReauthPad> {
   }
 }
 
-/// Runs [vaultReauthenticate] and then [action]; a no-op when cancelled.
+/// One re-auth (+ action) at a time, app-wide: a second tap on a switch
+/// while the PIN sheet / system prompt of the first is up is ignored (two
+/// sheets on one shared PIN pad, or two Keystore prompts, broke things).
+bool _reauthInFlight = false;
+
+/// Runs [vaultReauthenticate] and then [action]; a no-op when cancelled or
+/// while another re-auth is running.
 Future<void> withVaultReauth(
   BuildContext context,
   WidgetRef ref,
@@ -206,17 +223,27 @@ Future<void> withVaultReauth(
   Future<void> Function() action, {
   bool needsKey = false,
 }) async {
-  if (!await vaultReauthenticate(
-    context,
-    ref,
-    reason: reason,
-    needsKey: needsKey,
-  )) {
-    return;
+  if (_reauthInFlight) return;
+  _reauthInFlight = true;
+  try {
+    if (!await vaultReauthenticate(
+      context,
+      ref,
+      reason: reason,
+      needsKey: needsKey,
+    )) {
+      return;
+    }
+    await action();
+    // The page may be gone by now (its ref with it).
+    if (context.mounted) ref.read(vaultSessionProvider.notifier).touch();
+  } finally {
+    _reauthInFlight = false;
   }
-  await action();
-  ref.read(vaultSessionProvider.notifier).touch();
 }
+
+/// Whether a [withVaultReauth] flow is running (switches show busy).
+bool get vaultReauthInFlight => _reauthInFlight;
 
 /// Fire-and-forget form of [withVaultReauth] for `onChanged` callbacks.
 void runWithVaultReauth(

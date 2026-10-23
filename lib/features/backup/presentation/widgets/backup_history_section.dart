@@ -13,7 +13,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
-import 'package:focusflow/core/sync/drive_store.dart';
 import 'package:focusflow/core/sync/local_backups.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
@@ -74,10 +73,12 @@ class _HistoryRow extends ConsumerWidget {
 
   final BackupRecord record;
 
-  Future<void> _restore(BuildContext context, WidgetRef ref) async {
+  Future<void> _restore(BuildContext context, WidgetRef ref) {
     final actions = ref.read(backupActionsProvider);
-    try {
-      final archive = await actions.open(
+    return restoreFromSource(
+      context,
+      ref,
+      () => actions.open(
         RestoreCandidate(
           kind: record.location == BackupLocation.drive
               ? RestoreSourceKind.drive
@@ -89,15 +90,8 @@ class _HistoryRow extends ConsumerWidget {
           driveFileId: record.driveFileId,
           record: record,
         ),
-      );
-      if (!context.mounted) return;
-      final msg = await runRestoreFlow(context, ref, archive);
-      if (msg != null && context.mounted) showFFToast(context, msg);
-    } on DriveFailure catch (f) {
-      if (context.mounted) showFFToast(context, f.message);
-    } on FormatException catch (e) {
-      if (context.mounted) showFFToast(context, e.message);
-    }
+      ),
+    );
   }
 
   Future<void> _download(BuildContext context, WidgetRef ref) async {

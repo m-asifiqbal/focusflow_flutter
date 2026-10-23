@@ -15,7 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
-import 'package:focusflow/core/sync/drive_store.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
@@ -33,19 +32,9 @@ class RestoreScreen extends ConsumerWidget {
   Future<void> _restore(
     BuildContext context,
     WidgetRef ref,
-    Future<BackupArchive?> Function() open,
-  ) async {
-    try {
-      final archive = await open();
-      if (archive == null || !context.mounted) return;
-      final msg = await runRestoreFlow(context, ref, archive);
-      if (msg != null && context.mounted) showFFToast(context, msg);
-    } on DriveFailure catch (f) {
-      if (context.mounted) showFFToast(context, f.message);
-    } on FormatException catch (e) {
-      if (context.mounted) showFFToast(context, e.message);
-    }
-  }
+    Future<BackupArchive?> Function() open, {
+    bool showProgress = true,
+  }) => restoreFromSource(context, ref, open, showProgress: showProgress);
 
   Future<BackupArchive?> _pickFile(WidgetRef ref) async {
     final f = await ref.read(importFileSourceProvider).pick();
@@ -54,7 +43,7 @@ class RestoreScreen extends ConsumerWidget {
       if (!ImportDetector.isFfBackup(f.name, f.bytes)) {
         throw FormatException(tr('Choose a FocusFlow .ffbackup file'));
       }
-      return ref.read(backupEngineProvider).inspect(f.bytes);
+      return await ref.read(backupEngineProvider).inspectAsync(f.bytes);
     } finally {
       await f.discard();
     }
@@ -168,7 +157,12 @@ class RestoreScreen extends ConsumerWidget {
                         size: AppSizes.iconTileSm,
                       ),
                       title: tr('Choose a backup file…'),
-                      onTap: () => _restore(context, ref, () => _pickFile(ref)),
+                      onTap: () => _restore(
+                        context,
+                        ref,
+                        () => _pickFile(ref),
+                        showProgress: false,
+                      ),
                     ),
                   ],
                 ),

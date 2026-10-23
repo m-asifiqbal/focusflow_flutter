@@ -4,6 +4,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:flutter/foundation.dart';
@@ -14,6 +15,7 @@ import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_files.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
 import 'package:focusflow/core/sync/snapshot.dart';
+import 'package:focusflow/shared/providers/repository_providers.dart';
 
 import '../../helpers/test_container.dart';
 import 'sync_fixtures.dart';
@@ -276,6 +278,41 @@ void main() {
     expect(
       await targetFiles.exists('FocusFlow/backups/evil.ffbackup'),
       isFalse,
+    );
+  });
+
+  test('a large backup is unzipped and parsed off the UI isolate', () async {
+    // ~1.2 MB of incompressible text: both the zip and db.json pass the
+    // background threshold, so inspectAsync and openSnapshot use isolates.
+    final random = Random(7);
+    const letters =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/';
+    final big = String.fromCharCodes([
+      for (var i = 0; i < 1200 * 1024; i++)
+        letters.codeUnitAt(random.nextInt(letters.length)),
+    ]);
+    await source.read(notesRepositoryProvider).createEmpty(initialText: big);
+    final engine = engineFor(source, sourceFiles);
+    final built = await engine.build();
+    final original = await engine.snapshot();
+    expect(
+      built.bytes.length,
+      greaterThan(BackupArchive.backgroundDecodeBytes),
+    );
+
+    final restore = engineFor(target, targetFiles);
+    final archive = await restore.inspectAsync(built.bytes);
+    expect(
+      archive.dbJson.length,
+      greaterThan(BackupArchive.backgroundDecodeBytes),
+    );
+    await restore.restore(archive, mode: RestoreMode.replace);
+    expect((await restore.snapshot()).sameContentAs(original), isTrue);
+
+    // A large file that isn't a backup still fails with the readable error.
+    await expectLater(
+      restore.inspectAsync(Uint8List(BackupArchive.backgroundDecodeBytes + 1)),
+      throwsFormatException,
     );
   });
 }

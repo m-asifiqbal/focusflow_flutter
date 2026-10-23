@@ -22,6 +22,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart' as crypto;
@@ -330,6 +331,30 @@ class BackupArchive {
   }
 
   /// Unzips [bytes]. Throws [FormatException] when it isn't a backup.
+  /// Files at least this large are unzipped / parsed on a background
+  /// isolate ([decodeAsync], [BackupEngine.openSnapshot]): a backup with
+  /// photos is many MB, and inflating it on the UI isolate froze the
+  /// screen for seconds right in the restore flow.
+  static const int backgroundDecodeBytes = 512 * 1024;
+
+  /// [decode], off the UI isolate for a large file. A file that can't be
+  /// read is decoded once more here, so the error message comes in the
+  /// user's language (the background isolate has no language pack).
+  static Future<BackupArchive> decodeAsync(List<int> bytes) async {
+    if (bytes.length < backgroundDecodeBytes) return decode(bytes);
+    final data = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
+    final archive = await Isolate.run(() => _tryDecode(data));
+    return archive ?? decode(data);
+  }
+
+  static BackupArchive? _tryDecode(Uint8List bytes) {
+    try {
+      return decode(bytes);
+    } on FormatException {
+      return null;
+    }
+  }
+
   static BackupArchive decode(List<int> bytes) {
     final Archive zip;
     try {

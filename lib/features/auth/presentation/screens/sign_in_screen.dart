@@ -60,7 +60,9 @@ class SignInScreen extends ConsumerWidget {
         final restore = await showBackupFoundSheet(context, newest);
         if (!context.mounted) return;
         if (restore ?? false) {
-          context.go(AppRoutes.settingsBackupRestore);
+          // Let the sheet finish closing before the whole stack changes.
+          await WidgetsBinding.instance.endOfFrame;
+          if (context.mounted) context.go(AppRoutes.settingsBackupRestore);
           return;
         }
         // Start fresh: existing backups are not merged automatically.

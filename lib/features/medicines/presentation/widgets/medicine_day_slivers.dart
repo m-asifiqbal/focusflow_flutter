@@ -7,11 +7,14 @@
 /// hero, refill banners, the doses by part of day (MORNING · AFTERNOON ·
 /// EVENING & NIGHT, cards from dose_card.dart), the as-needed medicines
 /// with "Log a dose", and — on the medicine list — "Your medicines".
-/// Cards animate in with a short fade + rise the first time they appear.
+/// Cards animate in with a short fade + rise when the day is first shown —
+/// never again when they scroll back into view (a lazy list rebuilds them,
+/// which used to replay the fade on every scroll: the "flicker").
 /// ============================================================
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -84,6 +87,7 @@ List<Widget> medicineDaySlivers(
   final low = day.lowStock;
   final asNeeded = day.asNeeded;
   const side = EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.screen);
+  final group = DateUtilsX.dayKey(day.day);
   return [
     SliverToBoxAdapter(
       child: Padding(
@@ -94,6 +98,7 @@ List<Widget> medicineDaySlivers(
           0,
         ),
         child: _Appear(
+          group: group,
           child: MedicineTodayCard(
             day: day.day,
             slots: scheduled,
@@ -113,7 +118,10 @@ List<Widget> medicineDaySlivers(
             AppSpacing.screen,
             0,
           ),
-          child: _Appear(child: MedicineRefillBanner(medicine: m)),
+          child: _Appear(
+            group: group,
+            child: MedicineRefillBanner(medicine: m),
+          ),
         ),
       ),
     if (parts.isEmpty && asNeeded.isEmpty)
@@ -142,6 +150,7 @@ List<Widget> medicineDaySlivers(
           itemCount: slots.length,
           itemBuilder: (context, i) => _Appear(
             key: ValueKey(slots[i].id),
+            group: group,
             child: DoseCard(slot: slots[i], now: now, use24h: use24h),
           ),
         ),
@@ -189,17 +198,44 @@ class _Section extends StatelessWidget {
   );
 }
 
-/// A short fade + rise the first time [child] is built (skipped with
-/// reduce motion). Keyed rows keep their state, so a dose being logged
-/// doesn't replay it.
-class _Appear extends StatelessWidget {
-  const _Appear({required this.child, super.key});
+/// A short fade + rise for the cards built while [group] (a day) is first
+/// revealed — within [window] of its first card, remembered in the
+/// route's [PageStorage]. A card a lazy list rebuilds later (scrolled back
+/// into view) shows at once, so scrolling never makes cards blink. Skipped
+/// with reduce motion.
+class _Appear extends StatefulWidget {
+  const _Appear({required this.group, required this.child, super.key});
 
+  final String group;
   final Widget child;
+
+  static const Duration window = Duration(milliseconds: 600);
+
+  @override
+  State<_Appear> createState() => _AppearState();
+}
+
+class _AppearState extends State<_Appear> {
+  late final bool _animate = _inFirstReveal();
+
+  bool _inFirstReveal() {
+    final bucket = PageStorage.maybeOf(context);
+    if (bucket == null) return false;
+    final id = ('medicine-appear', widget.group);
+    // Frame time (monotonic; the test clock in widget tests).
+    final now = SchedulerBinding.instance.currentFrameTimeStamp.inMilliseconds;
+    final start = bucket.readState(context, identifier: id);
+    if (start is! int) {
+      bucket.writeState(context, now, identifier: id);
+      return true;
+    }
+    return now - start < _Appear.window.inMilliseconds;
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (context.reduceMotion) return child;
+    final child = widget.child;
+    if (!_animate || context.reduceMotion) return child;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: AppMotion.slow,

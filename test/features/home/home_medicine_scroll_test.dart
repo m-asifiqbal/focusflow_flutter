@@ -65,6 +65,19 @@ void main() {
     final h = await seeded(tester);
     await pumpApp(tester, h, AppRoutes.medicines, size: const Size(390, 844));
     await settle(tester, rounds: 6);
-    await flingAround(tester, find.byType(Scrollable).first);
+    final list = find.byType(Scrollable).first;
+    await flingAround(tester, list);
+
+    // Cards rebuilt by the lazy list show at once (no fade from 0 = the
+    // flicker): drag down a screen, back up, and look at the first frame.
+    await tester.drag(list, const Offset(0, -900));
+    await tester.pump();
+    await tester.drag(list, const Offset(0, 900));
+    await tester.pump();
+    final faded = tester
+        .widgetList<Opacity>(find.byType(Opacity))
+        .where((o) => o.opacity < 0.5);
+    expect(faded, isEmpty);
+    await settle(tester);
   });
 }

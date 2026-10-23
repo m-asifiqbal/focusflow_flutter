@@ -20,8 +20,11 @@
 /// ============================================================
 library;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/storage/secure_store.dart';
@@ -117,7 +120,7 @@ class BiometricVaultStorage implements OsGatedVaultStorage {
   @override
   Future<String?> read(String key) async {
     try {
-      return await _storage.read(key: key);
+      return await _prompted(_storage.read(key: key));
     } on PlatformException {
       // Cancel, failed match, lock-out — the item itself is kept.
       throw const BiometricReadException();
@@ -129,7 +132,69 @@ class BiometricVaultStorage implements OsGatedVaultStorage {
     // Delete first: updating an access-controlled Keychain item would
     // itself require authentication.
     await delete(key);
-    await _storage.write(key: key, value: value);
+    try {
+      await _prompted(_storage.write(key: key, value: value));
+    } on PlatformException {
+      throw const BiometricReadException();
+    }
+  }
+
+  /// After the prompt closes, how long the plugin may take to answer.
+  @visibleForTesting
+  static const Duration dismissGrace = Duration(milliseconds: 2500);
+
+  /// Upper bound for one prompted call (a prompt left open, a phone whose
+  /// prompt doesn't take the window focus).
+  @visibleForTesting
+  static const Duration promptCeiling = Duration(seconds: 60);
+
+  /// Makes a call that shows the Android BiometricPrompt always end.
+  ///
+  /// flutter_secure_storage 11.2 gives the prompt's negative button ("Use
+  /// PIN") an empty listener, and the framework prompt reports that button
+  /// only to the listener — so the call never answered, and everything
+  /// waiting on it (the Settings switch, first set-up) hung for good. The
+  /// prompt takes the window focus (app → inactive) and gives it back when
+  /// it closes (→ resumed): when no answer follows within [dismissGrace],
+  /// the prompt was dismissed and this throws [BiometricReadException]
+  /// (= cancelled). [promptCeiling] bounds everything else.
+  Future<T> _prompted<T>(Future<T> call) {
+    // Only the real plugin on Android prompts per call (tests inject a
+    // fake storage and may have no binding).
+    if (_injected != null || !writePrompts) return call;
+    final done = Completer<T>();
+    Timer? grace;
+    Timer? ceiling;
+    AppLifecycleListener? listener;
+    void finish(void Function() complete) {
+      if (done.isCompleted) return;
+      grace?.cancel();
+      ceiling?.cancel();
+      listener?.dispose();
+      complete();
+    }
+
+    void cancelled() =>
+        finish(() => done.completeError(const BiometricReadException()));
+    var leftApp = false;
+    listener = AppLifecycleListener(
+      onStateChange: (s) {
+        if (s != AppLifecycleState.resumed) {
+          leftApp = true;
+          grace?.cancel();
+        } else if (leftApp) {
+          grace?.cancel();
+          grace = Timer(dismissGrace, cancelled);
+        }
+      },
+    );
+    ceiling = Timer(promptCeiling, cancelled);
+    call.then(
+      (v) => finish(() => done.complete(v)),
+      onError: (Object e, StackTrace s) =>
+          finish(() => done.completeError(e, s)),
+    );
+    return done.future;
   }
 
   @override

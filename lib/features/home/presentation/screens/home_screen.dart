@@ -10,6 +10,12 @@
 /// fails (with Retry) and empties independently; the screen only lays
 /// them out. MinuteTicker / HabitDayTicker keep "now" and the habit day
 /// fresh while Home is visible.
+///
+/// Scrolling: the (at most seven) sections sit in one Column, built once.
+/// A lazy ListView unmounted a section scrolled off-screen and rebuilt it
+/// on the way back — replaying its ring / reveal animations and guessing
+/// its height again, so the list jumped ("jitter, can't scroll back") —
+/// for no saving at this size.
 /// ============================================================
 library;
 
@@ -96,20 +102,25 @@ class HomeScreen extends ConsumerWidget {
                 child: RefreshIndicator(
                   color: context.ff.primary,
                   onRefresh: () => _refresh(ref),
-                  child: ListView(
+                  child: SingleChildScrollView(
+                    // Pull to refresh also works when Home is short.
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsetsDirectional.only(
                       bottom: context.barClearance,
                     ),
-                    children: [
-                      for (final (i, s) in sections.indexed) ...[
-                        SizedBox(
-                          height: i == 0
-                              ? AppSpacing.xxl
-                              : HomeDimens.sectionGap,
-                        ),
-                        KeyedSubtree(key: ValueKey(s), child: section(s)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (i, s) in sections.indexed) ...[
+                          SizedBox(
+                            height: i == 0
+                                ? AppSpacing.xxl
+                                : HomeDimens.sectionGap,
+                          ),
+                          KeyedSubtree(key: ValueKey(s), child: section(s)),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),

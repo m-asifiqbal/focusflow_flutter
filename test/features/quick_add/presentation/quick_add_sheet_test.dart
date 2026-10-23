@@ -134,8 +134,14 @@ void main() {
     for (final t in ['Note', 'Task', 'Reminder', 'Habit', 'Password', 'Scan']) {
       expect(find.text(t), findsOneWidget);
     }
+    // Inside the sheet: Home behind it builds every section (its notes
+    // carry folder tags like IDEAS too).
+    final sheet = find.byType(QuickAddSheet);
     for (final c in ['IDEAS', 'TO-DOS', 'ALERTS', 'ROUTINE', 'SECURE', 'OCR']) {
-      expect(find.text(c), findsOneWidget);
+      expect(
+        find.descendant(of: sheet, matching: find.text(c)),
+        findsOneWidget,
+      );
     }
     expect(find.bySemanticsLabel('Dictate'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);

@@ -4,7 +4,9 @@
 ///
 /// * [FFDialog] — ringed icon · title · message · stacked full-width actions
 ///   (screen 28).
-/// * [showFFDialog] — fade/scale-in route with `ff.scrim` + blur barrier.
+/// * [showFFDialog] — fade/scale-in route with `ff.scrim` + blur barrier;
+///   [ffDialogRoute] builds the same route for callers that keep a handle
+///   on it (ff_progress_dialog.dart).
 /// * [confirmDelete] → [DeleteChoice] (delete / archive instead / cancel);
 ///   the copy names **Recently Deleted** and the 30-day purge.
 /// * [showFFConfirm] → bool (discard changes, sign out…).
@@ -33,29 +35,41 @@ Future<T?> showFFDialog<T>(
   bool useRootNavigator = true,
 }) {
   final navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+  return navigator.push<T>(
+    ffDialogRoute<T>(
+      context,
+      navigator: navigator,
+      builder: builder,
+      barrierDismissible: barrierDismissible,
+    ),
+  );
+}
+
+/// The route [showFFDialog] pushes onto [navigator], themed from [context].
+RawDialogRoute<T> ffDialogRoute<T>(
+  BuildContext context, {
+  required NavigatorState navigator,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+}) {
   final themes = InheritedTheme.capture(from: context, to: navigator.context);
   final reduce = context.reduceMotion;
-  return navigator.push<T>(
-    _FFDialogRoute<T>(
-      barrierDismissible: barrierDismissible,
-      barrierColor: context.ff.scrim,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      transitionDuration: reduce ? Duration.zero : AppMotion.normal,
-      pageBuilder: (ctx, _, _) => themes.wrap(Builder(builder: builder)),
-      transitionBuilder: (ctx, animation, _, child) {
-        final curved = CurvedAnimation(
-          parent: animation,
-          curve: AppMotion.curve,
-        );
-        return FadeTransition(
-          opacity: curved,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.94, end: 1).animate(curved),
-            child: child,
-          ),
-        );
-      },
-    ),
+  return _FFDialogRoute<T>(
+    barrierDismissible: barrierDismissible,
+    barrierColor: context.ff.scrim,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    transitionDuration: reduce ? Duration.zero : AppMotion.normal,
+    pageBuilder: (ctx, _, _) => themes.wrap(Builder(builder: builder)),
+    transitionBuilder: (ctx, animation, _, child) {
+      final curved = CurvedAnimation(parent: animation, curve: AppMotion.curve);
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.94, end: 1).animate(curved),
+          child: child,
+        ),
+      );
+    },
   );
 }
 

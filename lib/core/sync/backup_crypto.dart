@@ -157,7 +157,8 @@ abstract final class BackupCipher {
   /// data was tampered with.
   static Future<Uint8List> open(List<int> sealed, BackupKey key) async {
     if (sealed.length >= isolateThreshold) {
-      final bytes = Uint8List.fromList(sealed);
+      // Already bytes (a decoded archive entry): no extra copy of a large file.
+      final bytes = sealed is Uint8List ? sealed : Uint8List.fromList(sealed);
       final keyBytes = key.keyBytes;
       return Isolate.run(() => _openSync(bytes, keyBytes));
     }

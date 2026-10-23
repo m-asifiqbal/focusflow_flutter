@@ -225,7 +225,9 @@ class ImportController extends AutoDisposeNotifier<ImportState> {
         ImportState(phase: ImportPhase.error, fileName: name, error: message);
     try {
       if (ImportDetector.isFfBackup(name, picked.bytes)) {
-        final archive = ref.read(backupEngineProvider).inspect(picked.bytes);
+        final archive = await ref
+            .read(backupEngineProvider)
+            .inspectAsync(picked.bytes);
         _set(
           ImportState(
             phase: ImportPhase.preview,

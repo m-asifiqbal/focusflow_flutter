@@ -22,6 +22,7 @@ import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_engine.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
+import 'package:focusflow/core/sync/drive_store.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -232,6 +233,49 @@ class _PreviewSheet extends StatelessWidget {
   }
 }
 
+/// A restore (open + flow) is running somewhere in the app.
+bool _restoreRunning = false;
+
+/// Opens a backup with [open] (Drive download / file read) and runs
+/// [runRestoreFlow] on it, toasting the outcome. One restore at a time,
+/// app-wide: a second tap while a backup downloads is ignored — two flows
+/// used to stack their sheets and dialogs. With [showProgress] a
+/// "Downloading the backup…" dialog covers the download, so the screen
+/// never looks dead (off for the file picker, which has its own UI).
+Future<void> restoreFromSource(
+  BuildContext context,
+  WidgetRef ref,
+  Future<BackupArchive?> Function() open, {
+  bool showProgress = true,
+}) async {
+  if (_restoreRunning) return;
+  _restoreRunning = true;
+  try {
+    final BackupArchive? archive;
+    final progress = showProgress
+        ? showFFProgressDialog(context, tr('Downloading the backup…'))
+        : null;
+    try {
+      archive = await open();
+    } finally {
+      progress?.close();
+    }
+    if (archive == null || !context.mounted) return;
+    final msg = await runRestoreFlow(context, ref, archive);
+    if (msg != null && context.mounted) showFFToast(context, msg);
+  } on DriveFailure catch (f) {
+    if (context.mounted) showFFToast(context, f.message);
+  } on FormatException catch (e) {
+    if (context.mounted) showFFToast(context, e.message);
+  } on Object {
+    if (context.mounted) {
+      showFFToast(context, tr("Restore failed. Your data wasn't changed."));
+    }
+  } finally {
+    _restoreRunning = false;
+  }
+}
+
 /// Runs preview → mode → PIN → restore for [archive]. Returns the summary
 /// shown to the user, or null when cancelled.
 Future<String?> runRestoreFlow(
@@ -280,40 +324,34 @@ Future<String?> runRestoreFlow(
       );
       if (pin == null || !context.mounted) return null;
     }
-    final nav = Navigator.of(context, rootNavigator: true);
-    showFFDialog<void>(
-      context,
-      barrierDismissible: false,
-      builder: (_) => PopScope(
-        canPop: false,
-        child: FFDialog(content: FFLoadingView(message: tr('Restoring…'))),
-      ),
-    );
+    // Closed through its handle: a blind pop could close something else
+    // pushed above it and leave this un-dismissable dialog up for good.
+    final progress = showFFProgressDialog(context, tr('Restoring…'));
     try {
       final r = await actions.restore(archive, mode: mode, pin: pin);
-      nav.pop();
+      progress.close();
       return restoreSummary(r);
     } on WrongBackupPin {
-      nav.pop();
+      progress.close();
       error = tr('Wrong PIN. Try again.');
     } on Argon2Failure {
       // The PIN could not even be checked: this phone ran out of memory or
       // was too slow for the backup's key settings. Nothing was changed.
-      nav.pop();
+      progress.close();
       error = tr(
         "This phone couldn't check the PIN (low memory). Close other apps "
         'and try again.',
       );
     } on FormatException catch (e) {
       // Damaged / newer-version backups fail before anything changes.
-      nav.pop();
+      progress.close();
       return e.message;
     } on RestoreFailed catch (e) {
-      nav.pop();
+      progress.close();
       return restoreFailedMessage(e);
     } on Object {
       // Everything else fails before writing (PIN / file checks).
-      nav.pop();
+      progress.close();
       return tr("Restore failed. Your data wasn't changed.");
     }
   }

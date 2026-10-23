@@ -81,7 +81,7 @@ extension DriveSyncAccount on DriveSync {
   /// Downloads a backup for preview / restore (see BackupEngine.inspect).
   Future<BackupArchive> download(String fileId) async {
     final store = await requireStore();
-    return engine.inspect(await store.download(fileId));
+    return engine.inspectAsync(await store.download(fileId));
   }
 
   /// Raw bytes of a Drive backup ("Download" → save to device).

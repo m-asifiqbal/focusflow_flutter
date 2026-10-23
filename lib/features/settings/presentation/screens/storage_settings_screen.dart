@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/core/router/open_location.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/library/presentation/providers/library_providers.dart';
@@ -79,7 +80,9 @@ class StorageSettingsScreen extends ConsumerWidget {
                   value: formatBytes(b.bytesOf(u)),
                   chevron: b == StorageBucket.backups,
                   onTap: b == StorageBucket.backups
-                      ? () => context.push(AppRoutes.settingsBackup)
+                      // Backup lives in the tab shell; this page doesn't
+                      // (a push would stack a second shell: blank page).
+                      ? () => context.openLocation(AppRoutes.settingsBackup)
                       : null,
                 ),
             ],
