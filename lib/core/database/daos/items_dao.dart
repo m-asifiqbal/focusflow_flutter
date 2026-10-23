@@ -29,6 +29,7 @@ part 'items_dao.g.dart';
     Tasks,
     Reminders,
     Habits,
+    Medicines,
     VaultItems,
     Folders,
     Tags,
@@ -68,6 +69,10 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
       "SELECT 'habit', x.id, x.name, x.category, x.color_hex, x.is_pinned, x.is_favorite, "
       'x.folder_id, 0, x.created_at, x.updated_at, x.archived_at, x.deleted_at, '
       'NULL, NULL, 0, x.sort_order, NULL, NULL FROM habits x '
+      'UNION ALL '
+      "SELECT 'medicine', x.id, x.name, x.strength, x.color_hex, x.is_pinned, "
+      'x.is_favorite, x.folder_id, 0, x.created_at, x.updated_at, x.archived_at, '
+      'x.deleted_at, NULL, NULL, 0, x.sort_order, NULL, NULL FROM medicines x '
       'UNION ALL '
       "SELECT 'vault', x.id, x.title, CASE x.item_type WHEN 1 THEN 'Card' "
       "WHEN 2 THEN 'Wi-Fi' WHEN 3 THEN 'Secure note' ELSE 'Login' END, "
@@ -232,6 +237,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
       "${count('tasks', ' AND completed_at IS NOT NULL')} AS tasks_done, "
       '${count('reminders')} AS reminders_total, '
       '${count('habits')} AS habits_total, '
+      '${count('medicines')} AS medicines_total, '
       '${count('vault_items')} AS vault_total, '
       "${count('vault_items', ' AND password_strength IS NOT NULL AND password_strength <= 1')} AS vault_weak, "
       "${count('vault_items', ' AND breach_count > 0')} AS vault_breached, "

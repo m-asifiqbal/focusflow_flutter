@@ -213,7 +213,7 @@ final homeGetStartedProvider = Provider.autoDispose<HomeGetStarted?>((ref) {
 });
 
 /// True while the library is completely empty — no note, task, reminder,
-/// habit or vault item, not even archived or in Recently Deleted.
+/// habit, medicine or vault item, not even archived or in Recently Deleted.
 final homeFirstRunProvider = Provider.autoDispose<bool>((ref) {
   final c = ref.watch(libraryCountsProvider).valueOrNull;
   if (c == null) return false;
@@ -221,6 +221,7 @@ final homeFirstRunProvider = Provider.autoDispose<bool>((ref) {
           c.tasksTotal +
           c.remindersTotal +
           c.habitsTotal +
+          c.medicinesTotal +
           c.vaultTotal +
           c.archived +
           c.trash ==

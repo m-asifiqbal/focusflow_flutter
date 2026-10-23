@@ -93,6 +93,13 @@ class InboxDao extends DatabaseAccessor<AppDatabase> with _$InboxDaoMixin {
         db.habits.deletedAt,
       ),
       hiddenIn(
+        ItemType.medicine,
+        db.medicines,
+        db.medicines.id,
+        db.medicines.archivedAt,
+        db.medicines.deletedAt,
+      ),
+      hiddenIn(
         ItemType.vault,
         db.vaultItems,
         db.vaultItems.id,

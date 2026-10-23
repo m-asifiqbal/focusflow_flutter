@@ -76,6 +76,7 @@ class ItemSummary {
           ItemType.task => tr('Untitled task'),
           ItemType.reminder => tr('Untitled reminder'),
           ItemType.habit => tr('Untitled habit'),
+          ItemType.medicine => tr('Untitled medicine'),
           ItemType.vault => tr('Untitled password'),
         }
       : title;

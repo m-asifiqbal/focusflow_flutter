@@ -20,6 +20,8 @@ import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
+import 'package:focusflow/features/medicines/presentation/providers/medicines_providers.dart';
+import 'package:focusflow/features/medicines/presentation/widgets/medicine_day_slivers.dart';
 import 'package:focusflow/features/reminders/domain/repository/reminders_repository.dart';
 import 'package:focusflow/features/reminders/presentation/providers/reminders_list_providers.dart';
 import 'package:focusflow/features/reminders/presentation/state/reminder_timeline.dart';
@@ -67,6 +69,28 @@ class RemindersListScreen extends ConsumerWidget {
     final day = ref.watch(reminderDayProvider);
     final now = ref.watch(minuteClockProvider);
     final use24h = ref.watch(settingsProvider.select((s) => s.use24HourTime));
+    if (ref.watch(reminderMedicineChipProvider)) {
+      final doses = ref.watch(medicineDayProvider(day));
+      final data = doses.valueOrNull;
+      if (data == null) {
+        return [
+          SliverToBoxAdapter(
+            child: doses.hasError
+                ? RemindersErrorState(
+                    onRetry: () => ref.invalidate(medicineDayProvider(day)),
+                  )
+                : const RemindersLoadingState(),
+          ),
+        ];
+      }
+      return medicineDaySlivers(
+        context,
+        day: data,
+        now: now,
+        use24h: use24h,
+        showCabinet: false,
+      );
+    }
     final key = (day, scope);
     final async = ref.watch(remindersTimelineProvider(key));
     final timeline = async.valueOrNull;

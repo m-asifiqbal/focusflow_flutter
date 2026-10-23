@@ -22,6 +22,7 @@ import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/utils/clock.dart';
 import 'package:focusflow/features/habits/domain/repository/habits_repository.dart';
+import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
 import 'package:focusflow/features/reminders/domain/repository/reminders_repository.dart';
 import 'package:focusflow/features/tasks/domain/repository/tasks_repository.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
@@ -32,6 +33,7 @@ class PlannerSnapshotLoader {
     required this.reminders,
     required this.tasks,
     required this.habits,
+    required this.medicines,
     required this.clock,
     this.limits = PlannerLimits.conservative,
   });
@@ -39,6 +41,7 @@ class PlannerSnapshotLoader {
   final RemindersRepository reminders;
   final TasksRepository tasks;
   final HabitsRepository habits;
+  final MedicinesRepository medicines;
   final Clock clock;
 
   /// How far ahead / how much the platform's OS can be asked to hold.
@@ -48,12 +51,16 @@ class PlannerSnapshotLoader {
     final now = clock.now();
     final calendar = ZoneCalendar(location);
     final today = calendar.dayOf(now);
-    final (rs, ts, hs) = await (
+    final (rs, ts, hs, ms) = await (
       reminders.watchSchedulable().first,
       tasks.watchTasks(const TasksQuery()).first,
       // Computed now, not read from a shared live stream: the pass must
       // include every write made before it (editors flush right after saving).
       habits.todayHabitsNow(today, weekStartsOn: settings.weekStartsOn),
+      medicines.schedulable(
+        ZoneCalendar.addDays(today, -1),
+        ZoneCalendar.addDays(today, limits.horizonDays + 1),
+      ),
     ).wait;
     return PlannerInput(
       now: now,
@@ -62,6 +69,7 @@ class PlannerSnapshotLoader {
       reminders: rs,
       tasks: ts,
       habits: hs,
+      medicines: ms,
       horizonDays: limits.horizonDays,
       vitalHorizonDays: limits.vitalHorizonDays,
       maxScheduled: limits.maxScheduled,

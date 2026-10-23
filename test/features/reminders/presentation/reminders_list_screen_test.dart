@@ -303,6 +303,8 @@ void main() {
     await tester.runAsync(() => _seedMockup(h));
     await pumpApp(tester, h, AppRoutes.reminders, size: _tall);
 
+    await tester.ensureVisible(find.text('Recurring'));
+    await tester.pump();
     await tester.tap(find.text('Recurring'));
     await settle(tester);
     expect(find.text('Take vitamins'), findsOneWidget);

@@ -76,6 +76,7 @@ abstract final class NotificationTints {
   static ModuleColors get reminders => ModuleStyle.reminders.colors;
   static ModuleColors get tasks => ModuleStyle.tasks.colors;
   static ModuleColors get habits => ModuleStyle.habits.colors;
+  static ModuleColors get medicines => ModuleStyle.medicines.colors;
 }
 
 /// Display strings for the stored notification settings.

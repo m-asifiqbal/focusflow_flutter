@@ -78,6 +78,9 @@ String searchHitMeta(
         // The habit category is stored in English.
         parts.add(HabitWords.shown(hit.detail));
       }
+    case ItemType.medicine:
+      // The strength ("500 mg").
+      parts.add(hit.detail);
     case ItemType.vault:
       parts.add(vaultUnlocked ? hit.detail : tr('unlock to view'));
   }

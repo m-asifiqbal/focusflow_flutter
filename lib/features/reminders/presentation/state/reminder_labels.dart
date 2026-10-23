@@ -136,6 +136,7 @@ abstract final class ReminderLabels {
     ItemType.task => tr('Linked task'),
     ItemType.reminder => tr('Linked reminder'),
     ItemType.habit => tr('Linked habit'),
+    ItemType.medicine => tr('Linked medicine'),
     ItemType.vault => tr('Linked password'),
   };
 }

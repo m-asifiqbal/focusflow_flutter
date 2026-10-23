@@ -135,6 +135,7 @@ class _Header extends ConsumerWidget {
     ItemType.task => c.tasksTotal,
     ItemType.reminder => c.remindersTotal,
     ItemType.habit => c.habitsTotal,
+    ItemType.medicine => c.medicinesTotal,
     ItemType.vault => c.vaultTotal,
   };
 }

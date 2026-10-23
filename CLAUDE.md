@@ -2,7 +2,7 @@
 
 ## What this app is
 FocusFlow is an offline-first, all-in-one productivity app for Android and iOS: **Notes, Tasks,
-Reminders, Habits and a Password Vault**, plus Insights, Calendar, Archive/Trash, Settings, and
+Reminders, Habits, Medicines and a Password Vault**, plus Insights, Calendar, Archive/Trash, Settings, and
 optional **Google Drive backup/sync** (scope `drive.appdata` only) with local backups and
 import/export. The app works fully without an account.
 
@@ -47,7 +47,11 @@ lib/
     presentation/  providers/ notifiers/ state/ screens/ widgets/ + <feature>_routes.dart
 ```
 Features: onboarding, auth, home, quick_add, library, search, notes, tasks, reminders, habits,
-vault, archive, insights, calendar, notifications_center, settings, backup.
+medicines, vault, archive, insights, calendar, notifications_center, settings, backup.
+Medicines (`ItemType.medicine`) live in the Library and behind the Reminders "Medicine" chip;
+their tables (`medicines`, `medicine_doses`) are created on open without a schema bump
+(`AppDatabase._ensureMedicineSchema`) so backups stay readable by older installs — follow the
+same pattern for future tables. Dose alerts: docs/notifications.md › Medicine doses.
 
 ## Tech stack (do not change without asking)
 - Flutter 3.44 / Dart 3.12, Material 3 with a fully custom theme.

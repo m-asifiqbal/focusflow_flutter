@@ -3,8 +3,8 @@
 /// ============================================================
 ///
 /// What: the real [NotificationEngine]. After `start()` it watches
-///   • schedulable reminders, active tasks and today's habits (repository
-///     streams — used only as *triggers*),
+///   • schedulable reminders, active tasks, today's habits and medicine
+///     doses (table writes — used only as *triggers*),
 ///   • the settings and the OS permission,
 /// and after each change (debounced) runs one reconcile pass over a fresh
 /// planner snapshot. No editor schedules or cancels anything.
@@ -283,6 +283,8 @@ class ReconcilingNotificationEngine implements NotificationEngine {
         db.tasks,
         db.habits,
         db.habitLogs,
+        db.medicines,
+        db.medicineDoses,
         db.inboxEntries,
       ]);
     }
@@ -488,6 +490,8 @@ class ReconcilingNotificationEngine implements NotificationEngine {
           db.tasks,
           db.habits,
           db.habitLogs,
+          db.medicines,
+          db.medicineDoses,
         ]).listen((_) => schedule(), onError: error),
       )
       ..add(
@@ -513,7 +517,10 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     if (route == null) return;
     try {
       final router = _ref.read(routerProvider);
-      if (payload.open != null || payload.target != null) {
+      // An item opens on top (back returns); a list route (digests, a
+      // grouped medicine dose) switches to its tab — never push a page
+      // that lives inside the tab shell (see open_location.dart).
+      if (route != payload.route) {
         unawaited(router.push(route));
       } else {
         router.go(route);

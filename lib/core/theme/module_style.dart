@@ -8,6 +8,7 @@
 /// | Tasks      | #3B82F6 | #DBEAFE | #1D4ED8 | check-double   |
 /// | Reminders  | #F97316 | #FFEDD5 | #C2410C | bell           |
 /// | Habits     | #6366F1 | #E0E7FF | #4338CA | repeat         |
+/// | Medicine   | #EC4899 | #FCE7F3 | #BE185D | pills          |
 /// | Vault      | #F59E0B | #FEF3C7 | #B45309 | shield-halved  |
 /// | Quick Scan | #F43F5E | #FFE4E6 | #BE123C | camera         |
 /// ============================================================
@@ -23,6 +24,7 @@ enum AppModule {
   tasks,
   reminders,
   habits,
+  medicines,
   vault,
   scan;
 
@@ -31,6 +33,7 @@ enum AppModule {
     ItemType.task => AppModule.tasks,
     ItemType.reminder => AppModule.reminders,
     ItemType.habit => AppModule.habits,
+    ItemType.medicine => AppModule.medicines,
     ItemType.vault => AppModule.vault,
   };
 }
@@ -78,6 +81,14 @@ class ModuleStyle {
     ),
     FontAwesomeIcons.repeat,
   );
+  static const medicines = ModuleStyle._(
+    ModuleColors(
+      solid: AppPalette.pink500,
+      soft: AppPalette.pink100,
+      ink: AppPalette.pink700,
+    ),
+    FontAwesomeIcons.pills,
+  );
   static const vault = ModuleStyle._(
     ModuleColors(
       solid: AppPalette.amber500,
@@ -100,6 +111,7 @@ class ModuleStyle {
     AppModule.tasks => tasks,
     AppModule.reminders => reminders,
     AppModule.habits => habits,
+    AppModule.medicines => medicines,
     AppModule.vault => vault,
     AppModule.scan => scan,
   };

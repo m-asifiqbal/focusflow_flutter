@@ -239,6 +239,87 @@ class HabitLogs extends Table {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Medicines (added after v3 — created on open, see AppDatabase)
+// ─────────────────────────────────────────────────────────────
+
+@DataClassName('MedicineRow')
+class Medicines extends Table with ItemColumns {
+  TextColumn get name => text().withDefault(const Constant(''))();
+
+  /// Free text ("500 mg", "5 ml").
+  TextColumn get strength => text().withDefault(const Constant(''))();
+
+  /// 0 tablet · 1 capsule · 2 liquid · 3 drops · 4 injection · 5 inhaler ·
+  /// 6 other (MedicineForm).
+  IntColumn get form => integer().withDefault(const Constant(0))();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// 0 any time · 1 before food · 2 with food · 3 after food.
+  IntColumn get foodTiming => integer().withDefault(const Constant(0))();
+
+  /// 0 every day · 1 specific days · 2 every N days · 3 as needed.
+  IntColumn get scheduleType => integer().withDefault(const Constant(0))();
+
+  /// Bit 0 = Monday … bit 6 = Sunday (127 = every day).
+  IntColumn get weekdaysMask => integer().withDefault(const Constant(127))();
+  IntColumn get everyNDays => integer().withDefault(const Constant(2))();
+
+  /// JSON `[{"t":"08:00","q":1}]` — dose times and amounts.
+  TextColumn get dosesJson => text().withDefault(const Constant('[]'))();
+
+  /// First day of the course (yyyy-MM-dd).
+  TextColumn get startDate => text()();
+
+  /// Last day of the course (yyyy-MM-dd, inclusive); null = ongoing.
+  TextColumn get endDate => text().nullable()();
+
+  /// Units left in the pack; null = not tracked.
+  RealColumn get stockLeft => real().nullable()();
+
+  /// Refill alert threshold (units); null = no alert.
+  RealColumn get refillAt => real().nullable()();
+
+  /// Units added by the last refill (pre-fills the next one).
+  RealColumn get packSize => real().nullable()();
+  BoolColumn get reminderEnabled =>
+      boolean().withDefault(const Constant(true))();
+
+  /// 0 notification · 1 alarm (full screen).
+  IntColumn get alertStyle => integer().withDefault(const Constant(0))();
+  IntColumn get snoozeMinutes => integer().withDefault(const Constant(10))();
+
+  /// Remind again this many minutes after a dose not taken; 0 = off.
+  IntColumn get followUpMinutes => integer().withDefault(const Constant(30))();
+  BoolColumn get isPaused => boolean().withDefault(const Constant(false))();
+}
+
+/// One logged dose. The id is the natural key `medicineId|yyyy-MM-dd|HH:mm`
+/// (scheduled dose) or `medicineId|yyyy-MM-dd|a<epoch>` (as-needed dose), so
+/// the same dose logged on two devices is one row in a merge.
+@DataClassName('MedicineDoseRow')
+class MedicineDoses extends Table {
+  TextColumn get id => text()();
+  TextColumn get medicineId => text()();
+
+  /// Local day the dose belongs to (yyyy-MM-dd).
+  TextColumn get date => text()();
+
+  /// Scheduled minute of the day (as-needed: the minute it was taken).
+  IntColumn get slotMinutes => integer()();
+
+  /// 0 pending (snoozed) · 1 taken · 2 skipped.
+  IntColumn get status => integer().withDefault(const Constant(0))();
+  DateTimeColumn get takenAt => dateTime().nullable()();
+  RealColumn get quantity => real().withDefault(const Constant(1))();
+  DateTimeColumn get snoozedUntil => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+// ─────────────────────────────────────────────────────────────
 // Vault (secrets live ONLY inside encryptedPayload)
 // ─────────────────────────────────────────────────────────────
 
@@ -437,7 +518,8 @@ class BackupRecords extends Table {
 @DataClassName('TombstoneRow')
 class Tombstones extends Table {
   /// What was deleted: an `ItemType.key` (`note`, `task`, `reminder`,
-  /// `habit`, `vault`) or `tag`, `folder`, `habit_log`, `focus_session`.
+  /// `habit`, `medicine`, `vault`) or `tag`, `folder`, `habit_log`,
+  /// `medicine_dose`, `focus_session`.
   TextColumn get entity => text()();
 
   /// The deleted row's id — for habit logs the natural key

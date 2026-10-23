@@ -37,6 +37,7 @@ abstract final class AppRoutes {
   static const tasks = '/library/tasks';
   static const reminders = '/library/reminders';
   static const habits = '/library/habits';
+  static const medicines = '/library/medicines';
 
   /// Vault gate → list with inner tabs (Vault · Generator · Favourites · Security).
   static const vault = '/library/vault';
@@ -69,6 +70,10 @@ abstract final class AppRoutes {
   static const newHabitPath = '/habits/new';
   static String habit(String id) => '/habits/$id';
   static String habitEdit(String id) => '/habits/$id/edit';
+
+  static const newMedicinePath = '/medicines/new';
+  static String medicine(String id) => '/medicines/$id';
+  static String medicineEdit(String id) => '/medicines/$id/edit';
 
   static const newVaultItemPath = '/vault/new';
   static String vaultItem(String id) => '/vault/item/$id';
@@ -105,6 +110,7 @@ abstract final class AppRoutes {
     ItemType.task => task(ref.id),
     ItemType.reminder => reminder(ref.id),
     ItemType.habit => habit(ref.id),
+    ItemType.medicine => medicine(ref.id),
     ItemType.vault => vaultItem(ref.id),
   };
 

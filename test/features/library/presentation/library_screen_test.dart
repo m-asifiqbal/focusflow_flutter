@@ -62,7 +62,7 @@ void main() {
       await captureScreen(tester, '05_library');
     });
     expect(find.text('Library'), findsWidgets);
-    expect(find.text('113 items across 5 spaces'), findsOneWidget);
+    expect(find.text('113 items across 6 spaces'), findsOneWidget);
     expect(find.text('3 pinned'), findsOneWidget);
     expect(find.text('Edited 2h ago'), findsOneWidget);
     expect(find.text('7 due today'), findsOneWidget);
@@ -116,10 +116,10 @@ void main() {
     final seed = (await tester.runAsync(() => seedLibrary(h)))!;
     await pumpApp(tester, h, AppRoutes.library, size: _mockupSize);
 
-    expect(find.text('3 items across 5 spaces'), findsOneWidget);
+    expect(find.text('3 items across 6 spaces'), findsOneWidget);
     expect(find.text('1 pinned'), findsOneWidget);
     expect(find.text('1 due today'), findsOneWidget);
-    expect(find.text(LibraryFormat.createFirst), findsNWidgets(3));
+    expect(find.text(LibraryFormat.createFirst), findsNWidgets(4));
     expect(find.text('#work'), findsOneWidget);
 
     await tester.runAsync(
@@ -142,7 +142,7 @@ void main() {
   ) async {
     final h = await harness(tester, mockup: true);
     await pumpApp(tester, h, AppRoutes.library, size: _mockupSize);
-    expect(find.byType(LibraryModuleCard), findsNWidgets(5));
+    expect(find.byType(LibraryModuleCard), findsNWidgets(6));
 
     await tester.runAsync(
       () => h.updateSettings(
@@ -153,8 +153,8 @@ void main() {
       ),
     );
     await settle(tester);
-    expect(find.byType(LibraryModuleCard), findsNWidgets(4));
-    expect(find.text('107 items across 4 spaces'), findsOneWidget);
+    expect(find.byType(LibraryModuleCard), findsNWidgets(5));
+    expect(find.text('107 items across 5 spaces'), findsOneWidget);
     expect(find.text('37'), findsNothing);
     expect(find.text('2/4 done today'), findsNothing);
   });

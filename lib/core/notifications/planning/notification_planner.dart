@@ -27,6 +27,7 @@ library;
 
 import 'package:focusflow/core/notifications/planning/digest_planner.dart';
 import 'package:focusflow/core/notifications/planning/habit_planner.dart';
+import 'package:focusflow/core/notifications/planning/medicine_planner.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/notifications/planning/planner_input.dart';
 import 'package:focusflow/core/notifications/planning/reminder_planner.dart';
@@ -56,6 +57,7 @@ abstract final class NotificationPlanner {
     final raw = [
       ...ReminderPlanner.plan(input, end, pendingUntil: vitalEnd),
       ...HabitPlanner.plan(input, end),
+      ...MedicinePlanner.plan(input, end),
       ...DigestPlanner.plan(input, end, tasks: tasks),
     ];
 
@@ -99,18 +101,22 @@ abstract final class NotificationPlanner {
     ];
   }
 
-  /// Reminders, alarms and task alerts — what the user explicitly set up
+  /// Reminders, alarms, task alerts and medicine doses — what the user
+  /// explicitly set up
   /// and cannot afford to lose. Habit nudges, streak warnings and digests
   /// are routine.
   static bool isVital(PlannedNotification n) =>
       switch (n.category) {
         NotificationCategory.reminder ||
         NotificationCategory.alarm ||
-        NotificationCategory.task => true,
+        NotificationCategory.task ||
+        NotificationCategory.medicine => true,
         _ => false,
       } &&
-      // A repeat of a reminder is a nicety: it never takes a slot from one.
-      !ReminderPlanner.isRepeatKey(n.key);
+      // A repeat of a reminder (or a dose's follow-up) is a nicety: it
+      // never takes a slot from one.
+      !ReminderPlanner.isRepeatKey(n.key) &&
+      !MedicinePlanner.isFollowUpKey(n.key);
 
   /// Keeps at most [maxCount] of [sorted] (soonest first). Vital ones take
   /// their slots first, the routine ones fill what is left — a daily
@@ -147,6 +153,9 @@ abstract final class NotificationPlanner {
     if (key.startsWith('rem:')) return ReminderPlanner.stillWanted(input, key);
     if (key.startsWith('hab:') || key.startsWith('stk:')) {
       return HabitPlanner.stillWanted(input, key);
+    }
+    if (key.startsWith(MedicinePlanner.prefix)) {
+      return MedicinePlanner.stillWanted(input, key);
     }
     return true;
   }

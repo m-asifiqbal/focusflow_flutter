@@ -51,6 +51,10 @@ abstract final class ExportFilter {
         for (final r in s.rows('habit_logs'))
           if (parentKept('habit', r['habit_id'])) r,
       ],
+      'medicine_doses': [
+        for (final r in s.rows('medicine_doses'))
+          if (parentKept('medicine', r['medicine_id'])) r,
+      ],
       'vault_history': [
         for (final r in s.rows('vault_history'))
           if (parentKept('vault', r['item_id'])) r,

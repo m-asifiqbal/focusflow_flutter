@@ -41,6 +41,11 @@ const Map<ExportModule, List<String>> kCsvColumns = {
     'weekdaysMask', 'timesPerWeek', 'everyNDays', 'startDate', 'paused', //
     'doneDays', 'created', 'archived',
   ],
+  ExportModule.medicines: [
+    'type', 'name', 'strength', 'form', 'food', 'schedule', 'times', //
+    'weekdaysMask', 'everyNDays', 'startDate', 'endDate', 'stockLeft', //
+    'refillAt', 'paused', 'takenDoses', 'note', 'created', 'archived',
+  ],
 };
 
 abstract final class ExportWriters {
@@ -65,6 +70,7 @@ abstract final class ExportWriters {
       if (modules.contains(ExportModule.tasks)) 'tasks': r.tasks(),
       if (modules.contains(ExportModule.reminders)) 'reminders': r.reminders(),
       if (modules.contains(ExportModule.habits)) 'habits': r.habits(),
+      if (modules.contains(ExportModule.medicines)) 'medicines': r.medicines(),
     };
     return Uint8List.fromList(
       utf8.encode(const JsonEncoder.withIndent('  ').convert(doc)),
@@ -85,6 +91,7 @@ abstract final class ExportWriters {
         ExportModule.tasks => r.tasks(),
         ExportModule.reminders => r.reminders(),
         ExportModule.habits => r.habits(),
+        ExportModule.medicines => r.medicines(),
         ExportModule.vault => const <Map<String, Object?>>[],
       };
       final cols = kCsvColumns[m]!;
@@ -109,6 +116,10 @@ abstract final class ExportWriters {
           if ((l as Map)['skipped'] != true && ((l['count'] as int?) ?? 0) > 0)
             l['count'] == 1 ? l['date'] : '${l['date']}=${l['count']}',
       ].join(' '),
+      'takenDoses' => [
+        for (final d in (r['doses'] as List? ?? const []))
+          if ((d as Map)['status'] == 'taken') '${d['date']} ${d['time']}',
+      ].join('; '),
       _ => r[col],
     };
   }

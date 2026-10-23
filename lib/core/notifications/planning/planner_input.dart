@@ -17,6 +17,7 @@ import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
+import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 
@@ -29,6 +30,7 @@ class PlannerInput {
     this.reminders = const [],
     this.tasks = const [],
     this.habits = const [],
+    this.medicines = const [],
     this.horizonDays = 14,
     this.vitalHorizonDays = 14,
     this.maxScheduled = defaultMaxScheduled,
@@ -55,6 +57,10 @@ class PlannerInput {
   /// Today's status of every active, not paused habit
   /// (`HabitsRepository.watchTodayHabits`).
   final List<HabitDayStatus> habits;
+
+  /// Schedulable medicines (`MedicinesRepository.schedulable`) with their
+  /// dose logs from yesterday to the end of the window.
+  final List<MedicineWithDoses> medicines;
 
   /// How many calendar days ahead to plan (the rolling window).
   final int horizonDays;

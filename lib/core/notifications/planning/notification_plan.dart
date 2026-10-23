@@ -45,6 +45,7 @@ enum NotificationChannelId {
   alarms('alarms_v2'),
   tasks('tasks_v2'),
   habits('habits_v2'),
+  medicines('medicines_v2'),
 
   /// Reminders whose sound is "Silent" (Android channel sounds are fixed,
   /// so silence needs a channel of its own).
@@ -67,6 +68,7 @@ enum NotificationChannelId {
     alarms => tr('Alarms'),
     tasks => tr('Tasks'),
     habits => tr('Habits'),
+    medicines => tr('Medicine'),
     silentReminders => tr('Silent reminders'),
     digests => tr('Daily digest'),
     system => tr('Security & sync'),
@@ -82,6 +84,7 @@ enum NotificationChannelId {
     alarms => tr('Alarm-style reminders shown full screen'),
     tasks => tr('Task due and overdue alerts'),
     habits => tr('Habit check-ins and streaks at risk'),
+    medicines => tr('Dose reminders for your medicines'),
     silentReminders => tr('Reminders set to Silent: shown without a sound'),
     digests => tr('Morning briefing, evening review and weekly report'),
     system => tr('Vault security alerts and backup / sync status'),
@@ -130,6 +133,7 @@ enum NotificationCategory {
   reminder(NotificationChannelId.reminders, InboxKind.reminder),
   alarm(NotificationChannelId.alarms, InboxKind.reminder),
   task(NotificationChannelId.tasks, InboxKind.task),
+  medicine(NotificationChannelId.medicines, InboxKind.medicine),
   habit(NotificationChannelId.habits, InboxKind.habit),
   streak(NotificationChannelId.habits, InboxKind.habit),
   digest(NotificationChannelId.digests, InboxKind.system),
@@ -141,8 +145,9 @@ enum NotificationCategory {
   final NotificationChannelId channel;
   final InboxKind inboxKind;
 
-  /// Alarm-style reminders ignore quiet hours (screen 31).
-  bool get bypassesQuietHours => this == alarm;
+  /// Alarm-style reminders ignore quiet hours (screen 31), and so do
+  /// medicine doses: a bedtime dose must not move to the morning.
+  bool get bypassesQuietHours => this == alarm || this == medicine;
 
   /// Ordering when several notifications share a minute and the rolling
   /// window must drop some (lower = more important).
@@ -168,7 +173,13 @@ enum NotificationButton {
   checkIn('checkin'),
 
   /// Open the item (brings the app to the foreground, like a body tap).
-  open('open');
+  open('open'),
+
+  /// Mark the notified medicine doses taken.
+  taken('taken'),
+
+  /// Mark the notified medicine doses skipped.
+  skip('skip');
 
   const NotificationButton(this.id);
 
@@ -198,6 +209,7 @@ class NotificationPayload {
     this.route,
     this.snoozeMinutes,
     this.day,
+    this.doses = const [],
   });
 
   /// Stable plan key (`rem:<id>:<epoch>`, `hab:<id>:<day>:<minute>` …).
@@ -216,8 +228,14 @@ class NotificationPayload {
   /// Snooze length for [NotificationButton.snooze].
   final int? snoozeMinutes;
 
-  /// Habit day for [NotificationButton.checkIn] (`yyyy-MM-dd`).
+  /// Habit day for [NotificationButton.checkIn] / medicine dose day
+  /// (`yyyy-MM-dd`).
   final String? day;
+
+  /// Medicine ids whose dose at [day] / the key's minute a Taken, Skip or
+  /// Snooze applies to (a medicine notification groups the doses due at
+  /// the same time).
+  final List<String> doses;
 
   NotificationPayload withCategory(NotificationCategory category) =>
       NotificationPayload(
@@ -228,6 +246,7 @@ class NotificationPayload {
         route: route,
         snoozeMinutes: snoozeMinutes,
         day: day,
+        doses: doses,
       );
 
   String encode() => jsonEncode({
@@ -238,6 +257,7 @@ class NotificationPayload {
     if (route != null) 'r': route,
     if (snoozeMinutes != null) 's': snoozeMinutes,
     if (day != null) 'd': day,
+    if (doses.isNotEmpty) 'm': doses,
   });
 
   static NotificationPayload? decode(String? raw) {
@@ -256,6 +276,9 @@ class NotificationPayload {
         route: j['r'] is String ? j['r'] as String : null,
         snoozeMinutes: j['s'] is num ? (j['s'] as num).toInt() : null,
         day: j['d'] is String ? j['d'] as String : null,
+        doses: j['m'] is List
+            ? List.unmodifiable((j['m'] as List).whereType<String>())
+            : const [],
       );
     } on FormatException {
       return null;

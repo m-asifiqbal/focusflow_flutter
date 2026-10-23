@@ -127,6 +127,7 @@ const AppSettings quiet = AppSettings(
   notifyTasks: false,
   notifyHabits: false,
   notifyStreakRisk: false,
+  notifyMedicines: false,
   quietHours: false,
   badgeMode: BadgeMode.none,
 );

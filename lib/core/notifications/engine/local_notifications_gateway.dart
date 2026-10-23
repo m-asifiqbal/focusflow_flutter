@@ -141,6 +141,11 @@ class LocalNotificationsGateway implements NotificationGateway {
         NotificationButton.open,
       ],
       [NotificationButton.checkIn],
+      [
+        NotificationButton.taken,
+        NotificationButton.snooze,
+        NotificationButton.skip,
+      ],
     ])
       DarwinNotificationCategory(
         _iosCategory(buttons),
@@ -490,6 +495,8 @@ class LocalNotificationsGateway implements NotificationGateway {
     NotificationButton.snooze => tr('Snooze'),
     NotificationButton.checkIn => tr('Check in'),
     NotificationButton.open => tr('Open'),
+    NotificationButton.taken => tr('Taken'),
+    NotificationButton.skip => tr('Skip'),
   };
 
   @override

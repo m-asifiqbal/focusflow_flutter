@@ -64,6 +64,16 @@ class NotificationModuleSection extends ConsumerWidget {
           onChanged: c.setHabits,
         ),
         FFListRow.toggle(
+          leading: NotificationRowTile(
+            FontAwesomeIcons.pills,
+            NotificationTints.medicines,
+          ),
+          title: tr('Medicine doses'),
+          subtitle: tr('At each dose time, and again if not taken'),
+          value: s.notifyMedicines,
+          onChanged: c.setMedicines,
+        ),
+        FFListRow.toggle(
           leading: const NotificationRowTile(
             FontAwesomeIcons.fire,
             NotificationTints.streak,

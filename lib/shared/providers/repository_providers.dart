@@ -25,6 +25,8 @@ import 'package:focusflow/features/backup/data/repository/backup_records_reposit
 import 'package:focusflow/features/backup/domain/repository/backup_records_repository.dart';
 import 'package:focusflow/features/habits/data/repository/habits_repository_impl.dart';
 import 'package:focusflow/features/habits/domain/repository/habits_repository.dart';
+import 'package:focusflow/features/medicines/data/repository/medicines_repository_impl.dart';
+import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
 import 'package:focusflow/features/insights/data/repository/focus_sessions_repository_impl.dart';
 import 'package:focusflow/features/insights/domain/repository/focus_sessions_repository.dart';
 import 'package:focusflow/features/notes/data/repository/notes_repository_impl.dart';
@@ -75,6 +77,7 @@ final itemsRepositoryProvider = Provider<ItemsRepository>((ref) {
     files: ref.watch(attachmentFileStoreProvider),
     reminders: ref.watch(remindersRepositoryProvider),
     habits: ref.watch(habitsRepositoryProvider),
+    medicines: ref.watch(medicinesRepositoryProvider),
   );
 });
 
@@ -133,6 +136,16 @@ final remindersRepositoryProvider = Provider<RemindersRepository>((ref) {
 final habitsRepositoryProvider = Provider<HabitsRepository>((ref) {
   final d = _deps(ref);
   return HabitsRepositoryImpl(
+    db: d.db,
+    clock: d.clock,
+    deviceId: d.deviceId,
+    newId: d.newId,
+  );
+});
+
+final medicinesRepositoryProvider = Provider<MedicinesRepository>((ref) {
+  final d = _deps(ref);
+  return MedicinesRepositoryImpl(
     db: d.db,
     clock: d.clock,
     deviceId: d.deviceId,

@@ -36,6 +36,7 @@ import 'package:focusflow/features/auth/presentation/auth_routes.dart';
 import 'package:focusflow/features/backup/presentation/backup_routes.dart';
 import 'package:focusflow/features/calendar/presentation/calendar_routes.dart';
 import 'package:focusflow/features/habits/presentation/habits_routes.dart';
+import 'package:focusflow/features/medicines/presentation/medicines_routes.dart';
 import 'package:focusflow/features/home/presentation/home_routes.dart';
 import 'package:focusflow/features/insights/presentation/insights_routes.dart';
 import 'package:focusflow/features/library/presentation/library_routes.dart';
@@ -113,6 +114,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 ...tasksLibraryRoutes,
                 ...remindersLibraryRoutes,
                 ...habitsLibraryRoutes,
+                ...medicinesLibraryRoutes,
                 ...vaultLibraryRoutes,
                 ...archiveLibraryRoutes,
               ]),
@@ -141,6 +143,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ...tasksRootRoutes,
         ...remindersRootRoutes,
         ...habitsRootRoutes,
+        ...medicinesRootRoutes,
         ...vaultRootRoutes,
         // focusflow://item/{type}/{id} → the item's editor/detail.
         GoRoute(

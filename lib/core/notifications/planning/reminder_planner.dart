@@ -126,7 +126,8 @@ abstract final class ReminderPlanner {
   }
 
   /// A plan key of a "repeat until done" copy: `rem:<id>:<epoch>:r<n>`.
-  static bool isRepeatKey(String key) => key.split(':').length > 3;
+  static bool isRepeatKey(String key) =>
+      key.startsWith('rem:') && key.split(':').length > 3;
 
   /// "Repeat until done" (Settings › Notifications): a reminder that is
   /// still open — not done, not archived — is shown again every

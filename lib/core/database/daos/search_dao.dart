@@ -51,6 +51,7 @@ class _SearchSpec {
     Tasks,
     Reminders,
     Habits,
+    Medicines,
     VaultItems,
     Folders,
     ItemTags,
@@ -96,6 +97,14 @@ class SearchDao extends DatabaseAccessor<AppDatabase> with _$SearchDaoMixin {
       titleExpr: 'x.name',
       metaExpr: 'x.category',
       weights: '10.0, 2.0',
+    ),
+    ItemType.medicine: _SearchSpec(
+      fts: 'medicines_fts',
+      table: 'medicines',
+      titleExpr: 'x.name',
+      metaExpr: 'x.strength',
+      weights: '10.0, 3.0, 1.0',
+      snippetColumn: 2,
     ),
     ItemType.vault: _SearchSpec(
       fts: 'vault_fts',

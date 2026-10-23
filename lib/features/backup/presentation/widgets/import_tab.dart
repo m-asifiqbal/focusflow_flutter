@@ -2,8 +2,9 @@
 /// IMPORT TAB — Import & Export › Import (screen 35)
 /// ============================================================
 ///
-/// What: pick a file → detected source + preview (counts per kind, rows
-/// that will be skipped) → Import (dedupe by title + date) with progress →
+/// What: pick a file → detected source + preview (a colour-coded
+/// composition bar and counts per kind, rows that will be skipped —
+/// import_review_widgets.dart) → Import (dedupe by title + date) with progress →
 /// summary with the partial-failure report. A .ffbackup goes through the
 /// restore flow (Merge / Replace, PIN). Password CSVs ask to unlock the
 /// vault before they are even parsed, and are encrypted on write.
@@ -22,6 +23,7 @@ import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/presentation/notifiers/import_export_controllers.dart';
+import 'package:focusflow/features/backup/presentation/widgets/import_review_widgets.dart';
 import 'package:focusflow/features/backup/presentation/widgets/restore_sheets.dart';
 import 'package:focusflow/features/vault/presentation/vault_gate.dart';
 
@@ -31,7 +33,7 @@ List<(String, String)> get kImportFormats => [
   (tr('FocusFlow backup'), tr('.ffbackup — restore with Merge or Replace')),
   (
     'FocusFlow JSON / CSV',
-    tr('Your own exports, or any CSV with a title column'),
+    tr('Your own exports (medicines too), or any CSV with a title column'),
   ),
   ('Google Keep', tr('Google Takeout zip or note .json files')),
   ('Todoist', tr('Project CSV export')),
@@ -76,13 +78,35 @@ class ImportTab extends ConsumerWidget {
         padding: EdgeInsetsDirectional.only(top: AppSpacing.xxxl),
         child: FFLoadingView(message: tr('Reading file…')),
       ),
-      ImportPhase.preview => _Preview(
-        state: s,
+      ImportPhase.preview => ImportPreviewView(
+        source: s.bundle?.source.label ?? ImportSource.ffbackup.label,
+        fileName: s.fileName,
+        parts: _parts(s),
+        total: s.bundle?.itemCount ?? s.archive?.manifest.itemCount ?? 0,
+        problems: [for (final p in s.bundle?.problems ?? const []) p.message],
+        hasLogins: s.bundle?.logins.isNotEmpty ?? false,
+        isBackup: s.bundle == null,
         onImport: () => _confirm(context, ref),
         onCancel: c.reset,
       ),
-      ImportPhase.importing => _Progress(state: s),
-      ImportPhase.done => _Summary(state: s, onDone: c.reset),
+      ImportPhase.importing => ImportProgressView(
+        progress: s.progress,
+        total: s.total,
+      ),
+      ImportPhase.done => ImportSummaryView(
+        imported: s.result?.imported,
+        duplicates: s.result?.duplicates ?? 0,
+        failed: s.result?.failed ?? 0,
+        failures: s.result?.failures ?? const [],
+        title: s.result == null
+            ? tr('Restore complete')
+            : (s.result!.failed > 0
+                  ? tr('Imported with some problems')
+                  : tr('Import complete')),
+        message: s.result == null ? s.summary : null,
+        notice: s.notice,
+        onDone: c.reset,
+      ),
       ImportPhase.error => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -142,211 +166,27 @@ class _Intro extends StatelessWidget {
   );
 }
 
-class _Preview extends StatelessWidget {
-  const _Preview({
-    required this.state,
-    required this.onImport,
-    required this.onCancel,
-  });
-
-  final ImportState state;
-  final VoidCallback onImport;
-  final VoidCallback onCancel;
-
-  @override
-  Widget build(BuildContext context) {
-    final b = state.bundle;
-    final m = state.archive?.manifest;
-    final rows = <(ModuleStyle, String, int)>[
-      if (b != null) ...[
-        (ModuleStyle.notes, tr('Notes'), b.notes.length),
-        (ModuleStyle.tasks, tr('Tasks'), b.tasks.length),
-        (ModuleStyle.reminders, tr('Reminders'), b.reminders.length),
-        (ModuleStyle.habits, tr('Habits'), b.habits.length),
-        (ModuleStyle.vault, tr('Passwords'), b.logins.length),
-      ] else if (m != null) ...[
-        (ModuleStyle.notes, tr('Notes'), m.counts['notes'] ?? 0),
-        (ModuleStyle.tasks, tr('Tasks'), m.counts['tasks'] ?? 0),
-        (ModuleStyle.reminders, tr('Reminders'), m.counts['reminders'] ?? 0),
-        (ModuleStyle.habits, tr('Habits'), m.counts['habits'] ?? 0),
-        (ModuleStyle.vault, tr('Vault'), m.counts['vault_items'] ?? 0),
-      ],
-    ]..removeWhere((r) => r.$3 == 0);
-    final total = b?.itemCount ?? m?.itemCount ?? 0;
-    final source = b?.source.label ?? ImportSource.ffbackup.label;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FFGroupedList(
-          label: tr('Detected · {source}', {'source': source}),
-          footer: state.fileName,
-          children: [
-            for (final (style, label, n) in rows)
-              FFListRow(
-                leading: FFIconTile(
-                  icon: style.icon,
-                  colors: style.colors,
-                  size: AppSizes.iconTileSm,
-                ),
-                title: label,
-                value: '$n',
-              ),
-          ],
-        ),
-        if (b != null && b.problems.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.lg),
-          FFInfoBanner(
-            icon: FontAwesomeIcons.circleInfo,
-            colors: ModuleStyle.vault.colors,
-            text: b.problems.take(4).map((p) => p.message).join('\n'),
-          ),
-        ],
-        if (b != null && b.logins.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.lg),
-          FFInfoBanner(
-            icon: FontAwesomeIcons.lock,
-            text: tr(
-              'Passwords are encrypted into your vault as they are imported. Delete the CSV file afterwards.',
-            ),
-          ),
-        ],
-        const SizedBox(height: AppSpacing.xxl),
-        FFPrimaryButton(
-          label: m != null
-              ? tr('Restore {total} items…', {'total': total})
-              : tr('Import {count, plural, one {# item} other {# items}}', {
-                  'count': total,
-                }),
-          icon: FontAwesomeIcons.fileImport,
-          onPressed: total == 0 ? null : onImport,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        FFTextButton(label: tr('Cancel'), onPressed: onCancel),
-      ],
-    );
+/// The kinds of items in the file (or backup), in module order.
+List<ImportPart> _parts(ImportState state) {
+  final b = state.bundle;
+  final m = state.archive?.manifest;
+  if (b != null) {
+    return [
+      (ModuleStyle.notes, tr('Notes'), b.notes.length),
+      (ModuleStyle.tasks, tr('Tasks'), b.tasks.length),
+      (ModuleStyle.reminders, tr('Reminders'), b.reminders.length),
+      (ModuleStyle.habits, tr('Habits'), b.habits.length),
+      (ModuleStyle.medicines, tr('Medicines'), b.medicines.length),
+      (ModuleStyle.vault, tr('Passwords'), b.logins.length),
+    ];
   }
-}
-
-class _Progress extends StatelessWidget {
-  const _Progress({required this.state});
-
-  final ImportState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final ff = context.ff;
-    final total = state.total;
-    final done = (state.progress * total).round();
-    return FFCard(
-      padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-      child: Semantics(
-        liveRegion: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              tr('Importing {done} of {total}…', {
-                'done': done,
-                'total': total,
-              }),
-              style: context.text.cardTitle,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadii.pill),
-              child: LinearProgressIndicator(
-                value: state.progress,
-                minHeight: 8,
-                color: ff.primary,
-                backgroundColor: ff.divider,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Summary extends StatelessWidget {
-  const _Summary({required this.state, required this.onDone});
-
-  final ImportState state;
-  final VoidCallback onDone;
-
-  @override
-  Widget build(BuildContext context) {
-    final r = state.result;
-    final failed = r != null && r.failed > 0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FFCard(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-          child: Column(
-            children: [
-              FFIconTile(
-                icon: failed
-                    ? FontAwesomeIcons.triangleExclamation
-                    : FontAwesomeIcons.check,
-                colors: failed
-                    ? ModuleStyle.vault.colors
-                    : ModuleStyle.notes.colors,
-                size: AppSizes.iconTileLg,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                r == null
-                    ? tr('Restore complete')
-                    : failed
-                    ? tr('Imported with some problems')
-                    : tr('Import complete'),
-                style: context.text.sectionTitle,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                r == null
-                    ? (state.summary ?? '')
-                    : [
-                        tr('{count} imported', {'count': r.imported}),
-                        if (r.duplicates > 0)
-                          tr('{count} duplicates skipped', {
-                            'count': r.duplicates,
-                          }),
-                        if (r.failed > 0)
-                          tr('{count} failed', {'count': r.failed}),
-                      ].join(' · '),
-                textAlign: TextAlign.center,
-                style: context.text.bodySmall,
-              ),
-            ],
-          ),
-        ),
-        if (state.notice case final notice?) ...[
-          const SizedBox(height: AppSpacing.lg),
-          FFInfoBanner(icon: FontAwesomeIcons.circleInfo, text: notice),
-        ],
-        if (failed) ...[
-          const SizedBox(height: AppSpacing.section),
-          FFGroupedList(
-            label: tr('Couldn\'t import'),
-            children: [
-              for (final f in r.failures.take(20))
-                FFListRow(
-                  title: f,
-                  leading: FFIconTile.soft(
-                    icon: FontAwesomeIcons.xmark,
-                    colors: ModuleStyle.vault.colors,
-                    size: AppSizes.iconTileSm,
-                  ),
-                ),
-            ],
-          ),
-        ],
-        const SizedBox(height: AppSpacing.xxl),
-        FFSecondaryButton(label: tr('Done'), onPressed: onDone),
-      ],
-    );
-  }
+  if (m == null) return const [];
+  return [
+    (ModuleStyle.notes, tr('Notes'), m.counts['notes'] ?? 0),
+    (ModuleStyle.tasks, tr('Tasks'), m.counts['tasks'] ?? 0),
+    (ModuleStyle.reminders, tr('Reminders'), m.counts['reminders'] ?? 0),
+    (ModuleStyle.habits, tr('Habits'), m.counts['habits'] ?? 0),
+    (ModuleStyle.medicines, tr('Medicines'), m.counts['medicines'] ?? 0),
+    (ModuleStyle.vault, tr('Vault'), m.counts['vault_items'] ?? 0),
+  ];
 }

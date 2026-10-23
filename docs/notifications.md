@@ -16,6 +16,27 @@ closed (code: `lib/core/notifications/`).
   (background isolate) and by the 12 h maintenance task
   (`core/sync/background_runner.dart` → `engine/background_reconcile.dart`).
 
+## Medicine doses
+* `planning/medicine_planner.dart` plans one notification per dose time;
+  doses of several medicines due at the same minute share one ("Time for 2
+  medicines") and its Taken / Snooze / Skip apply to all of them (the
+  payload's `doses` lists the medicine ids). Keys: `med:<day>:<minute>`,
+  `…:s` for snoozed doses (a new key, so an alarm the alarm service
+  re-armed on its own is cancelled rather than doubled) and `…:f` for the
+  "Did you take your 8:00 AM dose?" follow-up (`followUpMinutes` after the
+  dose while it is still not logged; not vital, no inbox row).
+* Doses are vital (they take their cap slots first, like reminders) and
+  ignore quiet hours. They are planned over `horizonDays` (14), not the
+  longer vital horizon, so a daily medicine can't fill the cap for months.
+* Alarm-style medicines ring through the alarm service; the follow-up is
+  always a plain notification. Settings › Notifications › "Medicine doses"
+  (`AppSettings.notifyMedicines`) turns them all off.
+* Taken / Skip / Snooze write through `MedicinesRepository` from the
+  foreground handler, the background isolate and the alarm's Snooze alike
+  (`engine/notification_actions.dart`).
+* The medicine name only appears in the text; the lock-screen setting
+  (Settings › Notifications) decides what a locked phone shows.
+
 ## Alarms (Android): real ones
 An alarm-style reminder used to be a "max priority, insistent" notification:
 it played its channel sound once and stayed silent in Do-not-disturb, so it

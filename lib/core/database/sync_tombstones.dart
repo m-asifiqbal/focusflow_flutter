@@ -26,12 +26,15 @@ const List<(String, String, String)> tombstoneSources = [
   ('tasks', 'task', '{r}.id'),
   ('reminders', 'reminder', '{r}.id'),
   ('habits', 'habit', '{r}.id'),
+  ('medicines', 'medicine', '{r}.id'),
   ('vault_items', 'vault', '{r}.id'),
   ('tags', 'tag', '{r}.id'),
   ('folders', 'folder', '{r}.id'),
   ('focus_sessions', 'focus_session', '{r}.id'),
   // Habit logs merge per (habit, day): log ids differ between devices.
   ('habit_logs', 'habit_log', "{r}.habit_id || '|' || {r}.date"),
+  // Dose ids are natural keys (medicineId|day|slot), the same everywhere.
+  ('medicine_doses', 'medicine_dose', '{r}.id'),
 ];
 
 /// Tombstone key of a habit log (matches the trigger expression above).

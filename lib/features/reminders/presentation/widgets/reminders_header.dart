@@ -166,6 +166,7 @@ class _WeekCard extends ConsumerWidget {
           hasItems: (d) => dots.contains(DateUtilsX.dayKey(d)),
           onSelected: (d) {
             ref.read(selectedReminderDayProvider.notifier).select(d);
+            // The Medicine chip stays on: it shows the picked day too.
             ref.read(reminderFilterProvider.notifier).set(RemindersScope.today);
           },
         ),
@@ -177,16 +178,37 @@ class _WeekCard extends ConsumerWidget {
 class _FilterChips extends ConsumerWidget {
   const _FilterChips();
 
+  /// Value of the "Medicine" chip (the others are [RemindersScope]s).
+  static const Object _medicine = 'medicine';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(reminderFilterProvider);
-    return FFChipBar<RemindersScope>(
+    final medicine = ref.watch(reminderMedicineChipProvider);
+    final filters = reminderFilters;
+    return FFChipBar<Object>(
       items: [
-        for (final (scope, label) in reminderFilters)
-          FFChipItem(value: scope, label: label),
+        for (final (i, (scope, label)) in filters.indexed) ...[
+          FFChipItem<Object>(value: scope, label: label),
+          // After "Upcoming": the doses of the picked day.
+          if (i == 1)
+            FFChipItem<Object>(
+              value: _medicine,
+              label: tr('Medicine'),
+              icon: FontAwesomeIcons.pills,
+            ),
+        ],
       ],
-      selected: selected,
-      onSelected: ref.read(reminderFilterProvider.notifier).set,
+      selected: medicine ? _medicine : selected,
+      onSelected: (v) {
+        final chip = ref.read(reminderMedicineChipProvider.notifier);
+        if (v == _medicine) {
+          chip.set(true);
+          return;
+        }
+        chip.set(false);
+        ref.read(reminderFilterProvider.notifier).set(v as RemindersScope);
+      },
     );
   }
 }

@@ -6613,6 +6613,2351 @@ class HabitLogsCompanion extends UpdateCompanion<HabitLogRow> {
   }
 }
 
+class $MedicinesTable extends Medicines
+    with TableInfo<$MedicinesTable, MedicineRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MedicinesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _archivedAtMeta = const VerificationMeta(
+    'archivedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> archivedAt = GeneratedColumn<DateTime>(
+    'archived_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _colorHexMeta = const VerificationMeta(
+    'colorHex',
+  );
+  @override
+  late final GeneratedColumn<String> colorHex = GeneratedColumn<String>(
+    'color_hex',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _folderIdMeta = const VerificationMeta(
+    'folderId',
+  );
+  @override
+  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
+    'folder_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<double> sortOrder = GeneratedColumn<double>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _syncVersionMeta = const VerificationMeta(
+    'syncVersion',
+  );
+  @override
+  late final GeneratedColumn<int> syncVersion = GeneratedColumn<int>(
+    'sync_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _strengthMeta = const VerificationMeta(
+    'strength',
+  );
+  @override
+  late final GeneratedColumn<String> strength = GeneratedColumn<String>(
+    'strength',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _formMeta = const VerificationMeta('form');
+  @override
+  late final GeneratedColumn<int> form = GeneratedColumn<int>(
+    'form',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _foodTimingMeta = const VerificationMeta(
+    'foodTiming',
+  );
+  @override
+  late final GeneratedColumn<int> foodTiming = GeneratedColumn<int>(
+    'food_timing',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _scheduleTypeMeta = const VerificationMeta(
+    'scheduleType',
+  );
+  @override
+  late final GeneratedColumn<int> scheduleType = GeneratedColumn<int>(
+    'schedule_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _weekdaysMaskMeta = const VerificationMeta(
+    'weekdaysMask',
+  );
+  @override
+  late final GeneratedColumn<int> weekdaysMask = GeneratedColumn<int>(
+    'weekdays_mask',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(127),
+  );
+  static const VerificationMeta _everyNDaysMeta = const VerificationMeta(
+    'everyNDays',
+  );
+  @override
+  late final GeneratedColumn<int> everyNDays = GeneratedColumn<int>(
+    'every_n_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2),
+  );
+  static const VerificationMeta _dosesJsonMeta = const VerificationMeta(
+    'dosesJson',
+  );
+  @override
+  late final GeneratedColumn<String> dosesJson = GeneratedColumn<String>(
+    'doses_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<String> endDate = GeneratedColumn<String>(
+    'end_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stockLeftMeta = const VerificationMeta(
+    'stockLeft',
+  );
+  @override
+  late final GeneratedColumn<double> stockLeft = GeneratedColumn<double>(
+    'stock_left',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _refillAtMeta = const VerificationMeta(
+    'refillAt',
+  );
+  @override
+  late final GeneratedColumn<double> refillAt = GeneratedColumn<double>(
+    'refill_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _packSizeMeta = const VerificationMeta(
+    'packSize',
+  );
+  @override
+  late final GeneratedColumn<double> packSize = GeneratedColumn<double>(
+    'pack_size',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reminderEnabledMeta = const VerificationMeta(
+    'reminderEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> reminderEnabled = GeneratedColumn<bool>(
+    'reminder_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("reminder_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _alertStyleMeta = const VerificationMeta(
+    'alertStyle',
+  );
+  @override
+  late final GeneratedColumn<int> alertStyle = GeneratedColumn<int>(
+    'alert_style',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _snoozeMinutesMeta = const VerificationMeta(
+    'snoozeMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> snoozeMinutes = GeneratedColumn<int>(
+    'snooze_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
+  static const VerificationMeta _followUpMinutesMeta = const VerificationMeta(
+    'followUpMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> followUpMinutes = GeneratedColumn<int>(
+    'follow_up_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
+  static const VerificationMeta _isPausedMeta = const VerificationMeta(
+    'isPaused',
+  );
+  @override
+  late final GeneratedColumn<bool> isPaused = GeneratedColumn<bool>(
+    'is_paused',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_paused" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    archivedAt,
+    deletedAt,
+    isPinned,
+    isFavorite,
+    colorHex,
+    folderId,
+    sortOrder,
+    syncVersion,
+    lastSyncedAt,
+    deviceId,
+    name,
+    strength,
+    form,
+    note,
+    foodTiming,
+    scheduleType,
+    weekdaysMask,
+    everyNDays,
+    dosesJson,
+    startDate,
+    endDate,
+    stockLeft,
+    refillAt,
+    packSize,
+    reminderEnabled,
+    alertStyle,
+    snoozeMinutes,
+    followUpMinutes,
+    isPaused,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'medicines';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MedicineRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('archived_at')) {
+      context.handle(
+        _archivedAtMeta,
+        archivedAt.isAcceptableOrUnknown(data['archived_at']!, _archivedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('is_pinned')) {
+      context.handle(
+        _isPinnedMeta,
+        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
+      );
+    }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
+    }
+    if (data.containsKey('color_hex')) {
+      context.handle(
+        _colorHexMeta,
+        colorHex.isAcceptableOrUnknown(data['color_hex']!, _colorHexMeta),
+      );
+    }
+    if (data.containsKey('folder_id')) {
+      context.handle(
+        _folderIdMeta,
+        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('sync_version')) {
+      context.handle(
+        _syncVersionMeta,
+        syncVersion.isAcceptableOrUnknown(
+          data['sync_version']!,
+          _syncVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
+          _lastSyncedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('strength')) {
+      context.handle(
+        _strengthMeta,
+        strength.isAcceptableOrUnknown(data['strength']!, _strengthMeta),
+      );
+    }
+    if (data.containsKey('form')) {
+      context.handle(
+        _formMeta,
+        form.isAcceptableOrUnknown(data['form']!, _formMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('food_timing')) {
+      context.handle(
+        _foodTimingMeta,
+        foodTiming.isAcceptableOrUnknown(data['food_timing']!, _foodTimingMeta),
+      );
+    }
+    if (data.containsKey('schedule_type')) {
+      context.handle(
+        _scheduleTypeMeta,
+        scheduleType.isAcceptableOrUnknown(
+          data['schedule_type']!,
+          _scheduleTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('weekdays_mask')) {
+      context.handle(
+        _weekdaysMaskMeta,
+        weekdaysMask.isAcceptableOrUnknown(
+          data['weekdays_mask']!,
+          _weekdaysMaskMeta,
+        ),
+      );
+    }
+    if (data.containsKey('every_n_days')) {
+      context.handle(
+        _everyNDaysMeta,
+        everyNDays.isAcceptableOrUnknown(
+          data['every_n_days']!,
+          _everyNDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('doses_json')) {
+      context.handle(
+        _dosesJsonMeta,
+        dosesJson.isAcceptableOrUnknown(data['doses_json']!, _dosesJsonMeta),
+      );
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    }
+    if (data.containsKey('stock_left')) {
+      context.handle(
+        _stockLeftMeta,
+        stockLeft.isAcceptableOrUnknown(data['stock_left']!, _stockLeftMeta),
+      );
+    }
+    if (data.containsKey('refill_at')) {
+      context.handle(
+        _refillAtMeta,
+        refillAt.isAcceptableOrUnknown(data['refill_at']!, _refillAtMeta),
+      );
+    }
+    if (data.containsKey('pack_size')) {
+      context.handle(
+        _packSizeMeta,
+        packSize.isAcceptableOrUnknown(data['pack_size']!, _packSizeMeta),
+      );
+    }
+    if (data.containsKey('reminder_enabled')) {
+      context.handle(
+        _reminderEnabledMeta,
+        reminderEnabled.isAcceptableOrUnknown(
+          data['reminder_enabled']!,
+          _reminderEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('alert_style')) {
+      context.handle(
+        _alertStyleMeta,
+        alertStyle.isAcceptableOrUnknown(data['alert_style']!, _alertStyleMeta),
+      );
+    }
+    if (data.containsKey('snooze_minutes')) {
+      context.handle(
+        _snoozeMinutesMeta,
+        snoozeMinutes.isAcceptableOrUnknown(
+          data['snooze_minutes']!,
+          _snoozeMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('follow_up_minutes')) {
+      context.handle(
+        _followUpMinutesMeta,
+        followUpMinutes.isAcceptableOrUnknown(
+          data['follow_up_minutes']!,
+          _followUpMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_paused')) {
+      context.handle(
+        _isPausedMeta,
+        isPaused.isAcceptableOrUnknown(data['is_paused']!, _isPausedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MedicineRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MedicineRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      archivedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}archived_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      isPinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      colorHex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color_hex'],
+      ),
+      folderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}folder_id'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      syncVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_version'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_synced_at'],
+      ),
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      strength: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}strength'],
+      )!,
+      form: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}form'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+      foodTiming: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}food_timing'],
+      )!,
+      scheduleType: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schedule_type'],
+      )!,
+      weekdaysMask: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}weekdays_mask'],
+      )!,
+      everyNDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}every_n_days'],
+      )!,
+      dosesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}doses_json'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_date'],
+      )!,
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_date'],
+      ),
+      stockLeft: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stock_left'],
+      ),
+      refillAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}refill_at'],
+      ),
+      packSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}pack_size'],
+      ),
+      reminderEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}reminder_enabled'],
+      )!,
+      alertStyle: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}alert_style'],
+      )!,
+      snoozeMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}snooze_minutes'],
+      )!,
+      followUpMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}follow_up_minutes'],
+      )!,
+      isPaused: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_paused'],
+      )!,
+    );
+  }
+
+  @override
+  $MedicinesTable createAlias(String alias) {
+    return $MedicinesTable(attachedDatabase, alias);
+  }
+}
+
+class MedicineRow extends DataClass implements Insertable<MedicineRow> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? archivedAt;
+  final DateTime? deletedAt;
+  final bool isPinned;
+  final bool isFavorite;
+
+  /// `RRGGBB`; null = module default / white card.
+  final String? colorHex;
+
+  /// Folder (notes/vault) or list (tasks). See [Folders].
+  final String? folderId;
+
+  /// Manual sort position (lower first). Fractional so a drag only rewrites
+  /// the moved row.
+  final double sortOrder;
+  final int syncVersion;
+  final DateTime? lastSyncedAt;
+
+  /// Device that last wrote the row (core/storage/device_id).
+  final String deviceId;
+  final String name;
+
+  /// Free text ("500 mg", "5 ml").
+  final String strength;
+
+  /// 0 tablet · 1 capsule · 2 liquid · 3 drops · 4 injection · 5 inhaler ·
+  /// 6 other (MedicineForm).
+  final int form;
+  final String note;
+
+  /// 0 any time · 1 before food · 2 with food · 3 after food.
+  final int foodTiming;
+
+  /// 0 every day · 1 specific days · 2 every N days · 3 as needed.
+  final int scheduleType;
+
+  /// Bit 0 = Monday … bit 6 = Sunday (127 = every day).
+  final int weekdaysMask;
+  final int everyNDays;
+
+  /// JSON `[{"t":"08:00","q":1}]` — dose times and amounts.
+  final String dosesJson;
+
+  /// First day of the course (yyyy-MM-dd).
+  final String startDate;
+
+  /// Last day of the course (yyyy-MM-dd, inclusive); null = ongoing.
+  final String? endDate;
+
+  /// Units left in the pack; null = not tracked.
+  final double? stockLeft;
+
+  /// Refill alert threshold (units); null = no alert.
+  final double? refillAt;
+
+  /// Units added by the last refill (pre-fills the next one).
+  final double? packSize;
+  final bool reminderEnabled;
+
+  /// 0 notification · 1 alarm (full screen).
+  final int alertStyle;
+  final int snoozeMinutes;
+
+  /// Remind again this many minutes after a dose not taken; 0 = off.
+  final int followUpMinutes;
+  final bool isPaused;
+  const MedicineRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.archivedAt,
+    this.deletedAt,
+    required this.isPinned,
+    required this.isFavorite,
+    this.colorHex,
+    this.folderId,
+    required this.sortOrder,
+    required this.syncVersion,
+    this.lastSyncedAt,
+    required this.deviceId,
+    required this.name,
+    required this.strength,
+    required this.form,
+    required this.note,
+    required this.foodTiming,
+    required this.scheduleType,
+    required this.weekdaysMask,
+    required this.everyNDays,
+    required this.dosesJson,
+    required this.startDate,
+    this.endDate,
+    this.stockLeft,
+    this.refillAt,
+    this.packSize,
+    required this.reminderEnabled,
+    required this.alertStyle,
+    required this.snoozeMinutes,
+    required this.followUpMinutes,
+    required this.isPaused,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<DateTime>(archivedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['is_pinned'] = Variable<bool>(isPinned);
+    map['is_favorite'] = Variable<bool>(isFavorite);
+    if (!nullToAbsent || colorHex != null) {
+      map['color_hex'] = Variable<String>(colorHex);
+    }
+    if (!nullToAbsent || folderId != null) {
+      map['folder_id'] = Variable<String>(folderId);
+    }
+    map['sort_order'] = Variable<double>(sortOrder);
+    map['sync_version'] = Variable<int>(syncVersion);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    map['device_id'] = Variable<String>(deviceId);
+    map['name'] = Variable<String>(name);
+    map['strength'] = Variable<String>(strength);
+    map['form'] = Variable<int>(form);
+    map['note'] = Variable<String>(note);
+    map['food_timing'] = Variable<int>(foodTiming);
+    map['schedule_type'] = Variable<int>(scheduleType);
+    map['weekdays_mask'] = Variable<int>(weekdaysMask);
+    map['every_n_days'] = Variable<int>(everyNDays);
+    map['doses_json'] = Variable<String>(dosesJson);
+    map['start_date'] = Variable<String>(startDate);
+    if (!nullToAbsent || endDate != null) {
+      map['end_date'] = Variable<String>(endDate);
+    }
+    if (!nullToAbsent || stockLeft != null) {
+      map['stock_left'] = Variable<double>(stockLeft);
+    }
+    if (!nullToAbsent || refillAt != null) {
+      map['refill_at'] = Variable<double>(refillAt);
+    }
+    if (!nullToAbsent || packSize != null) {
+      map['pack_size'] = Variable<double>(packSize);
+    }
+    map['reminder_enabled'] = Variable<bool>(reminderEnabled);
+    map['alert_style'] = Variable<int>(alertStyle);
+    map['snooze_minutes'] = Variable<int>(snoozeMinutes);
+    map['follow_up_minutes'] = Variable<int>(followUpMinutes);
+    map['is_paused'] = Variable<bool>(isPaused);
+    return map;
+  }
+
+  MedicinesCompanion toCompanion(bool nullToAbsent) {
+    return MedicinesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      archivedAt: archivedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archivedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      isPinned: Value(isPinned),
+      isFavorite: Value(isFavorite),
+      colorHex: colorHex == null && nullToAbsent
+          ? const Value.absent()
+          : Value(colorHex),
+      folderId: folderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(folderId),
+      sortOrder: Value(sortOrder),
+      syncVersion: Value(syncVersion),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+      deviceId: Value(deviceId),
+      name: Value(name),
+      strength: Value(strength),
+      form: Value(form),
+      note: Value(note),
+      foodTiming: Value(foodTiming),
+      scheduleType: Value(scheduleType),
+      weekdaysMask: Value(weekdaysMask),
+      everyNDays: Value(everyNDays),
+      dosesJson: Value(dosesJson),
+      startDate: Value(startDate),
+      endDate: endDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDate),
+      stockLeft: stockLeft == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stockLeft),
+      refillAt: refillAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(refillAt),
+      packSize: packSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(packSize),
+      reminderEnabled: Value(reminderEnabled),
+      alertStyle: Value(alertStyle),
+      snoozeMinutes: Value(snoozeMinutes),
+      followUpMinutes: Value(followUpMinutes),
+      isPaused: Value(isPaused),
+    );
+  }
+
+  factory MedicineRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MedicineRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      archivedAt: serializer.fromJson<DateTime?>(json['archivedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      colorHex: serializer.fromJson<String?>(json['colorHex']),
+      folderId: serializer.fromJson<String?>(json['folderId']),
+      sortOrder: serializer.fromJson<double>(json['sortOrder']),
+      syncVersion: serializer.fromJson<int>(json['syncVersion']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      name: serializer.fromJson<String>(json['name']),
+      strength: serializer.fromJson<String>(json['strength']),
+      form: serializer.fromJson<int>(json['form']),
+      note: serializer.fromJson<String>(json['note']),
+      foodTiming: serializer.fromJson<int>(json['foodTiming']),
+      scheduleType: serializer.fromJson<int>(json['scheduleType']),
+      weekdaysMask: serializer.fromJson<int>(json['weekdaysMask']),
+      everyNDays: serializer.fromJson<int>(json['everyNDays']),
+      dosesJson: serializer.fromJson<String>(json['dosesJson']),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      endDate: serializer.fromJson<String?>(json['endDate']),
+      stockLeft: serializer.fromJson<double?>(json['stockLeft']),
+      refillAt: serializer.fromJson<double?>(json['refillAt']),
+      packSize: serializer.fromJson<double?>(json['packSize']),
+      reminderEnabled: serializer.fromJson<bool>(json['reminderEnabled']),
+      alertStyle: serializer.fromJson<int>(json['alertStyle']),
+      snoozeMinutes: serializer.fromJson<int>(json['snoozeMinutes']),
+      followUpMinutes: serializer.fromJson<int>(json['followUpMinutes']),
+      isPaused: serializer.fromJson<bool>(json['isPaused']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'archivedAt': serializer.toJson<DateTime?>(archivedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'isPinned': serializer.toJson<bool>(isPinned),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
+      'colorHex': serializer.toJson<String?>(colorHex),
+      'folderId': serializer.toJson<String?>(folderId),
+      'sortOrder': serializer.toJson<double>(sortOrder),
+      'syncVersion': serializer.toJson<int>(syncVersion),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'name': serializer.toJson<String>(name),
+      'strength': serializer.toJson<String>(strength),
+      'form': serializer.toJson<int>(form),
+      'note': serializer.toJson<String>(note),
+      'foodTiming': serializer.toJson<int>(foodTiming),
+      'scheduleType': serializer.toJson<int>(scheduleType),
+      'weekdaysMask': serializer.toJson<int>(weekdaysMask),
+      'everyNDays': serializer.toJson<int>(everyNDays),
+      'dosesJson': serializer.toJson<String>(dosesJson),
+      'startDate': serializer.toJson<String>(startDate),
+      'endDate': serializer.toJson<String?>(endDate),
+      'stockLeft': serializer.toJson<double?>(stockLeft),
+      'refillAt': serializer.toJson<double?>(refillAt),
+      'packSize': serializer.toJson<double?>(packSize),
+      'reminderEnabled': serializer.toJson<bool>(reminderEnabled),
+      'alertStyle': serializer.toJson<int>(alertStyle),
+      'snoozeMinutes': serializer.toJson<int>(snoozeMinutes),
+      'followUpMinutes': serializer.toJson<int>(followUpMinutes),
+      'isPaused': serializer.toJson<bool>(isPaused),
+    };
+  }
+
+  MedicineRow copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> archivedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? isPinned,
+    bool? isFavorite,
+    Value<String?> colorHex = const Value.absent(),
+    Value<String?> folderId = const Value.absent(),
+    double? sortOrder,
+    int? syncVersion,
+    Value<DateTime?> lastSyncedAt = const Value.absent(),
+    String? deviceId,
+    String? name,
+    String? strength,
+    int? form,
+    String? note,
+    int? foodTiming,
+    int? scheduleType,
+    int? weekdaysMask,
+    int? everyNDays,
+    String? dosesJson,
+    String? startDate,
+    Value<String?> endDate = const Value.absent(),
+    Value<double?> stockLeft = const Value.absent(),
+    Value<double?> refillAt = const Value.absent(),
+    Value<double?> packSize = const Value.absent(),
+    bool? reminderEnabled,
+    int? alertStyle,
+    int? snoozeMinutes,
+    int? followUpMinutes,
+    bool? isPaused,
+  }) => MedicineRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    isPinned: isPinned ?? this.isPinned,
+    isFavorite: isFavorite ?? this.isFavorite,
+    colorHex: colorHex.present ? colorHex.value : this.colorHex,
+    folderId: folderId.present ? folderId.value : this.folderId,
+    sortOrder: sortOrder ?? this.sortOrder,
+    syncVersion: syncVersion ?? this.syncVersion,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+    deviceId: deviceId ?? this.deviceId,
+    name: name ?? this.name,
+    strength: strength ?? this.strength,
+    form: form ?? this.form,
+    note: note ?? this.note,
+    foodTiming: foodTiming ?? this.foodTiming,
+    scheduleType: scheduleType ?? this.scheduleType,
+    weekdaysMask: weekdaysMask ?? this.weekdaysMask,
+    everyNDays: everyNDays ?? this.everyNDays,
+    dosesJson: dosesJson ?? this.dosesJson,
+    startDate: startDate ?? this.startDate,
+    endDate: endDate.present ? endDate.value : this.endDate,
+    stockLeft: stockLeft.present ? stockLeft.value : this.stockLeft,
+    refillAt: refillAt.present ? refillAt.value : this.refillAt,
+    packSize: packSize.present ? packSize.value : this.packSize,
+    reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+    alertStyle: alertStyle ?? this.alertStyle,
+    snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
+    followUpMinutes: followUpMinutes ?? this.followUpMinutes,
+    isPaused: isPaused ?? this.isPaused,
+  );
+  MedicineRow copyWithCompanion(MedicinesCompanion data) {
+    return MedicineRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      archivedAt: data.archivedAt.present
+          ? data.archivedAt.value
+          : this.archivedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
+      colorHex: data.colorHex.present ? data.colorHex.value : this.colorHex,
+      folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      syncVersion: data.syncVersion.present
+          ? data.syncVersion.value
+          : this.syncVersion,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      name: data.name.present ? data.name.value : this.name,
+      strength: data.strength.present ? data.strength.value : this.strength,
+      form: data.form.present ? data.form.value : this.form,
+      note: data.note.present ? data.note.value : this.note,
+      foodTiming: data.foodTiming.present
+          ? data.foodTiming.value
+          : this.foodTiming,
+      scheduleType: data.scheduleType.present
+          ? data.scheduleType.value
+          : this.scheduleType,
+      weekdaysMask: data.weekdaysMask.present
+          ? data.weekdaysMask.value
+          : this.weekdaysMask,
+      everyNDays: data.everyNDays.present
+          ? data.everyNDays.value
+          : this.everyNDays,
+      dosesJson: data.dosesJson.present ? data.dosesJson.value : this.dosesJson,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      stockLeft: data.stockLeft.present ? data.stockLeft.value : this.stockLeft,
+      refillAt: data.refillAt.present ? data.refillAt.value : this.refillAt,
+      packSize: data.packSize.present ? data.packSize.value : this.packSize,
+      reminderEnabled: data.reminderEnabled.present
+          ? data.reminderEnabled.value
+          : this.reminderEnabled,
+      alertStyle: data.alertStyle.present
+          ? data.alertStyle.value
+          : this.alertStyle,
+      snoozeMinutes: data.snoozeMinutes.present
+          ? data.snoozeMinutes.value
+          : this.snoozeMinutes,
+      followUpMinutes: data.followUpMinutes.present
+          ? data.followUpMinutes.value
+          : this.followUpMinutes,
+      isPaused: data.isPaused.present ? data.isPaused.value : this.isPaused,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MedicineRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('colorHex: $colorHex, ')
+          ..write('folderId: $folderId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('syncVersion: $syncVersion, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('name: $name, ')
+          ..write('strength: $strength, ')
+          ..write('form: $form, ')
+          ..write('note: $note, ')
+          ..write('foodTiming: $foodTiming, ')
+          ..write('scheduleType: $scheduleType, ')
+          ..write('weekdaysMask: $weekdaysMask, ')
+          ..write('everyNDays: $everyNDays, ')
+          ..write('dosesJson: $dosesJson, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('stockLeft: $stockLeft, ')
+          ..write('refillAt: $refillAt, ')
+          ..write('packSize: $packSize, ')
+          ..write('reminderEnabled: $reminderEnabled, ')
+          ..write('alertStyle: $alertStyle, ')
+          ..write('snoozeMinutes: $snoozeMinutes, ')
+          ..write('followUpMinutes: $followUpMinutes, ')
+          ..write('isPaused: $isPaused')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    createdAt,
+    updatedAt,
+    archivedAt,
+    deletedAt,
+    isPinned,
+    isFavorite,
+    colorHex,
+    folderId,
+    sortOrder,
+    syncVersion,
+    lastSyncedAt,
+    deviceId,
+    name,
+    strength,
+    form,
+    note,
+    foodTiming,
+    scheduleType,
+    weekdaysMask,
+    everyNDays,
+    dosesJson,
+    startDate,
+    endDate,
+    stockLeft,
+    refillAt,
+    packSize,
+    reminderEnabled,
+    alertStyle,
+    snoozeMinutes,
+    followUpMinutes,
+    isPaused,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MedicineRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.archivedAt == this.archivedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.isPinned == this.isPinned &&
+          other.isFavorite == this.isFavorite &&
+          other.colorHex == this.colorHex &&
+          other.folderId == this.folderId &&
+          other.sortOrder == this.sortOrder &&
+          other.syncVersion == this.syncVersion &&
+          other.lastSyncedAt == this.lastSyncedAt &&
+          other.deviceId == this.deviceId &&
+          other.name == this.name &&
+          other.strength == this.strength &&
+          other.form == this.form &&
+          other.note == this.note &&
+          other.foodTiming == this.foodTiming &&
+          other.scheduleType == this.scheduleType &&
+          other.weekdaysMask == this.weekdaysMask &&
+          other.everyNDays == this.everyNDays &&
+          other.dosesJson == this.dosesJson &&
+          other.startDate == this.startDate &&
+          other.endDate == this.endDate &&
+          other.stockLeft == this.stockLeft &&
+          other.refillAt == this.refillAt &&
+          other.packSize == this.packSize &&
+          other.reminderEnabled == this.reminderEnabled &&
+          other.alertStyle == this.alertStyle &&
+          other.snoozeMinutes == this.snoozeMinutes &&
+          other.followUpMinutes == this.followUpMinutes &&
+          other.isPaused == this.isPaused);
+}
+
+class MedicinesCompanion extends UpdateCompanion<MedicineRow> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> archivedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> isPinned;
+  final Value<bool> isFavorite;
+  final Value<String?> colorHex;
+  final Value<String?> folderId;
+  final Value<double> sortOrder;
+  final Value<int> syncVersion;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<String> deviceId;
+  final Value<String> name;
+  final Value<String> strength;
+  final Value<int> form;
+  final Value<String> note;
+  final Value<int> foodTiming;
+  final Value<int> scheduleType;
+  final Value<int> weekdaysMask;
+  final Value<int> everyNDays;
+  final Value<String> dosesJson;
+  final Value<String> startDate;
+  final Value<String?> endDate;
+  final Value<double?> stockLeft;
+  final Value<double?> refillAt;
+  final Value<double?> packSize;
+  final Value<bool> reminderEnabled;
+  final Value<int> alertStyle;
+  final Value<int> snoozeMinutes;
+  final Value<int> followUpMinutes;
+  final Value<bool> isPaused;
+  final Value<int> rowid;
+  const MedicinesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.colorHex = const Value.absent(),
+    this.folderId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.syncVersion = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.strength = const Value.absent(),
+    this.form = const Value.absent(),
+    this.note = const Value.absent(),
+    this.foodTiming = const Value.absent(),
+    this.scheduleType = const Value.absent(),
+    this.weekdaysMask = const Value.absent(),
+    this.everyNDays = const Value.absent(),
+    this.dosesJson = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.stockLeft = const Value.absent(),
+    this.refillAt = const Value.absent(),
+    this.packSize = const Value.absent(),
+    this.reminderEnabled = const Value.absent(),
+    this.alertStyle = const Value.absent(),
+    this.snoozeMinutes = const Value.absent(),
+    this.followUpMinutes = const Value.absent(),
+    this.isPaused = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MedicinesCompanion.insert({
+    required String id,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.archivedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.colorHex = const Value.absent(),
+    this.folderId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.syncVersion = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.strength = const Value.absent(),
+    this.form = const Value.absent(),
+    this.note = const Value.absent(),
+    this.foodTiming = const Value.absent(),
+    this.scheduleType = const Value.absent(),
+    this.weekdaysMask = const Value.absent(),
+    this.everyNDays = const Value.absent(),
+    this.dosesJson = const Value.absent(),
+    required String startDate,
+    this.endDate = const Value.absent(),
+    this.stockLeft = const Value.absent(),
+    this.refillAt = const Value.absent(),
+    this.packSize = const Value.absent(),
+    this.reminderEnabled = const Value.absent(),
+    this.alertStyle = const Value.absent(),
+    this.snoozeMinutes = const Value.absent(),
+    this.followUpMinutes = const Value.absent(),
+    this.isPaused = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       startDate = Value(startDate);
+  static Insertable<MedicineRow> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? archivedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? isPinned,
+    Expression<bool>? isFavorite,
+    Expression<String>? colorHex,
+    Expression<String>? folderId,
+    Expression<double>? sortOrder,
+    Expression<int>? syncVersion,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<String>? deviceId,
+    Expression<String>? name,
+    Expression<String>? strength,
+    Expression<int>? form,
+    Expression<String>? note,
+    Expression<int>? foodTiming,
+    Expression<int>? scheduleType,
+    Expression<int>? weekdaysMask,
+    Expression<int>? everyNDays,
+    Expression<String>? dosesJson,
+    Expression<String>? startDate,
+    Expression<String>? endDate,
+    Expression<double>? stockLeft,
+    Expression<double>? refillAt,
+    Expression<double>? packSize,
+    Expression<bool>? reminderEnabled,
+    Expression<int>? alertStyle,
+    Expression<int>? snoozeMinutes,
+    Expression<int>? followUpMinutes,
+    Expression<bool>? isPaused,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (archivedAt != null) 'archived_at': archivedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (isPinned != null) 'is_pinned': isPinned,
+      if (isFavorite != null) 'is_favorite': isFavorite,
+      if (colorHex != null) 'color_hex': colorHex,
+      if (folderId != null) 'folder_id': folderId,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (syncVersion != null) 'sync_version': syncVersion,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (deviceId != null) 'device_id': deviceId,
+      if (name != null) 'name': name,
+      if (strength != null) 'strength': strength,
+      if (form != null) 'form': form,
+      if (note != null) 'note': note,
+      if (foodTiming != null) 'food_timing': foodTiming,
+      if (scheduleType != null) 'schedule_type': scheduleType,
+      if (weekdaysMask != null) 'weekdays_mask': weekdaysMask,
+      if (everyNDays != null) 'every_n_days': everyNDays,
+      if (dosesJson != null) 'doses_json': dosesJson,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (stockLeft != null) 'stock_left': stockLeft,
+      if (refillAt != null) 'refill_at': refillAt,
+      if (packSize != null) 'pack_size': packSize,
+      if (reminderEnabled != null) 'reminder_enabled': reminderEnabled,
+      if (alertStyle != null) 'alert_style': alertStyle,
+      if (snoozeMinutes != null) 'snooze_minutes': snoozeMinutes,
+      if (followUpMinutes != null) 'follow_up_minutes': followUpMinutes,
+      if (isPaused != null) 'is_paused': isPaused,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MedicinesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? archivedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? isPinned,
+    Value<bool>? isFavorite,
+    Value<String?>? colorHex,
+    Value<String?>? folderId,
+    Value<double>? sortOrder,
+    Value<int>? syncVersion,
+    Value<DateTime?>? lastSyncedAt,
+    Value<String>? deviceId,
+    Value<String>? name,
+    Value<String>? strength,
+    Value<int>? form,
+    Value<String>? note,
+    Value<int>? foodTiming,
+    Value<int>? scheduleType,
+    Value<int>? weekdaysMask,
+    Value<int>? everyNDays,
+    Value<String>? dosesJson,
+    Value<String>? startDate,
+    Value<String?>? endDate,
+    Value<double?>? stockLeft,
+    Value<double?>? refillAt,
+    Value<double?>? packSize,
+    Value<bool>? reminderEnabled,
+    Value<int>? alertStyle,
+    Value<int>? snoozeMinutes,
+    Value<int>? followUpMinutes,
+    Value<bool>? isPaused,
+    Value<int>? rowid,
+  }) {
+    return MedicinesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      archivedAt: archivedAt ?? this.archivedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      isPinned: isPinned ?? this.isPinned,
+      isFavorite: isFavorite ?? this.isFavorite,
+      colorHex: colorHex ?? this.colorHex,
+      folderId: folderId ?? this.folderId,
+      sortOrder: sortOrder ?? this.sortOrder,
+      syncVersion: syncVersion ?? this.syncVersion,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      deviceId: deviceId ?? this.deviceId,
+      name: name ?? this.name,
+      strength: strength ?? this.strength,
+      form: form ?? this.form,
+      note: note ?? this.note,
+      foodTiming: foodTiming ?? this.foodTiming,
+      scheduleType: scheduleType ?? this.scheduleType,
+      weekdaysMask: weekdaysMask ?? this.weekdaysMask,
+      everyNDays: everyNDays ?? this.everyNDays,
+      dosesJson: dosesJson ?? this.dosesJson,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      stockLeft: stockLeft ?? this.stockLeft,
+      refillAt: refillAt ?? this.refillAt,
+      packSize: packSize ?? this.packSize,
+      reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+      alertStyle: alertStyle ?? this.alertStyle,
+      snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
+      followUpMinutes: followUpMinutes ?? this.followUpMinutes,
+      isPaused: isPaused ?? this.isPaused,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<DateTime>(archivedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
+    if (colorHex.present) {
+      map['color_hex'] = Variable<String>(colorHex.value);
+    }
+    if (folderId.present) {
+      map['folder_id'] = Variable<String>(folderId.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<double>(sortOrder.value);
+    }
+    if (syncVersion.present) {
+      map['sync_version'] = Variable<int>(syncVersion.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (strength.present) {
+      map['strength'] = Variable<String>(strength.value);
+    }
+    if (form.present) {
+      map['form'] = Variable<int>(form.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (foodTiming.present) {
+      map['food_timing'] = Variable<int>(foodTiming.value);
+    }
+    if (scheduleType.present) {
+      map['schedule_type'] = Variable<int>(scheduleType.value);
+    }
+    if (weekdaysMask.present) {
+      map['weekdays_mask'] = Variable<int>(weekdaysMask.value);
+    }
+    if (everyNDays.present) {
+      map['every_n_days'] = Variable<int>(everyNDays.value);
+    }
+    if (dosesJson.present) {
+      map['doses_json'] = Variable<String>(dosesJson.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<String>(endDate.value);
+    }
+    if (stockLeft.present) {
+      map['stock_left'] = Variable<double>(stockLeft.value);
+    }
+    if (refillAt.present) {
+      map['refill_at'] = Variable<double>(refillAt.value);
+    }
+    if (packSize.present) {
+      map['pack_size'] = Variable<double>(packSize.value);
+    }
+    if (reminderEnabled.present) {
+      map['reminder_enabled'] = Variable<bool>(reminderEnabled.value);
+    }
+    if (alertStyle.present) {
+      map['alert_style'] = Variable<int>(alertStyle.value);
+    }
+    if (snoozeMinutes.present) {
+      map['snooze_minutes'] = Variable<int>(snoozeMinutes.value);
+    }
+    if (followUpMinutes.present) {
+      map['follow_up_minutes'] = Variable<int>(followUpMinutes.value);
+    }
+    if (isPaused.present) {
+      map['is_paused'] = Variable<bool>(isPaused.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MedicinesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('colorHex: $colorHex, ')
+          ..write('folderId: $folderId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('syncVersion: $syncVersion, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('name: $name, ')
+          ..write('strength: $strength, ')
+          ..write('form: $form, ')
+          ..write('note: $note, ')
+          ..write('foodTiming: $foodTiming, ')
+          ..write('scheduleType: $scheduleType, ')
+          ..write('weekdaysMask: $weekdaysMask, ')
+          ..write('everyNDays: $everyNDays, ')
+          ..write('dosesJson: $dosesJson, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('stockLeft: $stockLeft, ')
+          ..write('refillAt: $refillAt, ')
+          ..write('packSize: $packSize, ')
+          ..write('reminderEnabled: $reminderEnabled, ')
+          ..write('alertStyle: $alertStyle, ')
+          ..write('snoozeMinutes: $snoozeMinutes, ')
+          ..write('followUpMinutes: $followUpMinutes, ')
+          ..write('isPaused: $isPaused, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MedicineDosesTable extends MedicineDoses
+    with TableInfo<$MedicineDosesTable, MedicineDoseRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MedicineDosesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _medicineIdMeta = const VerificationMeta(
+    'medicineId',
+  );
+  @override
+  late final GeneratedColumn<String> medicineId = GeneratedColumn<String>(
+    'medicine_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _slotMinutesMeta = const VerificationMeta(
+    'slotMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> slotMinutes = GeneratedColumn<int>(
+    'slot_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<int> status = GeneratedColumn<int>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _takenAtMeta = const VerificationMeta(
+    'takenAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> takenAt = GeneratedColumn<DateTime>(
+    'taken_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _snoozedUntilMeta = const VerificationMeta(
+    'snoozedUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> snoozedUntil = GeneratedColumn<DateTime>(
+    'snoozed_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    medicineId,
+    date,
+    slotMinutes,
+    status,
+    takenAt,
+    quantity,
+    snoozedUntil,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'medicine_doses';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MedicineDoseRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('medicine_id')) {
+      context.handle(
+        _medicineIdMeta,
+        medicineId.isAcceptableOrUnknown(data['medicine_id']!, _medicineIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_medicineIdMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('slot_minutes')) {
+      context.handle(
+        _slotMinutesMeta,
+        slotMinutes.isAcceptableOrUnknown(
+          data['slot_minutes']!,
+          _slotMinutesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_slotMinutesMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('taken_at')) {
+      context.handle(
+        _takenAtMeta,
+        takenAt.isAcceptableOrUnknown(data['taken_at']!, _takenAtMeta),
+      );
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('snoozed_until')) {
+      context.handle(
+        _snoozedUntilMeta,
+        snoozedUntil.isAcceptableOrUnknown(
+          data['snoozed_until']!,
+          _snoozedUntilMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MedicineDoseRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MedicineDoseRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      medicineId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}medicine_id'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      )!,
+      slotMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}slot_minutes'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}status'],
+      )!,
+      takenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}taken_at'],
+      ),
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      snoozedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}snoozed_until'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MedicineDosesTable createAlias(String alias) {
+    return $MedicineDosesTable(attachedDatabase, alias);
+  }
+}
+
+class MedicineDoseRow extends DataClass implements Insertable<MedicineDoseRow> {
+  final String id;
+  final String medicineId;
+
+  /// Local day the dose belongs to (yyyy-MM-dd).
+  final String date;
+
+  /// Scheduled minute of the day (as-needed: the minute it was taken).
+  final int slotMinutes;
+
+  /// 0 pending (snoozed) · 1 taken · 2 skipped.
+  final int status;
+  final DateTime? takenAt;
+  final double quantity;
+  final DateTime? snoozedUntil;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const MedicineDoseRow({
+    required this.id,
+    required this.medicineId,
+    required this.date,
+    required this.slotMinutes,
+    required this.status,
+    this.takenAt,
+    required this.quantity,
+    this.snoozedUntil,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['medicine_id'] = Variable<String>(medicineId);
+    map['date'] = Variable<String>(date);
+    map['slot_minutes'] = Variable<int>(slotMinutes);
+    map['status'] = Variable<int>(status);
+    if (!nullToAbsent || takenAt != null) {
+      map['taken_at'] = Variable<DateTime>(takenAt);
+    }
+    map['quantity'] = Variable<double>(quantity);
+    if (!nullToAbsent || snoozedUntil != null) {
+      map['snoozed_until'] = Variable<DateTime>(snoozedUntil);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  MedicineDosesCompanion toCompanion(bool nullToAbsent) {
+    return MedicineDosesCompanion(
+      id: Value(id),
+      medicineId: Value(medicineId),
+      date: Value(date),
+      slotMinutes: Value(slotMinutes),
+      status: Value(status),
+      takenAt: takenAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(takenAt),
+      quantity: Value(quantity),
+      snoozedUntil: snoozedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(snoozedUntil),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory MedicineDoseRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MedicineDoseRow(
+      id: serializer.fromJson<String>(json['id']),
+      medicineId: serializer.fromJson<String>(json['medicineId']),
+      date: serializer.fromJson<String>(json['date']),
+      slotMinutes: serializer.fromJson<int>(json['slotMinutes']),
+      status: serializer.fromJson<int>(json['status']),
+      takenAt: serializer.fromJson<DateTime?>(json['takenAt']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      snoozedUntil: serializer.fromJson<DateTime?>(json['snoozedUntil']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'medicineId': serializer.toJson<String>(medicineId),
+      'date': serializer.toJson<String>(date),
+      'slotMinutes': serializer.toJson<int>(slotMinutes),
+      'status': serializer.toJson<int>(status),
+      'takenAt': serializer.toJson<DateTime?>(takenAt),
+      'quantity': serializer.toJson<double>(quantity),
+      'snoozedUntil': serializer.toJson<DateTime?>(snoozedUntil),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  MedicineDoseRow copyWith({
+    String? id,
+    String? medicineId,
+    String? date,
+    int? slotMinutes,
+    int? status,
+    Value<DateTime?> takenAt = const Value.absent(),
+    double? quantity,
+    Value<DateTime?> snoozedUntil = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => MedicineDoseRow(
+    id: id ?? this.id,
+    medicineId: medicineId ?? this.medicineId,
+    date: date ?? this.date,
+    slotMinutes: slotMinutes ?? this.slotMinutes,
+    status: status ?? this.status,
+    takenAt: takenAt.present ? takenAt.value : this.takenAt,
+    quantity: quantity ?? this.quantity,
+    snoozedUntil: snoozedUntil.present ? snoozedUntil.value : this.snoozedUntil,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  MedicineDoseRow copyWithCompanion(MedicineDosesCompanion data) {
+    return MedicineDoseRow(
+      id: data.id.present ? data.id.value : this.id,
+      medicineId: data.medicineId.present
+          ? data.medicineId.value
+          : this.medicineId,
+      date: data.date.present ? data.date.value : this.date,
+      slotMinutes: data.slotMinutes.present
+          ? data.slotMinutes.value
+          : this.slotMinutes,
+      status: data.status.present ? data.status.value : this.status,
+      takenAt: data.takenAt.present ? data.takenAt.value : this.takenAt,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      snoozedUntil: data.snoozedUntil.present
+          ? data.snoozedUntil.value
+          : this.snoozedUntil,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MedicineDoseRow(')
+          ..write('id: $id, ')
+          ..write('medicineId: $medicineId, ')
+          ..write('date: $date, ')
+          ..write('slotMinutes: $slotMinutes, ')
+          ..write('status: $status, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('quantity: $quantity, ')
+          ..write('snoozedUntil: $snoozedUntil, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    medicineId,
+    date,
+    slotMinutes,
+    status,
+    takenAt,
+    quantity,
+    snoozedUntil,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MedicineDoseRow &&
+          other.id == this.id &&
+          other.medicineId == this.medicineId &&
+          other.date == this.date &&
+          other.slotMinutes == this.slotMinutes &&
+          other.status == this.status &&
+          other.takenAt == this.takenAt &&
+          other.quantity == this.quantity &&
+          other.snoozedUntil == this.snoozedUntil &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class MedicineDosesCompanion extends UpdateCompanion<MedicineDoseRow> {
+  final Value<String> id;
+  final Value<String> medicineId;
+  final Value<String> date;
+  final Value<int> slotMinutes;
+  final Value<int> status;
+  final Value<DateTime?> takenAt;
+  final Value<double> quantity;
+  final Value<DateTime?> snoozedUntil;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const MedicineDosesCompanion({
+    this.id = const Value.absent(),
+    this.medicineId = const Value.absent(),
+    this.date = const Value.absent(),
+    this.slotMinutes = const Value.absent(),
+    this.status = const Value.absent(),
+    this.takenAt = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.snoozedUntil = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MedicineDosesCompanion.insert({
+    required String id,
+    required String medicineId,
+    required String date,
+    required int slotMinutes,
+    this.status = const Value.absent(),
+    this.takenAt = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.snoozedUntil = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       medicineId = Value(medicineId),
+       date = Value(date),
+       slotMinutes = Value(slotMinutes),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<MedicineDoseRow> custom({
+    Expression<String>? id,
+    Expression<String>? medicineId,
+    Expression<String>? date,
+    Expression<int>? slotMinutes,
+    Expression<int>? status,
+    Expression<DateTime>? takenAt,
+    Expression<double>? quantity,
+    Expression<DateTime>? snoozedUntil,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (medicineId != null) 'medicine_id': medicineId,
+      if (date != null) 'date': date,
+      if (slotMinutes != null) 'slot_minutes': slotMinutes,
+      if (status != null) 'status': status,
+      if (takenAt != null) 'taken_at': takenAt,
+      if (quantity != null) 'quantity': quantity,
+      if (snoozedUntil != null) 'snoozed_until': snoozedUntil,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MedicineDosesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? medicineId,
+    Value<String>? date,
+    Value<int>? slotMinutes,
+    Value<int>? status,
+    Value<DateTime?>? takenAt,
+    Value<double>? quantity,
+    Value<DateTime?>? snoozedUntil,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return MedicineDosesCompanion(
+      id: id ?? this.id,
+      medicineId: medicineId ?? this.medicineId,
+      date: date ?? this.date,
+      slotMinutes: slotMinutes ?? this.slotMinutes,
+      status: status ?? this.status,
+      takenAt: takenAt ?? this.takenAt,
+      quantity: quantity ?? this.quantity,
+      snoozedUntil: snoozedUntil ?? this.snoozedUntil,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (medicineId.present) {
+      map['medicine_id'] = Variable<String>(medicineId.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (slotMinutes.present) {
+      map['slot_minutes'] = Variable<int>(slotMinutes.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<int>(status.value);
+    }
+    if (takenAt.present) {
+      map['taken_at'] = Variable<DateTime>(takenAt.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (snoozedUntil.present) {
+      map['snoozed_until'] = Variable<DateTime>(snoozedUntil.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MedicineDosesCompanion(')
+          ..write('id: $id, ')
+          ..write('medicineId: $medicineId, ')
+          ..write('date: $date, ')
+          ..write('slotMinutes: $slotMinutes, ')
+          ..write('status: $status, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('quantity: $quantity, ')
+          ..write('snoozedUntil: $snoozedUntil, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $VaultItemsTable extends VaultItems
     with TableInfo<$VaultItemsTable, VaultItemRow> {
   @override
@@ -12019,7 +14364,8 @@ class $TombstonesTable extends Tombstones
 
 class TombstoneRow extends DataClass implements Insertable<TombstoneRow> {
   /// What was deleted: an `ItemType.key` (`note`, `task`, `reminder`,
-  /// `habit`, `vault`) or `tag`, `folder`, `habit_log`, `focus_session`.
+  /// `habit`, `medicine`, `vault`) or `tag`, `folder`, `habit_log`,
+  /// `medicine_dose`, `focus_session`.
   final String entity;
 
   /// The deleted row's id — for habit logs the natural key
@@ -12217,6 +14563,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $RemindersTable reminders = $RemindersTable(this);
   late final $HabitsTable habits = $HabitsTable(this);
   late final $HabitLogsTable habitLogs = $HabitLogsTable(this);
+  late final $MedicinesTable medicines = $MedicinesTable(this);
+  late final $MedicineDosesTable medicineDoses = $MedicineDosesTable(this);
   late final $VaultItemsTable vaultItems = $VaultItemsTable(this);
   late final $VaultHistoryTable vaultHistory = $VaultHistoryTable(this);
   late final $GeneratorHistoryTable generatorHistory = $GeneratorHistoryTable(
@@ -12241,6 +14589,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     reminders,
     habits,
     habitLogs,
+    medicines,
+    medicineDoses,
     vaultItems,
     vaultHistory,
     generatorHistory,
@@ -15229,6 +17579,1062 @@ typedef $$HabitLogsTableProcessedTableManager =
       HabitLogRow,
       PrefetchHooks Function()
     >;
+typedef $$MedicinesTableCreateCompanionBuilder =
+    MedicinesCompanion Function({
+      required String id,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<DateTime?> archivedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> isPinned,
+      Value<bool> isFavorite,
+      Value<String?> colorHex,
+      Value<String?> folderId,
+      Value<double> sortOrder,
+      Value<int> syncVersion,
+      Value<DateTime?> lastSyncedAt,
+      Value<String> deviceId,
+      Value<String> name,
+      Value<String> strength,
+      Value<int> form,
+      Value<String> note,
+      Value<int> foodTiming,
+      Value<int> scheduleType,
+      Value<int> weekdaysMask,
+      Value<int> everyNDays,
+      Value<String> dosesJson,
+      required String startDate,
+      Value<String?> endDate,
+      Value<double?> stockLeft,
+      Value<double?> refillAt,
+      Value<double?> packSize,
+      Value<bool> reminderEnabled,
+      Value<int> alertStyle,
+      Value<int> snoozeMinutes,
+      Value<int> followUpMinutes,
+      Value<bool> isPaused,
+      Value<int> rowid,
+    });
+typedef $$MedicinesTableUpdateCompanionBuilder =
+    MedicinesCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> archivedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> isPinned,
+      Value<bool> isFavorite,
+      Value<String?> colorHex,
+      Value<String?> folderId,
+      Value<double> sortOrder,
+      Value<int> syncVersion,
+      Value<DateTime?> lastSyncedAt,
+      Value<String> deviceId,
+      Value<String> name,
+      Value<String> strength,
+      Value<int> form,
+      Value<String> note,
+      Value<int> foodTiming,
+      Value<int> scheduleType,
+      Value<int> weekdaysMask,
+      Value<int> everyNDays,
+      Value<String> dosesJson,
+      Value<String> startDate,
+      Value<String?> endDate,
+      Value<double?> stockLeft,
+      Value<double?> refillAt,
+      Value<double?> packSize,
+      Value<bool> reminderEnabled,
+      Value<int> alertStyle,
+      Value<int> snoozeMinutes,
+      Value<int> followUpMinutes,
+      Value<bool> isPaused,
+      Value<int> rowid,
+    });
+
+class $$MedicinesTableFilterComposer
+    extends Composer<_$AppDatabase, $MedicinesTable> {
+  $$MedicinesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get colorHex => $composableBuilder(
+    column: $table.colorHex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get folderId => $composableBuilder(
+    column: $table.folderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get strength => $composableBuilder(
+    column: $table.strength,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get form => $composableBuilder(
+    column: $table.form,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get foodTiming => $composableBuilder(
+    column: $table.foodTiming,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get scheduleType => $composableBuilder(
+    column: $table.scheduleType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weekdaysMask => $composableBuilder(
+    column: $table.weekdaysMask,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get everyNDays => $composableBuilder(
+    column: $table.everyNDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dosesJson => $composableBuilder(
+    column: $table.dosesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get stockLeft => $composableBuilder(
+    column: $table.stockLeft,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get refillAt => $composableBuilder(
+    column: $table.refillAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get packSize => $composableBuilder(
+    column: $table.packSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get reminderEnabled => $composableBuilder(
+    column: $table.reminderEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get alertStyle => $composableBuilder(
+    column: $table.alertStyle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get snoozeMinutes => $composableBuilder(
+    column: $table.snoozeMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get followUpMinutes => $composableBuilder(
+    column: $table.followUpMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPaused => $composableBuilder(
+    column: $table.isPaused,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MedicinesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MedicinesTable> {
+  $$MedicinesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get colorHex => $composableBuilder(
+    column: $table.colorHex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get folderId => $composableBuilder(
+    column: $table.folderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get strength => $composableBuilder(
+    column: $table.strength,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get form => $composableBuilder(
+    column: $table.form,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get foodTiming => $composableBuilder(
+    column: $table.foodTiming,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get scheduleType => $composableBuilder(
+    column: $table.scheduleType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get weekdaysMask => $composableBuilder(
+    column: $table.weekdaysMask,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get everyNDays => $composableBuilder(
+    column: $table.everyNDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dosesJson => $composableBuilder(
+    column: $table.dosesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get stockLeft => $composableBuilder(
+    column: $table.stockLeft,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get refillAt => $composableBuilder(
+    column: $table.refillAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get packSize => $composableBuilder(
+    column: $table.packSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get reminderEnabled => $composableBuilder(
+    column: $table.reminderEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get alertStyle => $composableBuilder(
+    column: $table.alertStyle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get snoozeMinutes => $composableBuilder(
+    column: $table.snoozeMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get followUpMinutes => $composableBuilder(
+    column: $table.followUpMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPaused => $composableBuilder(
+    column: $table.isPaused,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MedicinesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MedicinesTable> {
+  $$MedicinesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get colorHex =>
+      $composableBuilder(column: $table.colorHex, builder: (column) => column);
+
+  GeneratedColumn<String> get folderId =>
+      $composableBuilder(column: $table.folderId, builder: (column) => column);
+
+  GeneratedColumn<double> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get strength =>
+      $composableBuilder(column: $table.strength, builder: (column) => column);
+
+  GeneratedColumn<int> get form =>
+      $composableBuilder(column: $table.form, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<int> get foodTiming => $composableBuilder(
+    column: $table.foodTiming,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get scheduleType => $composableBuilder(
+    column: $table.scheduleType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get weekdaysMask => $composableBuilder(
+    column: $table.weekdaysMask,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get everyNDays => $composableBuilder(
+    column: $table.everyNDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dosesJson =>
+      $composableBuilder(column: $table.dosesJson, builder: (column) => column);
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<double> get stockLeft =>
+      $composableBuilder(column: $table.stockLeft, builder: (column) => column);
+
+  GeneratedColumn<double> get refillAt =>
+      $composableBuilder(column: $table.refillAt, builder: (column) => column);
+
+  GeneratedColumn<double> get packSize =>
+      $composableBuilder(column: $table.packSize, builder: (column) => column);
+
+  GeneratedColumn<bool> get reminderEnabled => $composableBuilder(
+    column: $table.reminderEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get alertStyle => $composableBuilder(
+    column: $table.alertStyle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get snoozeMinutes => $composableBuilder(
+    column: $table.snoozeMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get followUpMinutes => $composableBuilder(
+    column: $table.followUpMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPaused =>
+      $composableBuilder(column: $table.isPaused, builder: (column) => column);
+}
+
+class $$MedicinesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MedicinesTable,
+          MedicineRow,
+          $$MedicinesTableFilterComposer,
+          $$MedicinesTableOrderingComposer,
+          $$MedicinesTableAnnotationComposer,
+          $$MedicinesTableCreateCompanionBuilder,
+          $$MedicinesTableUpdateCompanionBuilder,
+          (
+            MedicineRow,
+            BaseReferences<_$AppDatabase, $MedicinesTable, MedicineRow>,
+          ),
+          MedicineRow,
+          PrefetchHooks Function()
+        > {
+  $$MedicinesTableTableManager(_$AppDatabase db, $MedicinesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MedicinesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MedicinesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MedicinesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> archivedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<String?> colorHex = const Value.absent(),
+                Value<String?> folderId = const Value.absent(),
+                Value<double> sortOrder = const Value.absent(),
+                Value<int> syncVersion = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> strength = const Value.absent(),
+                Value<int> form = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<int> foodTiming = const Value.absent(),
+                Value<int> scheduleType = const Value.absent(),
+                Value<int> weekdaysMask = const Value.absent(),
+                Value<int> everyNDays = const Value.absent(),
+                Value<String> dosesJson = const Value.absent(),
+                Value<String> startDate = const Value.absent(),
+                Value<String?> endDate = const Value.absent(),
+                Value<double?> stockLeft = const Value.absent(),
+                Value<double?> refillAt = const Value.absent(),
+                Value<double?> packSize = const Value.absent(),
+                Value<bool> reminderEnabled = const Value.absent(),
+                Value<int> alertStyle = const Value.absent(),
+                Value<int> snoozeMinutes = const Value.absent(),
+                Value<int> followUpMinutes = const Value.absent(),
+                Value<bool> isPaused = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MedicinesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                archivedAt: archivedAt,
+                deletedAt: deletedAt,
+                isPinned: isPinned,
+                isFavorite: isFavorite,
+                colorHex: colorHex,
+                folderId: folderId,
+                sortOrder: sortOrder,
+                syncVersion: syncVersion,
+                lastSyncedAt: lastSyncedAt,
+                deviceId: deviceId,
+                name: name,
+                strength: strength,
+                form: form,
+                note: note,
+                foodTiming: foodTiming,
+                scheduleType: scheduleType,
+                weekdaysMask: weekdaysMask,
+                everyNDays: everyNDays,
+                dosesJson: dosesJson,
+                startDate: startDate,
+                endDate: endDate,
+                stockLeft: stockLeft,
+                refillAt: refillAt,
+                packSize: packSize,
+                reminderEnabled: reminderEnabled,
+                alertStyle: alertStyle,
+                snoozeMinutes: snoozeMinutes,
+                followUpMinutes: followUpMinutes,
+                isPaused: isPaused,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<DateTime?> archivedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<String?> colorHex = const Value.absent(),
+                Value<String?> folderId = const Value.absent(),
+                Value<double> sortOrder = const Value.absent(),
+                Value<int> syncVersion = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> strength = const Value.absent(),
+                Value<int> form = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<int> foodTiming = const Value.absent(),
+                Value<int> scheduleType = const Value.absent(),
+                Value<int> weekdaysMask = const Value.absent(),
+                Value<int> everyNDays = const Value.absent(),
+                Value<String> dosesJson = const Value.absent(),
+                required String startDate,
+                Value<String?> endDate = const Value.absent(),
+                Value<double?> stockLeft = const Value.absent(),
+                Value<double?> refillAt = const Value.absent(),
+                Value<double?> packSize = const Value.absent(),
+                Value<bool> reminderEnabled = const Value.absent(),
+                Value<int> alertStyle = const Value.absent(),
+                Value<int> snoozeMinutes = const Value.absent(),
+                Value<int> followUpMinutes = const Value.absent(),
+                Value<bool> isPaused = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MedicinesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                archivedAt: archivedAt,
+                deletedAt: deletedAt,
+                isPinned: isPinned,
+                isFavorite: isFavorite,
+                colorHex: colorHex,
+                folderId: folderId,
+                sortOrder: sortOrder,
+                syncVersion: syncVersion,
+                lastSyncedAt: lastSyncedAt,
+                deviceId: deviceId,
+                name: name,
+                strength: strength,
+                form: form,
+                note: note,
+                foodTiming: foodTiming,
+                scheduleType: scheduleType,
+                weekdaysMask: weekdaysMask,
+                everyNDays: everyNDays,
+                dosesJson: dosesJson,
+                startDate: startDate,
+                endDate: endDate,
+                stockLeft: stockLeft,
+                refillAt: refillAt,
+                packSize: packSize,
+                reminderEnabled: reminderEnabled,
+                alertStyle: alertStyle,
+                snoozeMinutes: snoozeMinutes,
+                followUpMinutes: followUpMinutes,
+                isPaused: isPaused,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MedicinesTable, MedicineRow>(table),
+                  BaseReferences<_$AppDatabase, $MedicinesTable, MedicineRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MedicinesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MedicinesTable,
+      MedicineRow,
+      $$MedicinesTableFilterComposer,
+      $$MedicinesTableOrderingComposer,
+      $$MedicinesTableAnnotationComposer,
+      $$MedicinesTableCreateCompanionBuilder,
+      $$MedicinesTableUpdateCompanionBuilder,
+      (
+        MedicineRow,
+        BaseReferences<_$AppDatabase, $MedicinesTable, MedicineRow>,
+      ),
+      MedicineRow,
+      PrefetchHooks Function()
+    >;
+typedef $$MedicineDosesTableCreateCompanionBuilder =
+    MedicineDosesCompanion Function({
+      required String id,
+      required String medicineId,
+      required String date,
+      required int slotMinutes,
+      Value<int> status,
+      Value<DateTime?> takenAt,
+      Value<double> quantity,
+      Value<DateTime?> snoozedUntil,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$MedicineDosesTableUpdateCompanionBuilder =
+    MedicineDosesCompanion Function({
+      Value<String> id,
+      Value<String> medicineId,
+      Value<String> date,
+      Value<int> slotMinutes,
+      Value<int> status,
+      Value<DateTime?> takenAt,
+      Value<double> quantity,
+      Value<DateTime?> snoozedUntil,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$MedicineDosesTableFilterComposer
+    extends Composer<_$AppDatabase, $MedicineDosesTable> {
+  $$MedicineDosesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get medicineId => $composableBuilder(
+    column: $table.medicineId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get slotMinutes => $composableBuilder(
+    column: $table.slotMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get takenAt => $composableBuilder(
+    column: $table.takenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get snoozedUntil => $composableBuilder(
+    column: $table.snoozedUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MedicineDosesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MedicineDosesTable> {
+  $$MedicineDosesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get medicineId => $composableBuilder(
+    column: $table.medicineId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get slotMinutes => $composableBuilder(
+    column: $table.slotMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get takenAt => $composableBuilder(
+    column: $table.takenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get snoozedUntil => $composableBuilder(
+    column: $table.snoozedUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MedicineDosesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MedicineDosesTable> {
+  $$MedicineDosesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get medicineId => $composableBuilder(
+    column: $table.medicineId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get slotMinutes => $composableBuilder(
+    column: $table.slotMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get takenAt =>
+      $composableBuilder(column: $table.takenAt, builder: (column) => column);
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get snoozedUntil => $composableBuilder(
+    column: $table.snoozedUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$MedicineDosesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MedicineDosesTable,
+          MedicineDoseRow,
+          $$MedicineDosesTableFilterComposer,
+          $$MedicineDosesTableOrderingComposer,
+          $$MedicineDosesTableAnnotationComposer,
+          $$MedicineDosesTableCreateCompanionBuilder,
+          $$MedicineDosesTableUpdateCompanionBuilder,
+          (
+            MedicineDoseRow,
+            BaseReferences<_$AppDatabase, $MedicineDosesTable, MedicineDoseRow>,
+          ),
+          MedicineDoseRow,
+          PrefetchHooks Function()
+        > {
+  $$MedicineDosesTableTableManager(_$AppDatabase db, $MedicineDosesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MedicineDosesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MedicineDosesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MedicineDosesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> medicineId = const Value.absent(),
+                Value<String> date = const Value.absent(),
+                Value<int> slotMinutes = const Value.absent(),
+                Value<int> status = const Value.absent(),
+                Value<DateTime?> takenAt = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<DateTime?> snoozedUntil = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MedicineDosesCompanion(
+                id: id,
+                medicineId: medicineId,
+                date: date,
+                slotMinutes: slotMinutes,
+                status: status,
+                takenAt: takenAt,
+                quantity: quantity,
+                snoozedUntil: snoozedUntil,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String medicineId,
+                required String date,
+                required int slotMinutes,
+                Value<int> status = const Value.absent(),
+                Value<DateTime?> takenAt = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<DateTime?> snoozedUntil = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MedicineDosesCompanion.insert(
+                id: id,
+                medicineId: medicineId,
+                date: date,
+                slotMinutes: slotMinutes,
+                status: status,
+                takenAt: takenAt,
+                quantity: quantity,
+                snoozedUntil: snoozedUntil,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MedicineDosesTable, MedicineDoseRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MedicineDosesTable,
+                    MedicineDoseRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MedicineDosesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MedicineDosesTable,
+      MedicineDoseRow,
+      $$MedicineDosesTableFilterComposer,
+      $$MedicineDosesTableOrderingComposer,
+      $$MedicineDosesTableAnnotationComposer,
+      $$MedicineDosesTableCreateCompanionBuilder,
+      $$MedicineDosesTableUpdateCompanionBuilder,
+      (
+        MedicineDoseRow,
+        BaseReferences<_$AppDatabase, $MedicineDosesTable, MedicineDoseRow>,
+      ),
+      MedicineDoseRow,
+      PrefetchHooks Function()
+    >;
 typedef $$VaultItemsTableCreateCompanionBuilder =
     VaultItemsCompanion Function({
       required String id,
@@ -18144,6 +21550,10 @@ class $AppDatabaseManager {
       $$HabitsTableTableManager(_db, _db.habits);
   $$HabitLogsTableTableManager get habitLogs =>
       $$HabitLogsTableTableManager(_db, _db.habitLogs);
+  $$MedicinesTableTableManager get medicines =>
+      $$MedicinesTableTableManager(_db, _db.medicines);
+  $$MedicineDosesTableTableManager get medicineDoses =>
+      $$MedicineDosesTableTableManager(_db, _db.medicineDoses);
   $$VaultItemsTableTableManager get vaultItems =>
       $$VaultItemsTableTableManager(_db, _db.vaultItems);
   $$VaultHistoryTableTableManager get vaultHistory =>

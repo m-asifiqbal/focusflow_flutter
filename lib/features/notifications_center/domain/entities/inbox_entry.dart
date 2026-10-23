@@ -18,6 +18,7 @@ enum InboxKind {
   reminder,
   task,
   habit,
+  medicine,
   security,
   sync,
   system;

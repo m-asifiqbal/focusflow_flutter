@@ -30,6 +30,7 @@ String? inboxFallbackRoute(InboxKind kind) => switch (kind) {
   InboxKind.reminder => AppRoutes.reminders,
   InboxKind.task => AppRoutes.tasks,
   InboxKind.habit => AppRoutes.habits,
+  InboxKind.medicine => AppRoutes.medicines,
   InboxKind.security => AppRoutes.vault,
   InboxKind.sync => AppRoutes.settingsBackup,
   InboxKind.system => null,

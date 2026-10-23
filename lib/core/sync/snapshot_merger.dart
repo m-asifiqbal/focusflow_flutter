@@ -14,7 +14,9 @@
 ///   subtasks, item tags and attachment rows replace the local ones;
 ///   otherwise the local children stay.
 /// * Habit logs: last-write-wins per (habit, day) — log ids differ between
-///   devices. Vault password history and focus sessions: union.
+///   devices. Medicine doses: last-write-wins per id (their ids are natural
+///   keys, the same on every device). Vault password history and focus
+///   sessions: union.
 /// * Folders / tags: last-write-wins by `updated_at`; a tag with the same
 ///   name but another id is the same tag (ids are remapped).
 /// * Incoming tombstones delete local rows that are not newer than the
@@ -96,6 +98,7 @@ class _MergeRun {
     }
     await _mergeChildren();
     await _mergeHabitLogs();
+    await _mergeMedicineDoses();
     await _mergeUnion(
       'vault_history',
       parentTable: 'vault_items',
@@ -268,6 +271,34 @@ class _MergeRun {
     }
   }
 
+  /// Last-write-wins per dose id, for doses whose medicine exists locally.
+  Future<void> _mergeMedicineDoses() async {
+    final medicines = await t.load('medicines');
+    final local = await t.load('medicine_doses');
+    for (final row in incoming.rows('medicine_doses')) {
+      if (!medicines.containsKey(row['medicine_id'].toString())) continue;
+      final id = row['id'].toString();
+      final mine = local[id];
+      if (mine == null) {
+        if (_deletedLater('medicine_dose', id, row['updated_at'])) continue;
+        await t.insert('medicine_doses', row, orIgnore: true);
+      } else if (rawTime(row['updated_at']) > rawTime(mine['updated_at'])) {
+        await t.update(
+          'medicine_doses',
+          row,
+          where: {'id': id},
+          only: const {
+            'status',
+            'taken_at',
+            'quantity',
+            'snoozed_until',
+            'updated_at',
+          },
+        );
+      }
+    }
+  }
+
   /// Insert-only union by id for rows whose parent exists locally.
   Future<void> _mergeUnion(
     String table, {
@@ -329,6 +360,10 @@ class _MergeRun {
           if (row != null) await t.delete('folders', {'id': id});
         case 'focus_session':
           await t.delete('focus_sessions', {'id': id});
+        case 'medicine_dose':
+          final row = await t.byId('medicine_doses', id);
+          if (row != null && rawTime(row['updated_at']) > at) continue;
+          if (row != null) await t.delete('medicine_doses', {'id': id});
         case 'habit_log':
           final sep = id.lastIndexOf('|');
           if (sep <= 0) continue;

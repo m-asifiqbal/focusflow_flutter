@@ -82,6 +82,7 @@ String? quickModuleLocation(AppModule module, DateTime? date) =>
             : DateUtilsX.atMinutes(date, _defaultReminderMinutes),
       ),
       AppModule.habits => AppRoutes.newHabitPath,
+      AppModule.medicines => AppRoutes.newMedicinePath,
       AppModule.vault => AppRoutes.newVaultItem(),
       AppModule.scan => null,
     };

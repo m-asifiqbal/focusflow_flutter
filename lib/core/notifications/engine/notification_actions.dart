@@ -15,6 +15,9 @@
 ///               (its own length, else the Settings default), from now.
 ///   • Open    — handled by the engine like a body tap (no write here).
 ///   • Check in — habit: one check-in on the notification's day.
+///   • Taken / Skip — medicine: every dose the notification groups
+///               (payload `doses` at its day and minute); Snooze on a
+///               medicine notification snoozes them all.
 ///
 /// Items that are archived, deleted or gone are ignored (a stale
 /// notification never resurrects an item). [tapRoute] maps a body tap to
@@ -28,7 +31,9 @@ import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/core/utils/clock.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
+import 'package:focusflow/core/notifications/planning/medicine_planner.dart';
 import 'package:focusflow/features/habits/domain/repository/habits_repository.dart';
+import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
 import 'package:focusflow/features/reminders/domain/repository/reminders_repository.dart';
 import 'package:focusflow/features/reminders/domain/usecases/complete_reminder.dart';
 import 'package:focusflow/features/tasks/domain/repository/tasks_repository.dart';
@@ -38,6 +43,7 @@ class NotificationActions {
     required this.reminders,
     required this.tasks,
     required this.habits,
+    required this.medicines,
     required this.clock,
     required this.defaultSnoozeMinutes,
   });
@@ -45,6 +51,7 @@ class NotificationActions {
   final RemindersRepository reminders;
   final TasksRepository tasks;
   final HabitsRepository habits;
+  final MedicinesRepository medicines;
   final Clock clock;
   final int defaultSnoozeMinutes;
 
@@ -56,6 +63,9 @@ class NotificationActions {
     final target = payload.target;
     if (target == null) return false;
     try {
+      if (target.type == ItemType.medicine) {
+        return await _medicine(button, payload);
+      }
       return switch (button) {
         NotificationButton.done => await markDone(
           target,
@@ -71,6 +81,7 @@ class NotificationActions {
           target,
           day: _day(payload.day),
         ),
+        NotificationButton.taken || NotificationButton.skip => false,
       };
     } catch (e) {
       AppLogger.w('Notification action ${button.id} failed: $e');
@@ -131,9 +142,53 @@ class NotificationActions {
     return true;
   }
 
+  /// Taken / Skip / Snooze on a medicine notification: applied to every
+  /// dose it groups that is still active and not logged differently.
+  Future<bool> _medicine(
+    NotificationButton button,
+    NotificationPayload payload,
+  ) async {
+    final slot = MedicinePlanner.parseKey(payload.key);
+    final day = _day(slot?.$1 ?? payload.day);
+    if (slot == null || day == null) return false;
+    final minutes = slot.$2;
+    final ids = payload.doses.isNotEmpty ? payload.doses : [payload.target!.id];
+    var changed = false;
+    for (final id in ids) {
+      final m = await medicines.getMedicine(id);
+      if (m == null || !m.isActive) continue;
+      switch (button) {
+        case NotificationButton.taken:
+          await medicines.markTaken(id, day, minutes);
+        case NotificationButton.skip:
+          await medicines.markSkipped(id, day, minutes);
+        case NotificationButton.snooze:
+          final log = await medicines.doseLog(id, day, minutes);
+          if (log != null && (log.isTaken || log.isSkipped)) continue;
+          final m2 =
+              payload.snoozeMinutes ??
+              (m.snoozeMinutes > 0 ? m.snoozeMinutes : defaultSnoozeMinutes);
+          await medicines.snooze(
+            id,
+            day,
+            minutes,
+            clock.now().add(Duration(minutes: m2)),
+          );
+        case NotificationButton.done ||
+            NotificationButton.checkIn ||
+            NotificationButton.open:
+          continue;
+      }
+      changed = true;
+    }
+    return changed;
+  }
+
   /// The route a body tap opens (item first, then the payload's route).
   static String? tapRoute(NotificationPayload? payload) {
     if (payload == null) return null;
+    // Several medicines at once open the medicine list, not the first one.
+    if (payload.doses.length > 1 && payload.route != null) return payload.route;
     final open = payload.open ?? payload.target;
     if (open != null) return AppRoutes.open(open);
     return payload.route;

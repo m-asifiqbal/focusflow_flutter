@@ -43,6 +43,20 @@ class ReminderFilterNotifier extends AutoDisposeNotifier<RemindersScope> {
   void set(RemindersScope scope) => state = scope;
 }
 
+/// The "Medicine" chip: the timeline shows the picked day's medicine
+/// doses instead of reminders (medicine_day_slivers.dart).
+class ReminderMedicineChip extends AutoDisposeNotifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool on) => state = on;
+}
+
+final reminderMedicineChipProvider =
+    NotifierProvider.autoDispose<ReminderMedicineChip, bool>(
+      ReminderMedicineChip.new,
+    );
+
 /// The selected chip.
 final reminderFilterProvider =
     NotifierProvider.autoDispose<ReminderFilterNotifier, RemindersScope>(

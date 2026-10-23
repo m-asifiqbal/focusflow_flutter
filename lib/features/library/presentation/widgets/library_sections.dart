@@ -42,6 +42,7 @@ String libraryModuleRoute(ItemType type) => switch (type) {
   ItemType.task => AppRoutes.tasks,
   ItemType.reminder => AppRoutes.reminders,
   ItemType.habit => AppRoutes.habits,
+  ItemType.medicine => AppRoutes.medicines,
   ItemType.vault => AppRoutes.vault,
 };
 
@@ -100,21 +101,24 @@ class LibraryModuleGrid extends ConsumerWidget {
       onTap: () => context.push(libraryModuleRoute(t)),
     );
 
+    // Two cards per row. An odd card out shares the last row with the vault
+    // (six spaces → three even rows); otherwise the vault spans the width.
+    final hasVault = modules.contains(ItemType.vault);
+    final grid = [...small, if (hasVault && small.length.isOdd) ItemType.vault];
+    Widget pair(ItemType a, ItemType b) => IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: card(a)),
+          const SizedBox(width: AppSpacing.cardGap),
+          Expanded(child: card(b)),
+        ],
+      ),
+    );
     final rows = <Widget>[
-      for (var i = 0; i < small.length; i += 2)
-        i + 1 < small.length
-            ? IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(child: card(small[i])),
-                    const SizedBox(width: AppSpacing.cardGap),
-                    Expanded(child: card(small[i + 1])),
-                  ],
-                ),
-              )
-            : card(small[i]),
-      if (modules.contains(ItemType.vault)) card(ItemType.vault),
+      for (var i = 0; i < grid.length; i += 2)
+        i + 1 < grid.length ? pair(grid[i], grid[i + 1]) : card(grid[i]),
+      if (hasVault && small.length.isEven) card(ItemType.vault),
       FFSecondaryButton(
         label: tr('Start a focus session'),
         icon: FontAwesomeIcons.stopwatch,

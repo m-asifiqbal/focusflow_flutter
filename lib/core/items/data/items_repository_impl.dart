@@ -18,6 +18,7 @@ import 'package:focusflow/core/database/daos/focus_sessions_dao.dart';
 import 'package:focusflow/core/database/daos/habits_dao.dart';
 import 'package:focusflow/core/database/daos/inbox_dao.dart';
 import 'package:focusflow/core/database/daos/items_dao.dart';
+import 'package:focusflow/core/database/daos/medicines_dao.dart';
 import 'package:focusflow/core/database/daos/organisation_dao.dart';
 import 'package:focusflow/core/database/daos/reminders_dao.dart';
 import 'package:focusflow/core/database/daos/tasks_dao.dart';
@@ -34,6 +35,8 @@ import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
 import 'package:focusflow/features/habits/domain/repository/habits_repository.dart';
+import 'package:focusflow/features/medicines/domain/entities/medicine_dose.dart';
+import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
 import 'package:focusflow/features/reminders/domain/repository/reminders_repository.dart';
 
@@ -46,14 +49,17 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
     required AttachmentFileStore files,
     RemindersRepository? reminders,
     HabitsRepository? habits,
+    MedicinesRepository? medicines,
   }) : _fileStore = files,
        _remindersRepo = reminders,
        _habitsRepo = habits,
+       _medicinesRepo = medicines,
        _dao = ItemsDao(db),
        _org = OrganisationDao(db),
        _tasks = TasksDao(db),
        _reminders = RemindersDao(db),
        _habits = HabitsDao(db),
+       _medicines = MedicinesDao(db),
        _vault = VaultDao(db),
        _inbox = InboxDao(db),
        _focus = FocusSessionsDao(db),
@@ -62,11 +68,13 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
   final AttachmentFileStore _fileStore;
   final RemindersRepository? _remindersRepo;
   final HabitsRepository? _habitsRepo;
+  final MedicinesRepository? _medicinesRepo;
   final ItemsDao _dao;
   final OrganisationDao _org;
   final TasksDao _tasks;
   final RemindersDao _reminders;
   final HabitsDao _habits;
+  final MedicinesDao _medicines;
   final VaultDao _vault;
   final InboxDao _inbox;
   final FocusSessionsDao _focus;
@@ -239,6 +247,9 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
           case ItemType.habit:
             await _deleteReminderRows(await _ownedReminders(type, ids));
             await _habits.deleteLogsOf(ids);
+          case ItemType.medicine:
+            await _deleteReminderRows(await _ownedReminders(type, ids));
+            await _medicines.deleteDosesOf(ids);
           case ItemType.vault:
             await _vault.deleteHistoryOf(ids);
         }
@@ -261,7 +272,9 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
     final s = stamp();
     final table = db.itemTable(ref.type);
     final newIdValue = newId();
-    final titleCol = ref.type == ItemType.habit ? 'name' : 'title';
+    final titleCol = ref.type == ItemType.habit || ref.type == ItemType.medicine
+        ? 'name'
+        : 'title';
     final overrides = <String, (String, List<Variable>)>{
       'id': ('?', [Variable.withString(newIdValue)]),
       'created_at': ('?', [Variable<DateTime>(s.now)]),
@@ -357,7 +370,8 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
 
   static const _moduleOrder =
       "CASE i.item_type WHEN 'note' THEN 0 WHEN 'task' THEN 1 "
-      "WHEN 'reminder' THEN 2 WHEN 'habit' THEN 3 ELSE 4 END";
+      "WHEN 'reminder' THEN 2 WHEN 'habit' THEN 3 WHEN 'medicine' THEN 4 "
+      'ELSE 5 END';
 
   static List<ItemSummary> _mapAll(List<QueryRow> rows) =>
       List.unmodifiable(rows.map(ItemMappers.summary));
@@ -458,6 +472,7 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
         .watchSingle();
     final reminders = _remindersRepo;
     final habits = _habitsRepo;
+    final medicines = _medicinesRepo;
     return combineLatestList<LibraryCounts>(
       [
         base,
@@ -465,12 +480,15 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
             Stream.value(const <ReminderOccurrence>[]),
         reminders?.watchNext(at) ?? Stream<ReminderOccurrence?>.value(null),
         habits?.watchTodayHabits(day) ?? Stream.value(const <HabitDayStatus>[]),
+        medicines?.watchDay(day) ?? Stream<MedicineDay?>.value(null),
       ],
       (v) {
         final r = v[0] as QueryRow;
         final today = v[1] as List<ReminderOccurrence>;
         final next = v[2] as ReminderOccurrence?;
         final statuses = v[3] as List<HabitDayStatus>;
+        final meds = v[4] as MedicineDay?;
+        final doses = meds?.scheduled ?? const <DoseSlot>[];
         var bestStreak = 0;
         for (final s in statuses) {
           if (s.currentStreak > bestStreak) bestStreak = s.currentStreak;
@@ -493,6 +511,12 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
               .length,
           habitsScheduledToday: statuses.where((s) => s.isScheduled).length,
           habitsBestStreak: bestStreak,
+          medicinesTotal: r.read<int>('medicines_total'),
+          medicinesTakenToday: doses
+              .where((s) => s.log?.isTaken ?? false)
+              .length,
+          medicinesDueToday: doses.length,
+          medicinesLow: meds?.lowStock.length ?? 0,
           vaultTotal: r.read<int>('vault_total'),
           vaultWeak: r.read<int>('vault_weak'),
           vaultBreached: r.read<int>('vault_breached'),

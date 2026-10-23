@@ -9,7 +9,8 @@
 /// encrypted per item with the vault key (core/crypto).
 ///
 /// Full-text search: one external-content FTS5 table per module
-/// (`notes_fts`, `tasks_fts`, `reminders_fts`, `habits_fts`, `vault_fts`)
+/// (`notes_fts`, `tasks_fts`, `reminders_fts`, `habits_fts`,
+/// `medicines_fts`, `vault_fts`)
 /// kept in sync by triggers created in [migration]. Query them with
 /// `customSelect` (see features/search). Because the triggers key on rowid,
 /// DAOs must write with insert / update / `insertOnConflictUpdate` (UPSERT);
@@ -37,6 +38,8 @@ part 'app_database.g.dart';
     Reminders,
     Habits,
     HabitLogs,
+    Medicines,
+    MedicineDoses,
     VaultItems,
     VaultHistory,
     GeneratorHistory,
@@ -58,6 +61,11 @@ class AppDatabase extends _$AppDatabase {
   /// v1 — initial schema (all modules + FTS5 search + indexes).
   /// v2 — `tombstones` + delete/insert triggers (sync merge, core/sync).
   /// v3 — `notes.lock_verifier` (a note locked with its own PIN).
+  ///
+  /// `medicines` + `medicine_doses` came later *without* a version bump:
+  /// they are created on open when missing ([_ensureMedicineSchema]), so
+  /// backups of this app stay readable by installs that predate them (an
+  /// older install skips the tables it doesn't know).
   @override
   int get schemaVersion => 3;
 
@@ -67,6 +75,7 @@ class AppDatabase extends _$AppDatabase {
     'task': 'tasks',
     'reminder': 'reminders',
     'habit': 'habits',
+    'medicine': 'medicines',
     'vault': 'vault_items',
   };
 
@@ -77,8 +86,12 @@ class AppDatabase extends _$AppDatabase {
       await _createSearchIndex();
       await _createIndexes();
       await _createTombstoneTriggers();
+      await _createMedicineIndexes();
     },
     onUpgrade: (m, from, to) async {
+      // First: the tombstone triggers below include the medicine tables.
+      await m.createTable(medicines);
+      await m.createTable(medicineDoses);
       if (from < 2) {
         await m.createTable(tombstones);
         await _createTombstoneTriggers();
@@ -86,11 +99,13 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         await m.addColumn(notes, notes.lockVerifier);
       }
+      await _ensureMedicineSchema(force: true);
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
       await customStatement('PRAGMA recursive_triggers = ON');
       await _ensureQueryIndexes();
+      await _ensureMedicineSchema();
     },
   );
 
@@ -100,6 +115,7 @@ class AppDatabase extends _$AppDatabase {
     ('tasks', 'tasks_fts', ['title', 'notes']),
     ('reminders', 'reminders_fts', ['title', 'note']),
     ('habits', 'habits_fts', ['name', 'category']),
+    ('medicines', 'medicines_fts', ['name', 'strength', 'note']),
     // Vault: plaintext title ONLY — secrets are never indexed.
     ('vault_items', 'vault_fts', ['title']),
   ];
@@ -157,6 +173,39 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_notes_folder ON notes(folder_id)',
       'CREATE INDEX IF NOT EXISTS idx_tasks_folder ON tasks(folder_id)',
       'CREATE INDEX IF NOT EXISTS idx_vault_folder ON vault_items(folder_id)',
+    ];
+    for (final s in statements) {
+      await customStatement(s);
+    }
+  }
+
+  /// Creates the medicine tables, their search index and tombstone
+  /// triggers on a database made before they existed. The tombstone trigger
+  /// of `medicine_doses` is created last, so its presence means "done" and
+  /// later opens cost one lookup. Every statement is idempotent.
+  /// [force] skips the check (an upgrade step: its tombstone triggers may
+  /// already include the marker).
+  Future<void> _ensureMedicineSchema({bool force = false}) async {
+    if (!force) {
+      final done = await customSelect(
+        "SELECT 1 FROM sqlite_master WHERE type = 'trigger' "
+        "AND name = 'tomb_medicine_doses_ai'",
+      ).get();
+      if (done.isNotEmpty) return;
+    }
+    final m = createMigrator();
+    await m.createTable(medicines);
+    await m.createTable(medicineDoses);
+    await _createSearchIndex();
+    await _createMedicineIndexes();
+    await _createTombstoneTriggers();
+  }
+
+  Future<void> _createMedicineIndexes() async {
+    const statements = [
+      'CREATE INDEX IF NOT EXISTS idx_medicines_lifecycle ON medicines(deleted_at, archived_at)',
+      'CREATE INDEX IF NOT EXISTS idx_medicine_doses_med ON medicine_doses(medicine_id, date)',
+      'CREATE INDEX IF NOT EXISTS idx_medicine_doses_date ON medicine_doses(date)',
     ];
     for (final s in statements) {
       await customStatement(s);

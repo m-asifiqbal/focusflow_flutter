@@ -28,6 +28,10 @@ class LibraryCounts {
     this.habitsDoneToday = 0,
     this.habitsScheduledToday = 0,
     this.habitsBestStreak = 0,
+    this.medicinesTotal = 0,
+    this.medicinesTakenToday = 0,
+    this.medicinesDueToday = 0,
+    this.medicinesLow = 0,
     this.vaultTotal = 0,
     this.vaultWeak = 0,
     this.vaultBreached = 0,
@@ -68,6 +72,14 @@ class LibraryCounts {
 
   /// Highest *current* streak among active habits ("Longest active streak").
   final int habitsBestStreak;
+  final int medicinesTotal;
+
+  /// Scheduled doses of the day taken / due (as-needed doses not counted).
+  final int medicinesTakenToday;
+  final int medicinesDueToday;
+
+  /// Medicines at or below their refill threshold.
+  final int medicinesLow;
   final int vaultTotal;
 
   /// Cached strength ≤ 1 (0–4 scale).
@@ -86,9 +98,14 @@ class LibraryCounts {
   /// Items in Recently Deleted.
   final int trash;
 
-  /// Active items across the five spaces ("113 items across 5 spaces").
+  /// Active items across the six spaces ("113 items across 6 spaces").
   int get totalItems =>
-      notesTotal + tasksTotal + remindersTotal + habitsTotal + vaultTotal;
+      notesTotal +
+      tasksTotal +
+      remindersTotal +
+      habitsTotal +
+      medicinesTotal +
+      vaultTotal;
 
   /// "Tags & Folders (11)".
   int get tagsAndFolders => tags + folders;
@@ -111,6 +128,10 @@ class LibraryCounts {
       other.habitsDoneToday == habitsDoneToday &&
       other.habitsScheduledToday == habitsScheduledToday &&
       other.habitsBestStreak == habitsBestStreak &&
+      other.medicinesTotal == medicinesTotal &&
+      other.medicinesTakenToday == medicinesTakenToday &&
+      other.medicinesDueToday == medicinesDueToday &&
+      other.medicinesLow == medicinesLow &&
       other.vaultTotal == vaultTotal &&
       other.vaultWeak == vaultWeak &&
       other.vaultBreached == vaultBreached &&
@@ -138,6 +159,10 @@ class LibraryCounts {
     habitsDoneToday,
     habitsScheduledToday,
     habitsBestStreak,
+    medicinesTotal,
+    medicinesTakenToday,
+    medicinesDueToday,
+    medicinesLow,
     vaultTotal,
     vaultWeak,
     vaultBreached,

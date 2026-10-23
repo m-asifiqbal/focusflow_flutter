@@ -38,6 +38,8 @@ const List<String> kSnapshotTables = [
   'reminders',
   'habits',
   'habit_logs',
+  'medicines',
+  'medicine_doses',
   'vault_items',
   'vault_history',
   'item_tags',
@@ -52,6 +54,7 @@ const Map<String, String> kItemTables = {
   'task': 'tasks',
   'reminder': 'reminders',
   'habit': 'habits',
+  'medicine': 'medicines',
   'vault': 'vault_items',
 };
 

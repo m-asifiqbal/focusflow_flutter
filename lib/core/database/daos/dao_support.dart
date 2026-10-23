@@ -110,18 +110,20 @@ extension ItemTablesX on AppDatabase {
     ItemType.task => tasks,
     ItemType.reminder => reminders,
     ItemType.habit => habits,
+    ItemType.medicine => medicines,
     ItemType.vault => vaultItems,
   };
 
   /// SQL name of the table holding items of [type].
   String itemTableName(ItemType type) => AppDatabase.itemTables[type.key]!;
 
-  /// All five item tables.
+  /// All six item tables.
   Set<TableInfo<Table, Object?>> get allItemTables => {
     notes,
     tasks,
     reminders,
     habits,
+    medicines,
     vaultItems,
   };
 }

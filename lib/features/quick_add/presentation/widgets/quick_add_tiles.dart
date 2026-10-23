@@ -1,11 +1,12 @@
 /// ============================================================
-/// QUICK ADD TILES — the 3×2 module grid of screen 04
+/// QUICK ADD TILES — the module grid of screen 04
 /// ============================================================
 ///
-/// What: Note · Task · Reminder · Habit · Password · Scan, each a white
-/// 22-radius card with a solid 46 pt module icon tile, a 15 pt title and an
-/// uppercase caption (Ideas, To-dos, Alerts, Routine, Secure, OCR).
-/// Reflows to two columns when the sheet is narrow or text is large.
+/// What: Note · Task · Reminder · Habit · Medicine · Password · Scan, each a
+/// white 22-radius card with a solid 46 pt module icon tile, a 15 pt title
+/// and an uppercase caption (Ideas, To-dos, Alerts, Routine, Doses, Secure,
+/// OCR). Reflows to two columns when the sheet is narrow or text is large;
+/// the tiles of an incomplete last row share its width.
 /// ============================================================
 library;
 
@@ -50,6 +51,12 @@ List<_TileSpec> _tiles() => [
     semantics: tr('New habit'),
   ),
   (
+    module: AppModule.medicines,
+    title: tr('Medicine'),
+    caption: tr('Doses'),
+    semantics: tr('New medicine'),
+  ),
+  (
     module: AppModule.vault,
     title: tr('Password'),
     caption: tr('Secure'),
@@ -90,15 +97,17 @@ class QuickAddTileGrid extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (var c = 0; c < columns; c++) ...[
+                    for (
+                      var c = 0;
+                      c < columns && row * columns + c < tiles.length;
+                      c++
+                    ) ...[
                       if (c > 0) const SizedBox(width: gap),
                       Expanded(
-                        child: row * columns + c < tiles.length
-                            ? _QuickAddTile(
-                                spec: tiles[row * columns + c],
-                                onTap: onTap,
-                              )
-                            : const SizedBox.shrink(),
+                        child: _QuickAddTile(
+                          spec: tiles[row * columns + c],
+                          onTap: onTap,
+                        ),
                       ),
                     ],
                   ],

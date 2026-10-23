@@ -44,7 +44,7 @@ abstract final class LibraryFormat {
   static String get createFirst => tr('Create your first');
 
   /// "113 items across 5 spaces".
-  static String headerSubtitle(int items, {int spaces = 5}) => tr(
+  static String headerSubtitle(int items, {int spaces = 6}) => tr(
     '{items, plural, one {# item} other {# items}} across '
     '{spaces, plural, one {# space} other {# spaces}}',
     {'items': items, 'spaces': spaces},
@@ -114,6 +114,22 @@ abstract final class LibraryFormat {
           ? tr('Best streak {n}d', {'n': c.habitsBestStreak})
           : tr('No streak yet'),
     ),
+    ItemType.medicine => LibraryCardLines(
+      count: c.medicinesTotal,
+      highlight: c.medicinesTotal == 0
+          ? createFirst
+          : c.medicinesDueToday > 0
+          ? tr('{done}/{total} doses taken', {
+              'done': c.medicinesTakenToday,
+              'total': c.medicinesDueToday,
+            })
+          : tr('No doses today'),
+      meta: c.medicinesLow > 0
+          ? tr('{n} to refill', {'n': c.medicinesLow})
+          : c.medicinesTotal == 0
+          ? tr('No medicines yet')
+          : tr('Stock OK'),
+    ),
     ItemType.vault => LibraryCardLines(
       count: c.vaultTotal,
       highlight: vault == VaultStatus.notSetUp
@@ -177,7 +193,9 @@ abstract final class LibraryFormat {
       parts.add(
         s.type == ItemType.task ? tr('Due {when}', {'when': when}) : when,
       );
-    } else if (s.type == ItemType.vault || s.type == ItemType.habit) {
+    } else if (s.type == ItemType.vault ||
+        s.type == ItemType.habit ||
+        s.type == ItemType.medicine) {
       if (s.meta.isNotEmpty) {
         // A habit's category is stored in English; shown in the active language.
         parts.add(s.type == ItemType.habit ? HabitWords.shown(s.meta) : s.meta);

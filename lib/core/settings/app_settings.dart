@@ -42,7 +42,7 @@ enum LocalBackupFrequency { off, daily, weekly }
 enum SwipeAction { none, archive, delete, complete, pin, favourite, snooze }
 
 /// Home sections (Settings › Home layout: show/hide/reorder).
-enum HomeSection { focus, week, upNext, tasks, notes, habits }
+enum HomeSection { focus, week, upNext, tasks, notes, habits, medicines }
 
 /// Sign-in mode chosen on screen 02.
 enum AccountMode { none, google, apple, offline }
@@ -89,6 +89,7 @@ class AppSettings {
     this.notifyReminders = true,
     this.notifyTasks = true,
     this.notifyHabits = true,
+    this.notifyMedicines = true,
     this.notifyStreakRisk = true,
     this.notifyVault = true,
     this.notifySync = false,
@@ -189,6 +190,9 @@ class AppSettings {
   final bool notifyReminders;
   final bool notifyTasks;
   final bool notifyHabits;
+
+  /// Medicine dose alerts and their "did you take it?" follow-ups.
+  final bool notifyMedicines;
   final bool notifyStreakRisk;
   final bool notifyVault;
   final bool notifySync;
@@ -313,6 +317,7 @@ class AppSettings {
     bool? notifyReminders,
     bool? notifyTasks,
     bool? notifyHabits,
+    bool? notifyMedicines,
     bool? notifyStreakRisk,
     bool? notifyVault,
     bool? notifySync,
@@ -394,6 +399,7 @@ class AppSettings {
       notifyReminders: notifyReminders ?? this.notifyReminders,
       notifyTasks: notifyTasks ?? this.notifyTasks,
       notifyHabits: notifyHabits ?? this.notifyHabits,
+      notifyMedicines: notifyMedicines ?? this.notifyMedicines,
       notifyStreakRisk: notifyStreakRisk ?? this.notifyStreakRisk,
       notifyVault: notifyVault ?? this.notifyVault,
       notifySync: notifySync ?? this.notifySync,
@@ -486,6 +492,7 @@ class AppSettings {
     'notifyReminders': notifyReminders,
     'notifyTasks': notifyTasks,
     'notifyHabits': notifyHabits,
+    'notifyMedicines': notifyMedicines,
     'notifyStreakRisk': notifyStreakRisk,
     'notifyVault': notifyVault,
     'notifySync': notifySync,
@@ -617,6 +624,7 @@ class AppSettings {
       notifyReminders: b('notifyReminders', d.notifyReminders),
       notifyTasks: b('notifyTasks', d.notifyTasks),
       notifyHabits: b('notifyHabits', d.notifyHabits),
+      notifyMedicines: b('notifyMedicines', d.notifyMedicines),
       notifyStreakRisk: b('notifyStreakRisk', d.notifyStreakRisk),
       notifyVault: b('notifyVault', d.notifyVault),
       notifySync: b('notifySync', d.notifySync),

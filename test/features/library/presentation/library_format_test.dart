@@ -20,7 +20,7 @@ void main() {
   ]) => LibraryFormat.card(t, c ?? kMockupCounts, now: now, vault: vault);
 
   test('mockup numbers', () {
-    expect(LibraryFormat.headerSubtitle(113), '113 items across 5 spaces');
+    expect(LibraryFormat.headerSubtitle(113), '113 items across 6 spaces');
     expect(LibraryFormat.headerSubtitle(1, spaces: 1), '1 item across 1 space');
     final notes = card(ItemType.note);
     expect(

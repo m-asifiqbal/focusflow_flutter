@@ -12,6 +12,8 @@
 /// ============================================================
 library;
 
+import 'dart:convert';
+
 import 'package:focusflow/core/sync/snapshot.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 
@@ -149,6 +151,76 @@ class ExportRecords {
           ..._common('habit', r),
         },
     ];
+  }
+
+  static const List<String> _forms = [
+    'tablet', 'capsule', 'liquid', 'drops', 'injection', 'inhaler', 'other', //
+  ];
+  static const List<String> _food = ['any', 'before', 'with', 'after'];
+  static const List<String> _schedules = [
+    'everyDay', 'specificDays', 'everyNDays', 'asNeeded', //
+  ];
+
+  static String _name(List<String> names, Object? i) =>
+      i is int && i >= 0 && i < names.length ? names[i] : names.first;
+
+  /// Medicines with their logged doses inlined (taken / skipped, oldest
+  /// first). Dose times stay the stored JSON list (`[{"t":"08:00","q":1}]`).
+  List<Map<String, Object?>> medicines() {
+    final doses = <String, List<Map<String, Object?>>>{};
+    for (final d in s.rows('medicine_doses')) {
+      final status = d['status'];
+      if (status != 1 && status != 2) continue;
+      (doses['${d['medicine_id']}'] ??= []).add({
+        'date': d['date'],
+        'time': _hhmm(d['slot_minutes']),
+        'status': status == 1 ? 'taken' : 'skipped',
+        'quantity': d['quantity'] ?? 1,
+        'at': iso(d['taken_at']),
+      });
+    }
+    for (final list in doses.values) {
+      list.sort(
+        (a, b) =>
+            '${a['date']} ${a['time']}'.compareTo('${b['date']} ${b['time']}'),
+      );
+    }
+    return [
+      for (final r in s.rows('medicines'))
+        {
+          'name': r['name'] ?? '',
+          'strength': r['strength'] ?? '',
+          'form': _name(_forms, r['form']),
+          'food': _name(_food, r['food_timing']),
+          'schedule': _name(_schedules, r['schedule_type']),
+          'weekdaysMask': r['weekdays_mask'] ?? 127,
+          'everyNDays': r['every_n_days'] ?? 2,
+          'times': _times(r['doses_json']),
+          'startDate': r['start_date'],
+          'endDate': r['end_date'],
+          'stockLeft': r['stock_left'],
+          'refillAt': r['refill_at'],
+          'note': r['note'] ?? '',
+          'paused': _b(r['is_paused']),
+          'doses': doses['${r['id']}'] ?? const <Map<String, Object?>>[],
+          ..._common('medicine', r),
+        },
+    ];
+  }
+
+  /// `08:00×1; 20:00×0.5` from the stored dose JSON.
+  static String _times(Object? json) {
+    if (json is! String) return '';
+    try {
+      final list = jsonDecode(json);
+      if (list is! List) return '';
+      return [
+        for (final e in list)
+          if (e is Map) '${e['t']}×${e['q'] ?? 1}',
+      ].join('; ');
+    } on FormatException {
+      return '';
+    }
   }
 
   static String? _hhmm(Object? minutes) {

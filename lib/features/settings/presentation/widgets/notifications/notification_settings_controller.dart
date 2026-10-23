@@ -81,6 +81,9 @@ class NotificationSettingsController {
   Future<void> setHabits(bool on) =>
       _update((s) => s.copyWith(notifyHabits: on));
 
+  Future<void> setMedicines(bool on) =>
+      _update((s) => s.copyWith(notifyMedicines: on));
+
   Future<void> setStreakRisk(bool on) =>
       _update((s) => s.copyWith(notifyStreakRisk: on));
 

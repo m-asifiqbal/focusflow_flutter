@@ -8,6 +8,7 @@ mixin _$ItemsDaoMixin on DatabaseAccessor<AppDatabase> {
   $TasksTable get tasks => attachedDatabase.tasks;
   $RemindersTable get reminders => attachedDatabase.reminders;
   $HabitsTable get habits => attachedDatabase.habits;
+  $MedicinesTable get medicines => attachedDatabase.medicines;
   $VaultItemsTable get vaultItems => attachedDatabase.vaultItems;
   $FoldersTable get folders => attachedDatabase.folders;
   $TagsTable get tags => attachedDatabase.tags;
@@ -26,6 +27,8 @@ class ItemsDaoManager {
       $$RemindersTableTableManager(_db.attachedDatabase, _db.reminders);
   $$HabitsTableTableManager get habits =>
       $$HabitsTableTableManager(_db.attachedDatabase, _db.habits);
+  $$MedicinesTableTableManager get medicines =>
+      $$MedicinesTableTableManager(_db.attachedDatabase, _db.medicines);
   $$VaultItemsTableTableManager get vaultItems =>
       $$VaultItemsTableTableManager(_db.attachedDatabase, _db.vaultItems);
   $$FoldersTableTableManager get folders =>

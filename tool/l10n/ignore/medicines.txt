@@ -1,0 +1,6 @@
+# medicines: literals that are data, not shown text (SQL)
+lib/features/medicines/data/repository/medicines_repository_impl.dart	m.archived_at IS NOT NULL AND m.deleted_at IS NULL
+lib/features/medicines/data/repository/medicines_repository_impl.dart	m.id = ?
+lib/features/medicines/data/repository/medicines_repository_impl.dart	{} AND m.is_paused = 0 AND m.reminder_enabled = 1 AND m.schedule_type != {}
+lib/core/database/daos/medicines_dao.dart	m.is_pinned DESC, m.sort_order ASC, m.created_at ASC
+lib/features/medicines/data/repository/medicines_repository_impl.dart	m.deleted_at IS NULL

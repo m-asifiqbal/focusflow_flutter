@@ -28,6 +28,7 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/ff_action_sheet.dart';
 import 'package:focusflow/core/widgets/ff_snackbar.dart';
 import 'package:focusflow/features/habits/presentation/habit_item_actions.dart';
+import 'package:focusflow/features/medicines/presentation/medicine_item_actions.dart';
 import 'package:focusflow/features/notes/presentation/note_item_actions.dart';
 import 'package:focusflow/features/reminders/presentation/reminder_item_actions.dart';
 import 'package:focusflow/features/tasks/presentation/task_item_actions.dart';
@@ -128,7 +129,9 @@ Future<void> showItemActions(
       icon: FontAwesomeIcons.tag,
       label: switch (type) {
         ItemType.task => tr('Edit tags / move to list'),
-        ItemType.habit || ItemType.reminder => tr('Edit tags'),
+        ItemType.habit ||
+        ItemType.reminder ||
+        ItemType.medicine => tr('Edit tags'),
         _ => tr('Edit tags / move to folder'),
       },
       colors: TagPalette.travel,
@@ -296,6 +299,7 @@ Future<ModuleItemActions> _moduleActions(
   ItemType.task => taskItemActions(context, ref, item),
   ItemType.reminder => reminderItemActions(context, ref, item),
   ItemType.habit => habitItemActions(context, ref, item),
+  ItemType.medicine => medicineItemActions(context, ref, item),
   ItemType.vault => vaultItemActions(context, ref, item),
 };
 
@@ -316,6 +320,10 @@ String _selectedTitle(ItemType? type, int count) => switch (type) {
   ),
   ItemType.habit => tr(
     '{count, plural, one {# habit selected} other {# habits selected}}',
+    {'count': count},
+  ),
+  ItemType.medicine => tr(
+    '{count, plural, one {# medicine selected} other {# medicines selected}}',
     {'count': count},
   ),
   ItemType.vault => tr(

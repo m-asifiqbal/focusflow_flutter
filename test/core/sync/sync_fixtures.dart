@@ -17,6 +17,7 @@ import 'package:focusflow/core/sync/settings_bridge.dart';
 import 'package:focusflow/core/sync/snapshot.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
+import 'package:focusflow/features/medicines/domain/entities/medicine.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
@@ -126,6 +127,12 @@ Future<SampleIds> seedSample(TestHarness h, AppFiles files) async {
   final habits = h.read(habitsRepositoryProvider);
   final habit = await habits.save(Habit.draft(startDate: now, name: 'Read'));
   await habits.toggleDone(habit, now);
+
+  final medicines = h.read(medicinesRepositoryProvider);
+  final medicine = await medicines.save(
+    Medicine.draft(startDate: now, name: 'Metformin').copyWith(stockLeft: 30),
+  );
+  await medicines.markTaken(medicine, now, 8 * 60);
 
   final gone = await notes.createEmpty(title: 'Gone for good');
   await h.read(itemsRepositoryProvider).deleteForever([
