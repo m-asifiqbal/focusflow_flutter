@@ -15,6 +15,8 @@
 ///     for every scheduled day would paint every cell for daily habits.
 ///     The agenda still lists every habit scheduled that day.
 ///   • Notes appear on the day they were created.
+///   • Medicine dots mark days with a dose taken (like habits); the agenda
+///     lists every dose of the day with how it went.
 ///   • Timed rows first (by time), then all-day rows, module order
 ///     Tasks · Reminders · Habits · Notes (as in the mockup).
 /// ============================================================
@@ -26,6 +28,8 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/calendar/domain/entities/calendar_entry.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
+import 'package:focusflow/features/medicines/domain/entities/medicine_dose.dart';
+import 'package:focusflow/features/medicines/domain/services/medicine_words.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
@@ -36,6 +40,7 @@ abstract final class CalendarRules {
     ItemType.task,
     ItemType.reminder,
     ItemType.habit,
+    ItemType.medicine,
     ItemType.note,
   ];
 
@@ -90,6 +95,7 @@ abstract final class CalendarRules {
     Iterable<TaskItem> tasks = const [],
     Iterable<ReminderOccurrence> reminders = const [],
     Iterable<HabitLog> habitLogs = const [],
+    Iterable<DoseLog> doseLogs = const [],
     Iterable<Note> notes = const [],
   }) {
     final byDay = <String, Set<ItemType>>{};
@@ -106,6 +112,9 @@ abstract final class CalendarRules {
     }
     for (final l in habitLogs) {
       if (l.count > 0 && !l.skipped) add(l.date, ItemType.habit);
+    }
+    for (final l in doseLogs) {
+      if (l.isTaken) add(DateUtilsX.parseDayKey(l.dayKey), ItemType.medicine);
     }
     for (final n in notes) {
       add(n.createdAt, ItemType.note);
@@ -128,9 +137,12 @@ abstract final class CalendarRules {
     Iterable<TaskItem> tasks = const [],
     Iterable<ReminderOccurrence> reminders = const [],
     Iterable<HabitDayStatus> habits = const [],
+    Iterable<DoseSlot> doses = const [],
+    DateTime? now,
     Iterable<Note> notes = const [],
   }) {
     final entries = <CalendarEntry>[
+      for (final d in doses) doseEntry(d, now ?? DateTime.now()),
       ...tasks.map(taskEntry),
       ...reminders.where(showsReminder).map(reminderEntry),
       ...habits.where((h) => h.isScheduled).map(habitEntry),
@@ -201,6 +213,30 @@ abstract final class CalendarRules {
       title: s.habit.name,
       meta: _meta(ItemType.habit, detail),
       done: s.isDone,
+    );
+  }
+
+  /// "Medicine · 1 tablet · taken".
+  static CalendarEntry doseEntry(DoseSlot s, DateTime now) {
+    final state = s.stateAt(now);
+    final m = s.medicine;
+    final detail = [
+      MedicineWords.amount(s.quantity, m.form),
+      switch (state) {
+        DoseState.taken => tr('taken'),
+        DoseState.skipped => tr('skipped'),
+        DoseState.missed => tr('missed'),
+        DoseState.snoozed => tr('snoozed'),
+        DoseState.due => tr('due now'),
+        DoseState.upcoming => null,
+      },
+    ].nonNulls.join(' · ');
+    return CalendarEntry(
+      ref: m.ref,
+      title: m.name.trim().isEmpty ? tr('Untitled medicine') : m.name.trim(),
+      time: s.at,
+      meta: _meta(ItemType.medicine, detail),
+      done: state == DoseState.taken,
     );
   }
 

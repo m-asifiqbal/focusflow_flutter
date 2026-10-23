@@ -226,7 +226,23 @@ void main() {
     for (var i = 0; i < 4; i++) {
       await settle(tester);
     }
-    expect(find.text('0 imported · 2 duplicates skipped'), findsOneWidget);
+    // Coloured result tiles: 0 imported, 2 already had, 0 failed.
+    Finder tile(String label) => find
+        .ancestor(of: find.text(label), matching: find.byType(Container))
+        .first;
+    expect(
+      find.descendant(of: tile('Imported'), matching: find.text('0')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: tile('Already had'), matching: find.text('2')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: tile('Failed'), matching: find.text('0')),
+      findsOneWidget,
+    );
+    await captureScreen(tester, '35_import_summary_duplicates');
   });
 
   testWidgets('no overflow at 360 pt and text scale 1.3', (tester) async {

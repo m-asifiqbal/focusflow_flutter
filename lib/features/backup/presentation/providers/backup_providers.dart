@@ -194,6 +194,7 @@ final importWriterProvider = Provider<ImportWriter>((ref) {
     tasks: ref.watch(tasksRepositoryProvider),
     reminders: ref.watch(remindersRepositoryProvider),
     habits: ref.watch(habitsRepositoryProvider),
+    medicines: ref.watch(medicinesRepositoryProvider),
     items: ref.watch(itemsRepositoryProvider),
     vault: ref.watch(vaultBridgeProvider),
     vaultLogin: (id, blob) async {

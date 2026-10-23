@@ -135,7 +135,11 @@ void main() {
       ),
     );
     await settle(tester);
-    expect(settings().homeSections.last, HomeSection.notes);
+    // Habits swapped above Notes; Medicine stays last.
+    expect(
+      settings().homeSections.sublist(settings().homeSections.length - 3),
+      [HomeSection.habits, HomeSection.notes, HomeSection.medicines],
+    );
     semantics.dispose();
 
     await tap(tester, find.text('Reset'));

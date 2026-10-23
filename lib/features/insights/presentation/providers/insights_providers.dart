@@ -39,6 +39,21 @@ class InsightsRangeController extends Notifier<InsightsRange> {
   void select(InsightsRange range) => state = range;
 }
 
+/// The Insights tab's two views: everyday productivity, and medicines.
+enum InsightsView { overview, medicine }
+
+class InsightsViewController extends Notifier<InsightsView> {
+  @override
+  InsightsView build() => InsightsView.overview;
+
+  void select(InsightsView v) => state = v;
+}
+
+final insightsViewProvider =
+    NotifierProvider<InsightsViewController, InsightsView>(
+      InsightsViewController.new,
+    );
+
 final insightsRangeProvider =
     NotifierProvider<InsightsRangeController, InsightsRange>(
       InsightsRangeController.new,

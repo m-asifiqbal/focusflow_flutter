@@ -23,6 +23,8 @@ import 'package:focusflow/features/calendar/domain/entities/calendar_entry.dart'
 import 'package:focusflow/features/calendar/domain/services/calendar_rules.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
+import 'package:focusflow/features/medicines/domain/entities/medicine_dose.dart';
+import 'package:focusflow/features/medicines/presentation/providers/medicines_providers.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
 import 'package:focusflow/features/notes/domain/repository/notes_repository.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
@@ -199,6 +201,13 @@ final _habitLogsInRangeProvider = StreamProvider.autoDispose
           .watchLogsInRange(r.from, DateUtilsX.addDays(r.to, -1)),
     );
 
+final _doseLogsInRangeProvider = StreamProvider.autoDispose
+    .family<List<DoseLog>, CalendarRange>(
+      (ref, r) => ref
+          .watch(medicinesRepositoryProvider)
+          .watchLogsInRange(r.from, DateUtilsX.addDays(r.to, -1)),
+    );
+
 final _tasksForDayProvider = StreamProvider.autoDispose
     .family<List<TaskItem>, DateTime>(
       (ref, day) => ref.watch(tasksRepositoryProvider).watchTasksForDay(day),
@@ -242,13 +251,15 @@ final calendarDotsProvider = Provider.autoDispose
       final tasks = ref.watch(_tasksInRangeProvider(r));
       final reminders = ref.watch(_remindersInRangeProvider(r));
       final logs = ref.watch(_habitLogsInRangeProvider(r));
+      final doses = ref.watch(_doseLogsInRangeProvider(r));
       final notes = ref.watch(calendarNotesProvider);
       return _combine(
-        [tasks, reminders, logs, notes],
+        [tasks, reminders, logs, doses, notes],
         () => CalendarRules.dots(
           tasks: tasks.requireValue,
           reminders: reminders.requireValue,
           habitLogs: logs.requireValue,
+          doseLogs: doses.requireValue,
           notes: notes.requireValue.where(
             (n) => !n.createdAt.isBefore(r.from) && n.createdAt.isBefore(r.to),
           ),
@@ -262,13 +273,17 @@ final calendarAgendaProvider = Provider.autoDispose
       final tasks = ref.watch(_tasksForDayProvider(day));
       final reminders = ref.watch(_remindersForDayProvider(day));
       final habits = ref.watch(_habitsForDayProvider(day));
+      final medicines = ref.watch(medicineDayProvider(day));
+      final now = ref.watch(minuteClockProvider);
       final notes = ref.watch(calendarNotesProvider);
       return _combine(
-        [tasks, reminders, habits, notes],
+        [tasks, reminders, habits, medicines, notes],
         () => CalendarRules.agenda(
           tasks: tasks.requireValue,
           reminders: reminders.requireValue,
           habits: habits.requireValue,
+          doses: medicines.requireValue.slots,
+          now: now,
           notes: CalendarRules.notesOn(notes.requireValue, day),
         ),
       );
@@ -280,6 +295,7 @@ void retryCalendarAgenda(WidgetRef ref, DateTime day) {
     ..invalidate(_tasksForDayProvider(day))
     ..invalidate(_remindersForDayProvider(day))
     ..invalidate(_habitsForDayProvider(day))
+    ..invalidate(medicineDayProvider(day))
     ..invalidate(calendarNotesProvider);
 }
 
@@ -289,5 +305,6 @@ void retryCalendarDots(WidgetRef ref, CalendarRange range) {
     ..invalidate(_tasksInRangeProvider(range))
     ..invalidate(_remindersInRangeProvider(range))
     ..invalidate(_habitLogsInRangeProvider(range))
+    ..invalidate(_doseLogsInRangeProvider(range))
     ..invalidate(calendarNotesProvider);
 }

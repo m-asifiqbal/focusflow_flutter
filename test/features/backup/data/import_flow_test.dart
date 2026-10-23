@@ -260,6 +260,7 @@ void main() {
           tasks: h.read(tasksRepositoryProvider),
           reminders: h.read(remindersRepositoryProvider),
           habits: h.read(habitsRepositoryProvider),
+          medicines: h.read(medicinesRepositoryProvider),
           items: h.read(itemsRepositoryProvider),
           vault: vault,
           clock: h.read(clockProvider),

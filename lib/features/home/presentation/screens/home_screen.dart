@@ -26,6 +26,7 @@ import 'package:focusflow/features/home/presentation/home_tokens.dart';
 import 'package:focusflow/features/home/presentation/providers/home_providers.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_focus_card.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_habits_section.dart';
+import 'package:focusflow/features/home/presentation/widgets/home_medicine_section.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_header.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_notes_section.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_section_states.dart';
@@ -47,9 +48,15 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sections = ref.watch(
-      settingsProvider.select((s) => s.visibleHomeSections),
-    );
+    final hasMedicines = ref.watch(homeHasMedicinesProvider);
+    final sections = [
+      for (final s in ref.watch(
+        settingsProvider.select((s) => s.visibleHomeSections),
+      ))
+        // Medicine only for those who have medicines: no empty card for
+        // everyone else.
+        if (s != HomeSection.medicines || hasMedicines) s,
+    ];
     const pad = EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.screen);
 
     Widget section(HomeSection s) => switch (s) {
@@ -70,6 +77,10 @@ class HomeScreen extends ConsumerWidget {
       HomeSection.habits => const Padding(
         padding: pad,
         child: HomeHabitsSection(),
+      ),
+      HomeSection.medicines => const Padding(
+        padding: pad,
+        child: HomeMedicineSection(),
       ),
     };
 

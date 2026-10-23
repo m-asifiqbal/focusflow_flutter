@@ -146,28 +146,44 @@ class MedicinesRepositoryImpl extends RepositoryBase
       });
 
   @override
-  Stream<MedicineInsights> watchInsights(
+  Stream<MedicineInsights> watchInsights(MedicinePeriod period, DateTime now) =>
+      db.watchComputed(_tables, () async {
+        final win = MedicineInsightsCalculator.window(period, now);
+        final prev = MedicineInsightsCalculator.previousWindow(period, win);
+        // History counts archived medicines too (up to their archive day).
+        final meds = await _load('m.deleted_at IS NULL');
+        final logs = await _logs(
+          meds.map((m) => m.id),
+          from: prev.$1,
+          to: win.$2,
+        );
+        // A year of daily doses for several medicines: off the UI isolate.
+        return period == MedicinePeriod.yearly
+            ? _insightsOnIsolate(meds, logs, period, now)
+            : MedicineInsightsCalculator.compute(
+                medicines: meds,
+                logs: logs,
+                period: period,
+                now: now,
+              );
+      });
+
+  /// Runs the calculator on a background isolate. Static on purpose: a
+  /// closure made inside an instance method can capture `this` (and with
+  /// it the database connection), which can't be sent to an isolate.
+  static Future<MedicineInsights> _insightsOnIsolate(
+    List<Medicine> medicines,
+    List<DoseLog> logs,
     MedicinePeriod period,
     DateTime now,
-  ) => db.watchComputed(_tables, () async {
-    final win = MedicineInsightsCalculator.window(period, now);
-    final prev = MedicineInsightsCalculator.previousWindow(period, win);
-    // History counts archived medicines too (up to their archive day).
-    final meds = await _load('m.deleted_at IS NULL');
-    final logs = await _logs(
-      meds.map((m) => m.id),
-      from: prev.$1,
-      to: win.$2,
-    );
-    MedicineInsights run() => MedicineInsightsCalculator.compute(
-      medicines: meds,
+  ) => Isolate.run(
+    () => MedicineInsightsCalculator.compute(
+      medicines: medicines,
       logs: logs,
       period: period,
       now: now,
-    );
-    // A year of daily doses for several medicines: off the UI isolate.
-    return period == MedicinePeriod.yearly ? Isolate.run(run) : run();
-  });
+    ),
+  );
 
   @override
   Stream<List<DoseLog>> watchLogsInRange(DateTime from, DateTime to) =>

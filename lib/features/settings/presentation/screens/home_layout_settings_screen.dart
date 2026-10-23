@@ -127,6 +127,10 @@ class HomeLayoutSettingsScreen extends ConsumerWidget {
   HomeSection.tasks => (ModuleStyle.tasks.icon, ModuleStyle.tasks.colors),
   HomeSection.notes => (ModuleStyle.notes.icon, ModuleStyle.notes.colors),
   HomeSection.habits => (ModuleStyle.habits.icon, ModuleStyle.habits.colors),
+  HomeSection.medicines => (
+    ModuleStyle.medicines.icon,
+    ModuleStyle.medicines.colors,
+  ),
 };
 
 class _SectionsList extends ConsumerWidget {

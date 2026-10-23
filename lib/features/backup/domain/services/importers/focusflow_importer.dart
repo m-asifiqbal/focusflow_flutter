@@ -3,7 +3,8 @@
 /// ============================================================
 ///
 /// What: reads back what ExportWriters writes (JSON with
-/// `format: focusflow-export`, per-module CSVs with a `type` column) and,
+/// `format: focusflow-export`, per-module CSVs with a `type` column —
+/// medicines included, see medicine_importer.dart) and,
 /// leniently, any CSV with a title/name column ("generic CSV": rows with a
 /// due date become tasks, the rest notes).
 /// Why: exports must round-trip, and a plain spreadsheet of to-dos is the
@@ -18,6 +19,7 @@ import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/domain/services/csv_codec.dart';
 import 'package:focusflow/features/backup/domain/services/export_records.dart';
 import 'package:focusflow/features/backup/domain/services/importers/import_parsing.dart';
+import 'package:focusflow/features/backup/domain/services/importers/medicine_importer.dart';
 
 abstract final class FocusFlowImporter {
   static const _priorities = ['none', 'low', 'medium', 'high'];
@@ -59,6 +61,7 @@ abstract final class FocusFlowImporter {
             ),
       ],
       habits: list('habits').map(_habit).toList(),
+      medicines: list('medicines').map(MedicineImporter.fromMap).toList(),
     );
   }
 
@@ -149,6 +152,7 @@ abstract final class FocusFlowImporter {
     final ours = header.contains('type');
     final notes = <ImportedNote>[], tasks = <ImportedTask>[];
     final reminders = <ImportedReminder>[], habits = <ImportedHabit>[];
+    final medicines = <ImportedMedicine>[];
     final problems = <ImportProblem>[];
     // CSV keys are lower-cased; map back to the JSON field names.
     Map<String, String> js(Map<String, String> r) => {
@@ -160,6 +164,10 @@ abstract final class FocusFlowImporter {
       'everyNDays': r['everyndays'] ?? '',
       'startDate': r['startdate'] ?? '',
       'doneDays': r['donedays'] ?? '',
+      'endDate': r['enddate'] ?? '',
+      'stockLeft': r['stockleft'] ?? '',
+      'refillAt': r['refillat'] ?? '',
+      'takenDoses': r['takendoses'] ?? '',
     };
     for (var i = 0; i < rows.length; i++) {
       final r = js(rows[i]);
@@ -176,6 +184,8 @@ abstract final class FocusFlowImporter {
           tasks.add(_task(r));
         case 'habit':
           habits.add(_habit(r));
+        case 'medicine':
+          medicines.add(MedicineImporter.fromMap(r));
         case 'reminder':
           final at = ImportParsing.dateTime(r['at']);
           if (at == null) {
@@ -208,6 +218,7 @@ abstract final class FocusFlowImporter {
       tasks: tasks,
       reminders: reminders,
       habits: habits,
+      medicines: medicines,
       problems: problems,
     );
   }

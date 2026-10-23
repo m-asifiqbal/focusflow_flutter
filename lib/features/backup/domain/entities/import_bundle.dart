@@ -141,6 +141,55 @@ class ImportedHabit {
 }
 
 /// A row the parser could not use ("Row 12: no title").
+/// A medicine from a FocusFlow export (field names as ExportRecords
+/// writes them; enum values by name so the file stays readable).
+@immutable
+class ImportedMedicine {
+  const ImportedMedicine({
+    required this.name,
+    this.strength = '',
+    this.form = 'tablet',
+    this.food = 'any',
+    this.schedule = 'everyDay',
+    this.weekdaysMask = 127,
+    this.everyNDays = 2,
+    this.times = const [],
+    this.startDate,
+    this.endDate,
+    this.stockLeft,
+    this.refillAt,
+    this.note = '',
+    this.paused = false,
+    this.doses = const [],
+    this.createdAt,
+  });
+
+  final String name;
+  final String strength;
+  final String form;
+  final String food;
+  final String schedule;
+  final int weekdaysMask;
+  final int everyNDays;
+
+  /// Dose times: (minutes after midnight, amount).
+  final List<(int, double)> times;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final double? stockLeft;
+  final double? refillAt;
+  final String note;
+  final bool paused;
+
+  /// Logged doses: day `yyyy-MM-dd`, minute, taken (false = skipped),
+  /// amount, when.
+  final List<
+    ({String day, int minutes, bool taken, double quantity, DateTime? at})
+  >
+  doses;
+  final DateTime? createdAt;
+}
+
 @immutable
 class ImportProblem {
   const ImportProblem(this.message);
@@ -156,6 +205,7 @@ class ImportBundle {
     this.tasks = const [],
     this.reminders = const [],
     this.habits = const [],
+    this.medicines = const [],
     this.logins = const [],
     this.problems = const [],
   });
@@ -165,6 +215,7 @@ class ImportBundle {
   final List<ImportedTask> tasks;
   final List<ImportedReminder> reminders;
   final List<ImportedHabit> habits;
+  final List<ImportedMedicine> medicines;
   final List<ImportedLogin> logins;
   final List<ImportProblem> problems;
 
@@ -173,6 +224,7 @@ class ImportBundle {
       tasks.length +
       reminders.length +
       habits.length +
+      medicines.length +
       logins.length;
 
   bool get isEmpty => itemCount == 0;

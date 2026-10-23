@@ -8,7 +8,7 @@
 /// the partial-failure report.
 /// Dedupe ("title + date"): notes by title + created day (or title + body
 /// when the source has no date), tasks by title + due day, reminders by
-/// title + time, habits by name, logins by title + username + website
+/// title + time, habits by name, medicines by name + strength, logins by title + username + website
 /// (the username / URL of existing vault items live in the encrypted
 /// payload and are read with the unlocked vault through [vaultLogin]; an
 /// item that can't be read never counts as a duplicate, so distinct logins
@@ -37,6 +37,9 @@ import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
 import 'package:focusflow/features/habits/domain/repository/habits_repository.dart';
+import 'package:focusflow/features/medicines/domain/entities/medicine.dart';
+import 'package:focusflow/features/medicines/domain/entities/medicine_dose.dart';
+import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
 import 'package:focusflow/features/notes/domain/repository/notes_repository.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
 import 'package:focusflow/features/reminders/domain/repository/reminders_repository.dart';
@@ -62,6 +65,7 @@ class ImportWriter {
     required this.tasks,
     required this.reminders,
     required this.habits,
+    required this.medicines,
     required this.items,
     required this.vault,
     required this.clock,
@@ -74,6 +78,7 @@ class ImportWriter {
   final TasksRepository tasks;
   final RemindersRepository reminders;
   final HabitsRepository habits;
+  final MedicinesRepository medicines;
   final ItemsRepository items;
   final VaultBackupBridge vault;
   final Clock clock;
@@ -128,6 +133,11 @@ class ImportWriter {
     }
     for (final r in existing.rows('habits')) {
       if (r['deleted_at'] == null) seen.add('h|${_n(r['name'])}');
+    }
+    for (final r in existing.rows('medicines')) {
+      if (r['deleted_at'] == null) {
+        seen.add('m|${_n(r['name'])}|${_n(r['strength'])}');
+      }
     }
     final vaultLogins = <String>{};
     if (b.logins.isNotEmpty && vaultLogin != null) {
@@ -324,11 +334,81 @@ class ImportWriter {
       });
     }
 
+    for (final m in b.medicines) {
+      if (!seen.add('m|${_n(m.name)}|${_n(m.strength)}')) {
+        duplicates++;
+        tick();
+        continue;
+      }
+      await guard(m.name, () async {
+        final medicine = _medicine(m, now);
+        final id = await medicines.save(medicine, writeStock: true);
+        final stamp = clock.now();
+        await medicines.importDoses([
+          for (final d in m.doses)
+            DoseLog(
+              id: DoseLog.idFor(id, d.day, d.minutes),
+              medicineId: id,
+              dayKey: d.day,
+              slotMinutes: d.minutes,
+              status: d.taken ? DoseStatus.taken : DoseStatus.skipped,
+              takenAt: d.at,
+              quantity: d.quantity,
+              createdAt: stamp,
+              updatedAt: stamp,
+            ),
+        ]);
+      });
+    }
+
     return ImportResult(
       imported: imported,
       duplicates: duplicates,
       failed: failures.length,
       failures: failures,
+    );
+  }
+
+  static T _byName<T extends Enum>(List<T> values, String name, T fallback) =>
+      values.where((v) => v.name == name).firstOrNull ?? fallback;
+
+  /// The medicine to save for an imported one.
+  static Medicine _medicine(ImportedMedicine m, DateTime now) {
+    if (m.name.trim().isEmpty) {
+      throw ImportFormatException(tr('no name'));
+    }
+    const food = {
+      'any': FoodTiming.anyTime,
+      'before': FoodTiming.beforeFood,
+      'with': FoodTiming.withFood,
+      'after': FoodTiming.afterFood,
+    };
+    final schedule = _byName(
+      MedicineScheduleType.values,
+      m.schedule,
+      MedicineScheduleType.everyDay,
+    );
+    final doses = [for (final (t, q) in m.times) DoseTime(t, q)]..sort();
+    return Medicine.draft(
+      startDate: m.startDate ?? DateUtilsX.dateOnly(now),
+    ).copyWith(
+      name: m.name.trim(),
+      strength: m.strength,
+      form: _byName(MedicineForm.values, m.form, MedicineForm.tablet),
+      foodTiming: food[m.food] ?? FoodTiming.anyTime,
+      schedule: schedule,
+      weekdaysMask: m.weekdaysMask & 0x7F == 0 ? 0x7F : m.weekdaysMask,
+      everyNDays: m.everyNDays < 2 ? 2 : m.everyNDays,
+      doses: schedule == MedicineScheduleType.asNeeded
+          ? const []
+          : (doses.isEmpty ? const [DoseTime(8 * 60)] : doses),
+      endDate: m.endDate,
+      stockLeft: m.stockLeft,
+      clearStock: m.stockLeft == null,
+      refillAt: m.refillAt,
+      note: m.note,
+      isPaused: m.paused,
+      createdAt: m.createdAt,
     );
   }
 

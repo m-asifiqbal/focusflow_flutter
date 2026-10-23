@@ -90,9 +90,19 @@ abstract final class ImportDetector {
       }
       final csvs = files.entries.where((e) => e.key.endsWith('.csv'));
       if (csvs.isNotEmpty) {
-        return _merge([
-          for (final c in csvs) _csv(ImportParsing.text(c.value.content)),
-        ]);
+        // An export zip can hold a module with no rows (header only): skip
+        // a CSV that can't be read as long as another one can.
+        final parts = <ImportBundle>[];
+        ImportFormatException? first;
+        for (final c in csvs) {
+          try {
+            parts.add(_csv(ImportParsing.text(c.value.content)));
+          } on ImportFormatException catch (e) {
+            first ??= e;
+          }
+        }
+        if (parts.isEmpty) throw first!;
+        return _merge(parts);
       }
       throw ImportFormatException(
         tr("This zip doesn't contain anything FocusFlow can import."),
@@ -150,6 +160,7 @@ abstract final class ImportDetector {
     tasks: [for (final p in parts) ...p.tasks],
     reminders: [for (final p in parts) ...p.reminders],
     habits: [for (final p in parts) ...p.habits],
+    medicines: [for (final p in parts) ...p.medicines],
     logins: [for (final p in parts) ...p.logins],
     problems: [for (final p in parts) ...p.problems],
   );

@@ -163,10 +163,21 @@ class HabitsRepositoryImpl extends RepositoryBase implements HabitsRepository {
     );
     final calculator = HabitStatsCalculator(weekStartsOn: weekStartsOn);
     final stats = logs.length > isolateThreshold
-        ? await Isolate.run(() => calculator.compute(habit, logs, day))
+        ? await _statsOnIsolate(calculator, habit, logs, day)
         : calculator.compute(habit, logs, day);
     return HabitDetail(habit: habit, logs: logs, stats: stats, today: day);
   });
+
+  /// Static on purpose: a closure made inside an instance method can
+  /// capture `this` (and with it the database connection), which can't be
+  /// sent to an isolate — the long-history detail used to fail with
+  /// "object is unsendable".
+  static Future<HabitStats> _statsOnIsolate(
+    HabitStatsCalculator calculator,
+    Habit habit,
+    List<HabitLog> logs,
+    DateTime day,
+  ) => Isolate.run(() => calculator.compute(habit, logs, day));
 
   @override
   Stream<List<HabitDayStatus>> watchTodayHabits(

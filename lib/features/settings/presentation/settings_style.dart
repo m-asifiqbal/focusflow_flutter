@@ -173,6 +173,7 @@ abstract final class SettingsLabels {
     HomeSection.tasks => tr("Today's tasks"),
     HomeSection.notes => tr('Recent notes'),
     HomeSection.habits => tr('Habit tracker'),
+    HomeSection.medicines => tr('Medicine'),
   };
 
   static String homeSectionHint(HomeSection s) => switch (s) {
@@ -182,6 +183,7 @@ abstract final class SettingsLabels {
     HomeSection.tasks => tr('Up to 5 tasks due today'),
     HomeSection.notes => tr('Your latest notes'),
     HomeSection.habits => tr("Today's habit rings"),
+    HomeSection.medicines => tr("Today's doses (when you have medicines)"),
   };
 
   /// Sync pill text, sentence case: "Synced 2 min ago", "Synced just now".

@@ -164,6 +164,7 @@ void main() {
           HomeSection.upNext,
           HomeSection.notes,
           HomeSection.habits,
+          HomeSection.medicines,
         ],
         hiddenHomeSections: const {HomeSection.notes},
         hiddenLibraryModules: const {'vault'},

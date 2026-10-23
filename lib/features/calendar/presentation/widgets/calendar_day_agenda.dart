@@ -70,7 +70,8 @@ class CalendarDayAgenda extends ConsumerWidget {
           for (var i = 0; i < entries.length; i++) ...[
             if (i > 0) const SizedBox(height: CalendarDimens.cardGap),
             FFOpenOriginTracker(
-              key: ValueKey(entries[i].ref),
+              // A medicine has several doses a day: ref + time is unique.
+              key: ValueKey((entries[i].ref, entries[i].time)),
               child: CalendarAgendaRow(
                 entry: entries[i],
                 use24h: use24h,
