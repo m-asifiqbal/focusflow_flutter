@@ -8,6 +8,12 @@
 /// comes from `noteProvider`, so changes made elsewhere (actions sheet,
 /// another screen) show up immediately. Archived / deleted notes open
 /// read-only with a Restore banner.
+///
+/// Performance: a keystroke or cursor move must not rebuild the screen.
+/// Only the toolbar listens to Quill (through a value-equal
+/// [NoteToolState], so it rebuilds only when Undo / formats / colour
+/// change), edits hand the controller a lazy draft (serialised once per
+/// save, not per key), and the Quill styles are built once per theme.
 /// ============================================================
 library;
 
@@ -22,7 +28,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
-import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/notes/data/voice/voice_dictation.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
@@ -36,6 +41,7 @@ import 'package:focusflow/features/notes/presentation/widgets/note_editor_meta.d
 import 'package:focusflow/features/notes/presentation/widgets/note_editor_toolbar.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_quill_styles.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_metrics.dart';
+import 'package:focusflow/features/notes/presentation/widgets/note_read_only_banner.dart';
 
 class NoteEditorView extends ConsumerStatefulWidget {
   const NoteEditorView({
@@ -67,6 +73,10 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
   StreamSubscription<DocChange>? _changes;
   late final NoteBodyActions _actions;
   late final VoiceDictation _voice;
+  final _tools = ValueNotifier(const NoteToolState());
+  late String _lastTitle;
+  DefaultStyles? _styles;
+  Object? _stylesKey;
 
   bool get _readOnly => !widget.note.isActive;
 
@@ -81,11 +91,12 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
       selection: const TextSelection.collapsed(offset: 0),
       readOnly: _readOnly,
     );
-    _title = TextEditingController(text: note.title)..addListener(_onEdit);
+    _lastTitle = note.title;
+    _title = TextEditingController(text: note.title)..addListener(_onTitle);
     _changes = _quill.document.changes.listen((change) {
       if (change.source == ChangeSource.local) _onEdit();
     });
-    _quill.addListener(_onSelection);
+    _quill.addListener(_syncTools);
     _actions = NoteBodyActions(
       quill: _quill,
       controller: widget.controller,
@@ -93,6 +104,7 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
         if (mounted) setState(() {});
       },
     );
+    _syncTools();
     // A brand-new note starts in the title (or after prefilled text).
     if (widget.state.createdHere) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -144,21 +156,39 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
     }
   }
 
-  void _onEdit() => widget.controller.onChanged(
-    NoteDraft(
-      title: _title.text,
-      deltaJson: jsonEncode(_quill.document.toDelta().toJson()),
-    ),
+  void _onEdit() => widget.controller.onEdited(_draft);
+
+  NoteDraft _draft() => NoteDraft(
+    title: _title.text,
+    deltaJson: jsonEncode(_quill.document.toDelta().toJson()),
   );
 
-  void _onSelection() {
-    if (mounted) setState(() {});
+  /// The title controller also notifies on cursor moves: only text counts.
+  void _onTitle() {
+    if (_title.text == _lastTitle) return;
+    _lastTitle = _title.text;
+    _onEdit();
+  }
+
+  void _syncTools() => _tools.value = _actions.toolState();
+
+  /// Quill styles, rebuilt only when the theme / text styles / direction
+  /// change (not on every note re-delivery).
+  DefaultStyles _quillStyles(BuildContext context) {
+    final key = (context.ff, context.text, Directionality.of(context));
+    if (key != _stylesKey || _styles == null) {
+      _stylesKey = key;
+      _styles = noteQuillStyles(context);
+    }
+    return _styles!;
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _quill.removeListener(_onSelection);
+    _quill.removeListener(_syncTools);
+    _tools.dispose();
+    final controller = widget.controller;
     if (_actions.listening) {
       // Dictation running: stop it first, let the final words land in the
       // body (and reach the controller's last save), then dispose Quill.
@@ -169,6 +199,7 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
       widget.controller.holdCloseUntil(stopping);
       unawaited(
         stopping.whenComplete(() {
+          controller.capture();
           changes?.cancel();
           quill.dispose();
           title.dispose();
@@ -176,6 +207,7 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
       );
     } else {
       unawaited(_actions.close(_voice));
+      controller.capture();
       _changes?.cancel();
       _quill.dispose();
       _title.dispose();
@@ -262,22 +294,31 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
               ),
             ),
           ),
-          if (!readOnly)
-            NoteEditorToolbar(
-              colorHex: note.colorHex,
-              onColor: widget.controller.setColor,
-              canUndo: _quill.hasUndo,
-              onUndo: _quill.undo,
-              onRedo: () {
-                if (_quill.hasRedo) _quill.redo();
-              },
-              active: _actions.activeFormats(),
-              onFormat: _actions.toggle,
-              onImage: () => _actions.addImage(context, ref),
-              onVoice: () => _actions.toggleVoice(context, ref),
-              listening: _actions.listening,
-            ),
+          if (!readOnly) _toolbar(note),
         ],
+      ),
+    );
+  }
+
+  Widget _toolbar(Note note) {
+    final collapsed = ref.watch(noteToolbarCollapsedProvider);
+    return ValueListenableBuilder<NoteToolState>(
+      valueListenable: _tools,
+      builder: (context, tools, _) => NoteEditorToolbar(
+        colorHex: note.colorHex,
+        onColor: widget.controller.setColor,
+        tools: tools,
+        onUndo: _quill.undo,
+        onRedo: () {
+          if (_quill.hasRedo) _quill.redo();
+        },
+        onFormat: _actions.toggle,
+        onTextColor: _actions.setTextColor,
+        onImage: () => _actions.addImage(context, ref),
+        onVoice: () => _actions.toggleVoice(context, ref),
+        listening: _actions.listening,
+        collapsed: collapsed,
+        onCollapsed: ref.read(noteToolbarCollapsedProvider.notifier).set,
       ),
     );
   }
@@ -341,32 +382,20 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
         placeholder: tr('Start writing…'),
         textCapitalization: TextCapitalization.sentences,
         keyboardAppearance: Theme.of(context).brightness,
-        customStyles: noteQuillStyles(context),
+        customStyles: _quillStyles(context),
+        // Markdown-style starts: "1. " begins a numbered list, "- " bullets.
+        // Experimental in flutter_quill 11 (pinned ^11.4): if an upgrade
+        // changes it, the analyzer flags this line.
+        // ignore: experimental_member_use
+        spaceShortcutEvents: [
+          formatOrderedNumberToList,
+          formatHyphenToBulletList,
+        ],
         customStyleBuilder: (attr) =>
             noteCustomStyle(attr, ff) ?? const TextStyle(),
         embedBuilders: [NoteImageEmbedBuilder(resolve ?? (_) => null)],
         checkBoxReadOnly: _readOnly,
       ),
-    );
-  }
-}
-
-/// Archived / Recently Deleted notes open read-only.
-class NoteReadOnlyBanner extends ConsumerWidget {
-  const NoteReadOnlyBanner({required this.note, super.key});
-
-  final Note note;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final deleted = note.isDeleted;
-    return FFInfoBanner(
-      icon: deleted ? FontAwesomeIcons.trashCan : FontAwesomeIcons.boxArchive,
-      text: deleted
-          ? tr('In Recently Deleted — restore it to edit.')
-          : tr('Archived — restore it to edit.'),
-      actionLabel: tr('Restore'),
-      onAction: () => restoreNote(context, ref, note),
     );
   }
 }

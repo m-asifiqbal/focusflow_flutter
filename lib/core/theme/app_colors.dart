@@ -667,6 +667,18 @@ abstract final class TagPalette {
     ink: Color(0xFF0369A1),
   );
 
+  /// Peach / Lime note colours on reminders (not in the tag rotation).
+  static const peach = ModuleColors(
+    solid: AppPalette.orange500,
+    soft: AppPalette.orange100,
+    ink: AppPalette.orange700,
+  );
+  static const lime = ModuleColors(
+    solid: Color(0xFF84CC16),
+    soft: Color(0xFFECFCCB),
+    ink: Color(0xFF4D7C0F),
+  );
+
   static const List<ModuleColors> _rotation = [
     ideas,
     work,
@@ -707,6 +719,8 @@ abstract final class TagPalette {
 /// Note card colours (white, mint, amber, blue, pink, violet). The stored
 /// `colorHex` is one of [NoteColors.hexes]; null = white.
 abstract final class NoteColors {
+  /// Stored card colours (`colorHex`), in picker order. New colours go at
+  /// the end: older installs show an unknown hex as its own tint anyway.
   static const List<String> hexes = [
     'FFFFFF',
     'D1FAE5',
@@ -714,7 +728,26 @@ abstract final class NoteColors {
     'DBEAFE',
     'FCE7F3',
     'EDE9FE',
+    'FFEDD5',
+    'ECFCCB',
+    'CFFAFE',
+    'FEE2E2',
   ];
+
+  /// Display name of [hex] ("White" for null / unknown).
+  static String name(String? hex) =>
+      switch ((hex ?? 'FFFFFF').replaceAll('#', '').toUpperCase()) {
+        'D1FAE5' => tr('Mint'),
+        'FEF3C7' => tr('Amber'),
+        'DBEAFE' => tr('Blue'),
+        'FCE7F3' => tr('Pink'),
+        'EDE9FE' => tr('Violet'),
+        'FFEDD5' => tr('Peach'),
+        'ECFCCB' => tr('Lime'),
+        'CFFAFE' => tr('Sky'),
+        'FEE2E2' => tr('Coral'),
+        _ => tr('White'),
+      };
 
   /// Card background for [hex] in the current brightness (dark = 15% tint).
   static Color background(String? hex, Brightness brightness) {
@@ -733,6 +766,61 @@ abstract final class NoteColors {
         .withSaturation(0.8)
         .toColor();
   }
+}
+
+/// Text colours of the note body: the default ink and the palette of the
+/// editor's "Text colour" row.
+///
+/// A coloured run is stored as Quill's `color` attribute with the light
+/// value (`#DC2626`), which other editors and exports understand. On
+/// screen, [quillPalette] maps each stored value to the variant for the
+/// current brightness, so red text stays readable in dark mode.
+abstract final class NoteTextColors {
+  /// (stored value, light, dark) — Tailwind 600 / 400.
+  static const List<(String, Color, Color)> swatches = [
+    ('#DC2626', Color(0xFFDC2626), Color(0xFFF87171)),
+    ('#EA580C', AppPalette.orange600, AppPalette.orange400),
+    ('#CA8A04', Color(0xFFCA8A04), Color(0xFFFACC15)),
+    ('#16A34A', Color(0xFF16A34A), Color(0xFF4ADE80)),
+    ('#0D9488', Color(0xFF0D9488), Color(0xFF2DD4BF)),
+    ('#2563EB', AppPalette.blue600, AppPalette.blue400),
+    ('#9333EA', Color(0xFF9333EA), Color(0xFFC084FC)),
+    ('#DB2777', AppPalette.pink600, AppPalette.pink400),
+    ('#64748B', AppPalette.slate500, AppPalette.slate400),
+  ];
+
+  /// Default paragraph ink: near-black on light cards, soft white on dark.
+  static Color body(Brightness brightness) => brightness == Brightness.light
+      ? const Color(0xFF111827)
+      : AppPalette.white.withValues(alpha: 0.92);
+
+  /// Swatch [value] as drawn in [brightness].
+  static Color display(String value, Brightness brightness) {
+    for (final (v, light, dark) in swatches) {
+      if (v == value) return brightness == Brightness.light ? light : dark;
+    }
+    return parseHex(value) ?? body(brightness);
+  }
+
+  /// Display name of a swatch value.
+  static String name(String value) => switch (value) {
+    '#DC2626' => tr('Red'),
+    '#EA580C' => tr('Orange'),
+    '#CA8A04' => tr('Yellow'),
+    '#16A34A' => tr('Green'),
+    '#0D9488' => tr('Teal'),
+    '#2563EB' => tr('Blue'),
+    '#9333EA' => tr('Purple'),
+    '#DB2777' => tr('Pink'),
+    '#64748B' => tr('Grey'),
+    _ => value,
+  };
+
+  /// Quill `DefaultStyles.palette`: stored value → colour on screen.
+  static Map<String, Color> quillPalette(Brightness brightness) => {
+    for (final (v, light, dark) in swatches)
+      v: brightness == Brightness.light ? light : dark,
+  };
 }
 
 /// Parses `RRGGBB` / `#RRGGBB` / `AARRGGBB`. Returns null for null/invalid.

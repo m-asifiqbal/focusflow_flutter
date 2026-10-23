@@ -62,8 +62,12 @@ abstract final class NoteEditorMetrics {
   static const double paragraphSpace = 2;
   static const double h3Space = 6;
 
-  /// Toolbar: formatting glyphs, "COLOUR" label, Undo.
+  /// Toolbar: formatting glyphs, "COLOUR" label, Undo, hide chevron.
   static const double toolIcon = 19;
+  static const double toggleIcon = 14;
+
+  /// Bar under the "Text colour" glyph showing the current colour.
+  static const double colourBar = 3;
   static const double colourLabelSize = 10.5;
   static const double undoLabelSize = 13;
   static const double undoIcon = 11;
@@ -72,6 +76,8 @@ abstract final class NoteEditorMetrics {
   /// Visual colour swatch (its hit cell is AppSizes.minTap).
   static const double swatch = 24;
   static const double swatchSelectedBorder = 2.5;
+  static const double swatchHairline = 1.5;
+  static const double swatchGlyph = 11;
 
   /// Loading skeleton: meta line, title and body lines.
   static const double skeletonMetaWidth = 120;

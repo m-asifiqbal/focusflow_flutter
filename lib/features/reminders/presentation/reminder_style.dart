@@ -69,6 +69,10 @@ class ReminderStyle {
         'DBEAFE' => TagPalette.work,
         'FCE7F3' => TagPalette.personal,
         'EDE9FE' => TagPalette.design,
+        'FFEDD5' => TagPalette.peach,
+        'ECFCCB' => TagPalette.lime,
+        'CFFAFE' => TagPalette.travel,
+        'FEE2E2' => TagPalette.high,
         _ => null,
       };
 

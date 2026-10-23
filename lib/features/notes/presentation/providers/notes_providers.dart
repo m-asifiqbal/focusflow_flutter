@@ -7,6 +7,7 @@
 ///   persisted in Settings (pinned first, from the repository).
 /// * [notesCountsProvider] / [noteFoldersProvider] — header + chips.
 /// * [noteProvider]            — one live note (editor, sheets).
+/// * [noteToolbarCollapsedProvider] — editor panel hidden (this session).
 /// * file / share / voice services, overridable in tests.
 /// ============================================================
 library;
@@ -174,3 +175,15 @@ final voiceDictationProvider = Provider<VoiceDictation>(
 final noteImagePickerProvider = Provider<NoteImagePicker>(
   (ref) => DeviceNoteImagePicker(),
 );
+
+/// The editor's formatting panel is hidden (its chevron). Kept for the
+/// session, so the next note opens the way the user left the last one.
+class NoteToolbarCollapsed extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool collapsed) => state = collapsed;
+}
+
+final noteToolbarCollapsedProvider =
+    NotifierProvider<NoteToolbarCollapsed, bool>(NoteToolbarCollapsed.new);

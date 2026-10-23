@@ -203,15 +203,6 @@ class ColourPickerSheet extends StatelessWidget {
 
   final String? current;
 
-  List<String> get _names => [
-    tr('White'),
-    tr('Mint'),
-    tr('Amber'),
-    tr('Blue'),
-    tr('Pink'),
-    tr('Violet'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
@@ -231,7 +222,9 @@ class ColourPickerSheet extends StatelessWidget {
                 Semantics(
                   button: true,
                   selected: NoteColors.hexes[i] == selected,
-                  label: tr('{v} colour', {'v': _names[i]}),
+                  label: tr('{v} colour', {
+                    'v': NoteColors.name(NoteColors.hexes[i]),
+                  }),
                   excludeSemantics: true,
                   child: FFPressable(
                     onTap: () => Navigator.of(context).pop<ColourChoice>((

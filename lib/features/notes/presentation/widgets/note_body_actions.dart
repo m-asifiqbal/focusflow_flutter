@@ -3,7 +3,7 @@
 /// ============================================================
 ///
 /// Toolbar formatting on the Quill selection (heading / bold / italic /
-/// bullets / checklist / quote), image insertion (gallery or camera →
+/// bullets / numbers / checklist / quote / text colour), image insertion (gallery or camera →
 /// attachments → embed), voice dictation (speech_to_text → text at the
 /// cursor), and the header / tags-row follow-ups (More sheet, folder,
 /// tags, reminder, restore). Writes go through the editor controller or
@@ -90,14 +90,17 @@ class NoteBodyActions {
   // ── Formatting ──
 
   /// Formats applied at the cursor / selection.
-  Set<NoteFormat> activeFormats() {
-    final attrs = quill.getSelectionStyle().attributes;
+  Set<NoteFormat> activeFormats() =>
+      _formats(quill.getSelectionStyle().attributes);
+
+  static Set<NoteFormat> _formats(Map<String, Attribute> attrs) {
     final list = attrs[Attribute.list.key]?.value;
     return {
       if (attrs[Attribute.header.key]?.value != null) NoteFormat.heading,
       if (attrs.containsKey(Attribute.bold.key)) NoteFormat.bold,
       if (attrs.containsKey(Attribute.italic.key)) NoteFormat.italic,
       if (list == Attribute.ul.value) NoteFormat.bullets,
+      if (list == Attribute.ol.value) NoteFormat.numbered,
       if (list == Attribute.checked.value || list == Attribute.unchecked.value)
         NoteFormat.checklist,
       if (attrs.containsKey(Attribute.blockQuote.key)) NoteFormat.quote,
@@ -112,10 +115,32 @@ class NoteBodyActions {
       NoteFormat.bold => Attribute.bold,
       NoteFormat.italic => Attribute.italic,
       NoteFormat.bullets => Attribute.ul,
+      NoteFormat.numbered => Attribute.ol,
       NoteFormat.checklist => Attribute.unchecked,
       NoteFormat.quote => Attribute.blockQuote,
     };
     quill.formatSelection(on ? Attribute.clone(attribute, null) : attribute);
+  }
+
+  static String? _textColor(Map<String, Attribute> attrs) {
+    final value = attrs[Attribute.color.key]?.value;
+    return value is String ? value : null;
+  }
+
+  /// Colours the selection — or what is typed next at a plain cursor —
+  /// with [value] (a [NoteTextColors] value); null restores the default.
+  void setTextColor(String? value) =>
+      quill.formatSelection(ColorAttribute(value));
+
+  /// Everything the toolbar shows for the current cursor (one style
+  /// lookup).
+  NoteToolState toolState() {
+    final attrs = quill.getSelectionStyle().attributes;
+    return NoteToolState(
+      canUndo: quill.hasUndo,
+      formats: _formats(attrs),
+      textColor: _textColor(attrs),
+    );
   }
 
   // ── Image ──

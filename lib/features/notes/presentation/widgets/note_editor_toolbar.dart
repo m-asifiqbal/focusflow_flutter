@@ -1,18 +1,24 @@
 /// ============================================================
-/// NOTE EDITOR TOOLBAR — colour swatches + Undo, formatting buttons
+/// NOTE EDITOR TOOLBAR — colours + Undo + hide, formatting buttons
 /// ============================================================
 ///
 /// The rounded bottom panel of screen 08 (sits above the keyboard):
-///   row 1  "COLOUR" · white / mint / amber / blue / pink / violet · Undo
-///   row 2  Heading · Bold · Italic · Bullets · Checklist · Quote · Image ·
-///          Voice
-/// Active formats at the cursor are tinted with the accent. Long-press
-/// Undo to redo. Callbacks only — the screen applies them to Quill.
+///   row 1  "COLOUR" · note colours (scrolls sideways) · Undo · ⌄ hide
+///          — or, while "Text colour" is on, "TEXT" · Default · 9 colours
+///   row 2  Heading · Bold · Italic · Text colour · Bullets · Numbers ·
+///          Checklist · Quote, then Image · Voice pinned at the end. When
+///          44-pt cells don't fit, the formats scroll (half a cell peeks
+///          out so the scroll is obvious) — Image / Voice never do.
+/// Hidden, the panel shrinks to one slim row (Undo · ⌃ show) so the note
+/// gets the room. Active formats at the cursor are tinted with the accent.
+/// Long-press Undo to redo. Callbacks only — the view applies them to
+/// Quill, and rebuilds this panel only when [NoteToolState] changes.
 /// ============================================================
 library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
@@ -20,15 +26,17 @@ import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
-import 'package:focusflow/features/notes/presentation/widgets/note_metrics.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_quill_styles.dart';
+import 'package:focusflow/features/notes/presentation/widgets/note_toolbar_parts.dart';
 
-/// Formatting buttons of the toolbar (Image / Voice are separate actions).
+/// Formatting buttons of the toolbar (Text colour / Image / Voice are
+/// separate actions).
 enum NoteFormat {
   heading(FontAwesomeIcons.heading),
   bold(FontAwesomeIcons.bold),
   italic(FontAwesomeIcons.italic),
   bullets(FontAwesomeIcons.listUl),
+  numbered(FontAwesomeIcons.listOl),
   checklist(FontAwesomeIcons.listCheck),
   quote(FontAwesomeIcons.quoteLeft);
 
@@ -40,6 +48,7 @@ enum NoteFormat {
     NoteFormat.bold => tr('Bold'),
     NoteFormat.italic => tr('Italic'),
     NoteFormat.bullets => tr('Bullet list'),
+    NoteFormat.numbered => tr('Numbered list'),
     NoteFormat.checklist => tr('Checklist'),
     NoteFormat.quote => tr('Quote'),
   };
@@ -47,17 +56,46 @@ enum NoteFormat {
   final IconData icon;
 }
 
-class NoteEditorToolbar extends StatelessWidget {
+/// What the panel shows for the cursor: Undo state, active formats and
+/// the text colour (null = default ink). Value-equal, so the panel only
+/// rebuilds when one of these actually changes — not on every keystroke.
+@immutable
+class NoteToolState {
+  const NoteToolState({
+    this.canUndo = false,
+    this.formats = const {},
+    this.textColor,
+  });
+
+  final bool canUndo;
+  final Set<NoteFormat> formats;
+  final String? textColor;
+
+  @override
+  bool operator ==(Object other) =>
+      other is NoteToolState &&
+      other.canUndo == canUndo &&
+      other.textColor == textColor &&
+      setEquals(other.formats, formats);
+
+  @override
+  int get hashCode =>
+      Object.hash(canUndo, textColor, Object.hashAllUnordered(formats));
+}
+
+class NoteEditorToolbar extends StatefulWidget {
   const NoteEditorToolbar({
     required this.colorHex,
     required this.onColor,
-    required this.canUndo,
+    required this.tools,
     required this.onUndo,
     required this.onRedo,
-    required this.active,
     required this.onFormat,
+    required this.onTextColor,
     required this.onImage,
     required this.onVoice,
+    required this.collapsed,
+    required this.onCollapsed,
     this.listening = false,
     super.key,
   });
@@ -65,18 +103,35 @@ class NoteEditorToolbar extends StatelessWidget {
   /// Stored note colour (null = white).
   final String? colorHex;
   final ValueChanged<String> onColor;
-  final bool canUndo;
+  final NoteToolState tools;
   final VoidCallback onUndo;
   final VoidCallback onRedo;
-  final Set<NoteFormat> active;
   final ValueChanged<NoteFormat> onFormat;
+
+  /// A text colour was picked (null = back to the default ink).
+  final ValueChanged<String?> onTextColor;
   final VoidCallback onImage;
   final VoidCallback onVoice;
+
+  /// Panel hidden (one slim row).
+  final bool collapsed;
+  final ValueChanged<bool> onCollapsed;
 
   /// Dictation running (mic tinted, label "Stop dictation").
   final bool listening;
 
   static const double radius = 26;
+
+  /// Id of the "Default" text-colour swatch.
+  static const String defaultInk = 'default';
+
+  @override
+  State<NoteEditorToolbar> createState() => _NoteEditorToolbarState();
+}
+
+class _NoteEditorToolbarState extends State<NoteEditorToolbar> {
+  /// Row 1 shows text colours instead of note colours.
+  bool _textMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -86,18 +141,37 @@ class NoteEditorToolbar extends StatelessWidget {
       AppSpacing.sm,
       MediaQuery.paddingOf(context).bottom - AppSpacing.lg - AppSpacing.xxs,
     );
-    // Room for 8 × 44-pt tool cells; up to 8 pt side inset when it fits.
-    final side =
-        ((MediaQuery.sizeOf(context).width -
-                    NoteFormat.values.length * AppSizes.minTap -
-                    2 * AppSizes.minTap) /
-                2)
-            .clamp(AppSpacing.xs, AppSpacing.sm);
+    final collapsed = widget.collapsed;
+    final top = Row(
+      children: [
+        Expanded(
+          child: collapsed
+              ? const SizedBox.shrink()
+              : AnimatedSwitcher(
+                  duration: context.motion(AppMotion.fast),
+                  child: _textMode
+                      ? _textColours(context)
+                      : _noteColours(context),
+                ),
+        ),
+        NoteUndoButton(
+          canUndo: widget.tools.canUndo,
+          onUndo: widget.onUndo,
+          onRedo: widget.onRedo,
+        ),
+        NotePanelToggle(
+          collapsed: collapsed,
+          onTap: () => widget.onCollapsed(!collapsed),
+        ),
+      ],
+    );
     return Container(
       decoration: BoxDecoration(
         color: ff.tabBar,
         border: Border.all(color: ff.surfaceBorder),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(radius)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(NoteEditorToolbar.radius),
+        ),
         boxShadow: [
           for (final s in ff.cardShadow)
             BoxShadow(
@@ -107,298 +181,140 @@ class NoteEditorToolbar extends StatelessWidget {
             ),
         ],
       ),
-      // Narrow outer inset so the 8 tool cells keep 44 pt even at 360 pt.
       padding: EdgeInsetsDirectional.fromSTEB(
-        side,
-        AppSpacing.sm,
-        side,
+        AppSpacing.xs,
+        AppSpacing.xs,
+        AppSpacing.xs,
         bottom,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.screen - AppSpacing.md - side,
-            ),
-            child: _ColourRow(
-              colorHex: colorHex,
-              onColor: onColor,
-              canUndo: canUndo,
-              onUndo: onUndo,
-              onRedo: onRedo,
-            ),
-          ),
-          Row(
-            children: [
-              for (final f in NoteFormat.values)
-                _ToolButton(
-                  icon: f.icon,
-                  label: f.label,
-                  selected: active.contains(f),
-                  onTap: () => onFormat(f),
-                ),
-              _ToolButton(
-                icon: FontAwesomeIcons.solidImage,
-                label: tr('Add image'),
-                onTap: onImage,
-              ),
-              _ToolButton(
-                icon: FontAwesomeIcons.microphone,
-                label: listening ? tr('Stop dictation') : tr('Dictate'),
-                selected: listening,
-                onTap: onVoice,
-              ),
-            ],
-          ),
-        ],
+      child: AnimatedSize(
+        duration: context.motion(AppMotion.normal),
+        curve: AppMotion.curve,
+        alignment: Alignment.topCenter,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [top, if (!collapsed) _tools(context)],
+        ),
       ),
     );
   }
-}
 
-class _ColourRow extends StatelessWidget {
-  const _ColourRow({
-    required this.colorHex,
-    required this.onColor,
-    required this.canUndo,
-    required this.onUndo,
-    required this.onRedo,
-  });
-
-  final String? colorHex;
-  final ValueChanged<String> onColor;
-  final bool canUndo;
-  final VoidCallback onUndo;
-  final VoidCallback onRedo;
-
-  /// Swatches + Undo row. Every swatch cell is a full 44 × 44 tap target
-  /// (rule 6) around the small visual circle; the "COLOUR" label is
-  /// dropped when it doesn't fit, and the swatches scroll sideways on very
-  /// narrow screens / large text rather than shrink below 44.
-  static const double height = AppSizes.minTap;
-  static const double pitch = AppSizes.minTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ff = context.ff;
+  Widget _noteColours(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final selected = (colorHex ?? NoteColors.hexes.first).toUpperCase();
-    final undo = Semantics(
-      button: true,
-      enabled: canUndo,
-      label: tr('Undo'),
-      hint: tr('Long-press to redo'),
-      excludeSemantics: true,
-      child: FFPressable(
-        onTap: canUndo ? onUndo : null,
-        onLongPress: onRedo,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: height,
-            minWidth: AppSizes.minTap,
+    return NoteSwatchStrip(
+      key: const ValueKey('note-colours'),
+      label: tr('COLOUR'),
+      selected: (widget.colorHex ?? NoteColors.hexes.first).toUpperCase(),
+      onSelect: widget.onColor,
+      swatches: [
+        for (final hex in NoteColors.hexes)
+          NoteSwatchData(
+            id: hex,
+            color: NoteColors.background(hex, brightness),
+            outlined: hex == NoteColors.hexes.first,
+            label: tr('{label} note colour', {'label': NoteColors.name(hex)}),
           ),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.md,
-            ),
-            child: Opacity(
-              opacity: canUndo ? 1 : 0.45,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    FontAwesomeIcons.rotateLeft,
-                    size: NoteEditorMetrics.undoIcon,
-                    color: ff.primary,
-                  ),
-                  const SizedBox(width: NoteEditorMetrics.undoGap),
-                  Text(
-                    tr('Undo'),
-                    style: context.text.rowTitle.copyWith(
-                      fontSize: NoteEditorMetrics.undoLabelSize,
-                      fontWeight: FontWeight.w800,
-                      color: ff.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    return Row(
-      children: [
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, c) {
-              const count = 6;
-              final label = Text(
-                tr('COLOUR'),
-                maxLines: 1,
-                style: context.text.sectionLabel.copyWith(
-                  fontSize: NoteEditorMetrics.colourLabelSize,
-                ),
-              );
-              final labelWidth = _textWidth(context, label);
-              final showLabel =
-                  c.maxWidth - labelWidth - 2 * AppSpacing.md >= count * pitch;
-              final swatches = [
-                for (final hex in NoteColors.hexes)
-                  _Swatch(
-                    color: NoteColors.background(hex, brightness),
-                    selected: hex == selected,
-                    white: hex == NoteColors.hexes.first,
-                    width: pitch,
-                    size: NoteEditorMetrics.swatch,
-                    label: _colourName(hex),
-                    onTap: () => onColor(hex),
-                  ),
-              ];
-              if (c.maxWidth < count * pitch) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(children: swatches),
-                );
-              }
-              return Row(
-                children: [
-                  if (showLabel) ...[
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        start: AppSpacing.md,
-                      ),
-                      child: ExcludeSemantics(child: label),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                  ],
-                  ...swatches,
-                ],
-              );
-            },
-          ),
-        ),
-        undo,
       ],
     );
   }
 
-  static double _textWidth(BuildContext context, Text text) {
-    final painter = TextPainter(
-      text: TextSpan(text: text.data, style: text.style),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-      maxLines: 1,
-    )..layout();
-    final w = painter.width;
-    painter.dispose();
-    return w;
-  }
-
-  static String _colourName(String hex) => switch (hex) {
-    'D1FAE5' => tr('Mint'),
-    'FEF3C7' => tr('Amber'),
-    'DBEAFE' => tr('Blue'),
-    'FCE7F3' => tr('Pink'),
-    'EDE9FE' => tr('Violet'),
-    _ => tr('White'),
-  };
-}
-
-class _Swatch extends StatelessWidget {
-  const _Swatch({
-    required this.color,
-    required this.selected,
-    required this.white,
-    required this.width,
-    required this.size,
-    required this.label,
-    required this.onTap,
-  });
-
-  final Color color;
-  final bool selected;
-  final bool white;
-  final double width;
-  final double size;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ff = context.ff;
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: tr('{label} note colour', {'label': label}),
-      excludeSemantics: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: SizedBox(
-          width: width,
-          height: _ColourRow.height,
-          child: Center(
-            child: Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: selected
-                    ? Border.all(
-                        color: ff.success,
-                        width: NoteEditorMetrics.swatchSelectedBorder,
-                      )
-                    : white
-                    ? Border.all(color: ff.divider, width: 1.5)
-                    : null,
-              ),
-            ),
-          ),
+  Widget _textColours(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return NoteSwatchStrip(
+      key: const ValueKey('text-colours'),
+      label: tr('TEXT'),
+      selected: widget.tools.textColor ?? NoteEditorToolbar.defaultInk,
+      onSelect: (id) =>
+          widget.onTextColor(id == NoteEditorToolbar.defaultInk ? null : id),
+      swatches: [
+        NoteSwatchData(
+          id: NoteEditorToolbar.defaultInk,
+          color: noteBodyInk(context.ff),
+          outlined: true,
+          glyph: FontAwesomeIcons.font,
+          label: tr('Default text colour'),
         ),
-      ),
+        for (final (value, _, _) in NoteTextColors.swatches)
+          NoteSwatchData(
+            id: value,
+            color: NoteTextColors.display(value, brightness),
+            label: tr('{label} text colour', {
+              'label': NoteTextColors.name(value),
+            }),
+          ),
+      ],
     );
   }
-}
 
-class _ToolButton extends StatelessWidget {
-  const _ToolButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.selected = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _tools(BuildContext context) {
     final ff = context.ff;
-    return Expanded(
-      child: Semantics(
-        button: true,
-        toggled: selected,
-        label: label,
-        excludeSemantics: true,
-        child: FFPressable(
-          onTap: onTap,
-          scale: 0.9,
-          child: SizedBox(
-            height: AppSizes.minTap,
-            child: Icon(
-              icon,
-              size: NoteEditorMetrics.toolIcon,
-              color: selected ? ff.success : noteBodyInk(ff),
-            ),
-          ),
-        ),
+    final active = widget.tools.formats;
+    final colour = widget.tools.textColor;
+    NoteToolButton format(NoteFormat f) => NoteToolButton(
+      icon: f.icon,
+      label: f.label,
+      selected: active.contains(f),
+      onTap: () => widget.onFormat(f),
+    );
+    final formats = [
+      format(NoteFormat.heading),
+      format(NoteFormat.bold),
+      format(NoteFormat.italic),
+      NoteToolButton(
+        icon: FontAwesomeIcons.font,
+        label: tr('Text colour'),
+        selected: _textMode,
+        bar: colour == null
+            ? noteBodyInk(ff)
+            : NoteTextColors.display(colour, ff.brightness),
+        onTap: () => setState(() => _textMode = !_textMode),
       ),
+      format(NoteFormat.bullets),
+      format(NoteFormat.numbered),
+      format(NoteFormat.checklist),
+      format(NoteFormat.quote),
+    ];
+    // Inserting things stays in reach: Image / Voice never scroll away.
+    final pinned = [
+      NoteToolButton(
+        icon: FontAwesomeIcons.solidImage,
+        label: tr('Add image'),
+        onTap: widget.onImage,
+      ),
+      NoteToolButton(
+        icon: FontAwesomeIcons.microphone,
+        label: widget.listening ? tr('Stop dictation') : tr('Dictate'),
+        selected: widget.listening,
+        onTap: widget.onVoice,
+      ),
+    ];
+    return LayoutBuilder(
+      builder: (context, c) {
+        final all = [...formats, ...pinned];
+        if (c.maxWidth >= all.length * AppSizes.minTap) {
+          return Row(children: [for (final b in all) Expanded(child: b)]);
+        }
+        // The formats scroll in ≥ 44-pt cells, sized so half a cell peeks
+        // out at the end (the scroll is obvious without a hint).
+        final room = c.maxWidth - pinned.length * AppSizes.minTap;
+        final fit = (room / AppSizes.minTap - 0.5).floorToDouble();
+        final cell = room / (math.max(fit, 1) + 0.5);
+        return Row(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final b in formats) SizedBox(width: cell, child: b),
+                  ],
+                ),
+              ),
+            ),
+            for (final b in pinned) SizedBox(width: AppSizes.minTap, child: b),
+          ],
+        );
+      },
     );
   }
 }

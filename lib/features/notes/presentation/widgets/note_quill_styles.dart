@@ -2,11 +2,13 @@
 /// NOTE QUILL STYLES — how the note body (Quill) looks on screen 08
 /// ============================================================
 ///
-/// Paragraphs 15.5/1.75 Nunito, H3 headings Lexend 18, emerald square
-/// checkboxes (checked lines struck through and faded), quote blocks with
-/// a 4-pt emerald start border in italics, and rounded image embeds read
-/// from the note's attachments. Everything comes from theme tokens, so
-/// dark mode and the accent colour work for free.
+/// Paragraphs 18/1.65 Nunito in near-black ink, H3 headings Lexend 20.5,
+/// emerald square checkboxes (checked lines struck through and faded),
+/// numbered lists, quote blocks with a 4-pt emerald start border in
+/// italics, coloured text from the "Text colour" row (mapped per
+/// brightness via [NoteTextColors.quillPalette]) and rounded image embeds
+/// read from the note's attachments. Everything comes from theme tokens,
+/// so dark mode and the accent colour work for free.
 /// ============================================================
 library;
 
@@ -21,12 +23,12 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_metrics.dart';
 
-/// Body sizes of the editor (paragraphs 17/1.7 — a notch above the design
-/// spec's 15.5 for comfortable reading; H3 19.5).
+/// Body sizes of the editor (paragraphs 18/1.65 — above the design spec's
+/// 15.5 for comfortable reading on a phone; H3 20.5).
 abstract final class NoteBodyMetrics {
-  static const double fontSize = 17;
-  static const double lineHeight = 1.7;
-  static const double headingSize = 19.5;
+  static const double fontSize = 18;
+  static const double lineHeight = 1.65;
+  static const double headingSize = 20.5;
   static const double checkbox = 15;
 
   /// Leading column of list lines (checkbox + gap).
@@ -35,9 +37,8 @@ abstract final class NoteBodyMetrics {
   static const double quoteIndent = 13;
 }
 
-/// Paragraph ink of the body — softer than titles (mockup).
-Color noteBodyInk(FFColors ff) =>
-    ff.ink.withValues(alpha: ff.isDark ? 0.82 : 0.74);
+/// Paragraph ink of the body: crisp near-black (light) / soft white (dark).
+Color noteBodyInk(FFColors ff) => NoteTextColors.body(ff.brightness);
 
 /// Quill styles for the note body in the current theme.
 DefaultStyles noteQuillStyles(BuildContext context) {
@@ -87,7 +88,8 @@ DefaultStyles noteQuillStyles(BuildContext context) {
           NoteEditorMetrics.h3Space,
         ),
       ),
-      bold: TextStyle(fontWeight: FontWeight.w700, color: ff.ink),
+      // Bold keeps the run's colour (body ink or a picked text colour).
+      bold: const TextStyle(fontWeight: FontWeight.w700),
       italic: const TextStyle(fontStyle: FontStyle.italic),
       strikeThrough: const TextStyle(decoration: TextDecoration.lineThrough),
       link: TextStyle(
@@ -121,6 +123,7 @@ DefaultStyles noteQuillStyles(BuildContext context) {
         ),
       ),
       leading: block(body.copyWith(color: ff.inkMuted), VerticalSpacing.zero),
+      palette: NoteTextColors.quillPalette(ff.brightness),
     ),
   );
 }

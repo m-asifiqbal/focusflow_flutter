@@ -152,7 +152,7 @@ void main() {
     expect(selection.a, lessThan(0.5));
 
     // 2. Body text is a notch larger than the old 15.5.
-    expect(NoteBodyMetrics.fontSize, 17);
+    expect(NoteBodyMetrics.fontSize, 18);
 
     // 3. Tapping the body focuses it and shows the caret handle.
     await tester.tap(find.textContaining('landscape', findRichText: true));

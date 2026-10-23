@@ -5,8 +5,11 @@
 /// `noteEditorControllerProvider(args)` (AsyncNotifier):
 ///   * opens an existing note, or creates a new one for `/notes/new`
 ///     (folder / tag / text prefilled, default colour from Settings);
-///   * [onChanged] debounces writes by 600 ms ("Saving…" → "AUTO-SAVED");
-///     [flush] writes immediately (back, app paused, dispose);
+///   * [onChanged] / [onEdited] debounce writes by 600 ms ("Saving…" →
+///     "AUTO-SAVED"); [flush] writes immediately (back, app paused,
+///     dispose). [onEdited] takes a *reader*: the editor reports each
+///     keystroke for free and the note is serialised once, at save time —
+///     not per keystroke (which made typing in long notes stutter);
 ///   * derives plain text, checklist, word count and cover image from the
 ///     Delta (NoteContent) so lists and search stay in sync;
 ///   * [close] prunes images removed from the body and discards a new
@@ -42,6 +45,7 @@ class NoteEditorController
   late NotesRepository _repo;
   Timer? _timer;
   NoteDraft? _pending;
+  NoteDraft Function()? _read;
   NoteDraft? _saved;
   String? _cover;
   String? _noteId;
@@ -56,6 +60,7 @@ class NoteEditorController
     ref.onDispose(() {
       _disposed = true;
       _timer?.cancel();
+      _resolve();
       final pending = _pending;
       _pending = null;
       // Never lose an edit: finish the write even after the screen closed.
@@ -95,6 +100,7 @@ class NoteEditorController
   void onChanged(NoteDraft draft) {
     if (_current == null) return;
     _timer?.cancel();
+    _read = null;
     if (draft == _saved) {
       _pending = null;
       _setStatus(NoteSaveStatus.saved);
@@ -105,12 +111,43 @@ class NoteEditorController
     _timer = Timer(debounce, () => unawaited(flush()));
   }
 
+  /// The editor content changed; [read] builds the draft when the save
+  /// runs. Cheap enough to call on every keystroke.
+  void onEdited(NoteDraft Function() read) {
+    if (_current == null) return;
+    _timer?.cancel();
+    _read = read;
+    _pending = null;
+    _setStatus(NoteSaveStatus.saving);
+    _timer = Timer(debounce, () => unawaited(flush()));
+  }
+
+  /// Builds a pending [onEdited] draft now. The editor calls this before
+  /// disposing the controllers the reader uses.
+  void capture() => _resolve();
+
+  void _resolve() {
+    final read = _read;
+    if (read == null) return;
+    _read = null;
+    try {
+      _pending = read();
+    } catch (e) {
+      AppLogger.w('Reading the note draft failed: ${e.runtimeType}');
+    }
+  }
+
   /// Writes any pending change now (back, app paused).
   Future<void> flush() async {
     _timer?.cancel();
+    _resolve();
     final pending = _pending;
     _pending = null;
-    if (pending != null) await _write(pending);
+    if (pending != null && pending != _saved) {
+      await _write(pending);
+    } else if (pending != null) {
+      _setStatus(NoteSaveStatus.saved); // edited back to what is stored
+    }
     await _writes;
   }
 

@@ -32,21 +32,8 @@ import 'package:focusflow/features/settings/presentation/widgets/root/settings_s
 import 'package:focusflow/features/settings/presentation/widgets/settings_option_sheet.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
-/// Labels of [NoteColors.hexes], same order (a getter: follows the language).
-List<String> get noteColorNames => [
-  tr('White'),
-  tr('Mint'),
-  tr('Amber'),
-  tr('Blue'),
-  tr('Pink'),
-  tr('Violet'),
-];
-
 /// "White" for null / unknown, else the palette name.
-String noteColorLabel(String? hex) {
-  final i = NoteColors.hexes.indexOf((hex ?? 'FFFFFF').toUpperCase());
-  return i < 0 ? tr('White') : noteColorNames[i];
-}
+String noteColorLabel(String? hex) => NoteColors.name(hex);
 
 /// Snooze lengths offered (minutes).
 const snoozeChoices = [5, 10, 15, 30, 60];
@@ -117,8 +104,8 @@ class NotesDefaultsSection extends ConsumerWidget {
               title: tr('Colour of new notes'),
               selected: (s.notesDefaultColor ?? 'FFFFFF').toUpperCase(),
               options: [
-                for (var i = 0; i < NoteColors.hexes.length; i++)
-                  option(NoteColors.hexes[i], noteColorNames[i]),
+                for (final hex in NoteColors.hexes)
+                  option(hex, NoteColors.name(hex)),
               ],
             );
             if (v != null) {
