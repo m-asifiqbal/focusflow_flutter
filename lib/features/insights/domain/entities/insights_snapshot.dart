@@ -14,6 +14,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/features/habits/domain/services/streak_calculator.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_range.dart';
+import 'package:focusflow/features/insights/domain/entities/insights_timeline.dart';
 
 /// done / total for one window; [rate] is null when nothing was measured.
 @immutable
@@ -237,6 +238,7 @@ class InsightsSnapshot {
     required this.streaks,
     required this.hasHabits,
     required this.tip,
+    this.timeline = TaskTimeline.empty,
   });
 
   final InsightsWindow window;
@@ -262,6 +264,9 @@ class InsightsSnapshot {
   final bool hasHabits;
   final InsightsTip tip;
 
+  /// Gantt rows of the tasks due in the window (Overview › Task timeline).
+  final TaskTimeline timeline;
+
   /// The chart needs at least two points and some activity to draw a
   /// trend.
   bool get hasSeriesData =>
@@ -284,7 +289,8 @@ class InsightsSnapshot {
       other.split == split &&
       _streakEq.equals(other.streaks, streaks) &&
       other.hasHabits == hasHabits &&
-      other.tip == tip;
+      other.tip == tip &&
+      other.timeline == timeline;
 
   @override
   int get hashCode => Object.hash(
@@ -298,5 +304,6 @@ class InsightsSnapshot {
     _streakEq.hash(streaks),
     hasHabits,
     tip,
+    timeline,
   );
 }

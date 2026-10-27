@@ -3,7 +3,8 @@
 /// ============================================================
 ///
 /// Built on habitDetailProvider (habit + full history + stats, live):
-///   habitHeatmapRangeProvider   "Last 4 months" ⇄ "Last year" selector
+///   habitHeatmapRangeProvider   This week · This month · Last 4 months ·
+///                               Last year selector (tap cycles)
 ///   habitHeatmapValuesProvider  day → 0…1 for the heatmap
 ///   habitHeatmapRestDaysProvider  days the habit wasn't due (rest days)
 ///   habitHistoryProvider        newest-first History rows
@@ -18,20 +19,50 @@ import 'package:focusflow/features/habits/data/export/habit_csv_share_service.da
 import 'package:focusflow/features/habits/domain/services/habit_history.dart';
 import 'package:focusflow/features/habits/presentation/providers/habits_providers.dart';
 
-/// Heatmap span: weeks shown and the selector's label.
+/// Heatmap span, shortest first (the selector steps through them in order).
 enum HabitHeatmapRange {
-  months4(17),
-  year(53);
-
-  const HabitHeatmapRange(this.weeks);
-
-  final int weeks;
+  week,
+  month,
+  months4,
+  year;
 
   /// The selector's text, in the active language.
   String get label => switch (this) {
+    week => tr('This week'),
+    month => tr('This month'),
     months4 => tr('Last 4 months'),
     year => tr('Last year'),
   };
+
+  /// Week and month are drawn as a calendar (weeks as rows), the longer
+  /// ranges as the GitHub-style grid (weeks as columns).
+  bool get isCalendar => this == week || this == month;
+
+  /// The next range, wrapping from the longest back to the shortest.
+  HabitHeatmapRange get next => values[(index + 1) % values.length];
+
+  /// Week rows / columns the grid needs for the day [today]: 1 for the
+  /// week, the weeks the current month spans for the month (its 1st's week
+  /// to today's), 17 and 53 for the long ranges.
+  int weeksFor(DateTime today, int weekStart) => switch (this) {
+    week => 1,
+    month =>
+      (DateUtilsX.daysBetween(
+                _weekStartOf(DateTime(today.year, today.month), weekStart),
+                _weekStartOf(today, weekStart),
+              ) ~/
+              7) +
+          1,
+    months4 => 17,
+    year => 53,
+  };
+
+  /// First day shown: the 1st for the month calendar, else no limit.
+  DateTime? firstDay(DateTime today) =>
+      this == month ? DateTime(today.year, today.month) : null;
+
+  static DateTime _weekStartOf(DateTime d, int weekStart) =>
+      DateUtilsX.addDays(d, -((d.weekday - weekStart + 7) % 7));
 }
 
 class HabitHeatmapRangeController
@@ -39,9 +70,8 @@ class HabitHeatmapRangeController
   @override
   HabitHeatmapRange build(String habitId) => HabitHeatmapRange.months4;
 
-  void toggle() => state = state == HabitHeatmapRange.months4
-      ? HabitHeatmapRange.year
-      : HabitHeatmapRange.months4;
+  /// Steps to the next range (week → month → 4 months → year → week).
+  void toggle() => state = state.next;
 }
 
 /// Selected heatmap range of one habit's detail screen.

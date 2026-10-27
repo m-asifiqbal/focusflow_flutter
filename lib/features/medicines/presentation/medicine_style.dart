@@ -47,6 +47,15 @@ abstract final class MedicineSizes {
   static const double weekDot = 12;
   static const double weekDotGap = 6;
 
+  /// Month calendar: a day cell (min height), its date disc, the dose dots.
+  static const double monthCell = 50;
+  static const double monthDay = 22;
+  static const double monthDot = 6;
+  static const double monthDotGap = 2;
+
+  /// Year view: gap between the squares of a mini month.
+  static const double yearGap = 2;
+
   /// Stepper buttons (dose amount, refill) and its value's width.
   static const double stepper = 34;
   static const double stepperLabel = 120;

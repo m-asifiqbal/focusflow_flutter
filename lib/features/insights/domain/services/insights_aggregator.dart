@@ -44,6 +44,7 @@ import 'package:focusflow/features/habits/domain/services/streak_calculator.dart
 import 'package:focusflow/features/insights/domain/entities/focus_session.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_range.dart';
 import 'package:focusflow/features/insights/domain/entities/insights_snapshot.dart';
+import 'package:focusflow/features/insights/domain/entities/insights_timeline.dart';
 import 'package:focusflow/features/insights/domain/services/insights_tips.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder_occurrence.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
@@ -149,6 +150,7 @@ class InsightsAggregator {
       series: _bucket(window, daily),
       split: split,
       streaks: streakRows(s.habitStatuses),
+      timeline: TaskTimeline.build(s.tasksDue, window, today),
       hasHabits: s.habits.isNotEmpty,
       tip: InsightsTips.pick(
         window: window,

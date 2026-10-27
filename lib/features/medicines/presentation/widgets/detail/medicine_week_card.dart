@@ -26,6 +26,24 @@ class MedicineWeekCard extends StatelessWidget {
   final List<MedicineWeekDay> week;
 
   @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      FFSectionHeader(title: tr('This week')),
+      const SizedBox(height: AppSpacing.md),
+      FFCard(child: MedicineWeekGrid(week: week)),
+    ],
+  );
+}
+
+/// The 7-day dot grid with its legend (no card around it), so the calendar
+/// card can host it next to the Month and Year views.
+class MedicineWeekGrid extends StatelessWidget {
+  const MedicineWeekGrid({required this.week, super.key});
+
+  final List<MedicineWeekDay> week;
+
+  @override
   Widget build(BuildContext context) {
     final ff = context.ff;
     final rows = week.fold<int>(
@@ -34,72 +52,72 @@ class MedicineWeekCard extends StatelessWidget {
     );
     final today = week.isEmpty ? null : week.last.day;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FFSectionHeader(title: tr('This week')),
-        const SizedBox(height: AppSpacing.md),
-        FFCard(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  for (final d in week)
-                    Expanded(
-                      child: Text(
-                        DateFormats.of('EEEEE').format(d.day),
-                        textAlign: TextAlign.center,
-                        style: context.text.sectionLabel.copyWith(
-                          color: d.day == today
-                              ? MedicineStyle.colors.inkFor(ff.brightness)
-                              : ff.inkFaint,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              for (var r = 0; r < (rows == 0 ? 1 : rows); r++)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    top: MedicineSizes.weekDotGap,
-                  ),
-                  child: Row(
-                    children: [
-                      for (var i = 0; i < week.length; i++)
-                        Expanded(
-                          child: Center(
-                            child: _Dot(
-                              state: r < week[i].states.length
-                                  ? week[i].states[r]
-                                  : null,
-                              delay: i,
-                            ),
-                          ),
-                        ),
-                    ],
+        Row(
+          children: [
+            for (final d in week)
+              Expanded(
+                child: Text(
+                  DateFormats.of('EEEEE').format(d.day),
+                  textAlign: TextAlign.center,
+                  style: context.text.sectionLabel.copyWith(
+                    color: d.day == today
+                        ? MedicineStyle.colors.inkFor(ff.brightness)
+                        : ff.inkFaint,
                   ),
                 ),
-              const SizedBox(height: AppSpacing.lg),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: AppSpacing.lg,
-                runSpacing: AppSpacing.xs,
-                children: [
-                  _Legend(DoseState.taken, tr('Taken')),
-                  _Legend(DoseState.missed, tr('Missed')),
-                  _Legend(DoseState.skipped, tr('Skipped')),
-                  _Legend(DoseState.upcoming, tr('To come')),
-                ],
               ),
-            ],
-          ),
+          ],
         ),
+        const SizedBox(height: AppSpacing.sm),
+        for (var r = 0; r < (rows == 0 ? 1 : rows); r++)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(
+              top: MedicineSizes.weekDotGap,
+            ),
+            child: Row(
+              children: [
+                for (var i = 0; i < week.length; i++)
+                  Expanded(
+                    child: Center(
+                      child: _Dot(
+                        state: r < week[i].states.length
+                            ? week[i].states[r]
+                            : null,
+                        delay: i,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        const SizedBox(height: AppSpacing.lg),
+        const MedicineDoseLegend(),
       ],
     );
   }
 }
 
-BoxDecoration _decoration(BuildContext context, DoseState? s) {
+/// Taken · Missed · Skipped · To come key, shared by every calendar view.
+class MedicineDoseLegend extends StatelessWidget {
+  const MedicineDoseLegend({super.key});
+
+  @override
+  Widget build(BuildContext context) => Wrap(
+    alignment: WrapAlignment.center,
+    spacing: AppSpacing.lg,
+    runSpacing: AppSpacing.xs,
+    children: [
+      _Legend(DoseState.taken, tr('Taken')),
+      _Legend(DoseState.missed, tr('Missed')),
+      _Legend(DoseState.skipped, tr('Skipped')),
+      _Legend(DoseState.upcoming, tr('To come')),
+    ],
+  );
+}
+
+/// The dot of one dose in the state [s] (null = nothing scheduled).
+BoxDecoration doseDotDecoration(BuildContext context, DoseState? s) {
   final ff = context.ff;
   final solid = MedicineStyle.colors.solid;
   return switch (s) {
@@ -148,7 +166,7 @@ class _Dot extends StatelessWidget {
         : Container(
             width: MedicineSizes.weekDot,
             height: MedicineSizes.weekDot,
-            decoration: _decoration(context, state),
+            decoration: doseDotDecoration(context, state),
           );
     if (context.reduceMotion) return dot;
     final ms = AppMotion.slow.inMilliseconds;
@@ -180,7 +198,7 @@ class _Legend extends StatelessWidget {
       Container(
         width: MedicineSizes.weekDot - 2,
         height: MedicineSizes.weekDot - 2,
-        decoration: _decoration(context, state),
+        decoration: doseDotDecoration(context, state),
       ),
       const SizedBox(width: AppSpacing.xs),
       Text(label, style: context.text.caption),

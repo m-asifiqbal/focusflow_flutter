@@ -3,7 +3,7 @@
 /// ============================================================
 ///
 /// What: [InsightsContent] lays out the KPI grid, productivity chart,
-/// time split, habit streaks and weekly tip for one snapshot;
+/// task timeline (Gantt), time split, habit streaks and weekly tip for one snapshot;
 /// [InsightsSkeleton] mirrors that layout while the first snapshot loads.
 /// Why: the screen only switches between loading / error / data; each
 /// card handles its own "Not enough data" state.
@@ -21,6 +21,7 @@ import 'package:focusflow/features/insights/presentation/widgets/habit_streaks_c
 import 'package:focusflow/features/insights/presentation/widgets/insights_kpi_card.dart';
 import 'package:focusflow/features/insights/presentation/widgets/insights_motion.dart';
 import 'package:focusflow/features/insights/presentation/widgets/productivity_chart_card.dart';
+import 'package:focusflow/features/insights/presentation/widgets/task_timeline_card.dart';
 import 'package:focusflow/features/insights/presentation/widgets/time_split_card.dart';
 import 'package:focusflow/features/insights/presentation/widgets/weekly_tip_card.dart';
 
@@ -101,14 +102,19 @@ class InsightsContent extends StatelessWidget {
         const SizedBox(height: AppSpacing.xxl),
         InsightsReveal(index: 1, child: ProductivityChartCard(snapshot: s)),
         const SizedBox(height: AppSpacing.xxl),
-        InsightsReveal(index: 2, child: TimeSplitCard(split: s.split)),
+        InsightsReveal(
+          index: 2,
+          child: TaskTimelineCard(timeline: s.timeline, window: s.window),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        InsightsReveal(index: 3, child: TimeSplitCard(split: s.split)),
         const SizedBox(height: AppSpacing.xxl),
         InsightsReveal(
-          index: 3,
+          index: 4,
           child: HabitStreaksCard(rows: s.streaks, hasHabits: s.hasHabits),
         ),
         const SizedBox(height: AppSpacing.xxl),
-        InsightsReveal(index: 4, child: WeeklyTipCard(tip: s.tip)),
+        InsightsReveal(index: 5, child: WeeklyTipCard(tip: s.tip)),
       ],
     );
   }

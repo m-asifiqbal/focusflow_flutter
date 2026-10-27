@@ -38,6 +38,16 @@ abstract final class DateUtilsX {
 
   static DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
+  /// Weekday initials for a calendar header, starting at [weekStart]
+  /// (`DateTime.monday` … `DateTime.sunday`), in the current locale.
+  static List<String> weekdayInitials(int weekStart) {
+    final f = DateFormats.of('EEEEE');
+    // 2024-01-01 was a Monday.
+    return [
+      for (var i = 0; i < 7; i++) f.format(DateTime(2024, 1, weekStart + i)),
+    ];
+  }
+
   /// Encodes the calendar day of [day] for a "floating" date column (task
   /// due dates): UTC midnight of that y/m/d. Unlike local midnight it does
   /// not move to another day when the device changes time zone. Use it for

@@ -76,6 +76,7 @@ void main() {
     expect(find.text('34%'), findsOneWidget);
     expect(find.text('Daily productivity'), findsOneWidget);
     expect(find.text('Mon'), findsOneWidget);
+    expect(text('Task timeline'), findsOneWidget);
     expect(text('Where your time went'), findsOneWidget);
     // 27 tasks + 21 check-ins + 7 notes + 2 reminders.
     expect(text('57'), findsOneWidget);
@@ -125,7 +126,9 @@ void main() {
     await boot(tester, withData: false);
     await pumpScreen(tester, h, const InsightsScreen());
     await intro(tester);
-    expect(text('Not enough data'), findsNWidgets(2));
+    // The productivity chart, the task timeline and the time-split donut.
+    expect(text('Not enough data'), findsNWidgets(3));
+    expect(text('No tasks are due in this range.'), findsOneWidget);
     expect(text('No habits yet'), findsOneWidget);
     expect(find.text('—'), findsNWidgets(2)); // no task / habit rates
     expect(tester.takeException(), isNull);

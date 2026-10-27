@@ -181,6 +181,42 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  testWidgets('cursor handle returns on the first tap after typing', (
+    tester,
+  ) async {
+    await loadAppFonts();
+    final h = await harness(tester);
+    final id = (await tester.runAsync(() => seedMockupNote(h)))!;
+    await pumpApp(tester, h, AppRoutes.note(id));
+    final quill = tester
+        .widget<QuillEditor>(find.byType(QuillEditor))
+        .controller;
+    final handle = find.byKey(const ValueKey('note-caret-handle'));
+
+    await tester.tap(find.textContaining('landscape', findRichText: true));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    expect(handle, findsOneWidget);
+
+    // Typing hides the handle …
+    final at = quill.selection.baseOffset;
+    quill.replaceText(at, 0, 'x', TextSelection.collapsed(offset: at + 1));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(handle, findsNothing);
+
+    // … and the very next cursor move (a tap elsewhere) shows it again; the
+    // typing must not still count as "the last change" (the document's
+    // change stream is asynchronous).
+    quill.updateSelection(
+      const TextSelection.collapsed(offset: 3),
+      ChangeSource.local,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump();
+    expect(handle, findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
   testWidgets('editing the title auto-saves', (tester) async {
     final h = await harness(tester);
     final id = (await tester.runAsync(() => seedMockupNote(h)))!;

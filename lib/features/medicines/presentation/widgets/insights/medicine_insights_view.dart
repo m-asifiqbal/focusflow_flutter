@@ -5,7 +5,8 @@
 /// What: Daily · Monthly · Yearly chips, then for that period: KPI tiles
 /// (adherence, doses taken, on time, best run), the dose outcome donut, the
 /// stacked bars per day / month, the adherence trend line, the Venn of
-/// days, when doses are taken (time of day) and adherence per medicine.
+/// days, when doses are taken (time of day), adherence per medicine and the
+/// Gantt timeline of each medicine's course.
 /// Every card reveals with the Insights stagger; switching periods keeps
 /// the previous one on screen (dimmed) until the next is ready.
 /// Why: lives in the medicines feature; the Insights screen only hosts it.
@@ -26,6 +27,7 @@ import 'package:focusflow/features/insights/presentation/widgets/insights_motion
 import 'package:focusflow/features/medicines/domain/services/medicine_insights.dart';
 import 'package:focusflow/features/medicines/presentation/providers/medicine_insights_providers.dart';
 import 'package:focusflow/features/medicines/presentation/widgets/insights/medicine_chart_cards.dart';
+import 'package:focusflow/features/medicines/presentation/widgets/insights/medicine_gantt_card.dart';
 import 'package:focusflow/features/medicines/presentation/widgets/insights/medicine_breakdown_cards.dart';
 import 'package:focusflow/features/medicines/presentation/widgets/insights/medicine_venn_card.dart';
 import 'package:go_router/go_router.dart';
@@ -189,6 +191,8 @@ class _Content extends StatelessWidget {
         if (s.perMedicine.isNotEmpty) ...[
           gap,
           reveal(PerMedicineCard(insights: s)),
+          gap,
+          reveal(MedicineGanttCard(insights: s)),
         ],
         if (s.asNeededTaken > 0) ...[
           gap,

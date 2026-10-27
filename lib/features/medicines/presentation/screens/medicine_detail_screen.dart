@@ -4,7 +4,7 @@
 ///
 /// Back · "Medicine" · edit + more. The hero (today's ring, name, "Take
 /// 8:00 PM dose" / "Skip"), three stats (on time over 30 days, streak,
-/// stock), the refill banner when low, "This week" dots and the history.
+/// stock), the refill banner when low, dose calendar (Week · Month · Year) and the history.
 /// Everything comes from the live medicineDetailProvider (recomputed every
 /// minute and on every dose write), so a dose taken from a notification
 /// updates this screen at once.
@@ -28,7 +28,7 @@ import 'package:focusflow/features/medicines/presentation/medicine_style.dart';
 import 'package:focusflow/features/medicines/presentation/providers/medicines_providers.dart';
 import 'package:focusflow/features/medicines/presentation/widgets/detail/medicine_detail_hero.dart';
 import 'package:focusflow/features/medicines/presentation/widgets/detail/medicine_history_card.dart';
-import 'package:focusflow/features/medicines/presentation/widgets/detail/medicine_week_card.dart';
+import 'package:focusflow/features/medicines/presentation/widgets/detail/medicine_dose_calendar_card.dart';
 import 'package:focusflow/features/medicines/presentation/widgets/refill_sheet.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 import 'package:focusflow/shared/item_actions/item_actions_sheet.dart';
@@ -203,7 +203,10 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: AppSpacing.cardGap),
           MedicineRefillBanner(medicine: m),
         ],
-        if (!m.isAsNeeded) ...[gap, MedicineWeekCard(week: s.week)],
+        if (!m.isAsNeeded) ...[
+          gap,
+          MedicineDoseCalendarCard(medicine: m, week: s.week),
+        ],
         gap,
         MedicineHistoryCard(
           history: s.history,

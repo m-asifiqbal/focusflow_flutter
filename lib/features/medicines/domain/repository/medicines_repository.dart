@@ -145,6 +145,15 @@ abstract interface class MedicinesRepository {
   /// when doses change; the yearly pass runs on a background isolate).
   Stream<MedicineInsights> watchInsights(MedicinePeriod period, DateTime now);
 
+  /// Every dose log of one medicine with day in [from, to] (inclusive) —
+  /// the Month / Year views of the detail screen. Re-emits only when doses
+  /// change.
+  Stream<List<DoseLog>> watchDoseLogs(
+    String medicineId,
+    DateTime from,
+    DateTime to,
+  );
+
   /// Dose logs with day in [from, to] (inclusive) — calendar dots.
   Stream<List<DoseLog>> watchLogsInRange(DateTime from, DateTime to);
 

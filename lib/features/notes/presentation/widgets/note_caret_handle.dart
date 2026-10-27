@@ -100,8 +100,13 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
   double _lineHeight = 0;
   bool _visible = false;
   bool _dragging = false;
-  bool _docChanged = false;
-  late int _lastLength = widget.controller.document.length;
+
+  /// Document changes seen so far. The document's change stream is
+  /// asynchronous (it fires *after* the controller has notified its
+  /// listeners), so a "document changed" flag set there goes stale and
+  /// would hide the handle on the first cursor move after typing; a counter
+  /// compared across a frame can't.
+  int _edits = 0;
   Timer? _hide;
   StreamSubscription<DocChange>? _changes;
 
@@ -126,9 +131,11 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
     _scroller = createTicker(_onScrollTick);
     widget.controller.addListener(_onSelection);
     widget.focusNode.addListener(_onFocus);
-    _changes = widget.controller.document.changes.listen(
-      (_) => _docChanged = true,
-    );
+    // Typing, pasting or dictation: the handle gets out of the way.
+    _changes = widget.controller.document.changes.listen((_) {
+      _edits++;
+      _hideHandle();
+    });
   }
 
   @override
@@ -147,19 +154,12 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
 
   void _onSelection() {
     if (!_enabled || _dragging) return; // a drag places the handle itself
-    // Typing changes the document: keep the handle out of the way. The
-    // length check is synchronous (the change stream fires a tick later).
-    final length = widget.controller.document.length;
-    final edited = _docChanged || length != _lastLength;
-    _docChanged = false;
-    _lastLength = length;
-    if (edited) {
-      _hideHandle();
-      return;
-    }
     // After a tap the editor may still relayout (a format toggle), so
-    // measure once this frame is laid out.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _place());
+    // measure once this frame is laid out. If the document changed in the
+    // meantime (this notification came from typing) the stream has bumped
+    // [_edits] by then and the handle stays hidden.
+    final edits = _edits;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _place(edits));
   }
 
   bool get _canShow {
@@ -184,8 +184,8 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
     return true;
   }
 
-  void _place() {
-    if (!mounted) return;
+  void _place(int edits) {
+    if (!mounted || edits != _edits) return;
     if (!_measure()) {
       _hideHandle();
       return;

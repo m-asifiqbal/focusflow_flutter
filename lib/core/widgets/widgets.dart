@@ -25,6 +25,7 @@ export 'ff_dialog.dart';
 export 'ff_progress_dialog.dart';
 export 'ff_effects.dart';
 export 'ff_empty_state.dart';
+export 'ff_gantt.dart';
 export 'ff_grouped_list.dart';
 export 'ff_headers.dart';
 export 'ff_heatmap.dart';

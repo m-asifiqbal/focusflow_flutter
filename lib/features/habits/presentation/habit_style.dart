@@ -220,6 +220,10 @@ abstract final class HabitDimens {
   /// used when the heatmap has no width constraint.
   static const double heatmapLegendCell = 12;
   static const double heatmapFallbackCell = 18;
+
+  /// Week / Month calendar of the heatmap: widest cell, weekday header height.
+  static const double calendarCellMax = 44;
+  static const double calendarHeader = 22;
   static const double historyIcon = 13;
   static const double historyTitle = 16.5;
   static const double rangeLink = 15;

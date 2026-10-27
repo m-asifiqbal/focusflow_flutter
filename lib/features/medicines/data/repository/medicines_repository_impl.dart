@@ -186,6 +186,15 @@ class MedicinesRepositoryImpl extends RepositoryBase
   );
 
   @override
+  Stream<List<DoseLog>> watchDoseLogs(
+    String medicineId,
+    DateTime from,
+    DateTime to,
+  ) => db.watchComputed({
+    db.medicineDoses,
+  }, () => _logs([medicineId], from: from, to: to));
+
+  @override
   Stream<List<DoseLog>> watchLogsInRange(DateTime from, DateTime to) =>
       db.watchComputed({db.medicineDoses, db.medicines}, () async {
         // Archived / trashed medicines never show (rule 3).

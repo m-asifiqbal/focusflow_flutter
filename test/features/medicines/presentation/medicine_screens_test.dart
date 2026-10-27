@@ -6,6 +6,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/features/medicines/domain/entities/medicine.dart';
 import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
@@ -116,6 +117,51 @@ void main() {
       find.textContaining(RegExp(r'Take 0?8:00\sPM dose')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('detail: dose calendar switches Week · Month · Year', (
+    tester,
+  ) async {
+    final id = await tester.runAsync(() => _seed(repo));
+    await pumpApp(tester, h, AppRoutes.medicine(id!));
+    final list = find.byType(ListView);
+    await tester.drag(list, const Offset(0, -600));
+    await settle(tester);
+
+    // Week is the default and costs nothing extra.
+    expect(find.text('This week'), findsOneWidget);
+    expect(find.text('Week'), findsOneWidget);
+
+    // Month: a calendar of October 2026 with today's date on a disc.
+    await tester.tap(find.text('Month'));
+    await settle(tester);
+    expect(find.text('October 2026'), findsOneWidget);
+    expect(find.text('23'), findsWidgets);
+    expect(find.bySemanticsLabel('Previous month'), findsOneWidget);
+    // Today is the first day of the course: nothing earlier to go back to.
+    final previous = tester.widget<FFRoundIconButton>(
+      find.byWidgetPredicate(
+        (w) => w is FFRoundIconButton && w.semanticLabel == 'Previous month',
+      ),
+    );
+    expect(previous.onPressed, isNull);
+    expect(tester.takeException(), isNull);
+
+    // Year: twelve mini months; tapping one opens it in the Month view.
+    await tester.tap(find.text('Year'));
+    await settle(tester);
+    expect(find.text('2026'), findsOneWidget);
+    expect(find.text('Partly taken'), findsOneWidget);
+    expect(find.text('Oct'), findsOneWidget);
+    await tester.tap(find.text('Oct'));
+    await settle(tester);
+    expect(find.text('October 2026'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Back to the week.
+    await tester.tap(find.text('Week'));
+    await settle(tester);
+    expect(find.text('This week'), findsOneWidget);
   });
 
   testWidgets('editor: add a medicine and land on its page', (tester) async {

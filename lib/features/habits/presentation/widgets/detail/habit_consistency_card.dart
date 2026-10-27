@@ -2,8 +2,10 @@
 /// HABIT CONSISTENCY CARD — heatmap section of the habit detail (16)
 /// ============================================================
 ///
-/// "Consistency ……… Last 4 months" header (tap toggles 4 months ⇄ 1 year)
-/// over a card with the GitHub-style HabitHeatmap in the habit colour
+/// "Consistency ……… Last 4 months" header (tap steps through This week →
+/// This month → Last 4 months → Last year)
+/// over a card with the HabitHeatmap in the habit colour (a calendar for the
+/// week and month, the GitHub-style grid for 4 months and a year)
 /// (rest days outlined, not drawn as misses) and the "□ Rest day" +
 /// "Less □□■■ More" legend. Tapping a day between the start date and today
 /// opens the day editor.
@@ -44,6 +46,7 @@ class HabitConsistencyCard extends ConsumerWidget {
     final weekStart = ref.watch(habitWeekStartProvider);
     final color = habit.colors.solid;
     final year = range == HabitHeatmapRange.year;
+    final calendar = range.isCalendar;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -83,7 +86,9 @@ class HabitConsistencyCard extends ConsumerWidget {
                 values: values,
                 restDays: restDays,
                 end: today,
-                weeks: range.weeks,
+                weeks: range.weeksFor(today, weekStart),
+                calendar: calendar,
+                from: range.firstDay(today),
                 color: color,
                 weekStart: weekStart,
                 gap: year ? HabitDimens.heatmapGapYear : AppSpacing.xs,

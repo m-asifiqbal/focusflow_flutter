@@ -14,6 +14,8 @@ import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_log.dart';
 import 'package:focusflow/features/habits/domain/repository/habits_repository.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
+import 'package:focusflow/features/habits/presentation/providers/habit_detail_providers.dart';
+import 'package:focusflow/features/habits/presentation/widgets/detail/habit_heatmap.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
 import '../../../helpers/screen_harness.dart';
@@ -254,6 +256,86 @@ void main() {
     await tester.tap(find.text('Last 4 months'));
     await settle(tester);
     expect(find.text('Last year'), findsOneWidget);
+  });
+
+  testWidgets('heatmap range also offers this week and this month', (
+    tester,
+  ) async {
+    final id = await setUp(tester);
+    await pumpApp(tester, h, AppRoutes.habit(id), size: _mockupTall);
+    HabitHeatmap map() =>
+        tester.widget<HabitHeatmap>(find.byType(HabitHeatmap));
+    expect(map().calendar, isFalse);
+    expect(map().weeks, 17);
+
+    // 4 months → year → week → month → back to 4 months.
+    await tester.tap(find.text('Last 4 months'));
+    await settle(tester);
+    expect(map().weeks, 53);
+
+    await tester.tap(find.text('Last year'));
+    await settle(tester);
+    expect(find.text('This week'), findsOneWidget);
+    await captureScreen(tester, 'habit_detail_week');
+    expect(map().calendar, isTrue);
+    expect(map().weeks, 1);
+    expect(map().from, isNull);
+
+    await tester.tap(find.text('This week'));
+    await settle(tester);
+    expect(find.text('This month'), findsOneWidget);
+    await captureScreen(tester, 'habit_detail_month');
+    expect(map().calendar, isTrue);
+    expect(map().from!.day, 1);
+    expect(map().weeks, inInclusiveRange(1, 6));
+    // Days before the 1st are not drawn (and can't be tapped).
+    expect(
+      HabitHeatmap.levelFor(
+        day: map().from!.subtract(const Duration(days: 1)),
+        end: DateTime(2026, 6, 30),
+        byDay: const {},
+        rest: const {},
+        from: map().from,
+      ),
+      lessThan(-2),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('This month'));
+    await settle(tester);
+    expect(find.text('Last 4 months'), findsOneWidget);
+    expect(map().calendar, isFalse);
+  });
+
+  test('HabitHeatmapRange steps shortest to longest and wraps', () {
+    expect(HabitHeatmapRange.week.next, HabitHeatmapRange.month);
+    expect(HabitHeatmapRange.month.next, HabitHeatmapRange.months4);
+    expect(HabitHeatmapRange.months4.next, HabitHeatmapRange.year);
+    expect(HabitHeatmapRange.year.next, HabitHeatmapRange.week);
+  });
+
+  test('HabitHeatmapRange.weeksFor counts the rows of the month', () {
+    // 1 Oct 2026 is a Thursday; Monday weeks: 28 Sep, 5, 12, 19, 26 Oct.
+    expect(
+      HabitHeatmapRange.month.weeksFor(DateTime(2026, 10, 27), DateTime.monday),
+      5,
+    );
+    expect(
+      HabitHeatmapRange.month.weeksFor(DateTime(2026, 10, 2), DateTime.monday),
+      1,
+    );
+    // Sunday weeks start a day earlier: 27 Sep, 4, 11, 18, 25 Oct.
+    expect(
+      HabitHeatmapRange.month.weeksFor(DateTime(2026, 10, 26), DateTime.sunday),
+      5,
+    );
+    expect(HabitHeatmapRange.week.weeksFor(DateTime(2026, 10, 27), 1), 1);
+    expect(HabitHeatmapRange.year.weeksFor(DateTime(2026, 10, 27), 1), 53);
+    expect(
+      HabitHeatmapRange.month.firstDay(DateTime(2026, 10, 27)),
+      DateTime(2026, 10),
+    );
+    expect(HabitHeatmapRange.year.firstDay(DateTime(2026, 10, 27)), isNull);
   });
 
   testWidgets('new habit shows the empty stats copy', (tester) async {

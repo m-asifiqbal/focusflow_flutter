@@ -85,6 +85,7 @@ void main() {
       'Your days at a glance',
       'When you take them',
       'By medicine',
+      'Medicine timeline',
     ]) {
       expect(find.text(title), findsWidgets, reason: title);
     }
@@ -99,6 +100,7 @@ void main() {
       await settle(tester, rounds: 6);
     }
     expect(find.text('Doses by month'), findsOneWidget);
+    expect(find.text('Medicine timeline'), findsOneWidget);
     await captureScreen(tester, 'medicine_insights_yearly');
 
     // Back to the overview.
