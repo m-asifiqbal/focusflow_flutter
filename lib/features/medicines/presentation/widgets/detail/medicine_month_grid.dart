@@ -29,10 +29,7 @@ int leadingBlanks(DateTime firstOfMonth, int weekStart) =>
 BoxDecoration miniDoseDot(BuildContext context, DoseState s) {
   final ff = context.ff;
   return switch (s) {
-    DoseState.taken => BoxDecoration(
-      color: MedicineStyle.colors.solid,
-      shape: BoxShape.circle,
-    ),
+    DoseState.taken => BoxDecoration(color: ff.success, shape: BoxShape.circle),
     DoseState.missed => BoxDecoration(color: ff.danger, shape: BoxShape.circle),
     DoseState.skipped => BoxDecoration(
       color: ActionTints.lock.solid,

@@ -4,10 +4,12 @@
 /// habit shows the empty-stats copy, no overflow at 360 pt / 1.3.
 library;
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_frequency.dart';
@@ -130,7 +132,8 @@ void main() {
       expect(find.text(t, findRichText: true), findsOneWidget);
     }
     expect(find.text('Consistency'), findsOneWidget);
-    expect(find.text('Last 4 months'), findsOneWidget);
+    // The consistency range starts on this week.
+    expect(find.text('This week'), findsOneWidget);
     expect(find.text('Monthly completion'), findsOneWidget);
     expect(find.text('History'), findsOneWidget);
     // Stat tiles as in the mockup (completion: see _seedWater).
@@ -250,40 +253,47 @@ void main() {
     expect((back.count, back.skipped), (8, false));
   });
 
-  testWidgets('heatmap range toggles to the last year', (tester) async {
-    final id = await setUp(tester);
-    await pumpApp(tester, h, AppRoutes.habit(id), size: _mockupTall);
-    await tester.tap(find.text('Last 4 months'));
+  /// Opens the range sheet from the link and picks [label].
+  Future<void> pickRange(WidgetTester tester, String from, String label) async {
+    await tester.tap(find.text(from));
     await settle(tester);
-    expect(find.text('Last year'), findsOneWidget);
-  });
+    await tester.tap(find.text(label).last);
+    await settle(tester);
+  }
 
-  testWidgets('heatmap range also offers this week and this month', (
+  testWidgets('consistency starts on this week; the link has a chevron', (
     tester,
   ) async {
     final id = await setUp(tester);
     await pumpApp(tester, h, AppRoutes.habit(id), size: _mockupTall);
     HabitHeatmap map() =>
         tester.widget<HabitHeatmap>(find.byType(HabitHeatmap));
-    expect(map().calendar, isFalse);
-    expect(map().weeks, 17);
-
-    // 4 months → year → week → month → back to 4 months.
-    await tester.tap(find.text('Last 4 months'));
-    await settle(tester);
-    expect(map().weeks, 53);
-
-    await tester.tap(find.text('Last year'));
-    await settle(tester);
-    expect(find.text('This week'), findsOneWidget);
-    await captureScreen(tester, 'habit_detail_week');
     expect(map().calendar, isTrue);
     expect(map().weeks, 1);
-    expect(map().from, isNull);
+    expect(find.text('This week'), findsOneWidget);
+    // The chevron tells the user the range can be changed.
+    expect(find.byIcon(FontAwesomeIcons.chevronDown), findsWidgets);
+    expect(
+      find.bySemanticsLabel(RegExp('Heatmap range, This week')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the range sheet offers week, month, 4 months and year', (
+    tester,
+  ) async {
+    final id = await setUp(tester);
+    await pumpApp(tester, h, AppRoutes.habit(id), size: _mockupTall);
+    HabitHeatmap map() =>
+        tester.widget<HabitHeatmap>(find.byType(HabitHeatmap));
 
     await tester.tap(find.text('This week'));
     await settle(tester);
-    expect(find.text('This month'), findsOneWidget);
+    for (final l in ['This month', 'Last 4 months', 'Last year']) {
+      expect(find.text(l), findsOneWidget, reason: l);
+    }
+    await tester.tap(find.text('This month'));
+    await settle(tester);
     await captureScreen(tester, 'habit_detail_month');
     expect(map().calendar, isTrue);
     expect(map().from!.day, 1);
@@ -299,12 +309,49 @@ void main() {
       ),
       lessThan(-2),
     );
-    expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('This month'));
-    await settle(tester);
-    expect(find.text('Last 4 months'), findsOneWidget);
+    await pickRange(tester, 'This month', 'Last 4 months');
     expect(map().calendar, isFalse);
+    expect(map().weeks, 17);
+
+    await pickRange(tester, 'Last 4 months', 'Last year');
+    expect(map().weeks, 53);
+    expect(find.text('Last year'), findsOneWidget);
+
+    await pickRange(tester, 'Last year', 'This week');
+    expect(map().calendar, isTrue);
+    expect(map().weeks, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('monthly completion: every bar has a label, a tap picks one', (
+    tester,
+  ) async {
+    final id = await setUp(tester);
+    await pumpApp(tester, h, AppRoutes.habit(id), size: _mockupTall);
+    expect(find.text('Tap a bar'), findsOneWidget);
+    final chart = find.byType(BarChart);
+    expect(chart, findsOneWidget);
+    final data = tester.widget<BarChart>(chart).data;
+    // The percentage on top of every bar: always shown, and touch enabled.
+    expect(data.barTouchData.enabled, isTrue);
+    expect(
+      data.barGroups.every((g) => g.showingTooltipIndicators.isNotEmpty),
+      isTrue,
+    );
+    expect(data.barGroups.length, greaterThan(1));
+    // The current month is the picked one at first (solid colour).
+    Color? rodColor(int i) =>
+        tester.widget<BarChart>(chart).data.barGroups[i].barRods.single.color;
+    final last = data.barGroups.length - 1;
+    expect(rodColor(last), isNot(rodColor(0)));
+
+    // Tap the first bar: it becomes the solid one.
+    final box = tester.getRect(chart);
+    await tester.tapAt(Offset(box.left + 40, box.center.dy + 20));
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(rodColor(0), isNot(rodColor(last)));
+    expect(tester.takeException(), isNull);
   });
 
   test('HabitHeatmapRange steps shortest to longest and wraps', () {

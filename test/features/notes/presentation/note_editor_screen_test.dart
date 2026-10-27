@@ -217,6 +217,114 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  testWidgets('dragging the handle keeps following the finger in a long note', (
+    tester,
+  ) async {
+    await loadAppFonts();
+    final h = await harness(tester);
+    final id = (await tester.runAsync(() => seedMockupNote(h)))!;
+    await pumpApp(tester, h, AppRoutes.note(id));
+    final quill = tester
+        .widget<QuillEditor>(find.byType(QuillEditor))
+        .controller;
+    quill.replaceText(
+      0,
+      0,
+      List.generate(
+        300,
+        (i) => 'Line $i of a long note with some words.',
+      ).join('\n'),
+      const TextSelection.collapsed(offset: 0),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.textContaining('Line 3 ', findRichText: true).first);
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    final handle = find.byKey(const ValueKey('note-caret-handle'));
+    expect(handle, findsOneWidget);
+
+    var selectionChanges = 0;
+    int? last = quill.selection.baseOffset;
+    quill.addListener(() {
+      if (quill.selection.baseOffset != last) selectionChanges++;
+      last = quill.selection.baseOffset;
+    });
+
+    // A slow drag in small steps (a real finger): the old handle lost the
+    // gesture after its first move, so the caret stopped after one update.
+    final startTop = tester.getRect(handle).top;
+    final start = quill.selection.baseOffset;
+    final g = await tester.startGesture(tester.getCenter(handle));
+    final offsets = <int>[];
+    for (var i = 0; i < 30; i++) {
+      await g.moveBy(const Offset(0, 8));
+      await tester.pump(const Duration(milliseconds: 16));
+      offsets.add(quill.selection.baseOffset);
+    }
+    // The handle itself follows the finger every frame …
+    expect(tester.getRect(handle).top, greaterThan(startTop + 100));
+    // … and the caret keeps advancing through the whole drag, not only at
+    // the start …
+    expect(offsets.last, greaterThan(start + 100));
+    expect(offsets.sublist(15).toSet().length, greaterThan(1));
+    // … but is committed far less often than once per pointer move (every
+    // commit makes Quill rebuild all the note's lines).
+    expect(selectionChanges, lessThan(15));
+
+    await g.up();
+    await tester.pump(const Duration(milliseconds: 200));
+    // The caret ends where the handle is, and a new tap works again.
+    expect(quill.selection.isCollapsed, isTrue);
+    expect(handle, findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('losing focus mid-drag ends the drag (no runaway scroll)', (
+    tester,
+  ) async {
+    await loadAppFonts();
+    final h = await harness(tester);
+    final id = (await tester.runAsync(() => seedMockupNote(h)))!;
+    await pumpApp(tester, h, AppRoutes.note(id));
+    final quill = tester
+        .widget<QuillEditor>(find.byType(QuillEditor))
+        .controller;
+    quill.replaceText(
+      0,
+      0,
+      List.generate(
+        300,
+        (i) => 'Line $i of a long note with some words.',
+      ).join('\n'),
+      const TextSelection.collapsed(offset: 0),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.textContaining('Line 3 ', findRichText: true).first);
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    final handle = find.byKey(const ValueKey('note-caret-handle'));
+    final g = await tester.startGesture(tester.getCenter(handle));
+    await g.moveBy(const Offset(0, 40));
+    await tester.pump(const Duration(milliseconds: 100));
+    // Hold the finger low in the note, in the auto-scroll band, then lose
+    // the focus (a dialog, the keyboard closing …).
+    await g.moveBy(const Offset(0, 300));
+    await tester.pump(const Duration(milliseconds: 100));
+    FocusManager.instance.primaryFocus?.unfocus();
+    // Quill's own 100 ms reveal-the-caret scroll may still finish.
+    await tester.pump(const Duration(milliseconds: 600));
+    final scrollable = tester.state<ScrollableState>(
+      find.byType(Scrollable).first,
+    );
+    // One last tick may still land; after that nothing scrolls any more.
+    await tester.pump(const Duration(milliseconds: 300));
+    final before = scrollable.position.pixels;
+    await tester.pump(const Duration(seconds: 1));
+    expect(scrollable.position.pixels, before);
+    await g.up();
+    await tester.pump(const Duration(seconds: 5));
+  });
+
   testWidgets('editing the title auto-saves', (tester) async {
     final h = await harness(tester);
     final id = (await tester.runAsync(() => seedMockupNote(h)))!;

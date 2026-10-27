@@ -6,9 +6,11 @@
 /// faint track), a tick axis on top and a vertical grid behind the rows;
 /// the "today" unit gets a highlighted column. The domain is [units] equal
 /// cells (days, or months for a yearly view); a bar covers the cells
-/// `startUnit … endUnit` (both inclusive). A bar that begins before / ends
-/// after the domain is flat on that side ([FFGanttBar.continuesBefore] /
-/// [FFGanttBar.continuesAfter]) so it reads as "keeps going".
+/// `startUnit … endUnit` (both inclusive; one that reaches past the domain is
+/// clipped to it). Bars are flat rectangles like a project Gantt, each row in
+/// its own colour ([FFGantt.palette]); [FFGanttBar.completed] paints that
+/// share of the bar in a light tint of the colour ("Completed") before the
+/// solid rest ("Remaining").
 /// Why: bars are positioned with integer-flex Rows (no per-frame layout
 /// maths, RTL for free) and the grid is one CustomPaint, so a chart of a
 /// dozen rows costs a handful of render objects and never animates.
@@ -16,8 +18,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/widgets/ff_pressable.dart';
 
 /// A label on the axis, centred over the cell [unit].
@@ -40,8 +44,7 @@ class FFGanttBar {
     required this.semanticLabel,
     this.trailing,
     this.trailingColor,
-    this.continuesBefore = false,
-    this.continuesAfter = false,
+    this.completed = 0,
     this.onTap,
   });
 
@@ -55,8 +58,9 @@ class FFGanttBar {
   final int startUnit;
   final int endUnit;
   final Color color;
-  final bool continuesBefore;
-  final bool continuesAfter;
+
+  /// 0…1: the leading share of the bar drawn light (done), the rest solid.
+  final double completed;
   final String semanticLabel;
   final VoidCallback? onTap;
 }
@@ -80,7 +84,25 @@ class FFGantt extends StatelessWidget {
   final int? todayUnit;
 
   /// Height of one bar.
-  static const double barHeight = 12;
+  static const double barHeight = 18;
+
+  /// Distinct row colours (module colours + teal + slate), cycled by row.
+  static List<Color> palette(BuildContext context) => [
+    ModuleStyle.reminders.solid,
+    ModuleStyle.tasks.solid,
+    ModuleStyle.medicines.solid,
+    context.ff.primary,
+    ModuleStyle.habits.solid,
+    ModuleStyle.vault.solid,
+    ActionTints.share.solid,
+    ModuleStyle.notes.solid,
+  ];
+
+  /// The light "completed" tint of [color].
+  static Color light(BuildContext context, Color color) => Color.alphaBlend(
+    color.withValues(alpha: context.ff.isDark ? 0.4 : 0.28),
+    context.ff.surface,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -173,11 +195,7 @@ class _Row extends StatelessWidget {
     final lead = start;
     final span = end - start + 1;
     final tail = units - end - 1;
-    const r = Radius.circular(FFGantt.barHeight / 2);
-    final shape = BorderRadiusDirectional.horizontal(
-      start: bar.continuesBefore ? Radius.zero : r,
-      end: bar.continuesAfter ? Radius.zero : r,
-    );
+    final done = bar.completed.clamp(0.0, 1.0);
     final trailing = bar.trailing;
     return Semantics(
       button: bar.onTap != null,
@@ -228,11 +246,21 @@ class _Row extends StatelessWidget {
                       if (lead > 0) Spacer(flex: lead),
                       Expanded(
                         flex: span,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: bar.color,
-                            borderRadius: shape,
-                          ),
+                        // Square corners: a Gantt bar is a flat block.
+                        child: ColoredBox(
+                          color: bar.color,
+                          child: done <= 0
+                              ? null
+                              : Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: FractionallySizedBox(
+                                    widthFactor: done,
+                                    heightFactor: 1,
+                                    child: ColoredBox(
+                                      color: FFGantt.light(context, bar.color),
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                       if (tail > 0) Spacer(flex: tail),

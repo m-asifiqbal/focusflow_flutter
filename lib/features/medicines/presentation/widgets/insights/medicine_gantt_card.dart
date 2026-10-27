@@ -22,7 +22,6 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/medicines/domain/entities/medicine.dart';
 import 'package:focusflow/features/medicines/domain/services/medicine_insights.dart';
-import 'package:focusflow/features/medicines/presentation/medicine_style.dart';
 import 'package:focusflow/features/medicines/presentation/widgets/insights/medicine_insight_parts.dart';
 import 'package:go_router/go_router.dart';
 
@@ -110,13 +109,14 @@ class MedicineGanttCard extends StatelessWidget {
       final c = a.$3.start.compareTo(b.$3.start);
       return c != 0 ? c : a.$1.name.compareTo(b.$1.name);
     });
+    final palette = FFGantt.palette(context);
     final bars = <FFGanttBar>[
-      for (final (m, share, span) in rows)
-        _bar(context, m, share, span, insights),
+      for (final (i, (m, share, span)) in rows.indexed)
+        _bar(context, m, share, span, palette[i % palette.length]),
     ];
     return MedicineInsightCard(
       title: tr('Medicine timeline'),
-      caption: tr('When each medicine ran, coloured by adherence'),
+      caption: tr('When each medicine ran, with its adherence'),
       child: FFGantt(
         bars: bars,
         units: medicineAxisUnits(insights),
@@ -131,13 +131,14 @@ class MedicineGanttCard extends StatelessWidget {
     Medicine m,
     MedicineShare share,
     MedicineGanttSpan span,
-    MedicineInsights insights,
+    Color rowColor,
   ) {
     final ff = context.ff;
     final c = share.counts;
     final a = c.adherence;
+    // The % keeps the traffic-light colour; the bar has the row's own.
     final color = a == null
-        ? MedicineStyle.colors.solid
+        ? ff.inkMuted
         : (a >= 0.9 ? ff.success : (a >= 0.7 ? ff.warning : ff.danger));
     final name = m.name.trim().isEmpty ? tr('Untitled medicine') : m.name;
     final percent = a == null ? null : '${(a * 100).round()}%';
@@ -147,9 +148,7 @@ class MedicineGanttCard extends StatelessWidget {
       trailingColor: color,
       startUnit: span.start,
       endUnit: span.end,
-      continuesBefore: span.before,
-      continuesAfter: span.after,
-      color: m.isPaused ? color.withValues(alpha: 0.5) : color,
+      color: m.isPaused ? rowColor.withValues(alpha: 0.5) : rowColor,
       semanticLabel: tr('{name}: {percent} taken, {taken} of {total}', {
         'name': name,
         'percent': percent ?? '—',

@@ -25,7 +25,7 @@ import 'package:focusflow/features/medicines/presentation/widgets/detail/medicin
 Color outcomeColor(BuildContext context, DayOutcome outcome) {
   final ff = context.ff;
   return switch (outcome) {
-    DayOutcome.taken => MedicineStyle.colors.solid,
+    DayOutcome.taken => ff.success,
     DayOutcome.partial => ff.warning,
     DayOutcome.missed => ff.danger,
     DayOutcome.skipped => ActionTints.lock.solid,

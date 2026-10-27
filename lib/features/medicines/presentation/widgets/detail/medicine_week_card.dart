@@ -121,7 +121,9 @@ BoxDecoration doseDotDecoration(BuildContext context, DoseState? s) {
   final ff = context.ff;
   final solid = MedicineStyle.colors.solid;
   return switch (s) {
-    DoseState.taken => BoxDecoration(color: solid, shape: BoxShape.circle),
+    // Taken is green (success) in every calendar view, not the pink of the
+    // module: green reads as "done" at a glance.
+    DoseState.taken => BoxDecoration(color: ff.success, shape: BoxShape.circle),
     DoseState.missed => BoxDecoration(
       shape: BoxShape.circle,
       border: Border.all(color: ff.danger, width: AppSizes.hairline + 1),

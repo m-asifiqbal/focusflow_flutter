@@ -3,8 +3,8 @@
 /// ============================================================
 ///
 /// Built on habitDetailProvider (habit + full history + stats, live):
-///   habitHeatmapRangeProvider   This week · This month · Last 4 months ·
-///                               Last year selector (tap cycles)
+///   habitHeatmapRangeProvider   This week (default) · This month · Last 4
+///                               months · Last year selector
 ///   habitHeatmapValuesProvider  day → 0…1 for the heatmap
 ///   habitHeatmapRestDaysProvider  days the habit wasn't due (rest days)
 ///   habitHistoryProvider        newest-first History rows
@@ -12,7 +12,9 @@
 /// ============================================================
 library;
 
+import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/data/export/habit_csv_share_service.dart';
@@ -32,6 +34,14 @@ enum HabitHeatmapRange {
     month => tr('This month'),
     months4 => tr('Last 4 months'),
     year => tr('Last year'),
+  };
+
+  /// Glyph of the range in the picker sheet.
+  IconData get icon => switch (this) {
+    week => FontAwesomeIcons.calendarWeek,
+    month => FontAwesomeIcons.calendarDays,
+    months4 => FontAwesomeIcons.tableCells,
+    year => FontAwesomeIcons.calendar,
   };
 
   /// Week and month are drawn as a calendar (weeks as rows), the longer
@@ -68,7 +78,9 @@ enum HabitHeatmapRange {
 class HabitHeatmapRangeController
     extends AutoDisposeFamilyNotifier<HabitHeatmapRange, String> {
   @override
-  HabitHeatmapRange build(String habitId) => HabitHeatmapRange.months4;
+  HabitHeatmapRange build(String habitId) => HabitHeatmapRange.week;
+
+  void select(HabitHeatmapRange range) => state = range;
 
   /// Steps to the next range (week → month → 4 months → year → week).
   void toggle() => state = state.next;

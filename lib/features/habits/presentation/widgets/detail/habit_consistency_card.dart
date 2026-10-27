@@ -2,8 +2,9 @@
 /// HABIT CONSISTENCY CARD — heatmap section of the habit detail (16)
 /// ============================================================
 ///
-/// "Consistency ……… Last 4 months" header (tap steps through This week →
-/// This month → Last 4 months → Last year)
+/// "Consistency ……… This week ⌄" header: the range link has a chevron and
+/// opens a small sheet to pick This week (the default) · This month · Last 4
+/// months · Last year
 /// over a card with the HabitHeatmap in the habit colour (a calendar for the
 /// week and month, the GitHub-style grid for 4 months and a year)
 /// (rest days outlined, not drawn as misses) and the "□ Rest day" +
@@ -17,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
+import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/habits/presentation/habit_style.dart';
@@ -38,6 +40,31 @@ class HabitConsistencyCard extends ConsumerWidget {
   /// A tapped day in [start date, today].
   final ValueChanged<DateTime> onDay;
 
+  /// The range sheet: the four spans, the current one ticked.
+  void _pick(BuildContext context, WidgetRef ref, HabitHeatmapRange current) {
+    showFFActionSheet(
+      context,
+      FFActionSheetData(
+        header: FFActionSheetHeader(
+          title: tr('Consistency'),
+          icon: FontAwesomeIcons.calendarDays,
+          colors: habit.colors,
+        ),
+        actions: [
+          for (final r in HabitHeatmapRange.values)
+            FFActionItem(
+              icon: r == current ? FontAwesomeIcons.check : r.icon,
+              label: r.label,
+              colors: habit.colors,
+              onTap: () => ref
+                  .read(habitHeatmapRangeProvider(habit.id).notifier)
+                  .select(r),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final range = ref.watch(habitHeatmapRangeProvider(habit.id));
@@ -53,19 +80,9 @@ class HabitConsistencyCard extends ConsumerWidget {
       children: [
         FFSectionHeader(
           title: tr('Consistency'),
-          trailing: FFTextButton(
-            label: range.label,
-            semanticLabel: tr('Heatmap range, {label}. Tap to change', {
-              'label': range.label,
-            }),
-            onPressed: ref
-                .read(habitHeatmapRangeProvider(habit.id).notifier)
-                .toggle,
-            padding: EdgeInsetsDirectional.zero,
-            style: context.text.buttonSmall.copyWith(
-              fontSize: HabitDimens.rangeLink,
-              color: context.ff.primary,
-            ),
+          trailing: _RangeLink(
+            range: range,
+            onPressed: () => _pick(context, ref, range),
           ),
         ),
         const SizedBox(
@@ -113,6 +130,48 @@ class HabitConsistencyCard extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// "This week ⌄": the current range and a chevron that says it can be
+/// changed (44-pt tap target).
+class _RangeLink extends StatelessWidget {
+  const _RangeLink({required this.range, required this.onPressed});
+
+  final HabitHeatmapRange range;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.ff.primary;
+    return Semantics(
+      button: true,
+      label: tr('Heatmap range, {label}. Tap to change', {
+        'label': range.label,
+      }),
+      excludeSemantics: true,
+      child: FFPressable(
+        onTap: onPressed,
+        scale: 0.96,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSizes.minTap),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                range.label,
+                style: context.text.buttonSmall.copyWith(
+                  fontSize: HabitDimens.rangeLink,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs + AppSpacing.xxs),
+              Icon(FontAwesomeIcons.chevronDown, size: 12, color: color),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

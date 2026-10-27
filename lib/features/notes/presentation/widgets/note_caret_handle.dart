@@ -22,6 +22,19 @@
 /// the scrolled content, so it scrolls with the text and needs no per-frame
 /// tracking.
 ///
+/// Drag safety (why the code is shaped this way):
+///   * the magnifier and the handle are keyed Stack children. Without keys,
+///     showing the magnifier (inserted before the handle) made Flutter
+///     re-create the handle's gesture detector, which silently killed the
+///     drag after its first move — the caret then stopped following the
+///     finger, "dragging" stayed on and the edge auto-scroll ran for ever;
+///   * the finger only places the *handle* every frame; the caret in the
+///     editor is committed at most every [commitEvery]: each selection change
+///     makes Quill rebuild every line of the note, which is far too much work
+///     per pointer event in a long note;
+///   * anything that removes the handle mid-drag (focus lost, typing,
+///     dictation) ends the drag cleanly.
+///
 /// Behaviour: appears after a tap / selection move, hides while typing, after
 /// 4 s idle, on focus loss and in read-only notes. Touch-handle platforms
 /// only (Android): iOS keeps its native "long-press then drag" caret.
@@ -86,6 +99,9 @@ class NoteCaretHandle extends StatefulWidget {
 
   static const Duration idleHide = Duration(seconds: 4);
 
+  /// Longest interval between caret updates of the editor while dragging.
+  static const Duration commitEvery = Duration(milliseconds: 80);
+
   static bool get platformDefault =>
       defaultTargetPlatform == TargetPlatform.android;
 
@@ -113,6 +129,12 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
   /// Finger → caret-line-middle offset fixed at touch-down.
   Offset _grab = Offset.zero;
   Offset? _finger;
+
+  /// The caret the finger is over, not yet in the controller (see
+  /// [NoteCaretHandle.commitEvery]).
+  TextSelection? _pending;
+  Timer? _commitTimer;
+  DateTime _lastCommit = DateTime.fromMillisecondsSinceEpoch(0);
   late final Ticker _scroller;
   Duration _lastTick = Duration.zero;
 
@@ -141,6 +163,7 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
   @override
   void dispose() {
     _hide?.cancel();
+    _commitTimer?.cancel();
     _changes?.cancel();
     _scroller.dispose();
     widget.controller.removeListener(_onSelection);
@@ -172,11 +195,11 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
 
   /// Measures the caret of the current selection. Returns false when the
   /// handle can't be shown.
-  bool _measure() {
+  bool _measure([TextSelection? at]) {
     final render = _render;
     final box = context.findRenderObject();
     if (render == null || box is! RenderBox || !_canShow) return false;
-    final sel = widget.controller.selection;
+    final sel = at ?? widget.controller.selection;
     final points = render.getEndpointsForSelection(sel);
     if (points.isEmpty) return false;
     _tip = box.globalToLocal(render.localToGlobal(points.first.point));
@@ -202,6 +225,9 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
 
   void _hideHandle() {
     _hide?.cancel();
+    // The handle (and its gesture) is about to go: end a drag in progress
+    // here, nothing else will tell us.
+    if (_dragging) _finishDrag();
     if (_visible && mounted) setState(() => _visible = false);
   }
 
@@ -234,9 +260,9 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
     }
   }
 
-  /// Moves the caret to the text under the (grab-corrected) finger, clamped
-  /// into the visible note so Quill never scrolls on its own and fights the
-  /// auto-scroll.
+  /// Moves the handle to the text under the (grab-corrected) finger and
+  /// the caret after it (throttled), clamped into the visible note so Quill
+  /// never scrolls on its own and fights the auto-scroll.
   void _moveCaret() {
     final render = _render;
     final finger = _finger;
@@ -251,17 +277,37 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
       );
     }
     final position = render.getPositionForOffset(target);
-    final sel = widget.controller.selection;
-    if (position.offset != sel.baseOffset || !sel.isCollapsed) {
-      widget.controller.updateSelection(
-        TextSelection.collapsed(offset: position.offset),
-        ChangeSource.local,
-      );
+    final sel = TextSelection.collapsed(offset: position.offset);
+    if (sel != (_pending ?? widget.controller.selection)) {
       HapticFeedback.selectionClick();
     }
-    // Selection only: the layout is unchanged, so measure right away and
-    // move the handle in this same frame.
-    if (_measure()) setState(() => _visible = true);
+    _pending = sel;
+    // The layout is unchanged, so measure right away and move the handle in
+    // this same frame; the editor's caret follows within [commitEvery].
+    if (_measure(sel)) setState(() => _visible = true);
+    _commitSoon();
+  }
+
+  void _commitSoon() {
+    final due = _lastCommit.add(NoteCaretHandle.commitEvery);
+    final wait = due.difference(DateTime.now());
+    if (wait <= Duration.zero) {
+      _commit();
+    } else {
+      _commitTimer ??= Timer(wait, _commit);
+    }
+  }
+
+  /// Puts the pending caret into the editor.
+  void _commit() {
+    _commitTimer?.cancel();
+    _commitTimer = null;
+    final sel = _pending;
+    _pending = null;
+    _lastCommit = DateTime.now();
+    if (sel == null || !mounted) return;
+    final c = widget.controller;
+    if (c.selection != sel) c.updateSelection(sel, ChangeSource.local);
   }
 
   /// The visible part of the note's scroll view, in global coordinates.
@@ -309,11 +355,19 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
   }
 
   void _dragEnd() {
+    _finishDrag();
+    if (mounted) setState(() {}); // drop the magnifier
+    _restartTimer();
+  }
+
+  /// Stops everything a drag started (safe to call twice).
+  void _finishDrag() {
+    // The caret goes in while "dragging" is still on, so the selection
+    // listener leaves placing the handle to us.
+    _commit();
     _dragging = false;
     _finger = null;
     _scroller.stop();
-    if (mounted) setState(() {}); // drop the magnifier
-    _restartTimer();
   }
 
   @override
@@ -331,6 +385,7 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
         ),
         if (_visible && tip != null && _dragging)
           Positioned(
+            key: const ValueKey('note-caret-lens'),
             left: tip.dx - lens.width / 2,
             top: tip.dy - _lineHeight - NoteCaretHandle.lensGap - lens.height,
             child: IgnorePointer(
@@ -354,6 +409,7 @@ class _NoteCaretHandleState extends State<NoteCaretHandle>
           ),
         if (_visible && tip != null)
           Positioned(
+            key: const ValueKey('note-caret-handle-slot'),
             left: tip.dx - NoteCaretHandle.hitSize / 2,
             top: tip.dy - 2,
             width: NoteCaretHandle.hitSize,
