@@ -331,8 +331,10 @@ class VaultSessionController extends Notifier<VaultSessionState> {
           !await _bio.authenticate(reason ?? tr('Unlock your vault'))) {
         return UnlockResult.cancelled;
       }
+      // The storage ends a prompt on its own (60 s at the latest); this is
+      // only a safety net so the button can never spin for good.
       final read = await _keys.readBiometricCopy().timeout(
-        const Duration(seconds: 25),
+        const Duration(seconds: 70),
         onTimeout: () => const BiometricCopyRead(BiometricCopyStatus.cancelled),
       );
       if (_disposed) {

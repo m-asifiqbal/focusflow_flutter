@@ -65,6 +65,8 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
     final session = ref.read(vaultSessionProvider.notifier);
     await session.ready;
     if (!mounted) return;
+    await _untilSettled();
+    if (!mounted) return;
     final s = ref.read(vaultSessionProvider);
     final pinDigits = ref.read(vaultPinPadProvider).length;
     if (!s.isUnlocked && s.biometricsReady && !_pinOnly && pinDigits == 0) {
@@ -72,11 +74,36 @@ class _VaultLockCardState extends ConsumerState<VaultLockCard> {
     }
   }
 
+  /// Waits until the page that hosts this card has stopped moving and the
+  /// app is in the foreground (at most [_settleLimit]). The system prompt
+  /// needs a focused window: asked for during the page transition, or while
+  /// the app is still resuming, it may not show at all (the button spins) or
+  /// be refused by the host activity.
+  Future<void> _untilSettled() async {
+    final animation = ModalRoute.of(context)?.animation;
+    final deadline = DateTime.now().add(_settleLimit);
+    while (mounted && DateTime.now().isBefore(deadline)) {
+      final moving = animation != null && !animation.isCompleted;
+      final resumed =
+          WidgetsBinding.instance.lifecycleState == null ||
+          WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+      if (!moving && resumed) break;
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    if (mounted) await Future<void>.delayed(_settleGap);
+  }
+
+  static const Duration _settleLimit = Duration(milliseconds: 1500);
+  static const Duration _settleGap = Duration(milliseconds: 150);
+
   Future<void> _biometrics() async {
     if (_prompting || !mounted) return;
     setState(() => _prompting = true);
     try {
       await ref.read(vaultSessionProvider.notifier).unlockWithBiometrics();
+    } on Object {
+      // The prompt could not run (activity not ready, plugin error): the
+      // PIN pad below is always there; never leave an error or a spinner.
     } finally {
       if (mounted) setState(() => _prompting = false);
     }

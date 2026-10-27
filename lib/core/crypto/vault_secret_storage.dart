@@ -201,6 +201,91 @@ class BiometricVaultStorage implements OsGatedVaultStorage {
   Future<void> delete(String key) => _storage.delete(key: key);
 }
 
+/// The biometric unlock copy on ANDROID: the native `BiometricVault`
+/// (android/.../BiometricVault.kt, channel `focusflow/biometric_vault`).
+///
+/// Same contract as [BiometricVaultStorage] — an auth-bound Keystore key
+/// that needs a fresh strong-biometric match for every read and write, null
+/// when there is no copy or it was invalidated (fingerprints changed),
+/// [BiometricReadException] when the user did not authenticate — but driven
+/// by androidx BiometricPrompt on the main thread. Every call is answered
+/// exactly once by the native side ("Use PIN" included), so none of the
+/// lifecycle guessing [BiometricVaultStorage] needs is required here; the
+/// [ceiling] is only a last resort.
+class AndroidBiometricVaultStorage implements OsGatedVaultStorage {
+  AndroidBiometricVaultStorage({MethodChannel? channel})
+    : _channel = channel ?? const MethodChannel(channelName);
+
+  static const String channelName = 'focusflow/biometric_vault';
+
+  final MethodChannel _channel;
+
+  /// A prompt left open this long is cancelled.
+  @visibleForTesting
+  static const Duration ceiling = Duration(seconds: 60);
+
+  @override
+  bool get writePrompts => true;
+
+  /// Prompt texts, in the language chosen right now.
+  Map<String, Object?> get _texts => {
+    'title': tr('Unlock your vault'),
+    'subtitle': tr('Confirm your fingerprint or face'),
+    'negative': tr('Use PIN'),
+  };
+
+  Future<T?> _prompted<T>(String method, Map<String, Object?> args) async {
+    try {
+      return await _channel
+          .invokeMethod<T>(method, args)
+          .timeout(
+            ceiling,
+            onTimeout: () {
+              unawaited(_cancelPrompt());
+              throw const BiometricReadException();
+            },
+          );
+    } on PlatformException {
+      // cancelled · busy · unavailable · error: nothing was read or stored.
+      throw const BiometricReadException();
+    } on MissingPluginException {
+      throw const BiometricReadException();
+    }
+  }
+
+  Future<void> _cancelPrompt() async {
+    try {
+      await _channel.invokeMethod<void>('cancel');
+    } on Object {
+      // Best effort.
+    }
+  }
+
+  @override
+  Future<String?> read(String key) =>
+      _prompted<String>('read', {'key': key, ..._texts});
+
+  @override
+  Future<void> write(String key, String value) async {
+    final ok = await _prompted<bool>('write', {
+      'key': key,
+      'value': value,
+      ..._texts,
+    });
+    if (ok != true) throw const BiometricReadException();
+  }
+
+  /// Never prompts and never throws.
+  @override
+  Future<void> delete(String key) async {
+    try {
+      await _channel.invokeMethod<void>('delete', {'key': key});
+    } on Object {
+      // Nothing to delete / no platform side (tests).
+    }
+  }
+}
+
 /// The pre-1.0.3 biometric copy: a raw data key in a device-only namespace
 /// whose reads are NOT bound to a biometric match (the app checked
 /// local_auth first). Only read once more to migrate, then deleted.

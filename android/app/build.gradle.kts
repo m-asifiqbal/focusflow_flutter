@@ -67,6 +67,9 @@ dependencies {
     // On-device OCR for Quick Scan (Play-services model, downloaded once —
     // keeps the APK small). Called from MainActivity's platform channel.
     implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.1")
+    // The vault's biometric key copy (BiometricVault.kt); the same version
+    // local_auth already brings in.
+    implementation("androidx.biometric:biometric:1.1.0")
 }
 
 flutter {

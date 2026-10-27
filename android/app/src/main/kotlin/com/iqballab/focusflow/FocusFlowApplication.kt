@@ -15,14 +15,21 @@ import com.gdelataillade.alarm.services.AlarmRingingLiveData
  * (see [AlarmActivity.bringToFront]); this Application class is the one place
  * that is alive whenever the service is — the alarm's broadcast starts the
  * process, this runs before the service does, and no Flutter engine is needed.
+ *
+ * It also starts [AlarmAutoSnooze]: an alarm nobody answers for 2 minutes is
+ * snoozed by itself.
  */
 class FocusFlowApplication : Application() {
+    private lateinit var autoSnooze: AlarmAutoSnooze
+
     override fun onCreate() {
         super.onCreate()
+        autoSnooze = AlarmAutoSnooze(this)
         AlarmRingingLiveData.instance.observeForever { ringing ->
             if (ringing == true) {
                 AlarmActivity.wakeScreen(this)
                 AlarmActivity.bringToFront(this)
+                autoSnooze.start()
             }
         }
     }

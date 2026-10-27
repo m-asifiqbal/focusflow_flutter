@@ -13,6 +13,8 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/crypto/biometric_auth.dart';
@@ -35,8 +37,13 @@ final vaultStorageProvider = Provider<VaultSecretStorage>(
 
 /// OS-gated store for the biometric key copy (Keychain biometryCurrentSet
 /// / auth-bound Keystore key).
+///
+/// Android uses the app's own androidx BiometricPrompt implementation
+/// ([AndroidBiometricVaultStorage]); iOS the Keychain access-control store.
 final vaultBiometricStorageProvider = Provider<VaultSecretStorage>(
-  (ref) => BiometricVaultStorage(),
+  (ref) => defaultTargetPlatform == TargetPlatform.android
+      ? AndroidBiometricVaultStorage()
+      : BiometricVaultStorage(),
 );
 
 /// The pre-OS-gating biometric copy (read once to migrate, then deleted).

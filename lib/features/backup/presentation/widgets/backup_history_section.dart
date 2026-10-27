@@ -7,6 +7,11 @@
 /// /FocusFlow · 2.3 MB", and a ⋯ menu with Restore, Download, Delete.
 /// Why: live from backup_records, so Sync now / Back up now / pruning
 /// show up at once. Deleting a backup file asks first (it can't be undone).
+/// Rows are keyed by record and each paints in its own layer, and the row
+/// itself has NO tap / long-press handler: the menu lives on the ⋯ button
+/// only. A row that reacts to a resting finger (ink highlight, a long-press
+/// that opens a sheet) flickers and fights the list's scroll gesture when
+/// the user puts a finger down on the list to scroll it.
 /// ============================================================
 library;
 
@@ -62,7 +67,13 @@ class BackupHistorySection extends ConsumerWidget {
             )
           : FFGroupedList(
               label: tr('History'),
-              children: [for (final r in rows) _HistoryRow(record: r)],
+              children: [
+                for (final r in rows)
+                  RepaintBoundary(
+                    key: ValueKey(r.id),
+                    child: _HistoryRow(record: r),
+                  ),
+              ],
             ),
     );
   }
@@ -185,7 +196,6 @@ class _HistoryRow extends ConsumerWidget {
       ),
       title: title,
       subtitle: subtitle,
-      onLongPress: () => _menu(context, ref, title),
       trailing: IconButton(
         tooltip: tr('Backup options'),
         onPressed: () => _menu(context, ref, title),

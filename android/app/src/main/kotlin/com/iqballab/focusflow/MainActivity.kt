@@ -163,6 +163,10 @@ class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         configureSecureClipboard(flutterEngine)
+        // The vault's biometric key copy (androidx BiometricPrompt).
+        val biometricVault = BiometricVault(this)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, BiometricVault.CHANNEL)
+            .setMethodCallHandler { call, result -> biometricVault.handle(call, result) }
         shortcutChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focusflow/shortcuts").also { channel ->
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {

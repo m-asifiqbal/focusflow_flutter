@@ -61,6 +61,16 @@ ringing (phone off) comes back as "Missed". If the system refuses the alarm
 (no exact-alarm grant) it falls back to a notification. iOS has no alarm API:
 alarm-style stays a time-sensitive notification there.
 
+**Auto-snooze.** An alarm that rings for 2 minutes without a Stop or Snooze
+is snoozed by itself (`android/.../AlarmAutoSnooze.kt`, started by
+`FocusFlowApplication` when the ring starts). It calls the alarm package's own
+`SnoozeCoordinator` — the same code as the Snooze button — so the alarm is
+re-armed for its snooze length (the reminder's "snooze minutes", default 10),
+the ring is silenced, the screen closes and Dart is told if it is running.
+Each ring is timed separately (a snoozed alarm gets a fresh 2 minutes), and it
+repeats for as long as nobody answers. It needs no Flutter engine and no open
+alarm screen — only the ringing service, which keeps the process alive.
+
 ## The alarm guard (Android)
 "Alarms stop when I clear the app from recents." What *fires* an alarm and what
 *keeps the app alive* are different jobs, so the guard layers a keeper on top
