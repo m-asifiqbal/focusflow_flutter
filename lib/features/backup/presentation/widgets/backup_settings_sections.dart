@@ -1,9 +1,9 @@
 /// ============================================================
-/// BACKUP SETTINGS SECTIONS — AUTOMATIC BACKUP + LOCAL BACKUP (34)
+/// BACKUP SETTINGS SECTIONS — SYNC + AUTOMATIC BACKUP + LOCAL BACKUP (34)
 /// ============================================================
 ///
-/// What: Auto backup to Drive, Frequency (Daily · 9:00 PM), Sync when app
-/// opens, Wi-Fi only (applies to both automatic kinds),
+/// What: Auto backup to Drive, Frequency (Daily · 9:00 PM),
+/// Wi-Fi only (applies to every automatic kind),
 /// Encrypt backups (sets the backup PIN — separate from the vault PIN —
 /// the first time), Keep last N;
 /// Back up to device now, Backup location, Auto local backup.
@@ -34,6 +34,33 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 
 Widget _tile(IconData icon, ModuleColors c) =>
     FFIconTile(icon: icon, colors: c, size: AppSizes.iconTileSm);
+
+/// SYNC — how the app keeps up with your other devices (shown while a
+/// Google account is connected): "Sync when app opens".
+class SyncSection extends ConsumerWidget {
+  const SyncSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final on = ref.watch(settingsProvider.select((s) => s.syncOnOpen));
+    return FFGroupedList(
+      label: tr('Sync'),
+      children: [
+        FFListRow.toggle(
+          leading: _tile(FontAwesomeIcons.arrowsRotate, BackupTints.openSync),
+          title: tr('Sync when app opens'),
+          subtitle: on
+              ? tr('Gets changes from your other devices')
+              : tr('Off — sync only when you tap Sync now'),
+          value: on,
+          onChanged: (v) => ref
+              .read(settingsProvider.notifier)
+              .update((s) => s.copyWith(syncOnOpen: v)),
+        ),
+      ],
+    );
+  }
+}
 
 class AutomaticBackupSection extends ConsumerWidget {
   const AutomaticBackupSection({required this.connected, super.key});
@@ -142,13 +169,7 @@ class AutomaticBackupSection extends ConsumerWidget {
             enabled: s.autoBackupDrive,
             onTap: () => _frequency(context, ref),
           ),
-          FFListRow.toggle(
-            leading: _tile(FontAwesomeIcons.arrowsRotate, BackupTints.openSync),
-            title: tr('Sync when app opens'),
-            subtitle: tr('Gets changes from your other devices'),
-            value: s.syncOnOpen,
-            onChanged: (v) => edit.update((s) => s.copyWith(syncOnOpen: v)),
-          ),
+          // "Sync when app opens" has its own SYNC section above.
           FFListRow.toggle(
             leading: _tile(FontAwesomeIcons.wifi, BackupTints.wifi),
             title: tr('Wi-Fi only'),

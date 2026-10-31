@@ -2573,6 +2573,7 @@
   "{ordinal} to last {day}": "শেষ থেকে {ordinal} {day}",
   "{ordinal} {day}": "{ordinal} {day}",
   "{percent} of the file": "ফাইলের {percent}",
+  "{percent}% of Drive used": "Drive-এর {percent}% ব্যবহৃত",
   "{plannedMinutes} min": "{plannedMinutes} মিনিট",
   "{q} ml": "{q} মি.লি.",
   "{reason} · choose another PIN": "{reason} · অন্য একটি পিন বেছে নিন",

@@ -8,8 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/drive_store.dart';
+import 'package:focusflow/core/sync/drive_sync_models.dart';
 import 'package:focusflow/core/sync/sync_controller.dart';
 import 'package:focusflow/features/backup/domain/entities/backup_record.dart';
+import 'package:focusflow/features/backup/presentation/providers/backup_providers.dart';
 import 'package:focusflow/features/backup/presentation/screens/backup_sync_screen.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
@@ -29,6 +31,27 @@ void main() {
             .toUtc()
             .toIso8601String(),
       );
+
+  testWidgets('usage bar: three segments fill in order (75% used)', (
+    tester,
+  ) async {
+    const gb = 1024 * 1024 * 1024;
+    final (h, _) = await backupHarness(
+      tester,
+      fakeUsage: false,
+      overrides: [
+        driveUsageProvider.overrideWith(
+          (ref) async =>
+              const DriveUsage(usedBytes: 9 * gb, limitBytes: 12 * gb),
+        ),
+        backupItemCountProvider.overrideWith((ref) => Stream.value(113)),
+        backupKeyExistsProvider.overrideWith((ref) async => true),
+      ],
+    );
+    await pumpApp(tester, h, AppRoutes.settingsBackup);
+    expect(find.bySemanticsLabel(RegExp('75% of Drive used')), findsOneWidget);
+    await captureScreen(tester, '34_backup_usage_75');
+  });
 
   testWidgets('matches the mockup (light + dark captures)', (tester) async {
     final (h, _) = await backupHarness(tester);

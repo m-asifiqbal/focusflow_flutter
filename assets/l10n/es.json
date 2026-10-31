@@ -2573,6 +2573,7 @@
   "{ordinal} to last {day}": "{ordinal} {day} desde el final",
   "{ordinal} {day}": "{ordinal} {day}",
   "{percent} of the file": "{percent} del archivo",
+  "{percent}% of Drive used": "{percent} % de Drive en uso",
   "{plannedMinutes} min": "{plannedMinutes} min",
   "{q} ml": "{q} ml",
   "{reason} · choose another PIN": "{reason} · elige otro PIN",

@@ -2573,6 +2573,7 @@
   "{ordinal} to last {day}": "अंतिम से {ordinal} {day}",
   "{ordinal} {day}": "{ordinal} {day}",
   "{percent} of the file": "फ़ाइल का {percent}",
+  "{percent}% of Drive used": "Drive का {percent}% इस्तेमाल हुआ",
   "{plannedMinutes} min": "{plannedMinutes} मिनट",
   "{q} ml": "{q} मि.ली.",
   "{reason} · choose another PIN": "{reason} · कोई दूसरा पिन चुनें",

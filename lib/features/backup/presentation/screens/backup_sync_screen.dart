@@ -76,6 +76,7 @@ class BackupSyncScreen extends ConsumerWidget {
                 else
                   const ConnectDriveCard(),
                 gap,
+                if (drive) ...[const SyncSection(), gap],
                 AutomaticBackupSection(connected: drive),
                 gap,
                 const LocalBackupSection(),

@@ -5,7 +5,8 @@
 /// What: greeting header, then the sections in the order the user chose
 /// in Settings › Home layout (hidden ones left out): Today's Focus, week
 /// strip, Up Next, Today's Tasks, Recent Notes, Habit Tracker. Pull to
-/// refresh runs a Drive sync when signed in.
+/// refresh runs a Drive sync when signed in, and so does the floating sync
+/// button in the bottom start corner (home_sync_button.dart).
 /// Why: every section watches its own live provider, so each one loads,
 /// fails (with Retry) and empties independently; the screen only lays
 /// them out. MinuteTicker / HabitDayTicker keep "now" and the habit day
@@ -36,6 +37,7 @@ import 'package:focusflow/features/home/presentation/widgets/home_medicine_secti
 import 'package:focusflow/features/home/presentation/widgets/home_header.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_notes_section.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_section_states.dart';
+import 'package:focusflow/features/home/presentation/widgets/home_sync_button.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_tasks_section.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_up_next.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_week_section.dart';
@@ -90,6 +92,7 @@ class HomeScreen extends ConsumerWidget {
       ),
     };
 
+    final syncButton = ref.watch(homeSyncVisibleProvider);
     return MinuteTicker(
       child: HabitDayTicker(
         child: FFScaffold(
@@ -99,29 +102,25 @@ class HomeScreen extends ConsumerWidget {
             children: [
               const HomeHeader(),
               Expanded(
-                child: RefreshIndicator(
-                  color: context.ff.primary,
-                  onRefresh: () => _refresh(ref),
-                  child: SingleChildScrollView(
-                    // Pull to refresh also works when Home is short.
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsetsDirectional.only(
-                      bottom: context.barClearance,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: _scroll(
+                        context,
+                        ref,
+                        sections,
+                        section,
+                        syncButton,
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (final (i, s) in sections.indexed) ...[
-                          SizedBox(
-                            height: i == 0
-                                ? AppSpacing.xxl
-                                : HomeDimens.sectionGap,
-                          ),
-                          KeyedSubtree(key: ValueKey(s), child: section(s)),
-                        ],
-                      ],
-                    ),
-                  ),
+                    // Floating Drive sync, bottom start corner above the bar.
+                    if (syncButton)
+                      PositionedDirectional(
+                        start: AppSpacing.screen,
+                        bottom: context.barClearance + AppSpacing.sm,
+                        child: const HomeSyncButton(),
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -130,6 +129,37 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _scroll(
+    BuildContext context,
+    WidgetRef ref,
+    List<HomeSection> sections,
+    Widget Function(HomeSection) section,
+    bool syncButton,
+  ) => RefreshIndicator(
+    color: context.ff.primary,
+    onRefresh: () => _refresh(ref),
+    child: SingleChildScrollView(
+      // Pull to refresh also works when Home is short.
+      physics: const AlwaysScrollableScrollPhysics(),
+      // With the sync button, the last card can scroll clear
+      // of it too.
+      padding: EdgeInsetsDirectional.only(
+        bottom:
+            context.barClearance +
+            (syncButton ? HomeSyncButton.size + AppSpacing.md : 0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (i, s) in sections.indexed) ...[
+            SizedBox(height: i == 0 ? AppSpacing.xxl : HomeDimens.sectionGap),
+            KeyedSubtree(key: ValueKey(s), child: section(s)),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 /// Today's Focus hero with its loading / error states.

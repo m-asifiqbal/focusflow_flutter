@@ -2573,6 +2573,7 @@
   "{ordinal} to last {day}": "倒数{ordinal}个{day}",
   "{ordinal} {day}": "{ordinal}个{day}",
   "{percent} of the file": "占文件的 {percent}",
+  "{percent}% of Drive used": "已使用 Drive 的 {percent}%",
   "{plannedMinutes} min": "{plannedMinutes} 分钟",
   "{q} ml": "{q} 毫升",
   "{reason} · choose another PIN": "{reason} · 请选择其他 PIN",

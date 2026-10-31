@@ -4,7 +4,8 @@
 ///
 /// What: connected — Drive tile, "Google Drive", account email, CONNECTED
 /// badge, the status box (backed up / syncing with progress / error /
-/// "3 items updated from another device"), app-folder usage and the
+/// "3 items updated from another device"), app-folder usage (a green /
+/// orange / red segmented bar) and the
 /// Sync now + Restore buttons. (Not connected: connect_drive_card.dart.)
 /// Why: everything reads [syncStatusProvider] / [driveUsageProvider], so a
 /// background sync or one started elsewhere shows here live.
@@ -38,7 +39,6 @@ class DriveCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ff = context.ff;
     final text = context.text;
     final status = ref.watch(syncStatusProvider);
     final usage = ref.watch(driveUsageProvider).valueOrNull;
@@ -114,25 +114,10 @@ class DriveCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadii.pill),
-            child: SizedBox(
-              height: 6,
-              child: Stack(
-                children: [
-                  Positioned.fill(child: ColoredBox(color: ff.divider)),
-                  Positioned.fill(
-                    child: FractionallySizedBox(
-                      alignment: AlignmentDirectional.centerStart,
-                      widthFactor: usage == null
-                          ? 0
-                          : usage.fraction.clamp(0.06, 1).toDouble(),
-                      child: ColoredBox(color: BackupTints.drive.solid),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _UsageBar(
+            fraction: usage == null
+                ? 0
+                : usage.fraction.clamp(0.02, 1).toDouble(),
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
@@ -166,6 +151,79 @@ class DriveCard extends ConsumerWidget {
   }
 }
 
+/// Drive usage as three rounded segments — green, orange, red, a third of
+/// the space each — filled in order as the space used grows, so the colour
+/// itself says how full it is. The fill sweeps in when the card appears and
+/// glides to a new value (instant under reduce motion); the unfilled part of
+/// each segment keeps a faint tint of its colour.
+class _UsageBar extends StatelessWidget {
+  const _UsageBar({required this.fraction});
+
+  /// Space used, 0…1.
+  final double fraction;
+
+  static const double height = 7.5;
+  static const double gap = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    final ff = context.ff;
+    final zones = [ff.success, ff.warning, ff.danger];
+    return Semantics(
+      label: tr('{percent}% of Drive used', {
+        'percent': (fraction * 100).round(),
+      }),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: fraction),
+        duration: context.motion(const Duration(milliseconds: 900)),
+        curve: Curves.easeOutCubic,
+        builder: (context, value, _) => Row(
+          children: [
+            for (var i = 0; i < zones.length; i++) ...[
+              if (i > 0) const SizedBox(width: gap),
+              Expanded(
+                child: _Segment(
+                  // How much of this third is used (0…1).
+                  fill: ((value - i / 3) * 3).clamp(0.0, 1.0).toDouble(),
+                  color: zones[i],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Segment extends StatelessWidget {
+  const _Segment({required this.fill, required this.color});
+
+  final double fill;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(_UsageBar.height / 2);
+    return SizedBox(
+      height: _UsageBar.height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.16),
+          borderRadius: radius,
+        ),
+        child: FractionallySizedBox(
+          alignment: AlignmentDirectional.centerStart,
+          widthFactor: fill,
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: color, borderRadius: radius),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// The two half-width card buttons (Sync now / Restore). The shared
 /// FFPrimaryButton's 17 pt label and 20 pt padding don't fit half a card
 /// at 390 pt, so these use the 16 pt button style, tighter padding and
@@ -185,11 +243,17 @@ class _CardButton extends StatelessWidget {
   final bool primary;
   final bool busy;
 
+  /// A notch under the button style: the two labels sit side by side.
+  static const double labelSize = 14.5;
+
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
     final fg = primary ? ff.onPrimary : ff.primary;
-    final style = context.text.button.copyWith(color: fg);
+    final style = context.text.button.copyWith(
+      color: fg,
+      fontSize: _CardButton.labelSize,
+    );
     return Semantics(
       button: true,
       enabled: onPressed != null,
@@ -226,7 +290,7 @@ class _CardButton extends StatelessWidget {
                       ),
                     )
                   else
-                    Icon(icon, size: 16, color: fg),
+                    Icon(icon, size: 15, color: fg),
                   const SizedBox(width: AppSpacing.sm + 2),
                   Text(label, maxLines: 1, style: style),
                 ],

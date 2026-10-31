@@ -2573,6 +2573,7 @@
   "{ordinal} to last {day}": "{day} رقم {ordinal} من الآخر",
   "{ordinal} {day}": "{day} رقم {ordinal}",
   "{percent} of the file": "{percent} من الملف",
+  "{percent}% of Drive used": "تم استخدام {percent}% من Drive",
   "{plannedMinutes} min": "{plannedMinutes} د",
   "{q} ml": "{q} مل",
   "{reason} · choose another PIN": "{reason} · اختر رمز PIN آخر",
