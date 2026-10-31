@@ -47,15 +47,15 @@ Future<void> toggleVaultReveal(
 
 /// Copies an already-decrypted [value] ("Password", "Code", "Website" …
 /// as [what]). Secrets clear after Settings › Clipboard clear; a username
-/// or website ([secret] false) stays.
-Future<void> copyVaultValue(
+/// or website ([secret] false) stays. True when something was copied.
+Future<bool> copyVaultValue(
   BuildContext context,
   WidgetRef ref,
   String value,
   String what, {
   bool secret = true,
 }) async {
-  if (value.isEmpty) return;
+  if (value.isEmpty) return false;
   final settings = ref.read(settingsProvider);
   final seconds = settings.clipboardClearSeconds;
   final clears = secret && seconds > 0;
@@ -64,7 +64,7 @@ Future<void> copyVaultValue(
       .copy(value, clearAfter: clears ? Duration(seconds: seconds) : null);
   ref.read(vaultSessionProvider.notifier).touch();
   if (settings.hapticsEnabled) unawaited(HapticFeedback.lightImpact());
-  if (!context.mounted) return;
+  if (!context.mounted) return true;
   showFFToast(
     context,
     clears
@@ -72,6 +72,7 @@ Future<void> copyVaultValue(
         : tr('{what} copied', {'what': what}),
     icon: FontAwesomeIcons.solidCircleCheck,
   );
+  return true;
 }
 
 Future<void> toggleVaultFavourite(WidgetRef ref, VaultItemRecord record) {

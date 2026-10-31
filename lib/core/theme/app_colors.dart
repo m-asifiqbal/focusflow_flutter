@@ -100,6 +100,46 @@ abstract final class AppPalette {
   static const slate600 = Color(0xFF475569);
   static const slate700 = Color(0xFF334155);
 
+  // ── Soft accents (Settings › Appearance) — muted, low-saturation hues.
+  // Each primary keeps ≥ 4.5 : 1 against white (buttons carry white text).
+  /// Dusty rose (the mgi_recruitment "Rose" theme).
+  static const dustyRose300 = Color(0xFFF09AB3);
+  static const dustyRose100 = Color(0xFFFCE4EC);
+  static const dustyRose500 = Color(0xFFD2708D);
+  static const dustyRose600 = Color(0xFFB8466A);
+  static const dustyRose700 = Color(0xFF943553);
+
+  /// Amethyst (the mgi_recruitment "Purple" theme).
+  static const amethyst300 = Color(0xFFC9A0DC);
+  static const amethyst100 = Color(0xFFF3E5F5);
+  static const amethyst500 = Color(0xFFA569BD);
+  static const amethyst600 = Color(0xFF8E44AD);
+  static const amethyst700 = Color(0xFF6C3483);
+
+  static const lavender300 = Color(0xFFB4ABE0);
+  static const lavender100 = Color(0xFFECE9F7);
+  static const lavender500 = Color(0xFF8F84C4);
+  static const lavender600 = Color(0xFF6E62AA);
+  static const lavender700 = Color(0xFF4F4585);
+
+  static const sage300 = Color(0xFF9CC2A6);
+  static const sage100 = Color(0xFFE3EFE6);
+  static const sage500 = Color(0xFF6E9A7A);
+  static const sage600 = Color(0xFF527A5E);
+  static const sage700 = Color(0xFF3C5C45);
+
+  static const mist300 = Color(0xFF9DB8D3);
+  static const mist100 = Color(0xFFE1EAF3);
+  static const mist500 = Color(0xFF6A8DB0);
+  static const mist600 = Color(0xFF4F7396);
+  static const mist700 = Color(0xFF3A5772);
+
+  static const mocha300 = Color(0xFFCDB09B);
+  static const mocha100 = Color(0xFFF1E8E1);
+  static const mocha500 = Color(0xFFA2826B);
+  static const mocha600 = Color(0xFF86664F);
+  static const mocha700 = Color(0xFF5F4637);
+
   static const white = Color(0xFFFFFFFF);
 }
 
@@ -159,6 +199,60 @@ enum AccentColor {
     soft: AppPalette.slate200,
     gradient: [AppPalette.slate500, AppPalette.slate600, AppPalette.slate700],
     strong: AppPalette.slate700,
+  ),
+  rose(
+    primary: AppPalette.dustyRose600,
+    primaryDark: AppPalette.dustyRose300,
+    soft: AppPalette.dustyRose100,
+    gradient: [
+      AppPalette.dustyRose500,
+      AppPalette.dustyRose600,
+      AppPalette.dustyRose700,
+    ],
+    strong: AppPalette.dustyRose700,
+  ),
+  purple(
+    primary: AppPalette.amethyst600,
+    primaryDark: AppPalette.amethyst300,
+    soft: AppPalette.amethyst100,
+    gradient: [
+      AppPalette.amethyst500,
+      AppPalette.amethyst600,
+      AppPalette.amethyst700,
+    ],
+    strong: AppPalette.amethyst700,
+  ),
+  lavender(
+    primary: AppPalette.lavender600,
+    primaryDark: AppPalette.lavender300,
+    soft: AppPalette.lavender100,
+    gradient: [
+      AppPalette.lavender500,
+      AppPalette.lavender600,
+      AppPalette.lavender700,
+    ],
+    strong: AppPalette.lavender700,
+  ),
+  sage(
+    primary: AppPalette.sage600,
+    primaryDark: AppPalette.sage300,
+    soft: AppPalette.sage100,
+    gradient: [AppPalette.sage500, AppPalette.sage600, AppPalette.sage700],
+    strong: AppPalette.sage700,
+  ),
+  mist(
+    primary: AppPalette.mist600,
+    primaryDark: AppPalette.mist300,
+    soft: AppPalette.mist100,
+    gradient: [AppPalette.mist500, AppPalette.mist600, AppPalette.mist700],
+    strong: AppPalette.mist700,
+  ),
+  mocha(
+    primary: AppPalette.mocha600,
+    primaryDark: AppPalette.mocha300,
+    soft: AppPalette.mocha100,
+    gradient: [AppPalette.mocha500, AppPalette.mocha600, AppPalette.mocha700],
+    strong: AppPalette.mocha700,
   );
 
   const AccentColor({
@@ -177,6 +271,12 @@ enum AccentColor {
     pink => tr('Pink'),
     orange => tr('Orange'),
     slate => tr('Slate'),
+    rose => tr('Rose'),
+    purple => tr('Purple'),
+    lavender => tr('Lavender'),
+    sage => tr('Sage'),
+    mist => tr('Mist'),
+    mocha => tr('Mocha'),
   };
 
   /// Buttons, active tab, links, switches (light mode).

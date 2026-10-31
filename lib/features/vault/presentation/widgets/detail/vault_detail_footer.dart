@@ -10,6 +10,7 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_copy_button.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_fields.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 
@@ -29,7 +30,7 @@ class VaultNotesCard extends StatelessWidget {
 
   /// Copies the notes through the secure clipboard (auto-clear). The text
   /// itself is not selectable: a system "Copy" would bypass the clear.
-  final VoidCallback? onCopy;
+  final Future<bool> Function()? onCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +52,9 @@ class VaultNotesCard extends StatelessWidget {
                   children: [
                     Expanded(child: VaultFieldLabel(tr('Notes'))),
                     if (onCopy != null)
-                      VaultRoundButton(
-                        icon: FontAwesomeIcons.solidCopy,
+                      VaultCopyButton(
                         semanticLabel: tr('Copy notes'),
-                        onTap: onCopy,
+                        onCopy: onCopy!,
                       ),
                   ],
                 ),

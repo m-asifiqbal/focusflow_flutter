@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_quill_styles.dart';
+import 'package:focusflow/features/notes/presentation/widgets/note_paper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/core/router/app_router.dart';
@@ -73,6 +74,30 @@ void main() {
     await tester.pump(const Duration(milliseconds: 700));
     await settle(tester);
   }
+
+  testWidgets('lined / grid paper: drawn behind the body, picked per note', (
+    tester,
+  ) async {
+    await loadAppFonts();
+    final h = await harness(tester);
+    final id = (await tester.runAsync(() => seedMockupNote(h)))!;
+    await tester.runAsync(
+      () => h.read(notesRepositoryProvider).setPaper(id, NotePaper.lined),
+    );
+    await pumpApp(tester, h, AppRoutes.note(id));
+    await captureScreen(tester, '08_note_editor_lined');
+    expect(find.byType(NotePaperBackground), findsOneWidget);
+
+    // More › Paper › Grid.
+    await tester.tap(find.bySemanticsLabel('More note actions'));
+    await settle(tester);
+    await tester.tap(find.text('Paper: Lined'));
+    await settle(tester);
+    await tester.tap(find.text('Grid'));
+    await settle(tester);
+    expect((await note(tester, h, id))!.paper, NotePaper.grid);
+    await captureScreen(tester, '08_note_editor_grid');
+  });
 
   testWidgets('renders the mockup note (light)', (tester) async {
     await loadAppFonts();
@@ -562,6 +587,9 @@ void main() {
     await settle(tester);
     expect(find.text('Share / export (PDF, TXT, MD)'), findsOneWidget);
     expect(find.text('Lock with a PIN'), findsOneWidget);
+    expect(find.text('Paper: Plain'), findsOneWidget);
+    await tester.ensureVisible(find.text('Word count'));
+    await settle(tester);
     await tester.tap(find.text('Word count'));
     await settle(tester);
     expect(find.text('Reading time'), findsOneWidget);

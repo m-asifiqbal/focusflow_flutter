@@ -22,6 +22,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
+import 'package:focusflow/features/notes/domain/entities/note.dart';
 import 'package:focusflow/features/notes/domain/repository/notes_repository.dart';
 import 'package:focusflow/features/notes/domain/services/note_content.dart';
 import 'package:focusflow/features/notes/presentation/providers/notes_providers.dart';
@@ -229,6 +230,11 @@ class NoteEditorController
     if (id == null) return;
     final value = hex == null || hex.toUpperCase() == 'FFFFFF' ? null : hex;
     await _repo.setColor(id, value);
+  }
+
+  Future<void> setPaper(NotePaper paper) async {
+    final id = _noteId;
+    if (id != null) await _repo.setPaper(id, paper);
   }
 
   Future<void> setPinned(bool pinned) async {

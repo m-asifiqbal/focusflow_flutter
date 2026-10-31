@@ -27,6 +27,7 @@ import 'package:focusflow/features/vault/presentation/providers/vault_item_provi
 import 'package:focusflow/features/vault/presentation/vault_copy_actions.dart';
 import 'package:focusflow/features/vault/presentation/vault_detail_actions.dart';
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_copy_button.dart';
 import 'package:focusflow/features/vault/presentation/widgets/detail/vault_detail_sheets.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_fields.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_reveal.dart';
@@ -51,12 +52,10 @@ class VaultDetailFields extends ConsumerWidget {
     final p = payload;
 
     Widget copy(String value, String what, {bool secret = true}) =>
-        VaultRoundButton(
-          icon: FontAwesomeIcons.solidCopy,
+        VaultCopyButton(
           semanticLabel: tr('Copy {what}', {'what': what.toLowerCase()}),
-          onTap: () => unawaited(
-            copyVaultValue(context, ref, value, what, secret: secret),
-          ),
+          onCopy: () =>
+              copyVaultValue(context, ref, value, what, secret: secret),
         );
 
     Widget reveal(String field, String what) => VaultRevealButton(
@@ -362,12 +361,10 @@ class _WebsiteRow extends ConsumerWidget {
         ),
       ),
       actions: [
-        VaultRoundButton(
-          icon: FontAwesomeIcons.solidCopy,
+        VaultCopyButton(
           semanticLabel: tr('Copy website'),
-          onTap: () => unawaited(
-            copyVaultValue(context, ref, url, tr('Website'), secret: false),
-          ),
+          onCopy: () =>
+              copyVaultValue(context, ref, url, tr('Website'), secret: false),
         ),
         if (uri != null)
           VaultRoundButton(

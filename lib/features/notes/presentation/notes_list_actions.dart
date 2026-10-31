@@ -4,7 +4,8 @@
 ///
 /// * [setNotesView] / [setNotesSort] persist the view toggle and the sort
 ///   control in Settings › Notes.
-/// * [moveNote] — Manual sort: drop a dragged card onto another one.
+/// * [moveNote] — drop a dragged card onto another one (any sort; the
+///   list then sorts by Manual).
 /// * [createNoteFolder] — the "+ New folder" chip.
 /// Why: widgets stay layout-only; everything goes through the settings
 /// controller and the repositories (live streams refresh the list).
@@ -32,30 +33,26 @@ Future<void> setNotesSort(WidgetRef ref, NotesSort sort) => ref
 
 /// Moves [draggedId] to the slot of [targetId] within [visible] (the list
 /// as shown): below the target when dragged downwards, above otherwise.
-Future<void> moveNote(
+/// Works from any sort: the shown order, with the move, becomes the manual
+/// order and the list switches to "Manual" (so the note stays where it was
+/// dropped). True when it switched.
+Future<bool> moveNote(
   WidgetRef ref,
   List<Note> visible,
   String draggedId,
   String targetId,
 ) async {
-  if (draggedId == targetId) return;
+  if (draggedId == targetId) return false;
   final from = visible.indexWhere((n) => n.id == draggedId);
   final to = visible.indexWhere((n) => n.id == targetId);
-  if (from < 0 || to < 0) return;
-  final rest = [...visible]..removeAt(from);
-  final target = rest.indexWhere((n) => n.id == targetId);
-  final String? afterId;
-  final String? beforeId;
-  if (from < to) {
-    afterId = targetId;
-    beforeId = target + 1 < rest.length ? rest[target + 1].id : null;
-  } else {
-    afterId = target > 0 ? rest[target - 1].id : null;
-    beforeId = targetId;
-  }
-  await ref
-      .read(notesRepositoryProvider)
-      .reorder(draggedId, afterId: afterId, beforeId: beforeId);
+  if (from < 0 || to < 0) return false;
+  final order = [for (final n in visible) n.id]..removeAt(from);
+  final target = order.indexOf(targetId);
+  order.insert(from < to ? target + 1 : target, draggedId);
+  await ref.read(notesRepositoryProvider).setManualOrder(order);
+  if (ref.read(notesSortProvider) == NotesSort.manual) return false;
+  await setNotesSort(ref, NotesSort.manual);
+  return true;
 }
 
 /// Creates (or finds) a note folder named [name] and selects its chip.

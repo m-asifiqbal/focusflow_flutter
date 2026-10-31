@@ -174,9 +174,8 @@ class _Content extends ConsumerWidget {
                   historyCount: history.length,
                   onHistory: () =>
                       unawaited(showVaultPasswordHistory(context, history)),
-                  onCopy: () => unawaited(
-                    copyVaultValue(context, ref, notes, tr('Notes')),
-                  ),
+                  onCopy: () =>
+                      copyVaultValue(context, ref, notes, tr('Notes')),
                 ),
               ],
               const SizedBox(height: AppSpacing.lg + 2),

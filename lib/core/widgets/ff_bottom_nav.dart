@@ -432,7 +432,8 @@ class _GlassColors {
   final Gradient fill;
 
   /// The four shadows: drop glow (up-start) and drop shade (down-end)
-  /// outside the glass; inner light (inside the bottom-end edge) and inner
+  /// outside the glass; inner light (inside the bottom-end edge: a light rim
+  /// on dark glass, a softer shade on light glass) and inner
   /// shade (inside the top-start edge).
   final Color glow;
   final Color shade;
@@ -495,10 +496,10 @@ class _GlassColors {
           ],
         ),
         glow: Colors.white.withValues(alpha: 0.10),
-        shade: Colors.black.withValues(alpha: 0.55),
+        shade: Colors.black.withValues(alpha: 0.7),
         // A lighter inner pair than light mode: a 40 % black lip inside the
         // top-start edge blacked out the pill's left side on dark canvases.
-        innerLight: Colors.white.withValues(alpha: 0.10),
+        innerLight: Colors.white.withValues(alpha: 0.17),
         innerShade: Colors.black.withValues(alpha: 0.18),
         edge: Colors.white.withValues(alpha: 0.12),
         shadow: [
@@ -531,8 +532,11 @@ class _GlassColors {
         ],
       ),
       glow: Colors.white.withValues(alpha: 0.9),
-      shade: Colors.black.withValues(alpha: 0.16),
-      innerLight: Colors.white.withValues(alpha: 0.25),
+      shade: Colors.black.withValues(alpha: 0.22),
+      // Not white: a white lip vanished into the white glass and left the
+      // right end flat next to the shaded left one. A softer shade than the
+      // top-start one keeps the light coming from the top-start.
+      innerLight: Colors.black.withValues(alpha: 0.14),
       innerShade: Colors.black.withValues(alpha: 0.19),
       shadow: [
         BoxShadow(
@@ -580,9 +584,9 @@ class _NeuEdgePainter extends CustomPainter {
 
   /// The recipe's offsets and blurs (Figma blur = 2 σ), at 64 pt scale.
   static const Offset _lightOffset = Offset(-6, -6);
-  static const Offset _darkOffset = Offset(4, 4);
+  static const Offset _darkOffset = Offset(5, 5);
   static const double _lightSigma = 4.6;
-  static const double _darkSigma = 5.4;
+  static const double _darkSigma = 6;
 
   static Paint _blurred(Color color, double sigma) => Paint()
     ..color = color

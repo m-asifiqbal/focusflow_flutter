@@ -28,6 +28,9 @@ import 'package:focusflow/features/notes/presentation/widgets/note_metrics.dart'
 abstract final class NoteBodyMetrics {
   static const double fontSize = 18;
   static const double lineHeight = 1.65;
+
+  /// One body line (unscaled): the row of lined / grid paper.
+  static const double row = fontSize * lineHeight;
   static const double headingSize = 20.5;
   static const double checkbox = 15;
 
@@ -41,7 +44,11 @@ abstract final class NoteBodyMetrics {
 Color noteBodyInk(FFColors ff) => NoteTextColors.body(ff.brightness);
 
 /// Quill styles for the note body in the current theme.
-DefaultStyles noteQuillStyles(BuildContext context) {
+///
+/// [ruled] (lined / grid paper): every line sits on the paper's rows — no
+/// paragraph, list or quote spacing, and each heading exactly one row tall —
+/// so the text keeps to the ruling instead of drifting off it.
+DefaultStyles noteQuillStyles(BuildContext context, {bool ruled = false}) {
   final ff = context.ff;
   final text = context.text;
   final rtl = Directionality.of(context) == TextDirection.rtl;
@@ -51,9 +58,10 @@ DefaultStyles noteQuillStyles(BuildContext context) {
     color: noteBodyInk(ff),
     decoration: TextDecoration.none,
   );
-  final heading = text.sectionTitle.copyWith(
-    fontSize: NoteBodyMetrics.headingSize,
-    height: 1.4,
+  // A heading of [size]: 1.4 line height, or one paper row when ruled.
+  TextStyle heading(double size) => text.sectionTitle.copyWith(
+    fontSize: size,
+    height: ruled ? NoteBodyMetrics.row / size : 1.4,
     color: ff.ink,
   );
   const none = HorizontalSpacing(0, 0);
@@ -63,30 +71,23 @@ DefaultStyles noteQuillStyles(BuildContext context) {
   );
   DefaultTextBlockStyle block(TextStyle s, VerticalSpacing v) =>
       DefaultTextBlockStyle(s, none, v, VerticalSpacing.zero, null);
+  VerticalSpacing space(double top, double bottom) =>
+      ruled ? VerticalSpacing.zero : VerticalSpacing(top, bottom);
 
   const p = NoteEditorMetrics.paragraphSpace;
-  const headingSpace = VerticalSpacing(
+  final headingSpace = space(
     NoteEditorMetrics.headingSpaceBefore,
     NoteEditorMetrics.headingSpaceAfter,
   );
-  final paragraph = block(body, const VerticalSpacing(p, p));
+  final paragraph = block(body, space(p, p));
   return DefaultStyles.getInstance(context).merge(
     DefaultStyles(
       paragraph: paragraph,
-      h1: block(
-        heading.copyWith(fontSize: NoteEditorMetrics.h1Size),
-        headingSpace,
-      ),
-      h2: block(
-        heading.copyWith(fontSize: NoteEditorMetrics.h2Size),
-        headingSpace,
-      ),
+      h1: block(heading(NoteEditorMetrics.h1Size), headingSpace),
+      h2: block(heading(NoteEditorMetrics.h2Size), headingSpace),
       h3: block(
-        heading,
-        const VerticalSpacing(
-          NoteEditorMetrics.h3Space,
-          NoteEditorMetrics.h3Space,
-        ),
+        heading(NoteBodyMetrics.headingSize),
+        space(NoteEditorMetrics.h3Space, NoteEditorMetrics.h3Space),
       ),
       // Bold keeps the run's colour (body ink or a picked text colour).
       bold: const TextStyle(fontWeight: FontWeight.w700),
@@ -97,18 +98,15 @@ DefaultStyles noteQuillStyles(BuildContext context) {
         decoration: TextDecoration.underline,
         decorationColor: ff.primary,
       ),
-      placeHolder: block(
-        body.copyWith(color: ff.inkFaint),
-        const VerticalSpacing(p, p),
-      ),
+      placeHolder: block(body.copyWith(color: ff.inkFaint), space(p, p)),
       lists: DefaultListBlockStyle(
         body,
         none,
         // Checked / unchecked lines form separate blocks, so the block
         // spacing sets most checklist gaps; lineSpacing applies inside a
         // run of same-kind lines (36-pt pitch, mockup).
-        const VerticalSpacing(3, 3),
-        const VerticalSpacing(4, 5),
+        space(3, 3),
+        space(4, 5),
         null,
         NoteCheckboxBuilder(ff),
         indentWidthBuilder: _indentWidth(rtl),
@@ -116,8 +114,8 @@ DefaultStyles noteQuillStyles(BuildContext context) {
       quote: DefaultTextBlockStyle(
         body.copyWith(fontStyle: FontStyle.italic, color: ff.inkMuted),
         none,
-        const VerticalSpacing(p, p),
-        const VerticalSpacing(p, p),
+        space(p, p),
+        space(p, p),
         BoxDecoration(
           border: rtl ? Border(right: quoteSide) : Border(left: quoteSide),
         ),

@@ -145,6 +145,36 @@ class NotesDao extends DatabaseAccessor<AppDatabase> with _$NotesDaoMixin {
   Future<double?> sortOrderOf(String id) async =>
       (await rowById(id))?.sortOrder;
 
+  /// `sort_order` of each of [ids] (missing ids are left out).
+  Future<Map<String, double>> sortOrdersOf(List<String> ids) async {
+    final rows = await (select(notes)..where((n) => n.id.isIn(ids))).get();
+    return {for (final r in rows) r.id: r.sortOrder};
+  }
+
+  /// Order-only write: each note's new `sort_order`, without touching
+  /// `updated_at` — moving a note is not editing it, so "Last edited" and a
+  /// card's "Edited …" stay true. `device_id` / `sync_version` still change,
+  /// so the new order wins a merge against an otherwise identical copy.
+  /// Rows already at their value are skipped.
+  Future<void> setSortOrders(Map<String, double> orders, String deviceId) =>
+      transaction(() async {
+        for (final e in orders.entries) {
+          await customUpdate(
+            'UPDATE notes SET sort_order = ?, device_id = ?, '
+            'sync_version = sync_version + 1 '
+            'WHERE id = ? AND sort_order <> ?',
+            variables: [
+              Variable.withReal(e.value),
+              Variable.withString(deviceId),
+              Variable.withString(e.key),
+              Variable.withReal(e.value),
+            ],
+            updates: {notes},
+            updateKind: UpdateKind.update,
+          );
+        }
+      });
+
   /// Counts for headers: total / pinned / last edit / per folder.
   Selectable<QueryRow> counts() => customSelect(
     'SELECT COUNT(*) AS total, '

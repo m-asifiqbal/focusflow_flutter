@@ -2,8 +2,8 @@
 /// APPEARANCE CONTROLS — accent swatches, text size, app icon (screen 32)
 /// ============================================================
 ///
-/// * [AccentPicker]   — six round swatches; the selected one gets a
-///   primary ring with a surface gap.
+/// * [AccentPicker]   — twelve round swatches in two rows of six; the
+///   selected one gets a primary ring with a surface gap.
 /// * [TextSizeCard]   — small A · slider · large A over a live preview
 ///   sentence. While dragging only the preview re-scales; the setting is
 ///   saved (and the whole app re-scales) when the gesture ends.
@@ -12,6 +12,8 @@
 ///   Default is selectable and the others say "coming soon" honestly.
 /// ============================================================
 library;
+
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/l10n/tr.dart';
@@ -36,49 +38,71 @@ class AccentPicker extends StatelessWidget {
   static const double _ring = 2.5;
   static const double _gap = 3;
 
+  /// Swatches per row: the twelve accents sit in two even rows.
+  static const int _perRow = 6;
+
   @override
   Widget build(BuildContext context) {
     final ff = context.ff;
-    const outer = _swatch + 2 * (_ring + _gap);
     return FFCard(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.md,
       ),
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        runSpacing: AppSpacing.sm,
-        children: [
-          for (final a in AccentColor.values)
-            Semantics(
-              button: true,
-              selected: a == selected,
-              label: tr('{label} accent', {'label': a.label}),
-              excludeSemantics: true,
-              child: FFPressable(
-                onTap: () => onSelected(a),
-                child: SizedBox.square(
-                  dimension: outer,
-                  child: Container(
-                    padding: const EdgeInsets.all(_gap),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: a == selected ? ff.primary : Colors.transparent,
-                        width: _ring,
-                      ),
-                    ),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: ff.isDark ? a.primaryDark : a.primary,
-                      ),
-                    ),
-                  ),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          // Each swatch gets an equal cell; on a narrow phone the swatch
+          // shrinks with it instead of wrapping into a ragged third row.
+          // Floored: six cells must never add up to a hair over the width.
+          final cell = (c.maxWidth / _perRow).floorToDouble();
+          final outer = math.min(_swatch + 2 * (_ring + _gap), cell);
+          return Wrap(
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final a in AccentColor.values)
+                SizedBox(
+                  width: cell,
+                  child: Center(child: _swatchFor(context, ff, a, outer)),
                 ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _swatchFor(
+    BuildContext context,
+    FFColors ff,
+    AccentColor a,
+    double outer,
+  ) {
+    return Semantics(
+      button: true,
+      selected: a == selected,
+      label: tr('{label} accent', {'label': a.label}),
+      excludeSemantics: true,
+      child: FFPressable(
+        onTap: () => onSelected(a),
+        child: SizedBox.square(
+          dimension: outer,
+          child: Container(
+            padding: const EdgeInsets.all(_gap),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: a == selected ? ff.primary : Colors.transparent,
+                width: _ring,
               ),
             ),
-        ],
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: ff.isDark ? a.primaryDark : a.primary,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

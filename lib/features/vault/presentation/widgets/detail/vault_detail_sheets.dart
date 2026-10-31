@@ -18,7 +18,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
-import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
@@ -26,6 +25,7 @@ import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
 import 'package:focusflow/features/vault/presentation/vault_auto_hide.dart';
 import 'package:focusflow/features/vault/presentation/vault_detail_actions.dart';
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_copy_button.dart';
 import 'package:focusflow/features/vault/presentation/widgets/detail/vault_detail_fields.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_fields.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_reveal.dart';
@@ -291,12 +291,10 @@ class _HistorySheetState extends ConsumerState<_HistorySheet> {
                           cycle: _auto.cycleOf(i),
                           onTap: () => unawaited(_toggle(i)),
                         ),
-                        VaultRoundButton(
-                          icon: FontAwesomeIcons.solidCopy,
+                        VaultCopyButton(
                           semanticLabel: tr('Copy password'),
-                          onTap: () => unawaited(
-                            copyVaultValue(context, ref, pw, tr('Password')),
-                          ),
+                          onCopy: () =>
+                              copyVaultValue(context, ref, pw, tr('Password')),
                         ),
                       ],
                     ),

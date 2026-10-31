@@ -165,13 +165,42 @@ class _NoteEditorToolbarState extends State<NoteEditorToolbar> {
         ),
       ],
     );
+    // Frosted glass, lightly: the pane is mixed over the note's own colour
+    // (so it tints through, like glass on paper), with a sheen on the upper
+    // half, a faint accent frost lower down (the nav pill's recipe) and a
+    // bright hairline rim. Mixed, not translucent: a translucent fill shows
+    // the panel's own shadow through it and turns grey. No backdrop blur —
+    // nothing scrolls behind the panel (it sits below the text so it can
+    // never cover the caret), so a blur would cost a layer and show nothing.
+    const shape = BorderRadius.vertical(
+      top: Radius.circular(NoteEditorToolbar.radius),
+    );
+    final paper = Color.alphaBlend(
+      NoteColors.background(widget.colorHex, ff.brightness),
+      ff.isDark ? ff.canvas : ff.surface,
+    );
+    Color glass(double pane) =>
+        Color.alphaBlend(ff.tabBar.withValues(alpha: pane), paper);
     return Container(
       decoration: BoxDecoration(
-        color: ff.tabBar,
-        border: Border.all(color: ff.surfaceBorder),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(NoteEditorToolbar.radius),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.alphaBlend(
+              Colors.white.withValues(alpha: ff.isDark ? 0.07 : 0.6),
+              glass(0.55),
+            ),
+            Color.alphaBlend(
+              ff.primarySoft.withValues(alpha: ff.isDark ? 0.06 : 0.3),
+              glass(0.78),
+            ),
+          ],
         ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: ff.isDark ? 0.12 : 0.85),
+        ),
+        borderRadius: shape,
         boxShadow: [
           for (final s in ff.cardShadow)
             BoxShadow(

@@ -32,6 +32,7 @@ import 'package:focusflow/features/notes/presentation/notes_format.dart';
 import 'package:focusflow/features/notes/presentation/notifiers/note_editor_controller.dart';
 import 'package:focusflow/features/notes/presentation/providers/notes_providers.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_editor_toolbar.dart';
+import 'package:focusflow/features/notes/presentation/widgets/note_paper.dart';
 import 'package:focusflow/shared/item_actions/item_actions_sheet.dart';
 import 'package:focusflow/shared/item_actions/item_lifecycle_actions.dart';
 import 'package:focusflow/shared/item_actions/item_pickers.dart';
@@ -306,8 +307,21 @@ class NoteBodyActions {
       context,
       ref,
       note.ref,
-      extraActions: [noteWordCountAction(context, note)],
+      extraActions: [
+        FFActionItem(
+          icon: FontAwesomeIcons.alignJustify,
+          label: tr('Paper: {paper}', {'paper': note.paper.label}),
+          colors: ModuleStyle.notes.colors,
+          onTap: () => unawaited(_pickPaper(context, note)),
+        ),
+        noteWordCountAction(context, note),
+      ],
     );
+  }
+
+  Future<void> _pickPaper(BuildContext context, Note note) async {
+    final picked = await showNotePaperPicker(context, current: note.paper);
+    if (picked != null) await controller.setPaper(picked);
   }
 
   Future<void> moveToFolder(BuildContext context, WidgetRef ref, Note note) =>

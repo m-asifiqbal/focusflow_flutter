@@ -63,6 +63,32 @@ class ChecklistItem {
   String toString() => '[${done ? 'x' : ' '}] $text';
 }
 
+/// The editor's paper: plain, ruled lines, or a squared grid.
+enum NotePaper {
+  plain(null),
+  lined('lined'),
+  grid('grid');
+
+  const NotePaper(this.key);
+
+  /// Stored in `notes.paper` (null = plain).
+  final String? key;
+
+  /// Label in the active language.
+  String get label => switch (this) {
+    NotePaper.plain => tr('Plain'),
+    NotePaper.lined => tr('Lined'),
+    NotePaper.grid => tr('Grid'),
+  };
+
+  /// Unknown or missing keys read as plain.
+  static NotePaper fromKey(String? key) => switch (key) {
+    'lined' => NotePaper.lined,
+    'grid' => NotePaper.grid,
+    _ => NotePaper.plain,
+  };
+}
+
 @immutable
 class Note {
   const Note({
@@ -80,6 +106,7 @@ class Note {
     this.folderName,
     this.tags = const [],
     this.colorHex,
+    this.paper = NotePaper.plain,
     this.isPinned = false,
     this.isFavorite = false,
     this.sortOrder = 0,
@@ -119,6 +146,9 @@ class Note {
 
   /// `RRGGBB` card colour; null = white.
   final String? colorHex;
+
+  /// Paper the editor draws behind the body.
+  final NotePaper paper;
   final bool isPinned;
   final bool isFavorite;
   final double sortOrder;
@@ -177,6 +207,7 @@ class Note {
     List<Tag>? tags,
     String? colorHex,
     bool clearColor = false,
+    NotePaper? paper,
     bool? isPinned,
     bool? isFavorite,
     double? sortOrder,
@@ -200,6 +231,7 @@ class Note {
     folderName: clearFolder ? null : (folderName ?? this.folderName),
     tags: tags ?? this.tags,
     colorHex: clearColor ? null : (colorHex ?? this.colorHex),
+    paper: paper ?? this.paper,
     isPinned: isPinned ?? this.isPinned,
     isFavorite: isFavorite ?? this.isFavorite,
     sortOrder: sortOrder ?? this.sortOrder,
@@ -229,6 +261,7 @@ class Note {
       other.folderName == folderName &&
       _tagsEq.equals(other.tags, tags) &&
       other.colorHex == colorHex &&
+      other.paper == paper &&
       other.isPinned == isPinned &&
       other.isFavorite == isFavorite &&
       other.sortOrder == sortOrder &&
@@ -253,6 +286,7 @@ class Note {
     folderName,
     _tagsEq.hash(tags),
     colorHex,
+    paper,
     isPinned,
     isFavorite,
     sortOrder,

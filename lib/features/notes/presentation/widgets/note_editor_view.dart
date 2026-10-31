@@ -41,6 +41,7 @@ import 'package:focusflow/features/notes/presentation/widgets/note_editor_meta.d
 import 'package:focusflow/features/notes/presentation/widgets/note_editor_toolbar.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_quill_styles.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_metrics.dart';
+import 'package:focusflow/features/notes/presentation/widgets/note_paper.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_read_only_banner.dart';
 
 class NoteEditorView extends ConsumerStatefulWidget {
@@ -173,12 +174,14 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
   void _syncTools() => _tools.value = _actions.toolState();
 
   /// Quill styles, rebuilt only when the theme / text styles / direction
-  /// change (not on every note re-delivery).
+  /// change, or the paper turns ruled / plain (not on every note
+  /// re-delivery).
   DefaultStyles _quillStyles(BuildContext context) {
-    final key = (context.ff, context.text, Directionality.of(context));
+    final ruled = widget.note.paper != NotePaper.plain;
+    final key = (context.ff, context.text, Directionality.of(context), ruled);
     if (key != _stylesKey || _styles == null) {
       _stylesKey = key;
-      _styles = noteQuillStyles(context);
+      _styles = noteQuillStyles(context, ruled: ruled);
     }
     return _styles!;
   }
@@ -363,7 +366,10 @@ class _NoteEditorViewState extends ConsumerState<NoteEditorView>
       editorKey: _editorKey,
       scrollController: _scroll,
       readOnly: _readOnly,
-      child: _editor(context, resolve),
+      child: NotePaperBackground(
+        paper: widget.note.paper,
+        child: _editor(context, resolve),
+      ),
     );
   }
 

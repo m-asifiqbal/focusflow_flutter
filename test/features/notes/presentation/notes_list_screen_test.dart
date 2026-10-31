@@ -312,6 +312,44 @@ void main() {
     expect(find.byType(FFActionSheet), findsOneWidget);
   });
 
+  testWidgets(
+    'any sort: a drag rearranges, switches to Manual, edits nothing',
+    (tester) async {
+      await loadAppFonts();
+      final (h, _) = await harness(tester);
+      await pumpApp(tester, h, AppRoutes.notes, size: _mockupSize);
+      expect(h.read(settingsProvider).notesSort, NotesSort.lastEdited);
+
+      List<Note> shown() => h.read(notesListProvider).value!;
+      final unpinned = shown().where((n) => !n.isPinned).toList();
+      final dragged = unpinned[1];
+      final onto = unpinned[0];
+      final edited = dragged.updatedAt;
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text(dragged.title)),
+      );
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      await gesture.moveTo(tester.getCenter(find.text(onto.title)));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0, 4));
+      await tester.pump();
+      await gesture.up();
+      await settle(tester);
+
+      expect(h.read(settingsProvider).notesSort, NotesSort.manual);
+      final after = shown().where((n) => !n.isPinned).toList();
+      expect(after[0].id, dragged.id);
+      expect(after[1].id, onto.id);
+      // Moving is not editing.
+      expect(after[0].updatedAt, edited);
+      expect(
+        find.text('Sorted by Manual — drag notes to arrange them'),
+        findsOneWidget,
+      );
+    },
+  );
+
   testWidgets('tap opens the editor', (tester) async {
     await loadAppFonts();
     final (h, ids) = await harness(tester);

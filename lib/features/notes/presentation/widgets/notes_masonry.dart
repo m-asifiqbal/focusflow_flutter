@@ -7,26 +7,30 @@
 /// so cards never jump between columns while their content updates) or a
 /// compact list.
 /// Each note: tap = open (or toggle in multi-select), long-press = item
-/// actions sheet, swipe = ItemSwipe (Settings › Gestures). With the
-/// "Manual" sort, long-press + drag moves a note onto another card's slot
-/// (within its group: pinned or not);
+/// actions sheet, swipe = ItemSwipe (Settings › Gestures). In any sort,
+/// long-press + drag moves a note onto another card's slot (the first
+/// drop switches the list to "Manual"; within its group: pinned or not);
 /// long-press + release without moving still opens the actions sheet.
 /// Why: lazy slivers (SliverCrossAxisGroup of two SliverLists) keep big
 /// lists cheap; pinned-first order comes from the repository.
 /// ============================================================
 library;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart' show kTouchSlop;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/l10n/tr.dart';
+import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/ff_open_origin.dart';
+import 'package:focusflow/core/widgets/ff_snackbar.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/features/notes/domain/entities/note.dart';
-import 'package:focusflow/features/notes/domain/repository/notes_repository.dart';
 import 'package:focusflow/features/notes/presentation/notes_list_actions.dart';
 import 'package:focusflow/features/notes/presentation/providers/notes_providers.dart';
 import 'package:focusflow/features/notes/presentation/widgets/note_card.dart';
@@ -145,17 +149,18 @@ class _NoteItem extends ConsumerWidget {
     final provider = itemSelectionProvider(notesSelectionScope);
     final selecting = ref.watch(provider.select((s) => s.active));
     final selected = ref.watch(provider.select((s) => s.contains(note.ref)));
-    final manual =
-        !selecting && ref.watch(notesSortProvider) == NotesSort.manual;
+    // Long-press + drag rearranges in every sort (the first drop switches
+    // the list to Manual); not while multi-selecting.
+    final draggable = !selecting;
 
     void toggle() => ref.read(provider.notifier).toggle(note.ref);
     void actions() => showItemActions(context, ref, note.ref);
     final VoidCallback onTap = selecting
         ? toggle
         : () => context.push(AppRoutes.note(note.id));
-    final VoidCallback? onLongPress = manual
-        ? null
-        : (selecting ? toggle : actions);
+    // Not draggable = selecting: a long-press toggles. Otherwise the drag
+    // wrapper owns the long-press (held in place → the actions sheet).
+    final VoidCallback? onLongPress = draggable ? null : toggle;
 
     Widget child = grid
         ? NoteCard(
@@ -182,7 +187,7 @@ class _NoteItem extends ConsumerWidget {
           : null,
       child: child,
     );
-    if (manual) {
+    if (draggable) {
       child = _DragToReorder(
         id: note.id,
         radius: grid ? AppRadii.card : AppRadii.row,
@@ -191,7 +196,7 @@ class _NoteItem extends ConsumerWidget {
         canAccept: (dragged) =>
             dragged != note.id &&
             notes.any((n) => n.id == dragged && n.isPinned == note.isPinned),
-        onDrop: (dragged) => moveNote(ref, notes, dragged, note.id),
+        onDrop: (dragged) => unawaited(_drop(context, ref, dragged)),
         onHold: actions,
         child: child,
       );
@@ -205,6 +210,21 @@ class _NoteItem extends ConsumerWidget {
       radius: grid ? AppRadii.card : AppRadii.row,
       title: note.displayTitle,
       child: child,
+    );
+  }
+
+  /// Drops [dragged] on this note; says so when the list switched to Manual.
+  Future<void> _drop(
+    BuildContext context,
+    WidgetRef ref,
+    String dragged,
+  ) async {
+    final switched = await moveNote(ref, notes, dragged, note.id);
+    if (!switched || !context.mounted) return;
+    showFFToast(
+      context,
+      tr('Sorted by Manual — drag notes to arrange them'),
+      icon: FontAwesomeIcons.gripVertical,
     );
   }
 }

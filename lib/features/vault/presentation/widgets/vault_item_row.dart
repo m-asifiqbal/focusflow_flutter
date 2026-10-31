@@ -25,6 +25,7 @@ import 'package:focusflow/features/vault/presentation/providers/vault_list_provi
 import 'package:focusflow/features/vault/presentation/vault_copy_actions.dart';
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_avatar.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_copy_button.dart';
 import 'package:focusflow/shared/item_actions/item_actions_sheet.dart';
 import 'package:focusflow/shared/item_actions/item_swipe.dart';
 import 'package:go_router/go_router.dart';
@@ -158,9 +159,12 @@ class VaultItemRow extends ConsumerWidget {
                 VaultStatusBadge(entry.badge!),
               ],
               const SizedBox(width: VaultSizes.gapSm),
-              _CopyButton(
-                label: tr('Copy password for {title}', {'title': title}),
-                onTap: () => unawaited(copyVaultSecret(context, ref, r)),
+              VaultCopyButton(
+                look: VaultCopyLook.tile,
+                semanticLabel: tr('Copy password for {title}', {
+                  'title': title,
+                }),
+                onCopy: () => copyVaultSecret(context, ref, r),
               ),
             ],
           ),
@@ -222,51 +226,6 @@ class VaultStatusBadge extends StatelessWidget {
           fontSize: VaultType.badge,
           letterSpacing: 0.3,
           color: tone.fg,
-        ),
-      ),
-    );
-  }
-}
-
-class _CopyButton extends StatelessWidget {
-  const _CopyButton({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ff = context.ff;
-    // Own node (container) with its own tap: nested in the row's button,
-    // it would otherwise merge into the row's label.
-    return Semantics(
-      container: true,
-      button: true,
-      label: label,
-      onTap: onTap,
-      excludeSemantics: true,
-      child: FFPressable(
-        onTap: onTap,
-        scale: 0.92,
-        child: SizedBox(
-          width: AppSizes.minTap,
-          height: AppSizes.minTap,
-          child: Center(
-            child: Container(
-              width: VaultSizes.smallButton,
-              height: VaultSizes.smallButton,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: ff.vaultKey,
-                borderRadius: BorderRadius.circular(AppRadii.tile),
-              ),
-              child: Icon(
-                FontAwesomeIcons.solidCopy,
-                size: VaultSizes.iconMd,
-                color: ff.vaultAccent,
-              ),
-            ),
-          ),
         ),
       ),
     );
