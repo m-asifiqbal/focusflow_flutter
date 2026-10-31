@@ -254,6 +254,11 @@ abstract final class ReminderPlanner {
         target: r.ref,
         open: open,
         snoozeMinutes: r.snoozeMinutes,
+        autoSnoozeMinutes:
+            r.alertStyle == AlertStyle.alarm &&
+                r.autoSnoozeMinutes != Reminder.defaultAutoSnoozeMinutes
+            ? r.autoSnoozeMinutes
+            : null,
       ),
       // Screen 13: "Notification actions: Done, Snooze (default), Open".
       buttons: const [

@@ -38,6 +38,7 @@ abstract final class ReminderMapper {
           : AlertStyle.notification,
       sound: r.sound,
       snoozeMinutes: r.snoozeMinutes,
+      autoSnoozeMinutes: r.autoSnoozeMinutes,
       snoozedUntil: r.snoozedUntil,
       location: location,
       linkedRef: linkType == null || r.linkedItemId == null
@@ -70,6 +71,7 @@ abstract final class ReminderMapper {
     alertStyle: Value(r.alertStyle.index),
     sound: Value(r.sound),
     snoozeMinutes: Value(r.snoozeMinutes),
+    autoSnoozeMinutes: Value(r.autoSnoozeMinutes),
     snoozedUntil: Value(r.snoozedUntil),
     locationJson: Value(
       r.location == null ? null : jsonEncode(r.location!.toJson()),

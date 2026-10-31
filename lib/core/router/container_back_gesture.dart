@@ -2,10 +2,10 @@
 /// CONTAINER BACK GESTURE — swipe in from the edge to go back
 /// ============================================================
 ///
-/// A page that grows out of a card doesn't use the Cupertino slide, so it
-/// doesn't get that transition's edge swipe-back for free. This is the same
-/// gesture for the container: drag in from the leading edge (right in RTL)
-/// and the container shrinks back toward its card under your finger; let go
+/// The app's own transitions (the slide and the card-to-page container)
+/// don't get Cupertino's edge swipe-back for free. This is the same gesture
+/// for both: drag in from the leading edge (right in RTL) and the page
+/// follows your finger (the container shrinks back toward its card); let go
 /// past a third of the screen (or flick) and it closes, otherwise it springs
 /// open again.
 ///

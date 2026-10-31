@@ -266,6 +266,15 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _paperMeta = const VerificationMeta('paper');
+  @override
+  late final GeneratedColumn<String> paper = GeneratedColumn<String>(
+    'paper',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -290,6 +299,7 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     lockVerifier,
     wordCount,
     reminderId,
+    paper,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -456,6 +466,12 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
         reminderId.isAcceptableOrUnknown(data['reminder_id']!, _reminderIdMeta),
       );
     }
+    if (data.containsKey('paper')) {
+      context.handle(
+        _paperMeta,
+        paper.isAcceptableOrUnknown(data['paper']!, _paperMeta),
+      );
+    }
     return context;
   }
 
@@ -553,6 +569,10 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
         DriftSqlType.string,
         data['${effectivePrefix}reminder_id'],
       ),
+      paper: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}paper'],
+      ),
     );
   }
 
@@ -610,6 +630,10 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
 
   /// Linked reminder ("Reminder Fri" in the editor meta line).
   final String? reminderId;
+
+  /// Editor paper: null plain · `lined` · `grid` (NotePaper). Added on open,
+  /// not by a schema bump (AppDatabase._ensureAddedColumns).
+  final String? paper;
   const NoteRow({
     required this.id,
     required this.createdAt,
@@ -633,6 +657,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     this.lockVerifier,
     required this.wordCount,
     this.reminderId,
+    this.paper,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -674,6 +699,9 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     map['word_count'] = Variable<int>(wordCount);
     if (!nullToAbsent || reminderId != null) {
       map['reminder_id'] = Variable<String>(reminderId);
+    }
+    if (!nullToAbsent || paper != null) {
+      map['paper'] = Variable<String>(paper);
     }
     return map;
   }
@@ -718,6 +746,9 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       reminderId: reminderId == null && nullToAbsent
           ? const Value.absent()
           : Value(reminderId),
+      paper: paper == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paper),
     );
   }
 
@@ -749,6 +780,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       lockVerifier: serializer.fromJson<String?>(json['lockVerifier']),
       wordCount: serializer.fromJson<int>(json['wordCount']),
       reminderId: serializer.fromJson<String?>(json['reminderId']),
+      paper: serializer.fromJson<String?>(json['paper']),
     );
   }
   @override
@@ -777,6 +809,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       'lockVerifier': serializer.toJson<String?>(lockVerifier),
       'wordCount': serializer.toJson<int>(wordCount),
       'reminderId': serializer.toJson<String?>(reminderId),
+      'paper': serializer.toJson<String?>(paper),
     };
   }
 
@@ -803,6 +836,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     Value<String?> lockVerifier = const Value.absent(),
     int? wordCount,
     Value<String?> reminderId = const Value.absent(),
+    Value<String?> paper = const Value.absent(),
   }) => NoteRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -828,6 +862,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     lockVerifier: lockVerifier.present ? lockVerifier.value : this.lockVerifier,
     wordCount: wordCount ?? this.wordCount,
     reminderId: reminderId.present ? reminderId.value : this.reminderId,
+    paper: paper.present ? paper.value : this.paper,
   );
   NoteRow copyWithCompanion(NotesCompanion data) {
     return NoteRow(
@@ -871,6 +906,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       reminderId: data.reminderId.present
           ? data.reminderId.value
           : this.reminderId,
+      paper: data.paper.present ? data.paper.value : this.paper,
     );
   }
 
@@ -898,7 +934,8 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           ..write('isLocked: $isLocked, ')
           ..write('lockVerifier: $lockVerifier, ')
           ..write('wordCount: $wordCount, ')
-          ..write('reminderId: $reminderId')
+          ..write('reminderId: $reminderId, ')
+          ..write('paper: $paper')
           ..write(')'))
         .toString();
   }
@@ -927,6 +964,7 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     lockVerifier,
     wordCount,
     reminderId,
+    paper,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -953,7 +991,8 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           other.isLocked == this.isLocked &&
           other.lockVerifier == this.lockVerifier &&
           other.wordCount == this.wordCount &&
-          other.reminderId == this.reminderId);
+          other.reminderId == this.reminderId &&
+          other.paper == this.paper);
 }
 
 class NotesCompanion extends UpdateCompanion<NoteRow> {
@@ -979,6 +1018,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   final Value<String?> lockVerifier;
   final Value<int> wordCount;
   final Value<String?> reminderId;
+  final Value<String?> paper;
   final Value<int> rowid;
   const NotesCompanion({
     this.id = const Value.absent(),
@@ -1003,6 +1043,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     this.lockVerifier = const Value.absent(),
     this.wordCount = const Value.absent(),
     this.reminderId = const Value.absent(),
+    this.paper = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   NotesCompanion.insert({
@@ -1028,6 +1069,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     this.lockVerifier = const Value.absent(),
     this.wordCount = const Value.absent(),
     this.reminderId = const Value.absent(),
+    this.paper = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -1055,6 +1097,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     Expression<String>? lockVerifier,
     Expression<int>? wordCount,
     Expression<String>? reminderId,
+    Expression<String>? paper,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1080,6 +1123,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
       if (lockVerifier != null) 'lock_verifier': lockVerifier,
       if (wordCount != null) 'word_count': wordCount,
       if (reminderId != null) 'reminder_id': reminderId,
+      if (paper != null) 'paper': paper,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1107,6 +1151,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     Value<String?>? lockVerifier,
     Value<int>? wordCount,
     Value<String?>? reminderId,
+    Value<String?>? paper,
     Value<int>? rowid,
   }) {
     return NotesCompanion(
@@ -1132,6 +1177,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
       lockVerifier: lockVerifier ?? this.lockVerifier,
       wordCount: wordCount ?? this.wordCount,
       reminderId: reminderId ?? this.reminderId,
+      paper: paper ?? this.paper,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1205,6 +1251,9 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     if (reminderId.present) {
       map['reminder_id'] = Variable<String>(reminderId.value);
     }
+    if (paper.present) {
+      map['paper'] = Variable<String>(paper.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1236,6 +1285,7 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
           ..write('lockVerifier: $lockVerifier, ')
           ..write('wordCount: $wordCount, ')
           ..write('reminderId: $reminderId, ')
+          ..write('paper: $paper, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3269,6 +3319,18 @@ class $RemindersTable extends Reminders
     requiredDuringInsert: false,
     defaultValue: const Constant(10),
   );
+  static const VerificationMeta _autoSnoozeMinutesMeta = const VerificationMeta(
+    'autoSnoozeMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> autoSnoozeMinutes = GeneratedColumn<int>(
+    'auto_snooze_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2),
+  );
   static const VerificationMeta _snoozedUntilMeta = const VerificationMeta(
     'snoozedUntil',
   );
@@ -3383,6 +3445,7 @@ class $RemindersTable extends Reminders
     alertStyle,
     sound,
     snoozeMinutes,
+    autoSnoozeMinutes,
     snoozedUntil,
     locationJson,
     linkedItemId,
@@ -3535,6 +3598,15 @@ class $RemindersTable extends Reminders
         snoozeMinutes.isAcceptableOrUnknown(
           data['snooze_minutes']!,
           _snoozeMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('auto_snooze_minutes')) {
+      context.handle(
+        _autoSnoozeMinutesMeta,
+        autoSnoozeMinutes.isAcceptableOrUnknown(
+          data['auto_snooze_minutes']!,
+          _autoSnoozeMinutesMeta,
         ),
       );
     }
@@ -3698,6 +3770,10 @@ class $RemindersTable extends Reminders
         DriftSqlType.int,
         data['${effectivePrefix}snooze_minutes'],
       )!,
+      autoSnoozeMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}auto_snooze_minutes'],
+      )!,
       snoozedUntil: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}snoozed_until'],
@@ -3775,6 +3851,11 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
   final int alertStyle;
   final String sound;
   final int snoozeMinutes;
+
+  /// Minutes an Android alarm rings unanswered before it snoozes itself;
+  /// 0 = until stopped. Added on open, not by a schema bump
+  /// (AppDatabase._ensureAddedColumns).
+  final int autoSnoozeMinutes;
   final DateTime? snoozedUntil;
 
   /// JSON `{"lat":…,"lng":…,"radius":…,"onEnter":true,"label":"Office"}`
@@ -3811,6 +3892,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
     required this.alertStyle,
     required this.sound,
     required this.snoozeMinutes,
+    required this.autoSnoozeMinutes,
     this.snoozedUntil,
     this.locationJson,
     this.linkedItemId,
@@ -3855,6 +3937,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
     map['alert_style'] = Variable<int>(alertStyle);
     map['sound'] = Variable<String>(sound);
     map['snooze_minutes'] = Variable<int>(snoozeMinutes);
+    map['auto_snooze_minutes'] = Variable<int>(autoSnoozeMinutes);
     if (!nullToAbsent || snoozedUntil != null) {
       map['snoozed_until'] = Variable<DateTime>(snoozedUntil);
     }
@@ -3912,6 +3995,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
       alertStyle: Value(alertStyle),
       sound: Value(sound),
       snoozeMinutes: Value(snoozeMinutes),
+      autoSnoozeMinutes: Value(autoSnoozeMinutes),
       snoozedUntil: snoozedUntil == null && nullToAbsent
           ? const Value.absent()
           : Value(snoozedUntil),
@@ -3961,6 +4045,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
       alertStyle: serializer.fromJson<int>(json['alertStyle']),
       sound: serializer.fromJson<String>(json['sound']),
       snoozeMinutes: serializer.fromJson<int>(json['snoozeMinutes']),
+      autoSnoozeMinutes: serializer.fromJson<int>(json['autoSnoozeMinutes']),
       snoozedUntil: serializer.fromJson<DateTime?>(json['snoozedUntil']),
       locationJson: serializer.fromJson<String?>(json['locationJson']),
       linkedItemId: serializer.fromJson<String?>(json['linkedItemId']),
@@ -3995,6 +4080,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
       'alertStyle': serializer.toJson<int>(alertStyle),
       'sound': serializer.toJson<String>(sound),
       'snoozeMinutes': serializer.toJson<int>(snoozeMinutes),
+      'autoSnoozeMinutes': serializer.toJson<int>(autoSnoozeMinutes),
       'snoozedUntil': serializer.toJson<DateTime?>(snoozedUntil),
       'locationJson': serializer.toJson<String?>(locationJson),
       'linkedItemId': serializer.toJson<String?>(linkedItemId),
@@ -4027,6 +4113,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
     int? alertStyle,
     String? sound,
     int? snoozeMinutes,
+    int? autoSnoozeMinutes,
     Value<DateTime?> snoozedUntil = const Value.absent(),
     Value<String?> locationJson = const Value.absent(),
     Value<String?> linkedItemId = const Value.absent(),
@@ -4056,6 +4143,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
     alertStyle: alertStyle ?? this.alertStyle,
     sound: sound ?? this.sound,
     snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
+    autoSnoozeMinutes: autoSnoozeMinutes ?? this.autoSnoozeMinutes,
     snoozedUntil: snoozedUntil.present ? snoozedUntil.value : this.snoozedUntil,
     locationJson: locationJson.present ? locationJson.value : this.locationJson,
     linkedItemId: linkedItemId.present ? linkedItemId.value : this.linkedItemId,
@@ -4103,6 +4191,9 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
       snoozeMinutes: data.snoozeMinutes.present
           ? data.snoozeMinutes.value
           : this.snoozeMinutes,
+      autoSnoozeMinutes: data.autoSnoozeMinutes.present
+          ? data.autoSnoozeMinutes.value
+          : this.autoSnoozeMinutes,
       snoozedUntil: data.snoozedUntil.present
           ? data.snoozedUntil.value
           : this.snoozedUntil,
@@ -4151,6 +4242,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
           ..write('alertStyle: $alertStyle, ')
           ..write('sound: $sound, ')
           ..write('snoozeMinutes: $snoozeMinutes, ')
+          ..write('autoSnoozeMinutes: $autoSnoozeMinutes, ')
           ..write('snoozedUntil: $snoozedUntil, ')
           ..write('locationJson: $locationJson, ')
           ..write('linkedItemId: $linkedItemId, ')
@@ -4185,6 +4277,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
     alertStyle,
     sound,
     snoozeMinutes,
+    autoSnoozeMinutes,
     snoozedUntil,
     locationJson,
     linkedItemId,
@@ -4218,6 +4311,7 @@ class ReminderRow extends DataClass implements Insertable<ReminderRow> {
           other.alertStyle == this.alertStyle &&
           other.sound == this.sound &&
           other.snoozeMinutes == this.snoozeMinutes &&
+          other.autoSnoozeMinutes == this.autoSnoozeMinutes &&
           other.snoozedUntil == this.snoozedUntil &&
           other.locationJson == this.locationJson &&
           other.linkedItemId == this.linkedItemId &&
@@ -4249,6 +4343,7 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
   final Value<int> alertStyle;
   final Value<String> sound;
   final Value<int> snoozeMinutes;
+  final Value<int> autoSnoozeMinutes;
   final Value<DateTime?> snoozedUntil;
   final Value<String?> locationJson;
   final Value<String?> linkedItemId;
@@ -4279,6 +4374,7 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
     this.alertStyle = const Value.absent(),
     this.sound = const Value.absent(),
     this.snoozeMinutes = const Value.absent(),
+    this.autoSnoozeMinutes = const Value.absent(),
     this.snoozedUntil = const Value.absent(),
     this.locationJson = const Value.absent(),
     this.linkedItemId = const Value.absent(),
@@ -4310,6 +4406,7 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
     this.alertStyle = const Value.absent(),
     this.sound = const Value.absent(),
     this.snoozeMinutes = const Value.absent(),
+    this.autoSnoozeMinutes = const Value.absent(),
     this.snoozedUntil = const Value.absent(),
     this.locationJson = const Value.absent(),
     this.linkedItemId = const Value.absent(),
@@ -4345,6 +4442,7 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
     Expression<int>? alertStyle,
     Expression<String>? sound,
     Expression<int>? snoozeMinutes,
+    Expression<int>? autoSnoozeMinutes,
     Expression<DateTime>? snoozedUntil,
     Expression<String>? locationJson,
     Expression<String>? linkedItemId,
@@ -4376,6 +4474,7 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
       if (alertStyle != null) 'alert_style': alertStyle,
       if (sound != null) 'sound': sound,
       if (snoozeMinutes != null) 'snooze_minutes': snoozeMinutes,
+      if (autoSnoozeMinutes != null) 'auto_snooze_minutes': autoSnoozeMinutes,
       if (snoozedUntil != null) 'snoozed_until': snoozedUntil,
       if (locationJson != null) 'location_json': locationJson,
       if (linkedItemId != null) 'linked_item_id': linkedItemId,
@@ -4409,6 +4508,7 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
     Value<int>? alertStyle,
     Value<String>? sound,
     Value<int>? snoozeMinutes,
+    Value<int>? autoSnoozeMinutes,
     Value<DateTime?>? snoozedUntil,
     Value<String?>? locationJson,
     Value<String?>? linkedItemId,
@@ -4440,6 +4540,7 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
       alertStyle: alertStyle ?? this.alertStyle,
       sound: sound ?? this.sound,
       snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
+      autoSnoozeMinutes: autoSnoozeMinutes ?? this.autoSnoozeMinutes,
       snoozedUntil: snoozedUntil ?? this.snoozedUntil,
       locationJson: locationJson ?? this.locationJson,
       linkedItemId: linkedItemId ?? this.linkedItemId,
@@ -4515,6 +4616,9 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
     if (snoozeMinutes.present) {
       map['snooze_minutes'] = Variable<int>(snoozeMinutes.value);
     }
+    if (autoSnoozeMinutes.present) {
+      map['auto_snooze_minutes'] = Variable<int>(autoSnoozeMinutes.value);
+    }
     if (snoozedUntil.present) {
       map['snoozed_until'] = Variable<DateTime>(snoozedUntil.value);
     }
@@ -4568,6 +4672,7 @@ class RemindersCompanion extends UpdateCompanion<ReminderRow> {
           ..write('alertStyle: $alertStyle, ')
           ..write('sound: $sound, ')
           ..write('snoozeMinutes: $snoozeMinutes, ')
+          ..write('autoSnoozeMinutes: $autoSnoozeMinutes, ')
           ..write('snoozedUntil: $snoozedUntil, ')
           ..write('locationJson: $locationJson, ')
           ..write('linkedItemId: $linkedItemId, ')
@@ -14629,6 +14734,7 @@ typedef $$NotesTableCreateCompanionBuilder =
       Value<String?> lockVerifier,
       Value<int> wordCount,
       Value<String?> reminderId,
+      Value<String?> paper,
       Value<int> rowid,
     });
 typedef $$NotesTableUpdateCompanionBuilder =
@@ -14655,6 +14761,7 @@ typedef $$NotesTableUpdateCompanionBuilder =
       Value<String?> lockVerifier,
       Value<int> wordCount,
       Value<String?> reminderId,
+      Value<String?> paper,
       Value<int> rowid,
     });
 
@@ -14773,6 +14880,11 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
 
   ColumnFilters<String> get reminderId => $composableBuilder(
     column: $table.reminderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paper => $composableBuilder(
+    column: $table.paper,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -14895,6 +15007,11 @@ class $$NotesTableOrderingComposer
     column: $table.reminderId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get paper => $composableBuilder(
+    column: $table.paper,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$NotesTableAnnotationComposer
@@ -14989,6 +15106,9 @@ class $$NotesTableAnnotationComposer
     column: $table.reminderId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get paper =>
+      $composableBuilder(column: $table.paper, builder: (column) => column);
 }
 
 class $$NotesTableTableManager
@@ -15041,6 +15161,7 @@ class $$NotesTableTableManager
                 Value<String?> lockVerifier = const Value.absent(),
                 Value<int> wordCount = const Value.absent(),
                 Value<String?> reminderId = const Value.absent(),
+                Value<String?> paper = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => NotesCompanion(
                 id: id,
@@ -15065,6 +15186,7 @@ class $$NotesTableTableManager
                 lockVerifier: lockVerifier,
                 wordCount: wordCount,
                 reminderId: reminderId,
+                paper: paper,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -15091,6 +15213,7 @@ class $$NotesTableTableManager
                 Value<String?> lockVerifier = const Value.absent(),
                 Value<int> wordCount = const Value.absent(),
                 Value<String?> reminderId = const Value.absent(),
+                Value<String?> paper = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => NotesCompanion.insert(
                 id: id,
@@ -15115,6 +15238,7 @@ class $$NotesTableTableManager
                 lockVerifier: lockVerifier,
                 wordCount: wordCount,
                 reminderId: reminderId,
+                paper: paper,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -15999,6 +16123,7 @@ typedef $$RemindersTableCreateCompanionBuilder =
       Value<int> alertStyle,
       Value<String> sound,
       Value<int> snoozeMinutes,
+      Value<int> autoSnoozeMinutes,
       Value<DateTime?> snoozedUntil,
       Value<String?> locationJson,
       Value<String?> linkedItemId,
@@ -16031,6 +16156,7 @@ typedef $$RemindersTableUpdateCompanionBuilder =
       Value<int> alertStyle,
       Value<String> sound,
       Value<int> snoozeMinutes,
+      Value<int> autoSnoozeMinutes,
       Value<DateTime?> snoozedUntil,
       Value<String?> locationJson,
       Value<String?> linkedItemId,
@@ -16148,6 +16274,11 @@ class $$RemindersTableFilterComposer
 
   ColumnFilters<int> get snoozeMinutes => $composableBuilder(
     column: $table.snoozeMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get autoSnoozeMinutes => $composableBuilder(
+    column: $table.autoSnoozeMinutes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16301,6 +16432,11 @@ class $$RemindersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get autoSnoozeMinutes => $composableBuilder(
+    column: $table.autoSnoozeMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get snoozedUntil => $composableBuilder(
     column: $table.snoozedUntil,
     builder: (column) => ColumnOrderings(column),
@@ -16425,6 +16561,11 @@ class $$RemindersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get autoSnoozeMinutes => $composableBuilder(
+    column: $table.autoSnoozeMinutes,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get snoozedUntil => $composableBuilder(
     column: $table.snoozedUntil,
     builder: (column) => column,
@@ -16515,6 +16656,7 @@ class $$RemindersTableTableManager
                 Value<int> alertStyle = const Value.absent(),
                 Value<String> sound = const Value.absent(),
                 Value<int> snoozeMinutes = const Value.absent(),
+                Value<int> autoSnoozeMinutes = const Value.absent(),
                 Value<DateTime?> snoozedUntil = const Value.absent(),
                 Value<String?> locationJson = const Value.absent(),
                 Value<String?> linkedItemId = const Value.absent(),
@@ -16545,6 +16687,7 @@ class $$RemindersTableTableManager
                 alertStyle: alertStyle,
                 sound: sound,
                 snoozeMinutes: snoozeMinutes,
+                autoSnoozeMinutes: autoSnoozeMinutes,
                 snoozedUntil: snoozedUntil,
                 locationJson: locationJson,
                 linkedItemId: linkedItemId,
@@ -16577,6 +16720,7 @@ class $$RemindersTableTableManager
                 Value<int> alertStyle = const Value.absent(),
                 Value<String> sound = const Value.absent(),
                 Value<int> snoozeMinutes = const Value.absent(),
+                Value<int> autoSnoozeMinutes = const Value.absent(),
                 Value<DateTime?> snoozedUntil = const Value.absent(),
                 Value<String?> locationJson = const Value.absent(),
                 Value<String?> linkedItemId = const Value.absent(),
@@ -16607,6 +16751,7 @@ class $$RemindersTableTableManager
                 alertStyle: alertStyle,
                 sound: sound,
                 snoozeMinutes: snoozeMinutes,
+                autoSnoozeMinutes: autoSnoozeMinutes,
                 snoozedUntil: snoozedUntil,
                 locationJson: locationJson,
                 linkedItemId: linkedItemId,

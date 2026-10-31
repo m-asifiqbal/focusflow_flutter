@@ -4,14 +4,16 @@
 ///
 /// What:
 ///   * [ReminderAlertCard] — Sound (option sheet) · Alarm-style (full
-///     screen) switch · Default snooze (option sheet) · Location trigger
-///     ("Off"; explains v1.1).
+///     screen) switch · Auto-snooze after (Android alarms: how long it rings
+///     unanswered before snoozing itself) · Default snooze (option sheet) ·
+///     Location trigger ("Off"; explains v1.1).
 ///   * [ReminderLinkCard] — "Task or note" (link picker; "None").
 /// Why: rows reuse the task editor's [TaskEditorRow] so both editors look
 /// the same; every choice only updates the editor form.
 /// ============================================================
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/items/item_type.dart';
@@ -87,7 +89,34 @@ class ReminderAlertCard extends ConsumerWidget {
       if (picked != null) form.setSnooze(picked.value);
     }
 
+    Future<void> pickAutoSnooze() async {
+      final picked = await showOptionSheet<int>(
+        context,
+        title: tr('Auto-snooze after'),
+        subtitle: tr(
+          'A ringing alarm nobody stops snoozes itself after this long',
+        ),
+        options: [
+          for (final m in ReminderAlertOptions.autoSnoozeMinutes)
+            OptionItem(
+              value: m,
+              label: ReminderAlertOptions.autoSnoozeLabel(m),
+              icon: m == 0
+                  ? FontAwesomeIcons.bell
+                  : FontAwesomeIcons.hourglassHalf,
+              colors: TagPalette.high,
+            ),
+        ],
+        selected: reminder.autoSnoozeMinutes,
+        accent: orange.solid,
+      );
+      if (picked != null) form.setAutoSnooze(picked.value);
+    }
+
     final alarm = reminder.alertStyle == AlertStyle.alarm;
+    // Only Android rings real alarms (iOS alarm-style is a notification).
+    final ringsAlarm =
+        alarm && !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
     return FFGroupedList(
       children: [
         TaskEditorRow(
@@ -104,6 +133,16 @@ class ReminderAlertCard extends ConsumerWidget {
           value: alarm,
           onChanged: form.setAlarm,
         ),
+        if (ringsAlarm)
+          TaskEditorRow(
+            icon: FontAwesomeIcons.hourglassHalf,
+            colors: TagPalette.high,
+            title: tr('Auto-snooze after'),
+            value: ReminderAlertOptions.autoSnoozeLabel(
+              reminder.autoSnoozeMinutes,
+            ),
+            onTap: pickAutoSnooze,
+          ),
         TaskEditorRow(
           icon: FontAwesomeIcons.clockRotateLeft,
           colors: TagPalette.work,

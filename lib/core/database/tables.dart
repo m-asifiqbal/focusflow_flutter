@@ -92,6 +92,10 @@ class Notes extends Table with ItemColumns {
 
   /// Linked reminder ("Reminder Fri" in the editor meta line).
   TextColumn get reminderId => text().nullable()();
+
+  /// Editor paper: null plain · `lined` · `grid` (NotePaper). Added on open,
+  /// not by a schema bump (AppDatabase._ensureAddedColumns).
+  TextColumn get paper => text().nullable()();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -158,6 +162,11 @@ class Reminders extends Table with ItemColumns {
   IntColumn get alertStyle => integer().withDefault(const Constant(0))();
   TextColumn get sound => text().withDefault(const Constant('chime'))();
   IntColumn get snoozeMinutes => integer().withDefault(const Constant(10))();
+
+  /// Minutes an Android alarm rings unanswered before it snoozes itself;
+  /// 0 = until stopped. Added on open, not by a schema bump
+  /// (AppDatabase._ensureAddedColumns).
+  IntColumn get autoSnoozeMinutes => integer().withDefault(const Constant(2))();
   DateTimeColumn get snoozedUntil => dateTime().nullable()();
 
   /// JSON `{"lat":…,"lng":…,"radius":…,"onEnter":true,"label":"Office"}`

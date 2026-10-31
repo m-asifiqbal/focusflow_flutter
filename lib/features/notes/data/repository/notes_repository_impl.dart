@@ -69,6 +69,7 @@ class NotesRepositoryImpl extends RepositoryBase implements NotesRepository {
       folderName: r.folderName,
       tags: tags,
       colorHex: n.colorHex,
+      paper: NotePaper.fromKey(n.paper),
       isPinned: n.isPinned,
       isFavorite: n.isFavorite,
       sortOrder: n.sortOrder,
@@ -135,6 +136,7 @@ class NotesRepositoryImpl extends RepositoryBase implements NotesRepository {
     List<String> tagNames = const [],
     String title = '',
     String initialText = '',
+    String? initialDelta,
   }) => db.transaction(() async {
     final s = stamp();
     final id = newId();
@@ -149,9 +151,10 @@ class NotesRepositoryImpl extends RepositoryBase implements NotesRepository {
         contentDelta: Value(
           body.isEmpty
               ? '[]'
-              : jsonEncode([
-                  {'insert': '$body\n'},
-                ]),
+              : initialDelta ??
+                    jsonEncode([
+                      {'insert': '$body\n'},
+                    ]),
         ),
         wordCount: Value(_countWords('$title $body')),
         folderId: Value(folderId),
@@ -192,6 +195,10 @@ class NotesRepositoryImpl extends RepositoryBase implements NotesRepository {
   @override
   Future<void> setColor(String id, String? colorHex) =>
       _update(id, NotesCompanion(colorHex: Value(colorHex)));
+
+  @override
+  Future<void> setPaper(String id, NotePaper paper) =>
+      _update(id, NotesCompanion(paper: Value(paper.key)));
 
   @override
   Future<void> setPinned(String id, bool pinned) =>
@@ -256,6 +263,26 @@ class NotesRepositoryImpl extends RepositoryBase implements NotesRepository {
       NotesCompanion(sortOrder: Value(sortBetween(after, before))),
     );
   }
+
+  @override
+  Future<void> setManualOrder(List<String> orderedIds) =>
+      db.transaction(() async {
+        final current = await _dao.sortOrdersOf(orderedIds);
+        final ids = [
+          for (final id in orderedIds)
+            if (current.containsKey(id)) id,
+        ];
+        // The positions these notes hold, low to high, handed out in the new
+        // order. Strictly increasing, so equal legacy values (all 0) still
+        // come out in the shown order.
+        final slots = [for (final id in ids) current[id]!]..sort();
+        for (var i = 1; i < slots.length; i++) {
+          if (slots[i] <= slots[i - 1]) slots[i] = slots[i - 1] + 1;
+        }
+        await _dao.setSortOrders({
+          for (var i = 0; i < ids.length; i++) ids[i]: slots[i],
+        }, deviceId);
+      });
 
   @override
   Future<void> addAttachment(

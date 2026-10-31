@@ -103,6 +103,7 @@ class Reminder {
     this.alertStyle = AlertStyle.notification,
     this.sound = 'chime',
     this.snoozeMinutes = 10,
+    this.autoSnoozeMinutes = defaultAutoSnoozeMinutes,
     this.snoozedUntil,
     this.location,
     this.linkedRef,
@@ -150,6 +151,14 @@ class Reminder {
 
   /// Default snooze length for this reminder.
   final int snoozeMinutes;
+
+  /// Android alarm-style only: an alarm ringing this long with nobody
+  /// answering snoozes itself ([snoozeMinutes]); 0 = rings until stopped.
+  final int autoSnoozeMinutes;
+
+  /// Auto-snooze of a new reminder (and of every alarm before the option).
+  static const int defaultAutoSnoozeMinutes = 2;
+
   final DateTime? snoozedUntil;
   final ReminderLocation? location;
 
@@ -232,6 +241,7 @@ class Reminder {
     AlertStyle? alertStyle,
     String? sound,
     int? snoozeMinutes,
+    int? autoSnoozeMinutes,
     DateTime? snoozedUntil,
     bool clearSnoozedUntil = false,
     ReminderLocation? location,
@@ -265,6 +275,7 @@ class Reminder {
     alertStyle: alertStyle ?? this.alertStyle,
     sound: sound ?? this.sound,
     snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
+    autoSnoozeMinutes: autoSnoozeMinutes ?? this.autoSnoozeMinutes,
     snoozedUntil: clearSnoozedUntil
         ? null
         : (snoozedUntil ?? this.snoozedUntil),
@@ -299,6 +310,7 @@ class Reminder {
       other.alertStyle == alertStyle &&
       other.sound == sound &&
       other.snoozeMinutes == snoozeMinutes &&
+      other.autoSnoozeMinutes == autoSnoozeMinutes &&
       other.snoozedUntil == snoozedUntil &&
       other.location == location &&
       other.linkedRef == linkedRef &&
@@ -327,6 +339,7 @@ class Reminder {
     alertStyle,
     sound,
     snoozeMinutes,
+    autoSnoozeMinutes,
     snoozedUntil,
     location,
     linkedRef,

@@ -110,6 +110,24 @@ void main() {
       expect(out.single.category.channel, NotificationChannelId.alarms);
     });
 
+    test('an alarm carries its own auto-snooze, the default none', () {
+      final at = DateTime.utc(2026, 10, 13, 15);
+      final alarm = reminder('a', at: at, style: AlertStyle.alarm);
+      // Default (2 min): nothing in the payload, so it never changes.
+      final plain = plan([alarm]).single.payload;
+      expect(plain.autoSnoozeMinutes, isNull);
+      expect(plain.encode(), isNot(contains('"a"')));
+      // Own value (0 = never): carried for the native side, and decoded.
+      for (final m in [5, 0]) {
+        final p = plan([alarm.copyWith(autoSnoozeMinutes: m)]).single.payload;
+        expect(p.autoSnoozeMinutes, m);
+        expect(NotificationPayload.decode(p.encode())?.autoSnoozeMinutes, m);
+      }
+      // Not an alarm: not carried.
+      final note = reminder('n', at: at).copyWith(autoSnoozeMinutes: 5);
+      expect(plan([note]).single.payload.autoSnoozeMinutes, isNull);
+    });
+
     test('a snoozed reminder fires at snoozedUntil', () {
       final out = plan([
         reminder(

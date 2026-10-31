@@ -53,6 +53,10 @@ import org.json.JSONObject
  * is parked until Dart asks for it (`focusflow/shortcuts` > getInitial);
  * after that, shortcuts tapped while the app runs are pushed to Dart as
  * `onShortcut`. Keys: lib/core/platform/launcher_shortcuts.dart.
+ *
+ * Text and links shared from other apps arrive the same way, forwarded by
+ * [ShareTargetActivity]: parked until Dart asks (`focusflow/share` >
+ * getInitial), then pushed as `onShare` (lib/core/platform/share_intake.dart).
  */
 class MainActivity : FlutterFragmentActivity() {
     private var overLockScreen = false
@@ -61,17 +65,43 @@ class MainActivity : FlutterFragmentActivity() {
     private var shortcutChannel: MethodChannel? = null
     private var pendingShortcut: String? = null
     private var shortcutListening = false
+    private var shareChannel: MethodChannel? = null
+    private val pendingShares = ArrayList<Map<String, String>>()
+    private var shareListening = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyLockScreenPolicy(intent)
         takeShortcut(intent)
+        takeShare(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         applyLockScreenPolicy(intent)
         takeShortcut(intent)
+        takeShare(intent)
+    }
+
+    /**
+     * Picks a forwarded share out of [intent] (once, like a shortcut: the
+     * extras are removed, and a relaunch from Recents is not a new share) and
+     * delivers it to Dart, or parks it until Dart asks.
+     */
+    private fun takeShare(intent: Intent?) {
+        if (intent?.action != ShareTargetActivity.ACTION_SHARE) return
+        val text = intent.getStringExtra(ShareTargetActivity.EXTRA_TEXT).orEmpty()
+        val subject = intent.getStringExtra(ShareTargetActivity.EXTRA_SUBJECT).orEmpty()
+        intent.removeExtra(ShareTargetActivity.EXTRA_TEXT)
+        intent.removeExtra(ShareTargetActivity.EXTRA_SUBJECT)
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
+        if (text.isEmpty() && subject.isEmpty()) return
+        val share = mapOf("text" to text, "subject" to subject)
+        if (shareListening) {
+            shareChannel?.invokeMethod("onShare", share)
+        } else {
+            pendingShares.add(share)
+        }
     }
 
     /**
@@ -181,6 +211,19 @@ class MainActivity : FlutterFragmentActivity() {
                         shortcutListening = true
                         result.success(pendingShortcut)
                         pendingShortcut = null
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
+        shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focusflow/share").also { channel ->
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getInitial" -> {
+                        // Dart is listening from now on: later shares are pushed.
+                        shareListening = true
+                        result.success(ArrayList(pendingShares))
+                        pendingShares.clear()
                     }
                     else -> result.notImplemented()
                 }

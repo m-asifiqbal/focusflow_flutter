@@ -61,15 +61,23 @@ ringing (phone off) comes back as "Missed". If the system refuses the alarm
 (no exact-alarm grant) it falls back to a notification. iOS has no alarm API:
 alarm-style stays a time-sensitive notification there.
 
-**Auto-snooze.** An alarm that rings for 2 minutes without a Stop or Snooze
-is snoozed by itself (`android/.../AlarmAutoSnooze.kt`, started by
-`FocusFlowApplication` when the ring starts). It calls the alarm package's own
+**Auto-snooze.** An alarm that rings without a Stop or Snooze for the
+reminder's **Auto-snooze after** (editor › Alert, Android alarm-style only:
+1–30 min or Never; default 2 min, `reminders.auto_snooze_minutes`) is snoozed
+by itself (`android/.../AlarmAutoSnooze.kt`, started by
+`FocusFlowApplication` when the ring starts). The limit travels in the
+notification payload (`a`, minutes; left out at the default so existing
+payloads and fingerprints don't change) and the native side reads it from the
+alarm package's stored copy of the alarm (`FlutterSharedPreferences`,
+`flutter.__alarm_id__<id>`); missing or unreadable means 2 min, "Never" (0)
+leaves it ringing until stopped. It calls the alarm package's own
 `SnoozeCoordinator` — the same code as the Snooze button — so the alarm is
 re-armed for its snooze length (the reminder's "snooze minutes", default 10),
 the ring is silenced, the screen closes and Dart is told if it is running.
-Each ring is timed separately (a snoozed alarm gets a fresh 2 minutes), and it
+Each ring is timed separately (a snoozed alarm gets a fresh limit), and it
 repeats for as long as nobody answers. It needs no Flutter engine and no open
 alarm screen — only the ringing service, which keeps the process alive.
+Medicine alarms keep the 2-minute default.
 
 ## The alarm guard (Android)
 "Alarms stop when I clear the app from recents." What *fires* an alarm and what

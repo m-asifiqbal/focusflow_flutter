@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/core/router/page_transitions.dart';
 
 import '../helpers/screen_harness.dart';
 import '../helpers/test_container.dart';
@@ -30,7 +31,7 @@ void main() {
     expect(
       find.ancestor(
         of: find.text('Appearance').last,
-        matching: find.byType(CupertinoPageTransition),
+        matching: find.byType(FFSlideTransition),
       ),
       findsOneWidget,
     );

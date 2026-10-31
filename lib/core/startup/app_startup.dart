@@ -5,6 +5,8 @@
 /// - Notification engine start / resume reconcile (core/notifications)
 /// - Launcher shortcuts (app-icon long press): the one that started the app
 ///   and those tapped while it runs (core/platform/launcher_shortcuts.dart)
+/// - Shares from other apps ("Share → FocusFlow"): each is saved as a new
+///   note and opened (features/notes/presentation/shared_note_intake.dart)
 /// - Background job scheduling (core/sync/background_tasks.dart), which also
 ///   runs an overdue backup
 /// - Maintenance: purge Recently Deleted items older than 30 days
@@ -31,10 +33,12 @@ import 'package:focusflow/core/home_widgets/home_widget_sync.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/platform/launcher_shortcuts.dart';
 import 'package:focusflow/core/router/app_router.dart';
+import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/startup/maintenance.dart';
 import 'package:focusflow/core/sync/background_tasks.dart';
 import 'package:focusflow/core/sync/open_sync.dart';
 import 'package:focusflow/core/utils/app_logger.dart';
+import 'package:focusflow/features/notes/presentation/shared_note_intake.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
@@ -54,6 +58,7 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
 
   Timer? _settleTimer;
   LauncherShortcuts? _shortcuts;
+  SharedNoteIntake? _shares;
 
   /// When the app last left the foreground (null while visible).
   DateTime? _hiddenAt;
@@ -68,6 +73,7 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
   @override
   void dispose() {
     _shortcuts?.stopListening();
+    _shares?.stop();
     _settleTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -97,6 +103,13 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
       () => ref.read(notificationEngineProvider).start(),
     );
     _run('shortcuts', _startShortcuts);
+    _run('shares', () {
+      final shares = ref.read(sharedNoteIntakeProvider);
+      _shares = shares;
+      return shares.start(
+        (id) => _openTarget(LauncherTarget(AppRoutes.note(id))),
+      );
+    });
     // Android home-screen widgets: keep them current while the app runs.
     _run('widgets', () => ref.read(homeWidgetSyncProvider).start());
     _settleTimer = Timer(settleDelay, () {

@@ -146,13 +146,15 @@ abstract interface class NotesRepository {
   Future<Note?> getNote(String id);
 
   /// Creates a note and returns its id. [initialText] (quick capture / scan)
-  /// becomes the body; [title] the title.
+  /// becomes the body; [title] the title. [initialDelta]: the same body as
+  /// Quill Delta JSON when it carries formatting (links of a shared page).
   Future<String> createEmpty({
     String? folderId,
     String? colorHex,
     List<String> tagNames = const [],
     String title = '',
     String initialText = '',
+    String? initialDelta,
   });
 
   /// Auto-save of the editor content.
@@ -166,6 +168,9 @@ abstract interface class NotesRepository {
   });
 
   Future<void> setColor(String id, String? colorHex);
+
+  /// The paper the editor draws behind the body (lined / grid / plain).
+  Future<void> setPaper(String id, NotePaper paper);
   Future<void> setPinned(String id, bool pinned);
   Future<void> setFavorite(String id, bool favorite);
 
@@ -196,6 +201,12 @@ abstract interface class NotesRepository {
   /// Manual order: place [id] between [afterId] (above) and [beforeId]
   /// (below); either may be null at the ends.
   Future<void> reorder(String id, {String? afterId, String? beforeId});
+
+  /// Manual order: [orderedIds] (the list as shown, already rearranged)
+  /// take the manual positions those notes hold between them, in this order
+  /// — notes not in the list keep theirs. Works from any sort (the shown
+  /// order becomes the manual one) and does not count as an edit.
+  Future<void> setManualOrder(List<String> orderedIds);
 
   /// Records an image / file attached to the note ([localPath] is relative
   /// to the app documents directory, e.g. `attachments/<id>.jpg`).

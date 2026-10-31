@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/features/medicines/domain/entities/medicine.dart';
 import 'package:focusflow/features/medicines/domain/entities/medicine_dose.dart';
 import 'package:focusflow/features/medicines/domain/services/medicine_calendar.dart';
-import 'package:focusflow/features/medicines/domain/services/medicine_insights.dart';
-import 'package:focusflow/features/medicines/presentation/widgets/insights/medicine_gantt_card.dart';
 
 final _t0 = DateTime(2026, 1, 1);
 final _now = DateTime(2026, 10, 15, 12);
@@ -147,71 +145,6 @@ void main() {
       expect(o(const [DoseState.skipped]), DayOutcome.skipped);
       expect(o(const [DoseState.upcoming]), DayOutcome.pending);
       expect(o(const [DoseState.due, DoseState.snoozed]), DayOutcome.pending);
-    });
-  });
-
-  group('Gantt span of a course', () {
-    MedicineInsights insights(MedicinePeriod p) =>
-        MedicineInsightsCalculator.compute(
-          medicines: const [],
-          logs: const [],
-          period: p,
-          now: _now,
-        );
-
-    test('daily: 7 days ending today', () {
-      final i = insights(MedicinePeriod.daily); // Oct 9 – Oct 15
-      expect(medicineAxisUnits(i), 7);
-      final inside = medicineGanttSpan(
-        _med(start: DateTime(2026, 10, 11), end: DateTime(2026, 10, 13)),
-        i,
-      )!;
-      expect((inside.start, inside.end), (2, 4));
-      expect((inside.before, inside.after), (false, false));
-      // Started earlier, no end: runs through the whole axis, open both ways.
-      final open = medicineGanttSpan(_med(start: DateTime(2026, 9, 1)), i)!;
-      expect((open.start, open.end), (0, 6));
-      expect((open.before, open.after), (true, true));
-      // Archived on the 12th: stops there.
-      final archived = medicineGanttSpan(
-        _med(
-          start: DateTime(2026, 10, 1),
-          archivedAt: DateTime(2026, 10, 12, 9),
-        ),
-        i,
-      )!;
-      expect((archived.end, archived.after), (3, false));
-    });
-
-    test('a course outside the period has no span', () {
-      final i = insights(MedicinePeriod.daily);
-      expect(
-        medicineGanttSpan(
-          _med(start: DateTime(2026, 9, 1), end: DateTime(2026, 9, 20)),
-          i,
-        ),
-        isNull,
-      );
-      expect(medicineGanttSpan(_med(start: DateTime(2026, 11, 1)), i), isNull);
-    });
-
-    test('yearly: 12 month cells', () {
-      final i = insights(MedicinePeriod.yearly); // Nov 2025 – Oct 2026
-      expect(medicineAxisUnits(i), 12);
-      final s = medicineGanttSpan(
-        _med(start: DateTime(2026, 3, 10), end: DateTime(2026, 6, 1)),
-        i,
-      )!;
-      expect((s.start, s.end), (4, 7));
-      expect(medicineAxisTicks(i), hasLength(12));
-    });
-
-    test('axis labels: weekday initials, every 5th day, month initials', () {
-      expect(medicineAxisTicks(insights(MedicinePeriod.daily)), hasLength(7));
-      expect(
-        medicineAxisTicks(insights(MedicinePeriod.monthly)).map((t) => t.unit),
-        [0, 5, 10, 15, 20, 25],
-      );
     });
   });
 

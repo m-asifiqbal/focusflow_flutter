@@ -1,9 +1,8 @@
-/// Screen-to-screen motion: pushes slide (Cupertino-style, both
+/// Screen-to-screen motion: pushes slide (FFSlideTransition, both
 /// platforms); a page opened from a card wrapped in FFOpenOriginTracker
 /// grows out of that card; reduce motion switches instantly.
 library;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/router/page_transitions.dart';
@@ -121,7 +120,7 @@ double _surfaceAlpha(WidgetTester tester, String text) {
 /// The slide transition wrapping the page that shows [text].
 Finder slideAround(String text) => find.ancestor(
   of: find.text(text),
-  matching: find.byType(CupertinoPageTransition),
+  matching: find.byType(FFSlideTransition),
 );
 
 void main() {
@@ -197,7 +196,7 @@ void main() {
     pages.where.value = Alignment.bottomRight;
     Navigator.of(tester.element(find.text('Detail page'))).pop();
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 230)); // of 260
+    await tester.pump(const Duration(milliseconds: 200)); // of 230
     // The list is back on stage; find the card's place now.
     final card = tester.getRect(find.text('Open card'));
     final box = _containerRect(tester, 'Detail page');
@@ -328,5 +327,30 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Detail page'), findsOneWidget);
     });
+  });
+
+  testWidgets('a slid-in page follows the edge swipe and closes', (
+    tester,
+  ) async {
+    final pages = _Pages()..tracked.value = false;
+    addTearDown(pages.dispose);
+    await tester.pumpWidget(pages.app());
+    await tester.tap(find.text('Open card'));
+    await tester.pumpAndSettle();
+    expect(slideAround('Detail page'), findsWidgets);
+    final home = tester.getTopLeft(find.text('Detail page')).dx;
+
+    final gesture = await tester.startGesture(const Offset(4, 300));
+    for (var i = 0; i < 8; i++) {
+      await gesture.moveBy(const Offset(40, 0));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    // Under the finger, one to one (no curve while dragging).
+    final moved = tester.getTopLeft(find.text('Detail page')).dx - home;
+    expect(moved, closeTo(320, 30));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('Detail page'), findsNothing);
+    expect(find.text('Open card'), findsOneWidget);
   });
 }

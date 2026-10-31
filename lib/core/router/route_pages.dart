@@ -23,8 +23,8 @@ import 'package:focusflow/core/router/open_origin.dart';
 import 'package:go_router/go_router.dart';
 
 /// A [MaterialPage] whose route keeps the page *underneath* still when it
-/// grows out of a tapped card. A normal push slides the old page a third of
-/// the way left (parallax); next to a card-to-details container that looks
+/// grows out of a tapped card. A normal push slides the old page part of
+/// the way over (parallax); next to a card-to-details container that looks
 /// like two unrelated motions, so such a route declines to transition from it.
 class FFPage<T> extends MaterialPage<T> {
   const FFPage({
@@ -66,11 +66,11 @@ class _FFPageRoute<T> extends PageRoute<T>
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) =>
       FFOpenOrigin.claim(this) == null;
 
-  // ── edge swipe-back for container pages (see ContainerBackGesture) ──
+  // ── edge swipe-back (see ContainerBackGesture) ──
 
   @override
   bool get backGestureEnabled {
-    if (isFirst || willHandlePopInternally) return false;
+    if (isFirst || willHandlePopInternally || fullscreenDialog) return false;
     if (popDisposition == RoutePopDisposition.doNotPop) return false;
     final nav = navigator;
     final primary = animation;

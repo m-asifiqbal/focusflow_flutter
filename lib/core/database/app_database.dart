@@ -65,7 +65,8 @@ class AppDatabase extends _$AppDatabase {
   /// `medicines` + `medicine_doses` came later *without* a version bump:
   /// they are created on open when missing ([_ensureMedicineSchema]), so
   /// backups of this app stay readable by installs that predate them (an
-  /// older install skips the tables it doesn't know).
+  /// older install skips the tables it doesn't know). Same for
+  /// the columns in [addedColumns] ([_ensureAddedColumns]).
   @override
   int get schemaVersion => 3;
 
@@ -106,8 +107,33 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA recursive_triggers = ON');
       await _ensureQueryIndexes();
       await _ensureMedicineSchema();
+      await _ensureAddedColumns();
     },
   );
+
+  /// Columns added after v3 shipped — (table, column, type) — created on
+  /// open when missing: the same no-bump rule as the medicine tables, so
+  /// backups stay readable by older installs (a restore keeps only the
+  /// columns the schema has; a missing one takes its default).
+  static const List<(String, String, String)> addedColumns = [
+    // An Android alarm's "Auto-snooze after".
+    ('reminders', 'auto_snooze_minutes', 'INTEGER NOT NULL DEFAULT 2'),
+    // A note's paper (lined / grid).
+    ('notes', 'paper', 'TEXT'),
+  ];
+
+  Future<void> _ensureAddedColumns() async {
+    final known = <String, Set<String>>{};
+    for (final (table, column, type) in addedColumns) {
+      final names = known[table] ??= {
+        for (final c in await customSelect('PRAGMA table_info($table)').get())
+          c.read<String>('name'),
+      };
+      if (!names.contains(column)) {
+        await customStatement('ALTER TABLE $table ADD COLUMN $column $type');
+      }
+    }
+  }
 
   /// (table, fts table, indexed columns) for every searchable module.
   static const List<(String, String, List<String>)> searchTables = [

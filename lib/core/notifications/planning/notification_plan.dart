@@ -208,6 +208,7 @@ class NotificationPayload {
     this.open,
     this.route,
     this.snoozeMinutes,
+    this.autoSnoozeMinutes,
     this.day,
     this.doses = const [],
   });
@@ -228,6 +229,12 @@ class NotificationPayload {
   /// Snooze length for [NotificationButton.snooze].
   final int? snoozeMinutes;
 
+  /// Android alarms: minutes of unanswered ringing before the alarm snoozes
+  /// itself (0 = never). Null = the native default (2 min), so the payloads
+  /// — and fingerprints — of alarms that keep the default never change.
+  /// Read natively by AlarmAutoSnooze.kt from the alarm's stored payload.
+  final int? autoSnoozeMinutes;
+
   /// Habit day for [NotificationButton.checkIn] / medicine dose day
   /// (`yyyy-MM-dd`).
   final String? day;
@@ -245,6 +252,7 @@ class NotificationPayload {
         open: open,
         route: route,
         snoozeMinutes: snoozeMinutes,
+        autoSnoozeMinutes: autoSnoozeMinutes,
         day: day,
         doses: doses,
       );
@@ -256,6 +264,7 @@ class NotificationPayload {
     if (open != null) 'o': '${open!.type.key}/${open!.id}',
     if (route != null) 'r': route,
     if (snoozeMinutes != null) 's': snoozeMinutes,
+    if (autoSnoozeMinutes != null) 'a': autoSnoozeMinutes,
     if (day != null) 'd': day,
     if (doses.isNotEmpty) 'm': doses,
   });
@@ -275,6 +284,7 @@ class NotificationPayload {
         open: _ref(j['o']),
         route: j['r'] is String ? j['r'] as String : null,
         snoozeMinutes: j['s'] is num ? (j['s'] as num).toInt() : null,
+        autoSnoozeMinutes: j['a'] is num ? (j['a'] as num).toInt() : null,
         day: j['d'] is String ? j['d'] as String : null,
         doses: j['m'] is List
             ? List.unmodifiable((j['m'] as List).whereType<String>())

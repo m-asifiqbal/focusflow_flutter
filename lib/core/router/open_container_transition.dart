@@ -30,9 +30,10 @@ import 'package:focusflow/core/router/open_origin.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 
 abstract final class _Motion {
-  /// Route durations while a container is in play (see FFPage).
-  static const Duration opening = Duration(milliseconds: 340);
-  static const Duration closing = Duration(milliseconds: 260);
+  /// Route durations while a container is in play (see FFPage). Kept short:
+  /// on a 60 Hz screen every extra 50 ms is three more frames of waiting.
+  static const Duration opening = Duration(milliseconds: 300);
+  static const Duration closing = Duration(milliseconds: 230);
 
   /// Opening: leaves the card softly, accelerates, settles at full screen.
   static const Curve open = Cubic(0.3, 0.0, 0.1, 1.0);

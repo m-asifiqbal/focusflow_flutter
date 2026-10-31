@@ -2,9 +2,9 @@
 /// REMINDER ALERT OPTIONS — choices of the editor's ALERT section
 /// ============================================================
 ///
-/// What: the alert sounds (stored as `Reminder.sound` keys) and the
-/// default snooze lengths offered by the reminder editor (screen 13),
-/// with their labels.
+/// What: the alert sounds (stored as `Reminder.sound` keys), the default
+/// snooze lengths and the alarm auto-snooze delays offered by the reminder
+/// editor (screen 13), with their labels.
 /// Why: one catalogue for the editor, Settings › Notifications and the
 /// notification planner, so a stored key always has a readable label.
 /// ============================================================
@@ -28,6 +28,13 @@ abstract final class ReminderAlertOptions {
 
   /// Snooze lengths (minutes).
   static const List<int> snoozeMinutes = [5, 10, 15, 30, 60];
+
+  /// "Auto-snooze after" of an Android alarm (minutes; 0 = never).
+  static const List<int> autoSnoozeMinutes = [1, 2, 3, 5, 10, 15, 30, 0];
+
+  /// "2 min", or "Never" for 0.
+  static String autoSnoozeLabel(int minutes) =>
+      minutes <= 0 ? tr('Never') : snoozeLabel(minutes);
 
   /// "Chime" for `chime`.
   static String soundLabel(String key) {

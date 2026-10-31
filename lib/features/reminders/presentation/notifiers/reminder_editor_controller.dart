@@ -150,6 +150,9 @@ class ReminderEditorController
   void setSnooze(int minutes) =>
       _draft((r) => r.copyWith(snoozeMinutes: minutes));
 
+  void setAutoSnooze(int minutes) =>
+      _draft((r) => r.copyWith(autoSnoozeMinutes: minutes));
+
   /// Links a task / note; null removes the link.
   void setLink(ItemRef? link, String? title) => _draft(
     (r) => link == null

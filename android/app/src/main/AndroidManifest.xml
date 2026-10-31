@@ -96,6 +96,23 @@
              shows even though that start has no Flutter engine. Its own task
              (taskAffinity) so closing it returns to whatever the alarm
              interrupted, not into the app. -->
+        <!-- "Share" from any app (a link, some text): saved as a new note.
+             Invisible; forwards to MainActivity in the app's own task (see
+             ShareTargetActivity.kt for why it is not MainActivity itself). -->
+        <activity
+            android:name=".ShareTargetActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".AlarmActivity"
             android:exported="false"
