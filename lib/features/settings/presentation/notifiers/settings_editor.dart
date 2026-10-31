@@ -111,6 +111,15 @@ class SettingsEditor {
   Future<void> setSwipeRight(SwipeAction v) =>
       _set((s) => s.copyWith(swipeRight: v));
 
+  Future<void> setWidgetsTheme(WidgetsTheme v) =>
+      _set((s) => s.copyWith(widgetsTheme: v));
+
+  Future<void> setWidgetsShowNoteText(bool v) =>
+      _set((s) => s.copyWith(widgetsShowNoteText: v));
+
+  Future<void> setWidgetsShowCompleted(bool v) =>
+      _set((s) => s.copyWith(widgetsShowCompleted: v));
+
   Future<void> setSounds(bool v) => _set((s) => s.copyWith(soundsEnabled: v));
 
   Future<void> setHaptics(bool v) => _set((s) => s.copyWith(hapticsEnabled: v));

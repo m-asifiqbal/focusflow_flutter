@@ -140,7 +140,9 @@ abstract final class RecoveryKitPdf {
             ),
             pw.SizedBox(height: 8),
             para(
-              trPrint('1. Open the Vault and tap "Forgot PIN?" on the lock screen.'),
+              trPrint(
+                '1. Open the Vault and tap "Forgot PIN?" on the lock screen.',
+              ),
             ),
             para(trPrint('2. Enter this code, then choose a new master PIN.')),
             para(

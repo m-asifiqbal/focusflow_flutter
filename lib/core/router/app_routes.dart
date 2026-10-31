@@ -90,6 +90,7 @@ abstract final class AppRoutes {
   static const settingsGeneral = '/settings/general';
   static const settingsLanguage = '/settings/language';
   static const settingsHomeLayout = '/settings/home-layout';
+  static const settingsHomeWidgets = '/settings/widgets';
   static const settingsGestures = '/settings/gestures';
   static const settingsSoundsHaptics = '/settings/sounds-haptics';
   static const settingsAppLock = '/settings/app-lock';

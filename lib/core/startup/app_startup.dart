@@ -27,6 +27,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/home_widgets/home_widget_sync.dart';
 import 'package:focusflow/core/notifications/notification_engine.dart';
 import 'package:focusflow/core/platform/launcher_shortcuts.dart';
 import 'package:focusflow/core/router/app_router.dart';
@@ -96,6 +97,8 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
       () => ref.read(notificationEngineProvider).start(),
     );
     _run('shortcuts', _startShortcuts);
+    // Android home-screen widgets: keep them current while the app runs.
+    _run('widgets', () => ref.read(homeWidgetSyncProvider).start());
     _settleTimer = Timer(settleDelay, () {
       if (!mounted) return;
       _run(
@@ -112,15 +115,15 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
   Future<void> _startShortcuts() async {
     final shortcuts = ref.read(launcherShortcutsProvider);
     _shortcuts = shortcuts;
-    shortcuts.listen(_openShortcut);
-    final first = await shortcuts.initial();
-    if (first != null) _openShortcut(first);
+    shortcuts.listenTargets(_openTarget);
+    final first = await shortcuts.initialTarget();
+    if (first != null) _openTarget(first);
   }
 
-  void _openShortcut(LauncherShortcut shortcut) {
+  void _openTarget(LauncherTarget target) {
     // Before onboarding there is nothing to open yet.
     if (!mounted || !ref.read(settingsProvider).onboardingSeen) return;
-    openLauncherShortcut(ref.read(routerProvider), shortcut);
+    openLauncherRoute(ref.read(routerProvider), target.route);
   }
 
   void _onResume({required Duration away}) {
@@ -129,6 +132,9 @@ class _AppStartupHostState extends ConsumerState<AppStartupHost>
       () => ref.read(notificationEngineProvider).onResume(),
     );
     _run('maintenance', () => ref.read(maintenanceProvider).runIfDue());
+    // The widgets may have changed things in the background, and the day
+    // may have rolled over.
+    ref.read(homeWidgetSyncProvider).schedule(force: true);
     // Back after a real break counts as opening the app again. Before the
     // launch sync had its turn (settle timer pending) it isn't needed.
     if (away >= OpenSync.resumeAfter && !(_settleTimer?.isActive ?? true)) {

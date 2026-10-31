@@ -34,6 +34,11 @@ enum BadgeMode { overdue, today, none }
 /// device (reduced on a low-end phone), the others force it.
 enum PerformanceMode { auto, full, reduced }
 
+/// Settings › Home screen widgets › Theme: the look of every Android widget
+/// ([app] follows the app's light / dark / system choice; a single widget can
+/// override it in its own settings).
+enum WidgetsTheme { app, light, dark }
+
 enum BackupFrequency { daily, weekly }
 
 enum LocalBackupFrequency { off, daily, weekly }
@@ -102,6 +107,10 @@ class AppSettings {
     this.lockScreenVisibility = LockScreenVisibility.titleOnly,
     this.badgeMode = BadgeMode.overdue,
     this.keepAlarmsAlive = true,
+    // ── Home screen widgets (Android) ──
+    this.widgetsTheme = WidgetsTheme.app,
+    this.widgetsShowNoteText = true,
+    this.widgetsShowCompleted = true,
     // ── Modules ──
     this.notesView = NotesView.grid,
     this.notesSort = NotesSort.lastEdited,
@@ -223,6 +232,13 @@ class AppSettings {
   /// (the alarm guard, see core/notifications/alarm_guard.dart).
   final bool keepAlarmsAlive;
 
+  /// Home screen widgets: their theme, whether notes show a text preview
+  /// (off = titles only, for a phone others can see), and whether completed
+  /// tasks stay listed (struck through) until the day ends.
+  final WidgetsTheme widgetsTheme;
+  final bool widgetsShowNoteText;
+  final bool widgetsShowCompleted;
+
   final NotesView notesView;
   final NotesSort notesSort;
   final String? notesDefaultColor;
@@ -330,6 +346,9 @@ class AppSettings {
     LockScreenVisibility? lockScreenVisibility,
     BadgeMode? badgeMode,
     bool? keepAlarmsAlive,
+    WidgetsTheme? widgetsTheme,
+    bool? widgetsShowNoteText,
+    bool? widgetsShowCompleted,
     NotesView? notesView,
     NotesSort? notesSort,
     String? Function()? notesDefaultColor,
@@ -413,6 +432,9 @@ class AppSettings {
       lockScreenVisibility: lockScreenVisibility ?? this.lockScreenVisibility,
       badgeMode: badgeMode ?? this.badgeMode,
       keepAlarmsAlive: keepAlarmsAlive ?? this.keepAlarmsAlive,
+      widgetsTheme: widgetsTheme ?? this.widgetsTheme,
+      widgetsShowNoteText: widgetsShowNoteText ?? this.widgetsShowNoteText,
+      widgetsShowCompleted: widgetsShowCompleted ?? this.widgetsShowCompleted,
       notesView: notesView ?? this.notesView,
       notesSort: notesSort ?? this.notesSort,
       notesDefaultColor: notesDefaultColor != null
@@ -505,6 +527,9 @@ class AppSettings {
     'lockScreenVisibility': lockScreenVisibility.name,
     'badgeMode': badgeMode.name,
     'keepAlarmsAlive': keepAlarmsAlive,
+    'widgetsTheme': widgetsTheme.name,
+    'widgetsShowNoteText': widgetsShowNoteText,
+    'widgetsShowCompleted': widgetsShowCompleted,
     'notesView': notesView.name,
     'notesSort': notesSort.name,
     'notesDefaultColor': notesDefaultColor,
@@ -651,6 +676,9 @@ class AppSettings {
       ),
       badgeMode: e(BadgeMode.values, j['badgeMode'], d.badgeMode),
       keepAlarmsAlive: b('keepAlarmsAlive', d.keepAlarmsAlive),
+      widgetsTheme: e(WidgetsTheme.values, j['widgetsTheme'], d.widgetsTheme),
+      widgetsShowNoteText: b('widgetsShowNoteText', d.widgetsShowNoteText),
+      widgetsShowCompleted: b('widgetsShowCompleted', d.widgetsShowCompleted),
       notesView: e(NotesView.values, j['notesView'], d.notesView),
       notesSort: e(NotesSort.values, j['notesSort'], d.notesSort),
       notesDefaultColor: sn('notesDefaultColor'),

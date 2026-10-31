@@ -74,6 +74,12 @@ abstract final class SettingsIndex {
       route: AppRoutes.settingsHomeLayout,
     ),
     SettingsEntry(
+      title: tr('Home screen widgets'),
+      page: tr('Preferences'),
+      keywords: ['widget', 'home screen', 'android', 'privacy', 'theme'],
+      route: AppRoutes.settingsHomeWidgets,
+    ),
+    SettingsEntry(
       title: tr('Gestures & swipe actions'),
       page: tr('Preferences'),
       keywords: ['swipe left', 'swipe right', 'archive', 'complete'],

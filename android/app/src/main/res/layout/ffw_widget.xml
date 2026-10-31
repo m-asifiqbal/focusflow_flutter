@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/ffw_bg" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/titleBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="30dp"
+                    android:layout_height="30dp">
+
+                    <ImageView
+                        android:id="@+id/badge"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ffw_circle" />
+
+                    <ImageView
+                        android:id="@+id/icon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_ffw_all" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/subtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/add"
+                android:layout_width="44dp"
+                android:layout_height="44dp">
+
+                <ImageView
+                    android:id="@+id/addBg"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ffw_circle" />
+
+                <ImageView
+                    android:id="@+id/addIcon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_ffw_add" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <FrameLayout android:id="@+id/tab0" android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1">
+                <ImageView android:id="@+id/tab0bg" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ffw_circle" />
+                <ImageView android:id="@+id/tab0i" android:layout_width="16dp" android:layout_height="16dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ic_ffw_all" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/tab1" android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1">
+                <ImageView android:id="@+id/tab1bg" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ffw_circle" />
+                <ImageView android:id="@+id/tab1i" android:layout_width="16dp" android:layout_height="16dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ic_ffw_all" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/tab2" android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1">
+                <ImageView android:id="@+id/tab2bg" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ffw_circle" />
+                <ImageView android:id="@+id/tab2i" android:layout_width="16dp" android:layout_height="16dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ic_ffw_all" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/tab3" android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1">
+                <ImageView android:id="@+id/tab3bg" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ffw_circle" />
+                <ImageView android:id="@+id/tab3i" android:layout_width="16dp" android:layout_height="16dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ic_ffw_all" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/tab4" android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1">
+                <ImageView android:id="@+id/tab4bg" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ffw_circle" />
+                <ImageView android:id="@+id/tab4i" android:layout_width="16dp" android:layout_height="16dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ic_ffw_all" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/tab5" android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1">
+                <ImageView android:id="@+id/tab5bg" android:layout_width="30dp" android:layout_height="30dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ffw_circle" />
+                <ImageView android:id="@+id/tab5i" android:layout_width="16dp" android:layout_height="16dp" android:layout_gravity="center" android:importantForAccessibility="no" android:src="@drawable/ic_ffw_all" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:layout_weight="1">
+
+            <ListView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:dividerHeight="0dp"
+                android:scrollbars="none" />
+
+            <TextView
+                android:id="@+id/empty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="8dp"
+                android:textSize="13sp" />
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>

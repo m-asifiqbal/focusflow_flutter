@@ -58,7 +58,9 @@ abstract final class L10n {
   /// Like [translate] for text drawn into a PDF with Latin-only fonts: the
   /// active language when its script can be drawn, English otherwise.
   static String translatePrint(String key, [Map<String, Object?>? args]) =>
-      _language.printable ? translate(key, args) : format(key, args ?? const {}, AppLanguage.en);
+      _language.printable
+      ? translate(key, args)
+      : format(key, args ?? const {}, AppLanguage.en);
 
   /// Fills [template] (see the library comment) for [language].
   static String format(

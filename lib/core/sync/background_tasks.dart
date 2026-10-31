@@ -36,6 +36,11 @@ abstract class BackgroundTasks {
   static const String backupTask = 'com.iqballab.focusflow.backup';
   static const String maintenanceTask = 'com.iqballab.focusflow.maintenance';
 
+  /// One tap on a home-screen widget's check circle (android/.../widget):
+  /// enqueued natively as a one-off WorkManager task whose input carries the
+  /// action (see core/home_widgets/widget_actions.dart).
+  static const String widgetActionTask = 'com.iqballab.focusflow.widgetAction';
+
   /// (Re)schedules jobs to match the current settings. Idempotent.
   Future<void> ensureScheduled();
 }

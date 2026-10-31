@@ -10,4 +10,18 @@
     <string name="shortcut_new_reminder_long">New Reminder</string>
     <string name="shortcut_habits_short">Habits</string>
     <string name="shortcut_habits_long">Habits</string>
+
+    <!-- Home-screen widget picker (the widgets' own text comes from the app). -->
+    <string name="ffw_label_today">FocusFlow · All together</string>
+    <string name="ffw_label_tasks">FocusFlow · Tasks</string>
+    <string name="ffw_label_habits">FocusFlow · Habits</string>
+    <string name="ffw_label_medicines">FocusFlow · Medicine</string>
+    <string name="ffw_label_reminders">FocusFlow · Reminders</string>
+    <string name="ffw_label_notes">FocusFlow · Notes</string>
+    <string name="ffw_desc_today">Tasks, habits, doses, reminders and notes together, with tabs.</string>
+    <string name="ffw_desc_tasks">Today’s tasks. Tap the circle to complete one.</string>
+    <string name="ffw_desc_habits">Today’s habits and streaks. Tap to check in.</string>
+    <string name="ffw_desc_medicines">Today’s doses. Tap to mark one taken.</string>
+    <string name="ffw_desc_reminders">What is coming up today.</string>
+    <string name="ffw_desc_notes">Pinned and recent notes.</string>
 </resources>

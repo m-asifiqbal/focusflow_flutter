@@ -46,6 +46,43 @@ enum LauncherShortcut {
   }
 }
 
+/// Where a launcher tap goes: an app-icon shortcut, or an item / list / editor
+/// a home-screen widget row or button points at (`route:/tasks/<id>`).
+/// Widget routes come from our own snapshot, but the intent that carries
+/// them can be sent by any app, so only a few known path families are
+/// accepted ([isSafeRoute]).
+class LauncherTarget {
+  const LauncherTarget(this.route);
+
+  static const String routePrefix = 'route:';
+
+  final String route;
+
+  static final RegExp _safe = RegExp(
+    r'^/(home|tasks|notes|habits|medicines|reminders|item|library)(/[A-Za-z0-9_\-./%]*)?(\?[A-Za-z0-9_\-=&.%]*)?$',
+  );
+
+  /// A path the app may open on behalf of a widget.
+  static bool isSafeRoute(String route) =>
+      route.length <= 300 && !route.contains('..') && _safe.hasMatch(route);
+
+  static LauncherTarget? fromKey(String? key) {
+    final shortcut = LauncherShortcut.fromKey(key);
+    if (shortcut != null) return LauncherTarget(shortcut.route);
+    if (key != null && key.startsWith(routePrefix)) {
+      final route = key.substring(routePrefix.length);
+      if (isSafeRoute(route)) return LauncherTarget(route);
+    }
+    return null;
+  }
+}
+
+/// Opens [route] like a launcher shortcut (see [openLauncherShortcut]).
+void openLauncherRoute(GoRouter router, String route) {
+  if (router.state.uri.toString() == route) return;
+  openLocationOn(router, route);
+}
+
 /// Opens [shortcut] on top of whatever the app is showing: editors and the
 /// notification centre are pushed (back returns to where the user was), the
 /// habit tracker follows [openLocationOn] (a tab page). Does nothing when
@@ -74,6 +111,28 @@ class LauncherShortcuts {
     } on PlatformException {
       return null;
     }
+  }
+
+  /// Like [initial], but also understands widget routes.
+  Future<LauncherTarget?> initialTarget() async {
+    try {
+      return LauncherTarget.fromKey(
+        await _channel.invokeMethod<String>('getInitial'),
+      );
+    } on MissingPluginException {
+      return null;
+    } on PlatformException {
+      return null;
+    }
+  }
+
+  /// Calls [onTarget] for every shortcut or widget tap while the app runs.
+  void listenTargets(void Function(LauncherTarget target) onTarget) {
+    _channel.setMethodCallHandler((call) async {
+      if (call.method != 'onShortcut') return;
+      final t = LauncherTarget.fromKey(call.arguments as String?);
+      if (t != null) onTarget(t);
+    });
   }
 
   /// Calls [onShortcut] for every shortcut tapped while the app is running.

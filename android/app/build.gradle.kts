@@ -70,6 +70,9 @@ dependencies {
     // The vault's biometric key copy (BiometricVault.kt); the same version
     // local_auth already brings in.
     implementation("androidx.biometric:biometric:1.1.0")
+    // Home-screen widgets queue the app's own WorkManager task (the plugin
+    // brings the same version).
+    implementation("androidx.work:work-runtime:2.11.2")
 }
 
 flutter {

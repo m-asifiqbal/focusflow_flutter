@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/home_widgets/home_widget_channel.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
@@ -114,6 +115,15 @@ class SettingsPreferencesSection extends ConsumerWidget {
           title: tr('Home layout & widgets'),
           onTap: () => context.push(AppRoutes.settingsHomeLayout),
         ),
+        if (HomeWidgetChannel.supported)
+          FFListRow(
+            leading: settingsTile(
+              FontAwesomeIcons.tableCells,
+              SettingsTints.emeraldDeep,
+            ),
+            title: tr('Home screen widgets'),
+            onTap: () => context.push(AppRoutes.settingsHomeWidgets),
+          ),
         FFListRow(
           leading: settingsTile(
             FontAwesomeIcons.solidHandPointer,

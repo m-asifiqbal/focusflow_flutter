@@ -15,6 +15,8 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusflow/core/home_widgets/home_widget_sync.dart';
+import 'package:focusflow/core/home_widgets/widget_actions.dart';
 import 'package:focusflow/core/l10n/language_service.dart';
 import 'package:focusflow/core/database/app_database.dart';
 import 'package:focusflow/core/database/encrypted_database.dart';
@@ -55,12 +57,15 @@ Future<bool> runNotificationMaintenance(
 /// Top-level callback handed to `Workmanager().initialize`.
 @pragma('vm:entry-point')
 void backgroundDispatcher() {
-  Workmanager().executeTask((task, _) => runBackgroundTask(task));
+  Workmanager().executeTask((task, input) => runBackgroundTask(task, input));
 }
 
 /// Runs one scheduled task; true = done (also when there was nothing to
 /// do), false = let the OS retry later.
-Future<bool> runBackgroundTask(String task) async {
+Future<bool> runBackgroundTask(
+  String task, [
+  Map<String, dynamic>? input,
+]) async {
   AppDatabase? db;
   ProviderContainer? container;
   try {
@@ -85,12 +90,25 @@ Future<bool> runBackgroundTask(String task) async {
         notificationGatewayProvider.overrideWithValue(gateway),
       ],
     );
+    if (task == BackgroundTasks.widgetActionTask) {
+      // A widget tap: do just that (fast), refresh the widgets, re-plan the
+      // notifications it may have made obsolete — no backup / maintenance.
+      await runWidgetAction(container.read, {...?input});
+      await runNotificationMaintenance(
+        container.read,
+        gateway.initializeInBackground,
+      );
+      return true;
+    }
     final jobs = BackgroundJobs(container.read);
     await jobs.run(maintenance: true);
     await runNotificationMaintenance(
       container.read,
       gateway.initializeInBackground,
     );
+    // The widgets show today's data: the app may not be opened for days, and
+    // the day rolls over meanwhile.
+    await pushWidgetSnapshot(container.read);
     if (task == BackgroundTasks.backupTask) {
       // iOS processing tasks are one-shot: queue the next one.
       await container.read(backgroundTasksProvider).ensureScheduled();

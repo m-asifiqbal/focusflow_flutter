@@ -163,6 +163,12 @@ class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         configureSecureClipboard(flutterEngine)
+        // Home-screen widgets: the app pushes snapshots, the launcher asks to pin.
+        val widgetBridge = com.iqballab.focusflow.widget.HomeWidgetBridge(this)
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            com.iqballab.focusflow.widget.HomeWidgetBridge.CHANNEL,
+        ).setMethodCallHandler { call, result -> widgetBridge.handle(call, result) }
         // The vault's biometric key copy (androidx BiometricPrompt).
         val biometricVault = BiometricVault(this)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, BiometricVault.CHANNEL)
