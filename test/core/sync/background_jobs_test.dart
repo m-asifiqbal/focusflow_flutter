@@ -140,6 +140,20 @@ void main() {
       expect(again, isNot(contains(BackgroundStep.localBackup)));
     });
 
+    test(
+      'the launch catch-up (drive: false while "Sync when app opens" is off) '
+      'never touches Drive',
+      () async {
+        net.wifi = true;
+        final h = await harness(now: DateTime(2026, 3, 5, 22));
+        final jobs = BackgroundJobs(h.container.read);
+        final done = await jobs.run(maintenance: false, drive: false);
+        expect(done, isNot(contains(BackgroundStep.driveBackup)));
+        expect(store.backupNames, isEmpty);
+        expect(h.read(syncStatusProvider).lastSyncAt, isNull);
+      },
+    );
+
     test('no Drive backup when auto backup is off or signed out', () async {
       net.wifi = true;
       final h = await harness(now: DateTime(2026, 3, 5, 22));

@@ -80,6 +80,9 @@ class FakeSettingsBridge implements SettingsBackupBridge {
 
   final applied = <({BackupSettings settings, bool replace})>[];
 
+  /// Every [adoptMissingSetup] call.
+  final adopted = <BackupSettings>[];
+
   @override
   Future<BackupSettings?> export() async => exported;
 
@@ -87,6 +90,11 @@ class FakeSettingsBridge implements SettingsBackupBridge {
   Future<void> apply(BackupSettings incoming, {required bool replace}) async {
     if (applyError != null) throw applyError!;
     applied.add((settings: incoming, replace: replace));
+  }
+
+  @override
+  Future<void> adoptMissingSetup(BackupSettings incoming) async {
+    adopted.add(incoming);
   }
 }
 

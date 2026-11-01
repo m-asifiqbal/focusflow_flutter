@@ -59,6 +59,7 @@ enum ExportModule {
   reminders('reminders', 'reminder'),
   habits('habits', 'habit'),
   medicines('medicines', 'medicine'),
+  prayers('prayers', 'prayer'),
   vault('vault_items', 'vault');
 
   const ExportModule(this.table, this.itemType);
@@ -70,6 +71,7 @@ enum ExportModule {
     reminders => tr('Reminders'),
     habits => tr('Habits'),
     medicines => tr('Medicines'),
+    prayers => tr('Prayer'),
     vault => tr('Vault'),
   };
 
@@ -93,6 +95,7 @@ class ExportOptions {
       ExportModule.reminders,
       ExportModule.habits,
       ExportModule.medicines,
+      ExportModule.prayers,
     },
     this.includeArchived = true,
     this.includeAttachments = true,

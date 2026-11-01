@@ -354,7 +354,7 @@ class _Row extends StatelessWidget {
                         child: texts,
                       ),
                       if (mark != null) ...[
-                        const SizedBox(height: AppSpacing.sm),
+                        const SizedBox(height: AppSpacing.xxs),
                         mark,
                       ],
                     ],

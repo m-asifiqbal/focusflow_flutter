@@ -1,7 +1,8 @@
 /// Sync on app open: DriveSync's `skipUnchanged` (uploads only when this
 /// device's data differs from its newest Drive backup, still merges other
 /// devices' newer backups) and OpenSync's rules (setting, account,
-/// network / Wi-Fi only, min gap; offline is a silent skip).
+/// network (any — Wi-Fi only is for scheduled backups), min gap; offline
+/// is a silent skip).
 library;
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -235,7 +236,7 @@ void main() {
       },
     );
 
-    test('off, offline, off Wi-Fi or signed out: skipped quietly', () async {
+    test('off, offline or signed out: skipped quietly', () async {
       final h = await harness();
       final open = OpenSync(h.container.read);
       final edit = h.read(settingsProvider.notifier);
@@ -253,8 +254,8 @@ void main() {
       net
         ..online = true
         ..wifi = false;
-      expect(await open.isDue(), isFalse); // "Wi-Fi only" is on by default
-      await edit.update((s) => s.copyWith(backupWifiOnly: false));
+      // "Wi-Fi only" (on by default) is for scheduled backups: opening
+      // the app syncs on mobile data too.
       expect(await open.isDue(), isTrue);
 
       await h.read(cloudAccountControllerProvider).signOut();

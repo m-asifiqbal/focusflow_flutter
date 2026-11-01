@@ -133,12 +133,18 @@ class PrayerMarkButton extends StatelessWidget {
     required this.label,
     required this.color,
     required this.onTap,
+    this.textColor,
     super.key,
   });
 
   final String label;
+
+  /// The pill's fill.
   final Color color;
   final VoidCallback onTap;
+
+  /// The label's colour (default: on-gradient white).
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -147,20 +153,33 @@ class PrayerMarkButton extends StatelessWidget {
     excludeSemantics: true,
     child: FFPressable(
       onTap: onTap,
-      child: Container(
-        height: PrayerStyle.markButton,
+      // A 44 pt tap area around the compact pill.
+      child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: AppSpacing.md,
+          vertical: (AppSizes.minTap - PrayerStyle.markButton) / 2,
         ),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(AppRadii.tile),
-        ),
-        child: Text(
-          label,
-          style: context.text.buttonSmall.copyWith(
-            color: context.ff.onGradient,
+        child: Container(
+          height: PrayerStyle.markButton,
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(AppRadii.tile),
+          ),
+          // Centred vertically, as wide as the label.
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                style: context.text.buttonSmall.copyWith(
+                  fontSize: PrayerStyle.markButtonFont,
+                  color: textColor ?? context.ff.onGradient,
+                ),
+              ),
+            ],
           ),
         ),
       ),

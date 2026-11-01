@@ -171,6 +171,8 @@ List<ImportPart> _parts(ImportState state) {
   final b = state.bundle;
   final m = state.archive?.manifest;
   if (b != null) {
+    // No Prayer row: importing prayers from a JSON / CSV export is not
+    // supported yet (the importer skips them); a .ffbackup restores them.
     return [
       (ModuleStyle.notes, tr('Notes'), b.notes.length),
       (ModuleStyle.tasks, tr('Tasks'), b.tasks.length),
@@ -187,6 +189,7 @@ List<ImportPart> _parts(ImportState state) {
     (ModuleStyle.reminders, tr('Reminders'), m.counts['reminders'] ?? 0),
     (ModuleStyle.habits, tr('Habits'), m.counts['habits'] ?? 0),
     (ModuleStyle.medicines, tr('Medicines'), m.counts['medicines'] ?? 0),
+    (ModuleStyle.prayers, tr('Prayer'), m.counts['prayers'] ?? 0),
     (ModuleStyle.vault, tr('Vault'), m.counts['vault_items'] ?? 0),
   ];
 }

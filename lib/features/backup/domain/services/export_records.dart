@@ -208,6 +208,74 @@ class ExportRecords {
     ];
   }
 
+  /// PrayerStatus names by stored index (prayer_logs.status).
+  static const List<String> _prayerStatuses = [
+    'pending', 'onTime', 'late', 'madeUp', 'missed', 'excused', //
+  ];
+
+  /// Prayers with their daily logs inlined (oldest first). A window end
+  /// reads `HH:mm` when fixed, or `sunset`, `sunset+10`, `dawn-5` (the sun
+  /// event ± minutes) when it follows the sun; `end` is null for a moment
+  /// with no end. `jamaat` is `HH:mm`, `N min after start`, or null.
+  /// Not read back by the FocusFlow importer yet (a .ffbackup restores
+  /// prayers).
+  List<Map<String, Object?>> prayers() {
+    final logs = <String, List<Map<String, Object?>>>{};
+    for (final l in s.rows('prayer_logs')) {
+      (logs['${l['prayer_id']}'] ??= []).add({
+        'date': l['date'],
+        'status': _name(_prayerStatuses, l['status']),
+        'congregation': _b(l['congregation']),
+        'place': l['place'],
+        'count': l['count'] ?? 0,
+        'at': iso(l['logged_at']),
+      });
+    }
+    for (final list in logs.values) {
+      list.sort((a, b) => '${a['date']}'.compareTo('${b['date']}'));
+    }
+    return [
+      for (final r in s.rows('prayers'))
+        {
+          'name': r['name'] ?? '',
+          'kind': r['kind'] ?? 'custom',
+          'tradition': r['tradition'] ?? 'custom',
+          'start': _rule(
+            r['start_event'],
+            r['start_offset'],
+            r['start_minutes'],
+          ),
+          'end': r['end_event'] == null && r['end_minutes'] == null
+              ? null
+              : _rule(r['end_event'], r['end_offset'], r['end_minutes']),
+          'weekdaysMask': r['weekdays_mask'] ?? 127,
+          'startDate': r['start_date'],
+          'endDate': r['end_date'],
+          'place': r['place'] ?? '',
+          'jamaat': _jamaat(r['jamaat_minutes'], r['jamaat_after_start']),
+          'target': r['target_count'],
+          'note': r['note'] ?? '',
+          'paused': _b(r['is_paused']),
+          'logs': logs['${r['id']}'] ?? const <Map<String, Object?>>[],
+          ..._common('prayer', r),
+        },
+    ];
+  }
+
+  /// A window end: the sun event ± offset minutes, else the fixed time.
+  static String? _rule(Object? event, Object? offset, Object? minutes) {
+    if (event is String && event.isNotEmpty) {
+      final o = offset is int ? offset : 0;
+      return o == 0 ? event : '$event${o > 0 ? '+' : ''}$o';
+    }
+    return _hhmm(minutes);
+  }
+
+  static String? _jamaat(Object? minutes, Object? afterStart) {
+    if (minutes is! int) return null;
+    return _b(afterStart) ? '$minutes min after start' : _hhmm(minutes);
+  }
+
   /// `08:00×1; 20:00×0.5` from the stored dose JSON.
   static String _times(Object? json) {
     if (json is! String) return '';

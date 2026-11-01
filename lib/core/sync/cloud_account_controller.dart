@@ -21,6 +21,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
+import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/core/sync/account_store.dart';
 import 'package:focusflow/core/sync/cloud_account.dart';
 import 'package:focusflow/core/sync/drive_sync_state.dart';
@@ -45,10 +46,17 @@ class CloudAccountNotifier extends Notifier<CloudAccount?> {
   }
 
   Future<void> _load() async {
-    final stored = await ref.read(accountStoreProvider).read();
-    // A sign-in that finished first wins over the stored profile.
-    if (!_changed) state = stored;
-    if (!_loaded.isCompleted) _loaded.complete(state);
+    try {
+      final stored = await ref.read(accountStoreProvider).read();
+      // A sign-in that finished first wins over the stored profile.
+      if (!_changed) state = stored;
+    } on Object catch (e) {
+      // An unreadable keychain must not leave [loaded] pending forever:
+      // the sync on app open and the background jobs await it.
+      AppLogger.w('Account load failed (${e.runtimeType})');
+    } finally {
+      if (!_loaded.isCompleted) _loaded.complete(state);
+    }
   }
 
   /// Called by the controller after sign-in / sign-out.

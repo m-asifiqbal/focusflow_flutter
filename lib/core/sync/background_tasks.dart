@@ -11,7 +11,8 @@
 /// * [BackgroundTasks.maintenanceTask] — every ~12 h: trash purge + the
 ///   auto local backup (needs no network).
 /// The jobs run in background_runner.dart; what they do is BackgroundJobs.
-/// [ensureScheduled] also catches up an overdue backup when the app opens.
+/// [ensureScheduled] also catches up an overdue backup when the app opens
+/// (the Drive part only while "Sync when app opens" is on).
 /// Rescheduling happens automatically when the backup settings or the
 /// account change.
 /// ============================================================
@@ -97,8 +98,13 @@ class WorkmanagerBackgroundTasks implements BackgroundTasks {
     await _scheduleBackup();
     if (!_caughtUp) {
       _caughtUp = true;
-      // Launch catch-up (iOS may never grant background time).
-      await BackgroundJobs(_ref.read).run(maintenance: false);
+      // Launch catch-up (iOS may never grant background time). Its Drive
+      // part is a sync at app open, so it follows "Sync when app opens":
+      // with that off, opening the app never syncs (the scheduled job
+      // still backs up in the background).
+      await BackgroundJobs(
+        _ref.read,
+      ).run(maintenance: false, drive: _ref.read(settingsProvider).syncOnOpen);
     }
   }
 

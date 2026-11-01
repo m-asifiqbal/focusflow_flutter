@@ -34,6 +34,7 @@ class ExportCountsSource {
             db.reminders,
             db.habits,
             db.medicines,
+            db.prayers,
             db.vaultItems,
           },
         )

@@ -5,8 +5,6 @@ library;
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focusflow/core/sync/backup_crypto.dart';
-import 'package:focusflow/core/sync/backup_files.dart';
 import 'package:focusflow/core/sync/sync_providers.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';

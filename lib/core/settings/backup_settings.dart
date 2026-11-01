@@ -23,6 +23,10 @@
 ///  * **App lock** can be switched on by a restore but never off — turning
 ///    it off needs the device owner (Settings › App lock), see
 ///    `AppLockController.setEnabled`.
+///  * **Sync from another phone** takes no settings, except a module set-up
+///    this phone has never made ([adoptMissingSetup] — today Prayer:
+///    tradition, location, calculation), so prayers that arrive by sync get
+///    their times and reminders instead of "Set up Prayer".
 ///
 /// Fields the backup lacks (older app version) keep their local value; values
 /// are sanitised through [AppSettings.fromJson] (clamped; one it cannot read
@@ -143,6 +147,16 @@ class BackupSettings {
     merged['appLockEnabled'] =
         current.appLockEnabled || merged['appLockEnabled'] == true;
     return AppSettings.fromJson(merged);
+  }
+
+  /// [current] with the module set-ups it lacks taken from this backup
+  /// (see the file header), or null when there is nothing to take. A set-up
+  /// this phone already has is never touched.
+  AppSettings? adoptMissingSetup(AppSettings current) {
+    if (current.prayer.isSetUp || !settings.containsKey('prayer')) return null;
+    final prayer = PrayerPrefs.fromJson(settings['prayer']);
+    if (!prayer.isSetUp) return null;
+    return current.copyWith(prayer: prayer);
   }
 
   /// The preferences to write, given what [local] holds now (key → value,

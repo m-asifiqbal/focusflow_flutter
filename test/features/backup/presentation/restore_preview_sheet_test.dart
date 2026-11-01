@@ -1,6 +1,7 @@
 /// The restore preview says when a backup carries the app's settings
 /// (a row, and what Merge does with them) and stays as it was for backups
 /// that don't — including every backup made before settings were carried.
+/// A Prayer row appears only when the backup carries prayers.
 library;
 
 import 'package:flutter/material.dart';
@@ -13,14 +14,17 @@ import '../../../core/sync/sync_fixtures.dart';
 import '../../../helpers/screen_harness.dart';
 import '../../../helpers/test_container.dart';
 
-BackupManifest _manifest({required bool hasSettings}) => BackupManifest(
+BackupManifest _manifest({
+  required bool hasSettings,
+  Map<String, int> counts = const {'notes': 4, 'tasks': 2},
+}) => BackupManifest(
   schemaVersion: 2,
   appVersion: '1.0.0',
   createdAt: syncNow,
   deviceId: 'other',
   deviceName: 'Pixel 8',
   platform: 'Android',
-  counts: const {'notes': 4, 'tasks': 2},
+  counts: counts,
   itemCount: 6,
   checksum: 'x',
   hasSettings: hasSettings,
@@ -51,6 +55,7 @@ void main() {
   Future<void> open(
     WidgetTester tester, {
     required bool hasSettings,
+    Map<String, int>? counts,
     required ValueChanged<RestoreMode?> onResult,
   }) async {
     final h = (await tester.runAsync(() => TestHarness.create(now: syncNow)))!;
@@ -59,7 +64,9 @@ void main() {
       tester,
       h,
       _Host(
-        manifest: _manifest(hasSettings: hasSettings),
+        manifest: counts == null
+            ? _manifest(hasSettings: hasSettings)
+            : _manifest(hasSettings: hasSettings, counts: counts),
         onResult: onResult,
       ),
     );
@@ -94,9 +101,22 @@ void main() {
     expect(find.text('Restore this backup?'), findsOneWidget);
     expect(find.text('App settings'), findsNothing);
     expect(find.text('Included'), findsNothing);
+    expect(find.text('Prayer'), findsNothing);
     expect(
       find.text('Adds what is missing; the newest edit of each item wins.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a backup with prayers shows a Prayer row', (tester) async {
+    await open(
+      tester,
+      hasSettings: false,
+      counts: const {'notes': 4, 'prayers': 5, 'prayer_logs': 40},
+      onResult: (_) {},
+    );
+
+    expect(find.text('Prayer'), findsOneWidget);
+    expect(find.text('5'), findsOneWidget);
   });
 }

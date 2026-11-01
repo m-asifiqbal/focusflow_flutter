@@ -3,7 +3,8 @@
 /// ============================================================
 ///
 /// What: Auto backup to Drive, Frequency (Daily · 9:00 PM),
-/// Wi-Fi only (applies to every automatic kind),
+/// Wi-Fi only (scheduled backups; the sync on app open runs on any
+/// network),
 /// Encrypt backups (sets the backup PIN — separate from the vault PIN —
 /// the first time), Keep last N;
 /// Back up to device now, Backup location, Auto local backup.
@@ -186,6 +187,7 @@ class AutomaticBackupSection extends ConsumerWidget {
           FFListRow.toggle(
             leading: _tile(FontAwesomeIcons.wifi, BackupTints.wifi),
             title: tr('Wi-Fi only'),
+            subtitle: tr('Scheduled backups wait for Wi-Fi'),
             value: s.backupWifiOnly,
             onChanged: (v) => edit.update((s) => s.copyWith(backupWifiOnly: v)),
           ),

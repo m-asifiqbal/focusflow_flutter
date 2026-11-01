@@ -4,7 +4,8 @@
 ///
 /// What: keeps the item rows of the INCLUDE modules (never trash; archived
 /// only with "Include archived") plus their children (subtasks, habit
-/// logs, tag links, attachments, vault history, focus sessions). Folders
+/// logs, medicine doses, prayer logs, tag links, attachments, vault
+/// history, focus sessions). Folders
 /// and tags travel whole (they are small and referenced by name).
 /// Why: an export is a restore point, not a sync stream, so tombstones
 /// are dropped — merging a partial export never deletes anything.
@@ -54,6 +55,10 @@ abstract final class ExportFilter {
       'medicine_doses': [
         for (final r in s.rows('medicine_doses'))
           if (parentKept('medicine', r['medicine_id'])) r,
+      ],
+      'prayer_logs': [
+        for (final r in s.rows('prayer_logs'))
+          if (parentKept('prayer', r['prayer_id'])) r,
       ],
       'vault_history': [
         for (final r in s.rows('vault_history'))

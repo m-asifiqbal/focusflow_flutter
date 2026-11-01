@@ -45,6 +45,7 @@ import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/items_repository.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/settings/backup_settings.dart';
+import 'package:focusflow/core/utils/app_logger.dart';
 import 'package:focusflow/core/sync/backup_crypto.dart';
 import 'package:focusflow/core/sync/backup_files.dart';
 import 'package:focusflow/core/sync/backup_format.dart';
@@ -499,6 +500,17 @@ class BackupEngine {
         // The items are restored already; one unreadable file is reported
         // as missing instead of failing the whole restore.
         missing++;
+      }
+    }
+    if (!applySettings && mode == RestoreMode.merge) {
+      // Another phone's backup: only the set-ups this phone lacks.
+      final carried = (await _openSettings(archive, key)).value;
+      if (carried != null) {
+        try {
+          await settings.adoptMissingSetup(carried);
+        } on Object {
+          AppLogger.w('Set-up from another device not saved');
+        }
       }
     }
     var settingsRestored = false;

@@ -15,6 +15,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
+import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
@@ -79,7 +80,11 @@ abstract final class PrayerStyle {
   static const double timeColumn = 54;
   static const double railDot = 16;
   static const double summaryRing = 52;
-  static const double markButton = 40;
+
+  /// "Mark prayed": a compact pill as wide as its label (user: smaller,
+  /// smaller text); the tap area is padded out to 44 pt.
+  static const double markButton = 34;
+  static const double markButtonFont = 13;
   static const double heroRing = 58;
 
   // Insights › Prayer.
@@ -87,6 +92,50 @@ abstract final class PrayerStyle {
   static const double barMinWidth = 3;
   static const double barMaxWidth = 22;
   static const double progressBar = 8;
+
+  // The hero's sun arc (PrayerSunArc).
+  static const double sunArcWidth = 100;
+  static const double sunArcHeight = 54;
+  static const double sunArcStroke = 3.5;
+  static const double sunDot = 6;
+  static const double sunArcLabel = 10;
+  static const double sunArcMoon = 14;
+
+  /// The "1h 29m left" countdown under the part's name.
+  static const double sunLeftFont = 8.5;
+
+  /// The sun on the arc (a warm token, readable on the accent gradient).
+  static const Color sun = AppPalette.amber300;
+
+  /// The icon of a place: Home, Work, a house of worship (by the words in
+  /// the active language or English, so a typed "Masjid" or "office"
+  /// works too), else a map pin.
+  static IconData placeIcon(String place, PrayerTradition tradition) {
+    final p = place.trim().toLowerCase();
+    bool any(List<String> words) => words.any(
+      (w) =>
+          w.isNotEmpty && (p == w.toLowerCase() || p.contains(w.toLowerCase())),
+    );
+    if (any([tr('Home'), 'home', 'house'])) return FontAwesomeIcons.house;
+    if (any([tr('Work'), 'work', 'office'])) return FontAwesomeIcons.briefcase;
+    if (any([tr('Mosque'), 'mosque', 'masjid'])) {
+      return FontAwesomeIcons.mosque;
+    }
+    if (any([tr('Church'), 'church', 'chapel', 'cathedral'])) {
+      return FontAwesomeIcons.church;
+    }
+    if (any([tr('Synagogue'), 'synagogue', 'shul'])) {
+      return FontAwesomeIcons.synagogue;
+    }
+    if (any([tr('Temple'), 'temple', 'mandir', 'gurdwara', 'pagoda'])) {
+      return switch (tradition) {
+        PrayerTradition.hinduism => FontAwesomeIcons.gopuram,
+        PrayerTradition.buddhism => FontAwesomeIcons.vihara,
+        _ => FontAwesomeIcons.placeOfWorship,
+      };
+    }
+    return FontAwesomeIcons.locationDot;
+  }
 }
 
 abstract final class PrayerFormat {
@@ -123,7 +172,9 @@ abstract final class PrayerFormat {
   static String? jamaat(PrayerSlot s, DateTime now, {required bool use24h}) {
     final at = s.jamaat;
     if (at == null) return null;
-    final time = PrayerFormat.time(at, use24h: use24h);
+    final clock = PrayerFormat.time(at, use24h: use24h);
+    // An estimate is marked "~" (not the mosque's own time).
+    final time = s.prayer.jamaat?.estimated ?? false ? '~$clock' : clock;
     final label = s.prayer.tradition == PrayerTradition.islam
         ? tr('Jamaat {time}', {'time': time})
         : tr('Congregation {time}', {'time': time});

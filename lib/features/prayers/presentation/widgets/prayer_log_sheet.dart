@@ -157,6 +157,7 @@ class _LogSheetState extends State<_LogSheet> {
               for (final place in places)
                 FFChip(
                   label: place,
+                  icon: PrayerStyle.placeIcon(place, _p.tradition),
                   selected: place == selectedPlace,
                   onTap: () => setState(() => _place = place),
                 ),

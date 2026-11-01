@@ -2,10 +2,13 @@
 /// PRAYER HERO — "Now" / "Next" at the top of the Prayer page
 /// ============================================================
 ///
-/// What: the slot PrayerSchedule.focus picks. Open: "Now · ends in 1h 08m",
-/// the window, a bar of how much of it has passed and a "Mark prayed"
-/// button. Upcoming: "Next · in 1h 12m" and the window. Nothing left
-/// today: a calm "All done for today" card.
+/// What: the slot PrayerSchedule.focus picks. Open: "Now" with "Ends in
+/// 1h 08m" at the far end, the window, the jamaat (with a people icon), a
+/// bar of how much of it has passed and a "Mark prayed" button; the place
+/// (with its icon: home, work, mosque …) next to the button. Upcoming:
+/// "Next · in 1h 12m" and the window. Beside the name, the sun's path
+/// today in four parts ([PrayerSunArc]). Nothing left today: a calm "All
+/// done for today" card.
 /// Why: one focal point (the design brief) — everything else on the tab is
 /// quieter. Accent gradient, like Home's Today's Focus card, so the two
 /// heroes read as one family.
@@ -21,7 +24,10 @@ import 'package:focusflow/core/widgets/src/ff_token_gaps.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_day_parts.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_sun_arc.dart';
 
 class PrayerHeroCard extends StatelessWidget {
   const PrayerHeroCard({
@@ -30,6 +36,7 @@ class PrayerHeroCard extends StatelessWidget {
     required this.use24h,
     required this.onMark,
     required this.onOpen,
+    this.sun,
     super.key,
   });
 
@@ -39,6 +46,9 @@ class PrayerHeroCard extends StatelessWidget {
   final bool use24h;
   final VoidCallback onMark;
   final VoidCallback onOpen;
+
+  /// Today's sun times for the arc (null without a location).
+  final SolarDay? sun;
 
   @override
   Widget build(BuildContext context) {
@@ -98,8 +108,9 @@ class PrayerHeroCard extends StatelessWidget {
             1.0,
           );
     final jamaat = PrayerFormat.jamaat(s, now, use24h: use24h);
+    final place = s.prayer.place.trim();
     final details = [
-      if (s.prayer.place.trim().isNotEmpty) s.prayer.place.trim(),
+      ?(place.isEmpty ? null : place),
       if (s.prayer.priority == PrayerPriority.high) tr('Alarm'),
     ].join(' · ');
     return FFCard(
@@ -131,8 +142,8 @@ class PrayerHeroCard extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const Spacer(),
-              Flexible(
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
                 child: Text(
                   timing,
                   maxLines: 2,
@@ -149,25 +160,67 @@ class PrayerHeroCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            s.prayer.displayName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: text.largeTitle.copyWith(color: on, fontSize: 26),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      s.prayer.displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.largeTitle.copyWith(color: on, fontSize: 26),
+                    ),
+                    Text(
+                      PrayerFormat.window(w, use24h: use24h),
+                      style: text.body.copyWith(color: soft),
+                    ),
+                    if (jamaat != null) ...[
+                      const SizedBox(height: AppSpacing.xxs),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(top: 3),
+                            child: Icon(
+                              FontAwesomeIcons.users,
+                              size: 14,
+                              color: on,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Flexible(
+                            child: Text(
+                              jamaat,
+                              // Beside the sun arc: room for a third line at large text.
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.body.copyWith(
+                                color: on,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(top: AppSpacing.xs),
+                child: PrayerSunArc(
+                  sun: sun,
+                  now: now,
+                  use24h: use24h,
+                  color: on,
+                ),
+              ),
+            ],
           ),
-          Text(
-            PrayerFormat.window(w, use24h: use24h),
-            style: text.body.copyWith(color: soft),
-          ),
-          if (jamaat != null) ...[
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              jamaat,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: text.body.copyWith(color: on, fontWeight: FontWeight.w700),
-            ),
-          ],
           if (open && end != null) ...[
             const SizedBox(height: AppSpacing.md),
             ClipRRect(
@@ -185,36 +238,38 @@ class PrayerHeroCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  details,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: text.bodySmall.copyWith(color: soft),
+                child: Row(
+                  children: [
+                    if (place.isNotEmpty) ...[
+                      Icon(
+                        PrayerStyle.placeIcon(place, s.prayer.tradition),
+                        size: 14,
+                        color: soft,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                    Flexible(
+                      child: Text(
+                        details,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodySmall.copyWith(color: soft),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              if (open)
-                FFPressable(
+              if (open) ...[
+                const SizedBox(width: AppSpacing.md),
+                PrayerMarkButton(
+                  label: s.prayer.kind.isFast
+                      ? tr('Mark fasted')
+                      : tr('Mark prayed'),
+                  color: on,
+                  textColor: ff.primaryStrong,
                   onTap: onMark,
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minHeight: AppSizes.minTap,
-                    ),
-                    padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: AppSpacing.lg,
-                    ),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: on,
-                      borderRadius: BorderRadius.circular(AppRadii.tile),
-                    ),
-                    child: Text(
-                      s.prayer.kind.isFast
-                          ? tr('Mark fasted')
-                          : tr('Mark prayed'),
-                      style: text.buttonSmall.copyWith(color: ff.primaryStrong),
-                    ),
-                  ),
                 ),
+              ],
             ],
           ),
         ],

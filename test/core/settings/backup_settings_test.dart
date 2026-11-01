@@ -435,4 +435,35 @@ void main() {
       expect(prefs.getString('device_id'), 'this-phone');
     });
   });
+
+  group('a sync from another phone', () {
+    const dhaka = PrayerPrefs(
+      tradition: 'islam',
+      latitude: 23.8,
+      longitude: 90.4,
+      placeLabel: 'Dhaka',
+      method: 'karachi',
+    );
+
+    test('takes Prayer set-up only when this phone has none', () {
+      final carried = BackupSettings.of(
+        const AppSettings(prayer: dhaka, themeMode: ThemeMode.dark),
+      );
+      final adopted = carried.adoptMissingSetup(const AppSettings())!;
+      expect(adopted.prayer, dhaka);
+      // Nothing else comes with it.
+      expect(adopted.themeMode, const AppSettings().themeMode);
+
+      const mine = PrayerPrefs(tradition: 'christianity');
+      expect(
+        carried.adoptMissingSetup(const AppSettings(prayer: mine)),
+        isNull,
+      );
+    });
+
+    test('a backup without a Prayer set-up adopts nothing', () {
+      final carried = BackupSettings.of(const AppSettings());
+      expect(carried.adoptMissingSetup(const AppSettings()), isNull);
+    });
+  });
 }

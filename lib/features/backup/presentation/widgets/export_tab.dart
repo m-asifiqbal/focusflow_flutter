@@ -56,6 +56,7 @@ class ExportTab extends ConsumerWidget {
     ExportModule.reminders => ModuleStyle.reminders,
     ExportModule.habits => ModuleStyle.habits,
     ExportModule.medicines => ModuleStyle.medicines,
+    ExportModule.prayers => ModuleStyle.prayers,
     ExportModule.vault => ModuleStyle.vault,
   };
 

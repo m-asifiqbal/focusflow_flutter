@@ -165,6 +165,8 @@ class _PreviewSheet extends StatelessWidget {
       (ModuleStyle.habits, tr('Habits'), m.counts['habits'] ?? 0),
       if ((m.counts['medicines'] ?? 0) > 0)
         (ModuleStyle.medicines, tr('Medicines'), m.counts['medicines']!),
+      if ((m.counts['prayers'] ?? 0) > 0)
+        (ModuleStyle.prayers, tr('Prayer'), m.counts['prayers']!),
       (ModuleStyle.vault, tr('Vault'), m.counts['vault_items'] ?? 0),
     ];
     return Column(

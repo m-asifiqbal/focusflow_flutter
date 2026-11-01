@@ -205,7 +205,9 @@ class PrayerDetailsSection extends StatelessWidget {
         FFGroupedList(
           children: [
             FFListRow(
-              leading: _tile(FontAwesomeIcons.locationDot),
+              leading: _tile(
+                PrayerStyle.placeIcon(draft.place, draft.tradition),
+              ),
               title: tr('Place'),
               value: draft.place.trim().isEmpty
                   ? tr('Any')
@@ -226,7 +228,9 @@ class PrayerDetailsSection extends StatelessWidget {
                       OptionItem(
                         value: p,
                         label: p.isEmpty ? tr('Any') : p,
-                        icon: FontAwesomeIcons.locationDot,
+                        icon: p.isEmpty
+                            ? FontAwesomeIcons.earthAmericas
+                            : PrayerStyle.placeIcon(p, draft.tradition),
                         colors: PrayerStyle.module,
                       ),
                     OptionItem(

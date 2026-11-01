@@ -1,7 +1,8 @@
 /// ImportWriter (dedupe by title + date, created date kept, archived /
 /// pinned, logins only through the vault bridge, locked vault writes
 /// nothing) and ExportService (.ffbackup honours the INCLUDE filter and
-/// refuses vault items without a backup key).
+/// refuses vault items without a backup key; Prayer alone carries the
+/// prayers and their logs).
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +20,8 @@ import 'package:focusflow/features/backup/domain/entities/export_options.dart';
 import 'package:focusflow/features/backup/domain/entities/import_bundle.dart';
 import 'package:focusflow/features/backup/presentation/providers/backup_providers.dart';
 import 'package:focusflow/features/notes/domain/repository/notes_repository.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
@@ -149,6 +152,38 @@ void main() {
       ),
       throwsA(isA<VaultExportNeedsKey>()),
     );
+  });
+
+  test('.ffbackup with only Prayer carries prayers and their logs', () async {
+    await h.read(notesRepositoryProvider).createEmpty(title: 'A');
+    final now = h.clock.now();
+    final prayers = h.read(prayersRepositoryProvider);
+    final id = await prayers.save(
+      Prayer(
+        id: '',
+        name: 'Fajr',
+        start: const PrayerTimeRule.fixed(5 * 60),
+        end: const PrayerTimeRule.fixed(6 * 60 + 15),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    await prayers.mark(id, now, PrayerStatus.onTime);
+    final f = await h
+        .read(exportServiceProvider)
+        .build(const ExportOptions(modules: {ExportModule.prayers}));
+    expect(f.itemCount, 1);
+    final engine = h.read(backupEngineProvider);
+    final archive = engine.inspect(f.bytes);
+    expect(archive.manifest.counts['prayers'], 1);
+    expect(archive.manifest.counts['prayer_logs'], 1);
+    final snap = await engine.openSnapshot(archive);
+    final prayer = snap.rows('prayers').single;
+    expect(prayer['name'], 'Fajr');
+    expect(snap.rows('prayer_logs').single['prayer_id'], prayer['id']);
+    expect(snap.rows('notes'), isEmpty);
+    expect(snap.rows('medicines'), isEmpty);
+    expect(snap.rows('medicine_doses'), isEmpty);
   });
 
   test(

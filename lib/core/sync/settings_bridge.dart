@@ -32,6 +32,11 @@ abstract interface class SettingsBackupBridge {
   /// restore (everything the backup has), otherwise a Merge (only what is
   /// still at its default here). Throws when it could not be saved.
   Future<void> apply(BackupSettings incoming, {required bool replace});
+
+  /// After a merge from another phone: takes only the module set-ups this
+  /// phone lacks ([BackupSettings.adoptMissingSetup]). Throws when it could
+  /// not be saved.
+  Future<void> adoptMissingSetup(BackupSettings incoming);
 }
 
 /// Carries no settings and applies none.
@@ -43,6 +48,9 @@ class NoSettingsBackupBridge implements SettingsBackupBridge {
 
   @override
   Future<void> apply(BackupSettings incoming, {required bool replace}) async {}
+
+  @override
+  Future<void> adoptMissingSetup(BackupSettings incoming) async {}
 }
 
 /// The real settings: [settingsProvider] plus the view preferences in
@@ -98,6 +106,13 @@ class AppSettingsBackupBridge implements SettingsBackupBridge {
         ..addPostFrameCallback((_) => rebuildEverything())
         ..scheduleFrame();
     }
+  }
+
+  @override
+  Future<void> adoptMissingSetup(BackupSettings incoming) async {
+    await _ref
+        .read(settingsProvider.notifier)
+        .update((s) => incoming.adoptMissingSetup(s) ?? s);
   }
 }
 

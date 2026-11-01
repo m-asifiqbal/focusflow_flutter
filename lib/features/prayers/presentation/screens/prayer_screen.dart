@@ -209,6 +209,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
           slot: d.focus,
           now: d.now,
           use24h: use24h,
+          sun: ref.watch(prayerSunProvider)(d.now),
           onMark: () {
             final f = d.focus;
             if (f != null) unawaited(markPrayer(context, ref, f));

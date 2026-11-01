@@ -11,8 +11,11 @@
 /// * signed in with Google Drive and Drive is set up in this build;
 /// * no sync is running and the last one is older than [OpenSync.minGap]
 ///   (a quick app switch doesn't sync again);
-/// * the network allows it — "Wi-Fi only" covers every automatic sync.
-///   Offline is a silent skip, not a "Sync paused" error.
+/// * the device is online — on any network: opening the app is the user's
+///   own moment to get their other devices' changes, and an unchanged
+///   device uploads nothing. ("Wi-Fi only" is for the scheduled backup;
+///   applying it here made the open sync silently never run on mobile
+///   data.) Offline is a silent skip, not a "Sync paused" error.
 /// The sync is never interactive (no Google consent sheet) and passes
 /// `skipUnchanged`: when this device's newest Drive backup already holds
 /// the current data, nothing is uploaded or pruned — only other devices'
@@ -59,8 +62,7 @@ class OpenSync {
     if (status.isBusy) return false;
     final now = _read(clockProvider).now();
     if (!isStale(now: now, lastSync: status.lastSyncAt)) return false;
-    final net = _read(networkInfoProvider);
-    return s.backupWifiOnly ? net.isOnWifi() : net.isOnline();
+    return _read(networkInfoProvider).isOnline();
   }
 
   /// Syncs when [isDue]. Returns the outcome, or null when it didn't run

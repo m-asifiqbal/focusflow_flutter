@@ -8,11 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
+import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/repository/prayers_repository.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_presets.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_jamaat_section.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_day_card.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_hero.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_sun_arc.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
 import '../../../helpers/screen_harness.dart';
@@ -95,6 +98,67 @@ void main() {
       textScale: 1.3,
     );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('hero: jamaat with people icon, place icon, sun arc', (
+    tester,
+  ) async {
+    final (h, list) = await boot(tester);
+    final asr = list.firstWhere((p) => p.name == 'Asr');
+    await tester.runAsync(() async {
+      await h.updateSettings(
+        (s) => s.copyWith(
+          prayer: s.prayer.copyWith(
+            latitude: 23.81,
+            longitude: 90.41,
+            placeLabel: 'Dhaka',
+          ),
+        ),
+      );
+      await h
+          .read(prayersRepositoryProvider)
+          .save(
+            asr.copyWith(place: 'Mosque', jamaat: const PrayerJamaat.at(960)),
+          );
+    });
+    Finder inHero(Finder f) =>
+        find.descendant(of: find.byType(PrayerHeroCard), matching: f);
+
+    await pumpApp(tester, h, AppRoutes.prayers, size: const Size(390, 1400));
+    expect(inHero(find.byType(PrayerSunArc)), findsOneWidget);
+    expect(inHero(find.byIcon(FontAwesomeIcons.users)), findsOneWidget);
+    expect(inHero(find.byIcon(FontAwesomeIcons.mosque)), findsOneWidget);
+    expect(inHero(find.text('Mosque')), findsOneWidget);
+    // 3:50 PM in Dhaka on 1 Nov: after Asr began → evening.
+    expect(inHero(find.text('Evening')), findsOneWidget);
+    // Asr → sunset (5:19 PM): 1h 29m left at 3:50 PM.
+    expect(inHero(find.textContaining('left')), findsOneWidget);
+    // The timeline keeps the jamaat as plain text.
+    expect(
+      find.descendant(
+        of: find.byType(PrayerDayCard),
+        matching: find.byIcon(FontAwesomeIcons.users),
+      ),
+      findsNothing,
+    );
+    await captureScreen(tester, 'prayer_hero_sun');
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.prayers,
+      size: const Size(390, 1400),
+      dark: true,
+    );
+    await captureScreen(tester, 'prayer_hero_sun_dark');
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.prayers,
+      size: const Size(360, 1600),
+      textScale: 1.3,
+    );
+    expect(tester.takeException(), isNull);
+    await captureScreen(tester, 'prayer_hero_sun_360_x13');
   });
 
   testWidgets('"After start" follows the window; Off removes it', (

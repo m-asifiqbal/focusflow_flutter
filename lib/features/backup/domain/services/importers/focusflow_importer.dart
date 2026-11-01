@@ -4,7 +4,8 @@
 ///
 /// What: reads back what ExportWriters writes (JSON with
 /// `format: focusflow-export`, per-module CSVs with a `type` column —
-/// medicines included, see medicine_importer.dart) and,
+/// medicines included, see medicine_importer.dart; prayers are skipped —
+/// importing them from JSON / CSV is not supported yet) and,
 /// leniently, any CSV with a title/name column ("generic CSV": rows with a
 /// due date become tasks, the rest notes).
 /// Why: exports must round-trip, and a plain spreadsheet of to-dos is the
@@ -186,6 +187,11 @@ abstract final class FocusFlowImporter {
           habits.add(_habit(r));
         case 'medicine':
           medicines.add(MedicineImporter.fromMap(r));
+        case 'prayer':
+          // Importing prayers from a JSON / CSV export is not supported yet
+          // (a .ffbackup restores them); skip the row rather than turning
+          // it into a note.
+          continue;
         case 'reminder':
           final at = ImportParsing.dateTime(r['at']);
           if (at == null) {

@@ -46,6 +46,12 @@ const Map<ExportModule, List<String>> kCsvColumns = {
     'weekdaysMask', 'everyNDays', 'startDate', 'endDate', 'stockLeft', //
     'refillAt', 'paused', 'takenDoses', 'note', 'created', 'archived',
   ],
+  // Not read back by the FocusFlow CSV importer yet (rows are skipped).
+  ExportModule.prayers: [
+    'type', 'name', 'kind', 'tradition', 'start', 'end', 'weekdaysMask', //
+    'startDate', 'endDate', 'place', 'jamaat', 'target', 'paused', //
+    'prayerLogs', 'note', 'created', 'archived',
+  ],
 };
 
 abstract final class ExportWriters {
@@ -71,6 +77,7 @@ abstract final class ExportWriters {
       if (modules.contains(ExportModule.reminders)) 'reminders': r.reminders(),
       if (modules.contains(ExportModule.habits)) 'habits': r.habits(),
       if (modules.contains(ExportModule.medicines)) 'medicines': r.medicines(),
+      if (modules.contains(ExportModule.prayers)) 'prayers': r.prayers(),
     };
     return Uint8List.fromList(
       utf8.encode(const JsonEncoder.withIndent('  ').convert(doc)),
@@ -92,6 +99,7 @@ abstract final class ExportWriters {
         ExportModule.reminders => r.reminders(),
         ExportModule.habits => r.habits(),
         ExportModule.medicines => r.medicines(),
+        ExportModule.prayers => r.prayers(),
         ExportModule.vault => const <Map<String, Object?>>[],
       };
       final cols = kCsvColumns[m]!;
@@ -119,6 +127,15 @@ abstract final class ExportWriters {
       'takenDoses' => [
         for (final d in (r['doses'] as List? ?? const []))
           if ((d as Map)['status'] == 'taken') '${d['date']} ${d['time']}',
+      ].join('; '),
+      // `2026-10-23 onTime; 2026-10-24 late congregation`.
+      'prayerLogs' => [
+        for (final l in (r['logs'] as List? ?? const []))
+          [
+            (l as Map)['date'],
+            l['status'],
+            if (l['congregation'] == true) 'congregation',
+          ].join(' '),
       ].join('; '),
       _ => r[col],
     };

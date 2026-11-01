@@ -202,6 +202,43 @@ void main() {
       'item_tags': [
         {'item_id': 'k1', 'item_type': 'task', 'tag_id': 't1'},
       ],
+      'prayers': [
+        {
+          'id': 'p1', 'name': 'Fajr', 'kind': 'salah', 'tradition': 'islam', //
+          'start_event': 'dawn', 'start_offset': 0, 'start_minutes': 300,
+          'end_event': 'sunrise', 'end_offset': -10, 'end_minutes': 375,
+          'weekdays_mask': 127, 'place': 'Home', 'note': '',
+          'jamaat_minutes': 15, 'jamaat_after_start': 1, 'is_paused': 0,
+          'created_at': 1718000000, 'updated_at': 1718000000,
+        },
+        {
+          'id': 'p2', 'name': 'Tahajjud', 'kind': 'nafl', //
+          'tradition': 'islam', 'start_minutes': 210, 'end_minutes': null,
+          'jamaat_minutes': 330, 'jamaat_after_start': 0,
+          'created_at': 1718000000, 'updated_at': 1718000000,
+          'archived_at': 1718000500,
+        },
+        {
+          'id': 'p3', 'name': 'Trashed', 'kind': 'custom', //
+          'created_at': 1718000000, 'updated_at': 1718000000,
+          'deleted_at': 1718000100,
+        },
+      ],
+      'prayer_logs': [
+        {
+          'id': 'p1|2026-06-02', 'prayer_id': 'p1', 'date': '2026-06-02', //
+          'status': 2, 'congregation': 1, 'count': 0,
+          'logged_at': 1718000000,
+        },
+        {
+          'id': 'p1|2026-06-01', 'prayer_id': 'p1', 'date': '2026-06-01', //
+          'status': 1, 'congregation': 0, 'count': 0,
+        },
+        {
+          'id': 'p3|2026-06-01', 'prayer_id': 'p3', 'date': '2026-06-01', //
+          'status': 1,
+        },
+      ],
       'habits': [
         {
           'id': 'h1', 'name': 'Read', 'target_count': 1, //
@@ -227,6 +264,11 @@ void main() {
       expect(f.rows('tasks'), isEmpty);
       expect(f.rows('subtasks'), isEmpty);
       expect(f.rows('vault_items'), hasLength(1));
+      expect(f.rows('prayers').map((r) => r['id']), ['p1']);
+      expect(f.rows('prayer_logs').map((r) => r['id']), [
+        'p1|2026-06-02',
+        'p1|2026-06-01',
+      ]);
       final g = ExportFilter.apply(
         s,
         modules: {ExportModule.tasks},
@@ -236,6 +278,75 @@ void main() {
       expect(g.rows('subtasks'), hasLength(1));
       expect(g.rows('notes'), isEmpty);
       expect(g.rows('tombstones'), isEmpty);
+      expect(g.rows('prayers'), isEmpty);
+      expect(g.rows('prayer_logs'), isEmpty);
+      final p = ExportFilter.apply(
+        s,
+        modules: {ExportModule.prayers},
+        includeArchived: true,
+      );
+      expect(p.rows('prayers').map((r) => r['id']), ['p1', 'p2']);
+      expect(p.rows('prayer_logs'), hasLength(2));
+      expect(ExportFilter.itemCount(p), 2);
+    });
+
+    test('JSON export carries prayers with their logs', () {
+      final mods = {ExportModule.notes, ExportModule.prayers};
+      final f = ExportFilter.apply(s, modules: mods, includeArchived: true);
+      final bytes = ExportWriters.json(f, mods, now: DateTime(2026, 6, 13));
+      final doc = jsonDecode(utf8.decode(bytes)) as Map;
+      final prayers = (doc['prayers'] as List).cast<Map>();
+      expect(prayers.map((p) => p['name']), ['Fajr', 'Tahajjud']);
+      final fajr = prayers.first;
+      expect(fajr['kind'], 'salah');
+      expect(fajr['tradition'], 'islam');
+      expect(fajr['start'], 'dawn');
+      expect(fajr['end'], 'sunrise-10');
+      expect(fajr['weekdaysMask'], 127);
+      expect(fajr['place'], 'Home');
+      expect(fajr['jamaat'], '15 min after start');
+      expect(fajr['paused'], isFalse);
+      expect(fajr['archived'], isNull);
+      final logs = (fajr['logs'] as List).cast<Map>();
+      expect(logs.map((l) => l['date']), ['2026-06-01', '2026-06-02']);
+      expect(logs.map((l) => l['status']), ['onTime', 'late']);
+      expect(logs.last['congregation'], isTrue);
+      expect(logs.last['at'], isNotNull);
+      final tahajjud = prayers.last;
+      expect(tahajjud['start'], '03:30');
+      expect(tahajjud['end'], isNull);
+      expect(tahajjud['jamaat'], '05:30');
+      expect(tahajjud['archived'], isNotNull);
+      expect(tahajjud['logs'], isEmpty);
+
+      // The importer ignores the prayers (not supported yet) and still
+      // reads the rest of the file.
+      final b = ImportDetector.parse('export.json', bytes);
+      expect(b.notes.single.title, 'Groceries');
+      expect(b.itemCount, 1);
+    });
+
+    test('CSV export carries prayers; the importer skips them', () {
+      final mods = {ExportModule.notes, ExportModule.prayers};
+      final f = ExportFilter.apply(s, modules: mods, includeArchived: true);
+      final csv = ExportWriters.csvFiles(f, mods)[ExportModule.prayers]!;
+      final rows = CsvCodec.decodeMaps(csv);
+      expect(rows.map((r) => r['name']), ['Fajr', 'Tahajjud']);
+      expect(rows.first['type'], 'prayer');
+      expect(rows.first['start'], 'dawn');
+      expect(rows.first['end'], 'sunrise-10');
+      expect(rows.first['jamaat'], '15 min after start');
+      expect(
+        rows.first['prayerlogs'],
+        '2026-06-01 onTime; 2026-06-02 late congregation',
+      );
+      expect(rows.last['end'], '');
+
+      final out = ExportWriters.csv(f, mods);
+      expect(out.extension, 'zip');
+      final b = ImportDetector.parse('export.zip', out.bytes);
+      expect(b.notes.single.title, 'Groceries');
+      expect(b.itemCount, 1);
     });
 
     test('JSON export imports back', () {

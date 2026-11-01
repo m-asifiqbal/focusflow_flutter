@@ -36,8 +36,12 @@ class BackgroundJobs {
   final ProviderReader _read;
 
   /// Runs the backup steps (and, with [maintenance], the purge). Returns
-  /// the steps that did work.
-  Future<Set<BackgroundStep>> run({bool maintenance = true}) async {
+  /// the steps that did work. [drive] false skips the Drive backup (the
+  /// launch catch-up while "Sync when app opens" is off).
+  Future<Set<BackgroundStep>> run({
+    bool maintenance = true,
+    bool drive = true,
+  }) async {
     final done = <BackgroundStep>{};
     await _step('local backup', () async {
       final freq = _read(settingsProvider).localBackupFrequency;
@@ -45,7 +49,7 @@ class BackgroundJobs {
       if (r != null) done.add(BackgroundStep.localBackup);
     });
     await _step('drive backup', () async {
-      if (await isDriveBackupDue()) {
+      if (drive && await isDriveBackupDue()) {
         final outcome = await _read(
           syncStatusProvider.notifier,
         ).syncNow(isAuto: true, interactive: false);
