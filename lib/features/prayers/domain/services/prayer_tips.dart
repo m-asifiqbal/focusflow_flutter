@@ -1,5 +1,5 @@
 /// ============================================================
-/// PRAYER TIPS — the "Prayer tip of the day" catalogue (Prayer tab)
+/// PRAYER TIPS — the "Prayer tip of the day" catalogue (Prayer page)
 /// ============================================================
 ///
 /// What: practical habits that make a prayer life steadier, in the active

@@ -9,7 +9,7 @@
 ///     school, high-latitude rule — only for sun-based prayers;
 ///   * HIJRI DATE — a ±2 day correction for local moon sighting (Islam);
 ///   * GENERAL — Prayer reminders on / off, discreet notification titles,
-///     Show Prayer as a tab, and Set up from a tradition again.
+///     and Set up from a tradition again.
 /// Why: everything that changes "what time is Asr today" in one place,
 /// with today's times shown next to the choices that move them.
 /// ============================================================
@@ -325,14 +325,6 @@ class PrayerSettingsScreen extends ConsumerWidget {
                       value: prefs.discreet,
                       onChanged: (v) =>
                           unawaited(_edit(ref, (p) => p.copyWith(discreet: v))),
-                    ),
-                    FFListRow.toggle(
-                      leading: _tile(FontAwesomeIcons.tableColumns),
-                      title: tr('Show Prayer as a tab'),
-                      subtitle: tr('Otherwise it lives in Library'),
-                      value: prefs.showTab,
-                      onChanged: (v) =>
-                          unawaited(_edit(ref, (p) => p.copyWith(showTab: v))),
                     ),
                     FFListRow(
                       leading: _tile(FontAwesomeIcons.wandMagicSparkles),

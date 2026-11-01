@@ -31,12 +31,11 @@ import 'package:focusflow/features/prayers/presentation/prayer_flows.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_add_sheet.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_day_card.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_hero.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_location_sheets.dart';
-import 'package:focusflow/features/prayers/presentation/widgets/prayer_log_sheet.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_practice_cards.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_progress_section.dart';
-import 'package:focusflow/features/prayers/presentation/widgets/prayer_slot_row.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
@@ -81,32 +80,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
     }
   }
 
-  Future<void> _openLog(PrayerSlot slot) async {
-    final now = ref.read(minuteClockProvider);
-    final use24h = ref.read(settingsProvider).use24HourTime;
-    final choice = await showPrayerLogSheet(
-      context,
-      slot: slot,
-      now: now,
-      use24h: use24h,
-    );
-    if (!mounted || choice == null) return;
-    switch (choice) {
-      case PrayerLogSave(:final status, :final place, :final congregation):
-        await markPrayer(
-          context,
-          ref,
-          slot,
-          status: status,
-          place: place,
-          congregation: congregation,
-        );
-      case PrayerLogClear():
-        await clearPrayerMark(context, ref, slot);
-      case PrayerLogEdit():
-        unawaited(context.push(AppRoutes.prayerEdit(slot.prayer.id)));
-    }
-  }
+  Future<void> _openLog(PrayerSlot slot) => openPrayerLog(context, ref, slot);
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +88,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
     final prefs = ref.watch(prayerPrefsProvider);
     final hijri = ref.watch(prayerHijriProvider);
     final now = ref.watch(minuteClockProvider);
-    final date = DateFormats.of('EEE, d MMM').format(now);
-    final subtitle = hijri == null ? date : '$date · $hijri';
+    final date = DateFormats.of('EEEE, d MMMM').format(now);
     final actions = [
       FFRoundIconButton(
         icon: FontAwesomeIcons.plus,
@@ -135,7 +108,6 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
             FFNavHeader(
               leading: const FFBackButton(),
               title: tr('Prayer'),
-              subtitle: subtitle,
               trailing: actions,
             ),
             Expanded(
@@ -149,7 +121,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
                   ),
                 ),
                 data: (d) => d.hasPrayers
-                    ? _content(context, d, prefs.hasLocation)
+                    ? _content(context, d, prefs.hasLocation, date, hijri)
                     : _empty(context, prefs.isSetUp),
               ),
             ),
@@ -187,7 +159,13 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
     ),
   );
 
-  Widget _content(BuildContext context, PrayerToday d, bool hasLocation) {
+  Widget _content(
+    BuildContext context,
+    PrayerToday d,
+    bool hasLocation,
+    String date,
+    String? hijri,
+  ) {
     final ff = context.ff;
     final use24h = ref.watch(settingsProvider.select((s) => s.use24HourTime));
     final progress = ref.watch(prayerProgressProvider);
@@ -225,6 +203,8 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
         ],
+        _DateLine(date: date, hijri: hijri),
+        const SizedBox(height: AppSpacing.md),
         PrayerHeroCard(
           slot: d.focus,
           now: d.now,
@@ -254,15 +234,21 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
             tr('Nothing due today.'),
             style: context.text.bodySmall.copyWith(color: ff.inkMuted),
           ),
-        for (final s in d.prayers) ...[
-          PrayerSlotRow(
-            slot: s,
+        if (d.prayers.isNotEmpty) ...[
+          PrayerDayCard(
+            markInRow: false,
+            slots: d.prayers,
             now: d.now,
             use24h: use24h,
-            onMark: () => unawaited(markPrayer(context, ref, s)),
-            onTap: () => unawaited(_openLog(s)),
+            onMark: (s) => unawaited(markPrayer(context, ref, s)),
+            onTap: (s) => unawaited(_openLog(s)),
           ),
           gap,
+        ],
+        if (d.fasts.isNotEmpty || d.counters.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          FFSectionHeader(title: tr('Fasts and practices')),
+          const SizedBox(height: AppSpacing.sm),
         ],
         for (final s in d.fasts) ...[
           PrayerFastCard(
@@ -300,4 +286,54 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
       ],
     );
   }
+}
+
+/// "Sunday, 1 November · 20 Jumada al-Ula 1448" — wraps, never cut.
+class _DateLine extends StatelessWidget {
+  const _DateLine({required this.date, required this.hijri});
+
+  final String date;
+  final String? hijri;
+
+  @override
+  Widget build(BuildContext context) {
+    final ff = context.ff;
+    return Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.xs,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _part(context, FontAwesomeIcons.calendarDay, date, ff.inkMuted),
+        if (hijri != null)
+          _part(
+            context,
+            FontAwesomeIcons.solidMoon,
+            hijri!,
+            PrayerStyle.module.inkFor(ff.brightness),
+          ),
+      ],
+    );
+  }
+
+  static Widget _part(
+    BuildContext context,
+    IconData icon,
+    String label,
+    Color color,
+  ) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 12, color: color),
+      const SizedBox(width: AppSpacing.xs),
+      Flexible(
+        child: Text(
+          label,
+          style: context.text.meta.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    ],
+  );
 }

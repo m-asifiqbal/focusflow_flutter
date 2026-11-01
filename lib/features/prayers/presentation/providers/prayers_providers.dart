@@ -1,5 +1,5 @@
 /// ============================================================
-/// PRAYERS PROVIDERS — the live data of the Prayer tab, Home and Calendar
+/// PRAYERS PROVIDERS — the live data of the Prayer page, Home and Calendar
 /// ============================================================
 ///
 /// What: the active prayers, the logs of the last [PrayerStats.historyDays]
@@ -62,7 +62,7 @@ final prayerLogsProvider = StreamProvider.autoDispose<List<PrayerLog>>((ref) {
       );
 });
 
-/// Everything the Prayer tab shows for today.
+/// Everything the Prayer page shows for today.
 @immutable
 class PrayerToday {
   const PrayerToday({

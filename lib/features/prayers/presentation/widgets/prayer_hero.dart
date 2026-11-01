@@ -1,5 +1,5 @@
 /// ============================================================
-/// PRAYER HERO — "Now" / "Next" at the top of the Prayer tab
+/// PRAYER HERO — "Now" / "Next" at the top of the Prayer page
 /// ============================================================
 ///
 /// What: the slot PrayerSchedule.focus picks. Open: "Now · ends in 1h 08m",
@@ -97,6 +97,7 @@ class PrayerHeroCard extends StatelessWidget {
             0.0,
             1.0,
           );
+    final jamaat = PrayerFormat.jamaat(s, now, use24h: use24h);
     final details = [
       if (s.prayer.place.trim().isNotEmpty) s.prayer.place.trim(),
       if (s.prayer.priority == PrayerPriority.high) tr('Alarm'),
@@ -134,7 +135,8 @@ class PrayerHeroCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   timing,
-                  maxLines: 1,
+                  maxLines: 2,
+                  textAlign: TextAlign.end,
                   overflow: TextOverflow.ellipsis,
                   style: text.meta.copyWith(
                     color: state == PrayerSlotState.endingSoon ? on : soft,
@@ -157,6 +159,15 @@ class PrayerHeroCard extends StatelessWidget {
             PrayerFormat.window(w, use24h: use24h),
             style: text.body.copyWith(color: soft),
           ),
+          if (jamaat != null) ...[
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              jamaat,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: text.body.copyWith(color: on, fontWeight: FontWeight.w700),
+            ),
+          ],
           if (open && end != null) ...[
             const SizedBox(height: AppSpacing.md),
             ClipRRect(
@@ -194,7 +205,7 @@ class PrayerHeroCard extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: on,
-                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                      borderRadius: BorderRadius.circular(AppRadii.tile),
                     ),
                     child: Text(
                       s.prayer.kind.isFast

@@ -74,6 +74,12 @@ abstract final class PrayerStyle {
   };
 
   static const double rowAccent = 4;
+
+  // Day timeline (PrayerDayCard).
+  static const double timeColumn = 54;
+  static const double railDot = 16;
+  static const double summaryRing = 52;
+  static const double markButton = 40;
   static const double heroRing = 58;
 
   // Insights › Prayer.
@@ -110,6 +116,23 @@ abstract final class PrayerFormat {
 
   /// "in 1h 12m".
   static String inTime(Duration d) => tr('in {time}', {'time': duration(d)});
+
+  /// "Jamaat 4:15 PM" ("Congregation …" outside Islam), with "· in 25 min"
+  /// while it is still ahead (within 3 hours) and the prayer is not marked;
+  /// null when no jamaat is set.
+  static String? jamaat(PrayerSlot s, DateTime now, {required bool use24h}) {
+    final at = s.jamaat;
+    if (at == null) return null;
+    final time = PrayerFormat.time(at, use24h: use24h);
+    final label = s.prayer.tradition == PrayerTradition.islam
+        ? tr('Jamaat {time}', {'time': time})
+        : tr('Congregation {time}', {'time': time});
+    final ahead = at.difference(now);
+    if (s.status != null || ahead.isNegative || ahead.inHours >= 3) {
+      return label;
+    }
+    return '$label · ${inTime(ahead)}';
+  }
 
   /// "Ends in 18 min".
   static String endsIn(Duration d) =>

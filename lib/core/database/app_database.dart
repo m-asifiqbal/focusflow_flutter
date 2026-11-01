@@ -133,6 +133,14 @@ class AppDatabase extends _$AppDatabase {
     ('notes', 'paper', 'TEXT'),
     // A notification-centre row's own destination (digests have no item).
     ('inbox_entries', 'route', 'TEXT'),
+    // A prayer's congregation (jamaat) time and its reminder.
+    ('prayers', 'jamaat_minutes', 'INTEGER'),
+    (
+      'prayers',
+      'jamaat_after_start',
+      'INTEGER NOT NULL DEFAULT 0',
+    ),
+    ('prayers', 'remind_before_jamaat', 'INTEGER'),
   ];
 
   Future<void> _ensureAddedColumns() async {

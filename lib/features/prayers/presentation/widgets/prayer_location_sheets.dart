@@ -338,7 +338,7 @@ class _CitySheetState extends State<_CitySheet> {
   }
 }
 
-/// "You seem to be in a new place" on the Prayer tab.
+/// "You seem to be in a new place" on the Prayer page.
 class PrayerTravelBanner extends StatelessWidget {
   const PrayerTravelBanner({
     required this.km,

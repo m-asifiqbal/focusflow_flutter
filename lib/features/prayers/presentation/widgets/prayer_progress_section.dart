@@ -1,5 +1,5 @@
 /// ============================================================
-/// PRAYER PROGRESS — streak, on time, month, week grid (Prayer tab)
+/// PRAYER PROGRESS — streak, on time, month, week grid (Prayer page)
 /// ============================================================
 ///
 /// What: three tiles (streak with the best one, on-time % of the last 30

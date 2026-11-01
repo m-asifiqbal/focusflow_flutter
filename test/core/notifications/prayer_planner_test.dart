@@ -104,6 +104,40 @@ void main() {
     expect(NotificationPlanner.isVital(end), isFalse);
   });
 
+  test('jamaat: a reminder before the congregation, until marked', () {
+    final p = _prayer('a', remindBefore: null, remindBeforeEnd: null).copyWith(
+      tradition: PrayerTradition.islam,
+      jamaat: const PrayerJamaat.at(16 * 60 + 15),
+      remindBeforeJamaat: 10,
+      place: 'Baitul Mukarram',
+    );
+    final out = plan([p]);
+    expect(out.map((n) => n.key), ['pry:2026-10-23:a:j']);
+    final j = out.single;
+    expect(j.fireAt.toUtc(), DateTime.utc(2026, 10, 23, 16, 5));
+    expect(j.title, 'Asr jamaat in 10 min');
+    expect(j.body, 'Jamaat at 4:15 PM · Baitul Mukarram');
+    expect(j.inbox, isTrue);
+    // Minutes after the start; at the time itself; other traditions.
+    final after = plan([
+      p.copyWith(
+        jamaat: const PrayerJamaat.afterStart(20),
+        remindBeforeJamaat: 0,
+        tradition: PrayerTradition.christianity,
+      ),
+    ]).single;
+    expect(after.fireAt.toUtc(), DateTime.utc(2026, 10, 23, 16, 5));
+    expect(after.title, 'Asr with the congregation now');
+    // Discreet: the time only. Marked: nothing.
+    expect(
+      plan([p], prefs: const PrayerPrefs()).single.title,
+      'Reminder · 4:15 PM',
+    );
+    expect(plan([p], logs: [_log(p, day, PrayerStatus.onTime)]), isEmpty);
+    // No reminder chosen: nothing planned.
+    expect(plan([p.copyWith(clearRemindBeforeJamaat: true)]), isEmpty);
+  });
+
   test('marked prayers are left alone', () {
     final p = _prayer('a');
     expect(plan([p], logs: [_log(p, day, PrayerStatus.onTime)]), isEmpty);

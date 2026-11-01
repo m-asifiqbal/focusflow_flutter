@@ -3,13 +3,15 @@
 /// ============================================================
 ///
 /// For every day of the window, every due prayer (active, not paused —
-/// `PrayersRepository.schedulable`) gets up to two notifications:
+/// `PrayersRepository.schedulable`) gets up to three notifications:
 ///   • `pry:<day>:<id>:s` — [Prayer.remindBefore] minutes before its window
 ///     starts (a fast: the Suhoor reminder); rings as an alarm for a high
 ///     priority prayer, quiet for a low one;
 ///   • `pry:<day>:<id>:e` — [Prayer.remindBeforeEnd] minutes before the
 ///     window ends, only while the prayer is not marked (a fast: the Iftar
 ///     reminder, unless the fast was marked broken / not fasted / excused);
+///   • `pry:<day>:<id>:j` — [Prayer.remindBeforeJamaat] minutes before the
+///     congregation's time (jamaat), only while the prayer is not marked;
 ///   • `pry:<day>:<id>:z` — a snoozed start reminder, at the snooze end
 ///     (its own key, so the original alarm is cancelled, not doubled).
 /// Sun-based windows come from the saved location (PrayerSun); without one
@@ -33,7 +35,7 @@ abstract final class PrayerPlanner {
   static const String prefix = 'pry:';
 
   /// `(dayKey, prayerId, kind)` of a prayer plan key (kind `s` / `e` /
-  /// `z`), or null.
+  /// `j` / `z`), or null.
   static (String, String, String)? parseKey(String key) {
     final parts = key.split(':');
     if (parts.length != 4 || parts.first != 'pry') return null;
@@ -90,6 +92,25 @@ abstract final class PrayerPlanner {
         } else if (!marked && p.remindBefore != null) {
           final at = start.subtract(Duration(minutes: p.remindBefore!));
           add(_start(input, p, dayKey, start, end, at));
+        }
+        final lead = p.remindBeforeJamaat;
+        final jamaat = PrayerSchedule.jamaatOn(
+          p,
+          day,
+          start,
+          end ?? cal.at(ZoneCalendar.addDays(day, 1), 0),
+          cal.at,
+        );
+        if (!marked && lead != null && jamaat != null) {
+          add(
+            _jamaat(
+              input,
+              p,
+              dayKey,
+              jamaat,
+              jamaat.subtract(Duration(minutes: lead)),
+            ),
+          );
         }
         final before = p.remindBeforeEnd;
         if (before != null && end != null) {
@@ -195,6 +216,54 @@ abstract final class PrayerPlanner {
     final body = input.settings.prayer.discreet
         ? '$name · $range'
         : [range, if (p.place.trim().isNotEmpty) p.place.trim()].join(' · ');
+    return _notification(
+      input,
+      p,
+      key,
+      dayKey,
+      fireAt,
+      title,
+      body,
+      alarm: p.alarm,
+      inbox: true,
+    );
+  }
+
+  static PlannedNotification _jamaat(
+    PlannerInput input,
+    Prayer p,
+    String dayKey,
+    DateTime jamaat,
+    DateTime fireAt,
+  ) {
+    final key = '$prefix$dayKey:${p.id}:j';
+    final name = p.displayName;
+    final time = input.formatTime(jamaat);
+    final lead = p.remindBeforeJamaat ?? 0;
+    final islam = p.tradition == PrayerTradition.islam;
+    final String title;
+    if (input.settings.prayer.discreet) {
+      title = tr('Reminder · {time}', {'time': time});
+    } else if (lead <= 0) {
+      title = islam
+          ? tr('{name} jamaat now', {'name': name})
+          : tr('{name} with the congregation now', {'name': name});
+    } else {
+      title = islam
+          ? tr('{name} jamaat in {m} min', {'name': name, 'm': lead})
+          : tr('{name} with the congregation in {m} min', {
+              'name': name,
+              'm': lead,
+            });
+    }
+    final body = input.settings.prayer.discreet
+        ? '$name · $time'
+        : [
+            islam
+                ? tr('Jamaat at {time}', {'time': time})
+                : tr('Congregation at {time}', {'time': time}),
+            if (p.place.trim().isNotEmpty) p.place.trim(),
+          ].join(' · ');
     return _notification(
       input,
       p,

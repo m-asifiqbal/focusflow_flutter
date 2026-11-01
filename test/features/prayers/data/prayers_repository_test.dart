@@ -38,6 +38,8 @@ void main() {
         place: 'Mosque',
         colorHex: '10B981',
         targetCount: kind == PrayerKind.dhikr ? 3 : null,
+        jamaat: const PrayerJamaat.at(16 * 60 + 15),
+        remindBeforeJamaat: 5,
         createdAt: now,
         updatedAt: now,
       );
@@ -60,6 +62,17 @@ void main() {
     expect(p.priority, PrayerPriority.high);
     expect((p.remindBefore, p.remindBeforeEnd), (10, 20));
     expect(p.place, 'Mosque');
+    expect(p.jamaat, const PrayerJamaat.at(16 * 60 + 15));
+    expect(p.remindBeforeJamaat, 5);
+    // Jamaat after the start; then none (its reminder goes with it).
+    await repo.save(p.copyWith(jamaat: const PrayerJamaat.afterStart(10)));
+    expect(
+      (await repo.getPrayer(id))!.jamaat,
+      const PrayerJamaat.afterStart(10),
+    );
+    await repo.save(p.copyWith(clearJamaat: true));
+    final none = (await repo.getPrayer(id))!;
+    expect((none.jamaat, none.remindBeforeJamaat), (null, null));
     await repo.setPaused(id, true);
     await repo.save(p.copyWith(name: 'Asr prayer', clearEnd: true));
     final again = (await repo.getPrayer(id))!;

@@ -35,8 +35,8 @@
 ///
 /// Use with `Scaffold(extendBody: true)` (the app shell does) so content
 /// scrolls under the glass; scroll views pad with `context.barClearance`.
-/// [currentIndex] is the index into [FFBottomNav.items] (4 or 5 tabs; the +
-/// is not a tab).
+/// [currentIndex] is the index into [FFBottomNav.items] (the + is not a
+/// tab).
 /// ============================================================
 library;
 
@@ -84,7 +84,7 @@ class FFBottomNav extends StatefulWidget {
   /// The separate "+" (always opens Quick Add).
   final VoidCallback onFab;
 
-  /// 4 tabs, or 5 with the Prayer tab (the layout shares any count).
+  /// The tabs (the layout shares any count).
   final List<FFNavItem>? _items;
   final String? _fabSemanticLabel;
 

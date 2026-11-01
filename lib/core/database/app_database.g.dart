@@ -9442,6 +9442,42 @@ class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _jamaatMinutesMeta = const VerificationMeta(
+    'jamaatMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> jamaatMinutes = GeneratedColumn<int>(
+    'jamaat_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _jamaatAfterStartMeta = const VerificationMeta(
+    'jamaatAfterStart',
+  );
+  @override
+  late final GeneratedColumn<bool> jamaatAfterStart = GeneratedColumn<bool>(
+    'jamaat_after_start',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("jamaat_after_start" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _remindBeforeJamaatMeta =
+      const VerificationMeta('remindBeforeJamaat');
+  @override
+  late final GeneratedColumn<int> remindBeforeJamaat = GeneratedColumn<int>(
+    'remind_before_jamaat',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isPausedMeta = const VerificationMeta(
     'isPaused',
   );
@@ -9492,6 +9528,9 @@ class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
     place,
     note,
     targetCount,
+    jamaatMinutes,
+    jamaatAfterStart,
+    remindBeforeJamaat,
     isPaused,
   ];
   @override
@@ -9734,6 +9773,33 @@ class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
         ),
       );
     }
+    if (data.containsKey('jamaat_minutes')) {
+      context.handle(
+        _jamaatMinutesMeta,
+        jamaatMinutes.isAcceptableOrUnknown(
+          data['jamaat_minutes']!,
+          _jamaatMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('jamaat_after_start')) {
+      context.handle(
+        _jamaatAfterStartMeta,
+        jamaatAfterStart.isAcceptableOrUnknown(
+          data['jamaat_after_start']!,
+          _jamaatAfterStartMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remind_before_jamaat')) {
+      context.handle(
+        _remindBeforeJamaatMeta,
+        remindBeforeJamaat.isAcceptableOrUnknown(
+          data['remind_before_jamaat']!,
+          _remindBeforeJamaatMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_paused')) {
       context.handle(
         _isPausedMeta,
@@ -9881,6 +9947,18 @@ class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
         DriftSqlType.int,
         data['${effectivePrefix}target_count'],
       ),
+      jamaatMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}jamaat_minutes'],
+      ),
+      jamaatAfterStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}jamaat_after_start'],
+      )!,
+      remindBeforeJamaat: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}remind_before_jamaat'],
+      ),
       isPaused: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_paused'],
@@ -9962,6 +10040,15 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
 
   /// Daily goal of a dhikr / counting practice; null = no goal.
   final int? targetCount;
+
+  /// Congregation (jamaat) time: minutes after midnight, or after the
+  /// window's start when [jamaatAfterStart]; null = none. Added after the
+  /// table shipped: see AppDatabase.addedColumns.
+  final int? jamaatMinutes;
+  final bool jamaatAfterStart;
+
+  /// Reminder this many minutes before the jamaat; null = off.
+  final int? remindBeforeJamaat;
   final bool isPaused;
   const PrayerRow({
     required this.id,
@@ -9997,6 +10084,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     required this.place,
     required this.note,
     this.targetCount,
+    this.jamaatMinutes,
+    required this.jamaatAfterStart,
+    this.remindBeforeJamaat,
     required this.isPaused,
   });
   @override
@@ -10060,6 +10150,13 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     map['note'] = Variable<String>(note);
     if (!nullToAbsent || targetCount != null) {
       map['target_count'] = Variable<int>(targetCount);
+    }
+    if (!nullToAbsent || jamaatMinutes != null) {
+      map['jamaat_minutes'] = Variable<int>(jamaatMinutes);
+    }
+    map['jamaat_after_start'] = Variable<bool>(jamaatAfterStart);
+    if (!nullToAbsent || remindBeforeJamaat != null) {
+      map['remind_before_jamaat'] = Variable<int>(remindBeforeJamaat);
     }
     map['is_paused'] = Variable<bool>(isPaused);
     return map;
@@ -10126,6 +10223,13 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
       targetCount: targetCount == null && nullToAbsent
           ? const Value.absent()
           : Value(targetCount),
+      jamaatMinutes: jamaatMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(jamaatMinutes),
+      jamaatAfterStart: Value(jamaatAfterStart),
+      remindBeforeJamaat: remindBeforeJamaat == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remindBeforeJamaat),
       isPaused: Value(isPaused),
     );
   }
@@ -10169,6 +10273,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
       place: serializer.fromJson<String>(json['place']),
       note: serializer.fromJson<String>(json['note']),
       targetCount: serializer.fromJson<int?>(json['targetCount']),
+      jamaatMinutes: serializer.fromJson<int?>(json['jamaatMinutes']),
+      jamaatAfterStart: serializer.fromJson<bool>(json['jamaatAfterStart']),
+      remindBeforeJamaat: serializer.fromJson<int?>(json['remindBeforeJamaat']),
       isPaused: serializer.fromJson<bool>(json['isPaused']),
     );
   }
@@ -10209,6 +10316,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
       'place': serializer.toJson<String>(place),
       'note': serializer.toJson<String>(note),
       'targetCount': serializer.toJson<int?>(targetCount),
+      'jamaatMinutes': serializer.toJson<int?>(jamaatMinutes),
+      'jamaatAfterStart': serializer.toJson<bool>(jamaatAfterStart),
+      'remindBeforeJamaat': serializer.toJson<int?>(remindBeforeJamaat),
       'isPaused': serializer.toJson<bool>(isPaused),
     };
   }
@@ -10247,6 +10357,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     String? place,
     String? note,
     Value<int?> targetCount = const Value.absent(),
+    Value<int?> jamaatMinutes = const Value.absent(),
+    bool? jamaatAfterStart,
+    Value<int?> remindBeforeJamaat = const Value.absent(),
     bool? isPaused,
   }) => PrayerRow(
     id: id ?? this.id,
@@ -10284,6 +10397,13 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     place: place ?? this.place,
     note: note ?? this.note,
     targetCount: targetCount.present ? targetCount.value : this.targetCount,
+    jamaatMinutes: jamaatMinutes.present
+        ? jamaatMinutes.value
+        : this.jamaatMinutes,
+    jamaatAfterStart: jamaatAfterStart ?? this.jamaatAfterStart,
+    remindBeforeJamaat: remindBeforeJamaat.present
+        ? remindBeforeJamaat.value
+        : this.remindBeforeJamaat,
     isPaused: isPaused ?? this.isPaused,
   );
   PrayerRow copyWithCompanion(PrayersCompanion data) {
@@ -10347,6 +10467,15 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
       targetCount: data.targetCount.present
           ? data.targetCount.value
           : this.targetCount,
+      jamaatMinutes: data.jamaatMinutes.present
+          ? data.jamaatMinutes.value
+          : this.jamaatMinutes,
+      jamaatAfterStart: data.jamaatAfterStart.present
+          ? data.jamaatAfterStart.value
+          : this.jamaatAfterStart,
+      remindBeforeJamaat: data.remindBeforeJamaat.present
+          ? data.remindBeforeJamaat.value
+          : this.remindBeforeJamaat,
       isPaused: data.isPaused.present ? data.isPaused.value : this.isPaused,
     );
   }
@@ -10387,6 +10516,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
           ..write('place: $place, ')
           ..write('note: $note, ')
           ..write('targetCount: $targetCount, ')
+          ..write('jamaatMinutes: $jamaatMinutes, ')
+          ..write('jamaatAfterStart: $jamaatAfterStart, ')
+          ..write('remindBeforeJamaat: $remindBeforeJamaat, ')
           ..write('isPaused: $isPaused')
           ..write(')'))
         .toString();
@@ -10427,6 +10559,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     place,
     note,
     targetCount,
+    jamaatMinutes,
+    jamaatAfterStart,
+    remindBeforeJamaat,
     isPaused,
   ]);
   @override
@@ -10466,6 +10601,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
           other.place == this.place &&
           other.note == this.note &&
           other.targetCount == this.targetCount &&
+          other.jamaatMinutes == this.jamaatMinutes &&
+          other.jamaatAfterStart == this.jamaatAfterStart &&
+          other.remindBeforeJamaat == this.remindBeforeJamaat &&
           other.isPaused == this.isPaused);
 }
 
@@ -10503,6 +10641,9 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
   final Value<String> place;
   final Value<String> note;
   final Value<int?> targetCount;
+  final Value<int?> jamaatMinutes;
+  final Value<bool> jamaatAfterStart;
+  final Value<int?> remindBeforeJamaat;
   final Value<bool> isPaused;
   final Value<int> rowid;
   const PrayersCompanion({
@@ -10539,6 +10680,9 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     this.place = const Value.absent(),
     this.note = const Value.absent(),
     this.targetCount = const Value.absent(),
+    this.jamaatMinutes = const Value.absent(),
+    this.jamaatAfterStart = const Value.absent(),
+    this.remindBeforeJamaat = const Value.absent(),
     this.isPaused = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -10576,6 +10720,9 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     this.place = const Value.absent(),
     this.note = const Value.absent(),
     this.targetCount = const Value.absent(),
+    this.jamaatMinutes = const Value.absent(),
+    this.jamaatAfterStart = const Value.absent(),
+    this.remindBeforeJamaat = const Value.absent(),
     this.isPaused = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -10615,6 +10762,9 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     Expression<String>? place,
     Expression<String>? note,
     Expression<int>? targetCount,
+    Expression<int>? jamaatMinutes,
+    Expression<bool>? jamaatAfterStart,
+    Expression<int>? remindBeforeJamaat,
     Expression<bool>? isPaused,
     Expression<int>? rowid,
   }) {
@@ -10652,6 +10802,10 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
       if (place != null) 'place': place,
       if (note != null) 'note': note,
       if (targetCount != null) 'target_count': targetCount,
+      if (jamaatMinutes != null) 'jamaat_minutes': jamaatMinutes,
+      if (jamaatAfterStart != null) 'jamaat_after_start': jamaatAfterStart,
+      if (remindBeforeJamaat != null)
+        'remind_before_jamaat': remindBeforeJamaat,
       if (isPaused != null) 'is_paused': isPaused,
       if (rowid != null) 'rowid': rowid,
     });
@@ -10691,6 +10845,9 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     Value<String>? place,
     Value<String>? note,
     Value<int?>? targetCount,
+    Value<int?>? jamaatMinutes,
+    Value<bool>? jamaatAfterStart,
+    Value<int?>? remindBeforeJamaat,
     Value<bool>? isPaused,
     Value<int>? rowid,
   }) {
@@ -10728,6 +10885,9 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
       place: place ?? this.place,
       note: note ?? this.note,
       targetCount: targetCount ?? this.targetCount,
+      jamaatMinutes: jamaatMinutes ?? this.jamaatMinutes,
+      jamaatAfterStart: jamaatAfterStart ?? this.jamaatAfterStart,
+      remindBeforeJamaat: remindBeforeJamaat ?? this.remindBeforeJamaat,
       isPaused: isPaused ?? this.isPaused,
       rowid: rowid ?? this.rowid,
     );
@@ -10835,6 +10995,15 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     if (targetCount.present) {
       map['target_count'] = Variable<int>(targetCount.value);
     }
+    if (jamaatMinutes.present) {
+      map['jamaat_minutes'] = Variable<int>(jamaatMinutes.value);
+    }
+    if (jamaatAfterStart.present) {
+      map['jamaat_after_start'] = Variable<bool>(jamaatAfterStart.value);
+    }
+    if (remindBeforeJamaat.present) {
+      map['remind_before_jamaat'] = Variable<int>(remindBeforeJamaat.value);
+    }
     if (isPaused.present) {
       map['is_paused'] = Variable<bool>(isPaused.value);
     }
@@ -10880,6 +11049,9 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
           ..write('place: $place, ')
           ..write('note: $note, ')
           ..write('targetCount: $targetCount, ')
+          ..write('jamaatMinutes: $jamaatMinutes, ')
+          ..write('jamaatAfterStart: $jamaatAfterStart, ')
+          ..write('remindBeforeJamaat: $remindBeforeJamaat, ')
           ..write('isPaused: $isPaused, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -21360,6 +21532,9 @@ typedef $$PrayersTableCreateCompanionBuilder =
       Value<String> place,
       Value<String> note,
       Value<int?> targetCount,
+      Value<int?> jamaatMinutes,
+      Value<bool> jamaatAfterStart,
+      Value<int?> remindBeforeJamaat,
       Value<bool> isPaused,
       Value<int> rowid,
     });
@@ -21398,6 +21573,9 @@ typedef $$PrayersTableUpdateCompanionBuilder =
       Value<String> place,
       Value<String> note,
       Value<int?> targetCount,
+      Value<int?> jamaatMinutes,
+      Value<bool> jamaatAfterStart,
+      Value<int?> remindBeforeJamaat,
       Value<bool> isPaused,
       Value<int> rowid,
     });
@@ -21573,6 +21751,21 @@ class $$PrayersTableFilterComposer
 
   ColumnFilters<int> get targetCount => $composableBuilder(
     column: $table.targetCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get jamaatMinutes => $composableBuilder(
+    column: $table.jamaatMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get jamaatAfterStart => $composableBuilder(
+    column: $table.jamaatAfterStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get remindBeforeJamaat => $composableBuilder(
+    column: $table.remindBeforeJamaat,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -21756,6 +21949,21 @@ class $$PrayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get jamaatMinutes => $composableBuilder(
+    column: $table.jamaatMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get jamaatAfterStart => $composableBuilder(
+    column: $table.jamaatAfterStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get remindBeforeJamaat => $composableBuilder(
+    column: $table.remindBeforeJamaat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isPaused => $composableBuilder(
     column: $table.isPaused,
     builder: (column) => ColumnOrderings(column),
@@ -21896,6 +22104,21 @@ class $$PrayersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get jamaatMinutes => $composableBuilder(
+    column: $table.jamaatMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get jamaatAfterStart => $composableBuilder(
+    column: $table.jamaatAfterStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get remindBeforeJamaat => $composableBuilder(
+    column: $table.remindBeforeJamaat,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get isPaused =>
       $composableBuilder(column: $table.isPaused, builder: (column) => column);
 }
@@ -21961,6 +22184,9 @@ class $$PrayersTableTableManager
                 Value<String> place = const Value.absent(),
                 Value<String> note = const Value.absent(),
                 Value<int?> targetCount = const Value.absent(),
+                Value<int?> jamaatMinutes = const Value.absent(),
+                Value<bool> jamaatAfterStart = const Value.absent(),
+                Value<int?> remindBeforeJamaat = const Value.absent(),
                 Value<bool> isPaused = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PrayersCompanion(
@@ -21997,6 +22223,9 @@ class $$PrayersTableTableManager
                 place: place,
                 note: note,
                 targetCount: targetCount,
+                jamaatMinutes: jamaatMinutes,
+                jamaatAfterStart: jamaatAfterStart,
+                remindBeforeJamaat: remindBeforeJamaat,
                 isPaused: isPaused,
                 rowid: rowid,
               ),
@@ -22035,6 +22264,9 @@ class $$PrayersTableTableManager
                 Value<String> place = const Value.absent(),
                 Value<String> note = const Value.absent(),
                 Value<int?> targetCount = const Value.absent(),
+                Value<int?> jamaatMinutes = const Value.absent(),
+                Value<bool> jamaatAfterStart = const Value.absent(),
+                Value<int?> remindBeforeJamaat = const Value.absent(),
                 Value<bool> isPaused = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PrayersCompanion.insert(
@@ -22071,6 +22303,9 @@ class $$PrayersTableTableManager
                 place: place,
                 note: note,
                 targetCount: targetCount,
+                jamaatMinutes: jamaatMinutes,
+                jamaatAfterStart: jamaatAfterStart,
+                remindBeforeJamaat: remindBeforeJamaat,
                 isPaused: isPaused,
                 rowid: rowid,
               ),

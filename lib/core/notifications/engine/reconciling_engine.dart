@@ -247,11 +247,8 @@ class ReconcilingNotificationEngine implements NotificationEngine {
 
   static bool _changesPlan(AppSettings a, AppSettings b) {
     // The prayer settings are an object (its JSON is a map, which `!=`
-    // would always call changed); only the tab switch plans nothing.
-    if (a.prayer.copyWith(showTab: false) !=
-        b.prayer.copyWith(showTab: false)) {
-      return true;
-    }
+    // would always call changed): compare them as values.
+    if (a.prayer != b.prayer) return true;
     final before = a.toJson();
     final after = b.toJson();
     for (final e in before.entries) {

@@ -6,7 +6,7 @@
 /// and an optional footnote. The tip shown is picked from [day] (a new
 /// one every day, the same one all day); "Another tip" steps through the
 /// rest with a cross-fade and starts over on the next day.
-/// Why: Medicine insights (health tips) and the Prayer tab (prayer tips)
+/// Why: Medicine insights (health tips) and the Prayer page (prayer tips)
 /// share it; the catalogues stay in their features — this only rotates.
 /// ============================================================
 library;

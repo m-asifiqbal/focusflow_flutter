@@ -27,7 +27,6 @@ class PrayerPrefs {
     this.asrSchool = 'standard',
     this.highLatitudeRule = 'angleBased',
     this.hijriAdjust = 0,
-    this.showTab = false,
     this.tradition,
     this.notify = true,
     this.discreet = true,
@@ -57,9 +56,6 @@ class PrayerPrefs {
   /// Hijri date correction in days (−2…2) for local moon sighting.
   final int hijriAdjust;
 
-  /// Prayer is a tab of the bottom bar (else it lives in Library).
-  final bool showTab;
-
   /// PrayerTradition key picked at setup; null = not set up.
   final String? tradition;
 
@@ -84,7 +80,6 @@ class PrayerPrefs {
     String? asrSchool,
     String? highLatitudeRule,
     int? hijriAdjust,
-    bool? showTab,
     String? tradition,
     bool? notify,
     bool? discreet,
@@ -98,7 +93,6 @@ class PrayerPrefs {
     asrSchool: asrSchool ?? this.asrSchool,
     highLatitudeRule: highLatitudeRule ?? this.highLatitudeRule,
     hijriAdjust: hijriAdjust ?? this.hijriAdjust,
-    showTab: showTab ?? this.showTab,
     tradition: tradition ?? this.tradition,
     notify: notify ?? this.notify,
     discreet: discreet ?? this.discreet,
@@ -114,7 +108,6 @@ class PrayerPrefs {
     'asr': asrSchool,
     'highLat': highLatitudeRule,
     'hijri': hijriAdjust,
-    'tab': showTab,
     'tradition': tradition,
     'notify': notify,
     'discreet': discreet,
@@ -147,7 +140,6 @@ class PrayerPrefs {
       asrSchool: s('asr') ?? 'standard',
       highLatitudeRule: s('highLat') ?? 'angleBased',
       hijriAdjust: hijri is num ? hijri.toInt().clamp(-2, 2) : 0,
-      showTab: b('tab', false),
       tradition: s('tradition'),
       notify: b('notify', true),
       discreet: b('discreet', true),
@@ -166,7 +158,6 @@ class PrayerPrefs {
       other.asrSchool == asrSchool &&
       other.highLatitudeRule == highLatitudeRule &&
       other.hijriAdjust == hijriAdjust &&
-      other.showTab == showTab &&
       other.tradition == tradition &&
       other.notify == notify &&
       other.discreet == discreet;
@@ -182,7 +173,6 @@ class PrayerPrefs {
     asrSchool,
     highLatitudeRule,
     hijriAdjust,
-    showTab,
     tradition,
     notify,
     discreet,

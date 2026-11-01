@@ -1,6 +1,6 @@
 /// Prayer screens in the real app: the tab (hero, today's rows, a fast and
 /// a counter, progress; light / dark / 360 pt at text 1.3 captures), "Mark
-/// prayed" from the hero with Undo, the 5-tab bar, the setup picker saving
+/// prayed" from the hero with Undo, the bar without a Prayer tab, the setup picker saving
 /// a tradition's prayers, and the editor saving a new prayer.
 library;
 
@@ -25,7 +25,7 @@ import '../../reminders/isolated_notifications.dart';
 final _now = DateTime(2026, 11, 1, 15, 50);
 final _day = DateTime(2026, 11, 1);
 
-const _dhaka = PrayerPrefs(tradition: 'islam', showTab: true, discreet: false);
+const _dhaka = PrayerPrefs(tradition: 'islam', discreet: false);
 
 void main() {
   Future<TestHarness> boot(WidgetTester tester) async {
@@ -85,7 +85,7 @@ void main() {
   ) async {
     final h = await boot(tester);
     await seed(tester, h);
-    await pumpApp(tester, h, AppRoutes.prayer, size: const Size(390, 1800));
+    await pumpApp(tester, h, AppRoutes.prayers, size: const Size(390, 1800));
     expect(find.byType(PrayerHeroCard), findsOneWidget);
     expect(find.text('Asr'), findsWidgets);
     expect(find.text('Mark prayed'), findsWidgets);
@@ -96,7 +96,7 @@ void main() {
     await pumpApp(
       tester,
       h,
-      AppRoutes.prayer,
+      AppRoutes.prayers,
       size: const Size(390, 1800),
       dark: true,
     );
@@ -109,7 +109,7 @@ void main() {
     await pumpApp(
       tester,
       h,
-      AppRoutes.prayer,
+      AppRoutes.prayers,
       size: const Size(360, 2000),
       textScale: 1.3,
     );
@@ -117,18 +117,19 @@ void main() {
     await captureScreen(tester, 'prayer_tab_360_x13');
   });
 
-  testWidgets('Mark prayed on the hero, and the 5-tab bar', (tester) async {
+  testWidgets('Mark prayed on the hero; Prayer is not a tab', (tester) async {
     final h = await boot(tester);
     await seed(tester, h);
-    await pumpApp(tester, h, AppRoutes.prayer);
+    // Set up, and still the four classic tabs.
+    await pumpApp(tester, h, AppRoutes.home);
     final nav = tester.widget<FFBottomNav>(find.byType(FFBottomNav));
     expect(nav.items.map((i) => i.label), [
       'Home',
       'Library',
-      'Prayer',
       'Insights',
       'Settings',
     ]);
+    await pumpApp(tester, h, AppRoutes.prayers);
     await tester.tap(
       find.descendant(
         of: find.byType(PrayerHeroCard),
@@ -149,9 +150,7 @@ void main() {
     expect(log?.status, PrayerStatus.onTime);
   });
 
-  testWidgets('setup: a tradition\'s prayers saved, the tab turned on', (
-    tester,
-  ) async {
+  testWidgets('setup: a tradition\'s prayers saved', (tester) async {
     final h = await boot(tester);
     await pumpApp(tester, h, AppRoutes.prayerSetup);
     await tester.tap(find.text('Islam'));
@@ -180,7 +179,6 @@ void main() {
     expect(list.every((p) => !p.usesSun), isTrue);
     final prefs = h.read(settingsProvider).prayer;
     expect(prefs.tradition, 'islam');
-    expect(prefs.showTab, isTrue);
   });
 
   testWidgets('editor: a new prayer with a name is saved', (tester) async {

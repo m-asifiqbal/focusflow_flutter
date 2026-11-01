@@ -9,7 +9,6 @@
 ///   ├─ /library ── notes · tasks · reminders · habits · vault · archive ·
 ///   │              trash · pinned · favourites · tags[/:tagId]
 ///   ├─ /insights
-///   ├─ /prayer (5th branch, shown when the Prayer tab is on)
 ///   └─ /settings ── notifications · appearance · vault-security · backup ·
 ///                   import-export · account · …
 /// Root navigator (covers the tab bar): editors, details, search, calendar,
@@ -132,9 +131,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               ]),
             ]),
           ),
-          // Last, so the four classic tabs keep their indices; the bar shows
-          // it only when the Prayer tab is switched on (AppShell).
-          StatefulShellBranch(routes: withMaterialPages([prayerTabRoute])),
         ],
       ),
       // Explicit Material pages: see core/router/route_pages.dart.

@@ -61,6 +61,14 @@ abstract final class PrayerRowMapper {
       place: r.place,
       note: r.note,
       targetCount: r.targetCount,
+      jamaat: switch (r.jamaatMinutes) {
+        null => null,
+        final m when r.jamaatAfterStart => PrayerJamaat.afterStart(
+          m.clamp(0, 24 * 60),
+        ),
+        final m => PrayerJamaat.at(_minute(m)),
+      },
+      remindBeforeJamaat: r.jamaatMinutes == null ? null : r.remindBeforeJamaat,
       isPaused: r.isPaused,
       colorHex: r.colorHex,
       isPinned: r.isPinned,
@@ -101,6 +109,9 @@ abstract final class PrayerRowMapper {
       place: Value(p.place.trim()),
       note: Value(p.note),
       targetCount: Value(p.targetCount),
+      jamaatMinutes: Value(p.jamaat?.minutes),
+      jamaatAfterStart: Value(p.jamaat?.afterStart ?? false),
+      remindBeforeJamaat: Value(p.jamaat == null ? null : p.remindBeforeJamaat),
       colorHex: Value(p.colorHex),
     );
   }

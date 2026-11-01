@@ -165,6 +165,33 @@ class PrayerTimeRule {
       : 'auto(${event!.name}${offset == 0 ? '' : '$offset'})';
 }
 
+/// When the congregation prays (the mosque's jamaat, a church service):
+/// a set clock time, or a number of minutes after the window opens (Maghrib
+/// "10 minutes after the adhan" follows the sun by itself).
+@immutable
+class PrayerJamaat {
+  /// At [minutes] after midnight.
+  const PrayerJamaat.at(this.minutes) : afterStart = false;
+
+  /// [minutes] after the window's start.
+  const PrayerJamaat.afterStart(this.minutes) : afterStart = true;
+
+  final int minutes;
+  final bool afterStart;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PrayerJamaat &&
+      other.minutes == minutes &&
+      other.afterStart == afterStart;
+
+  @override
+  int get hashCode => Object.hash(minutes, afterStart);
+
+  @override
+  String toString() => afterStart ? 'jamaat(+$minutes)' : 'jamaat(@$minutes)';
+}
+
 @immutable
 class Prayer {
   const Prayer({
@@ -185,6 +212,8 @@ class Prayer {
     this.place = '',
     this.note = '',
     this.targetCount,
+    this.jamaat,
+    this.remindBeforeJamaat,
     this.isPaused = false,
     this.colorHex,
     this.isPinned = false,
@@ -248,6 +277,12 @@ class Prayer {
 
   /// Daily goal of a counting practice (dhikr); null = no goal.
   final int? targetCount;
+
+  /// The congregation's time (jamaat); null = none set.
+  final PrayerJamaat? jamaat;
+
+  /// Reminder this many minutes before [jamaat]; null = off.
+  final int? remindBeforeJamaat;
   final bool isPaused;
   final String? colorHex;
   final bool isPinned;
@@ -294,6 +329,10 @@ class Prayer {
     String? note,
     int? targetCount,
     bool clearTarget = false,
+    PrayerJamaat? jamaat,
+    bool clearJamaat = false,
+    int? remindBeforeJamaat,
+    bool clearRemindBeforeJamaat = false,
     bool? isPaused,
     String? colorHex,
     bool clearColor = false,
@@ -326,6 +365,10 @@ class Prayer {
     place: place ?? this.place,
     note: note ?? this.note,
     targetCount: clearTarget ? null : (targetCount ?? this.targetCount),
+    jamaat: clearJamaat ? null : (jamaat ?? this.jamaat),
+    remindBeforeJamaat: clearRemindBeforeJamaat || clearJamaat
+        ? null
+        : (remindBeforeJamaat ?? this.remindBeforeJamaat),
     isPaused: isPaused ?? this.isPaused,
     colorHex: clearColor ? null : (colorHex ?? this.colorHex),
     isPinned: isPinned ?? this.isPinned,
@@ -358,6 +401,8 @@ class Prayer {
       other.place == place &&
       other.note == note &&
       other.targetCount == targetCount &&
+      other.jamaat == jamaat &&
+      other.remindBeforeJamaat == remindBeforeJamaat &&
       other.isPaused == isPaused &&
       other.colorHex == colorHex &&
       other.isPinned == isPinned &&
@@ -388,6 +433,8 @@ class Prayer {
     place,
     note,
     targetCount,
+    jamaat,
+    remindBeforeJamaat,
     isPaused,
     colorHex,
     isPinned,

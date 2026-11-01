@@ -382,6 +382,16 @@ class Prayers extends Table with ItemColumns {
 
   /// Daily goal of a dhikr / counting practice; null = no goal.
   IntColumn get targetCount => integer().nullable()();
+
+  /// Congregation (jamaat) time: minutes after midnight, or after the
+  /// window's start when [jamaatAfterStart]; null = none. Added after the
+  /// table shipped: see AppDatabase.addedColumns.
+  IntColumn get jamaatMinutes => integer().nullable()();
+  BoolColumn get jamaatAfterStart =>
+      boolean().withDefault(const Constant(false))();
+
+  /// Reminder this many minutes before the jamaat; null = off.
+  IntColumn get remindBeforeJamaat => integer().nullable()();
   BoolColumn get isPaused => boolean().withDefault(const Constant(false))();
 }
 

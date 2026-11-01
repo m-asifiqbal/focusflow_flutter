@@ -3,7 +3,8 @@
 /// ============================================================
 ///
 /// What: name and type (Salah, Nafl, Fasting, Dhikr, Recitation,
-/// Meditation, Service, Other), the window (PrayerTimeSection), days,
+/// Meditation, Service, Other), the window (PrayerTimeSection), the
+/// congregation's time (PrayerJamaatSection, prayers only), days,
 /// reminders and priority, place, colour, goal and notes
 /// (PrayerDetailsSection); an existing prayer also gets Pause, Archive and
 /// Delete (the shared lifecycle actions: confirmation + Undo).
@@ -31,6 +32,7 @@ import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_details_section.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_jamaat_section.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_time_section.dart';
 import 'package:focusflow/shared/item_actions/item_lifecycle_actions.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
@@ -99,7 +101,11 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
   /// Picking a kind fills the defaults that kind needs.
   void _kind(PrayerKind k) {
     final d = _draft!;
-    var next = d.copyWith(kind: k);
+    var next = d.copyWith(
+      kind: k,
+      // A fast or a counting practice has no congregation time.
+      clearJamaat: !PrayerJamaatSection.appliesTo(k),
+    );
     if (k.isFast && !d.kind.isFast) {
       next = next.copyWith(
         start: const PrayerTimeRule.auto(SolarEvent.dawn, minutes: 5 * 60),
@@ -220,6 +226,16 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
           today: DateUtilsX.dateOnly(now),
           use24h: use24h,
         ),
+        if (PrayerJamaatSection.appliesTo(d.kind)) ...[
+          const SizedBox(height: AppSpacing.section),
+          PrayerJamaatSection(
+            draft: d,
+            onChanged: _set,
+            sunFor: sunFor,
+            today: DateUtilsX.dateOnly(now),
+            use24h: use24h,
+          ),
+        ],
         const SizedBox(height: AppSpacing.section),
         PrayerDetailsSection(draft: d, onChanged: _set, now: now),
         if (widget.prayerId != null) ...[

@@ -75,11 +75,8 @@ abstract final class AppRoutes {
   static String medicine(String id) => '/medicines/$id';
 
   // ── Prayer ──
-  /// The Prayer tab (shown when Settings › Prayer › "Show as a tab" is on).
-  static const prayer = '/prayer';
-
-  /// The same screen as a page over everything (Library, Home, a
-  /// notification) — works whether or not the tab is shown.
+  /// The Prayer page, over everything (Library, Home, Insights, a
+  /// notification).
   static const prayers = '/prayers';
   static const newPrayer = '/prayers/new';
   static const prayerSetup = '/prayers/setup';

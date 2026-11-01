@@ -27,9 +27,45 @@ import 'package:focusflow/features/prayers/domain/services/prayer_presets.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/prayers/domain/services/world_cities.dart';
+import 'package:focusflow/core/router/app_routes.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_log_sheet.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
+import 'package:go_router/go_router.dart';
+
+/// Tap on a prayer (Prayer page or Home): the log sheet — status, place,
+/// congregation — then saves, clears or opens the editor.
+Future<void> openPrayerLog(
+  BuildContext context,
+  WidgetRef ref,
+  PrayerSlot slot,
+) async {
+  final now = ref.read(clockProvider).now();
+  final use24h = ref.read(settingsProvider).use24HourTime;
+  final choice = await showPrayerLogSheet(
+    context,
+    slot: slot,
+    now: now,
+    use24h: use24h,
+  );
+  if (!context.mounted || choice == null) return;
+  switch (choice) {
+    case PrayerLogSave(:final status, :final place, :final congregation):
+      await markPrayer(
+        context,
+        ref,
+        slot,
+        status: status,
+        place: place,
+        congregation: congregation,
+      );
+    case PrayerLogClear():
+      await clearPrayerMark(context, ref, slot);
+    case PrayerLogEdit():
+      unawaited(context.push(AppRoutes.prayerEdit(slot.prayer.id)));
+  }
+}
 
 /// Moving this far from the saved location offers new prayer times.
 const double kPrayerTravelKm = 25;
@@ -112,7 +148,7 @@ Future<void> countPrayer(WidgetRef ref, PrayerSlot slot, int delta) async {
 }
 
 /// Saves the setup picker: the ticked [drafts] (fixed times when [manual]),
-/// the tradition, and turns the Prayer tab on.
+/// and the tradition.
 Future<void> savePrayerSetup(
   WidgetRef ref,
   PrayerTradition tradition,
@@ -126,9 +162,7 @@ Future<void> savePrayerSetup(
   await ref
       .read(settingsProvider.notifier)
       .update(
-        (s) => s.copyWith(
-          prayer: s.prayer.copyWith(tradition: tradition.key, showTab: true),
-        ),
+        (s) => s.copyWith(prayer: s.prayer.copyWith(tradition: tradition.key)),
       );
 }
 

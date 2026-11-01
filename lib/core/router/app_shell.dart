@@ -2,8 +2,7 @@
 /// APP SHELL — the tabs + the "+" button around StatefulShellRoute
 /// ============================================================
 ///
-/// Home · Library · (Prayer, when its tab is on) · Insights · Settings and
-/// the "+" button. The FAB always opens the Quick Add sheet (screen 04)
+/// Home · Library · Insights · Settings and the "+" button. The FAB always opens the Quick Add sheet (screen 04)
 /// over whatever tab is showing.
 /// Re-tapping the active tab pops that tab back to its root (iOS convention).
 ///
@@ -27,7 +26,6 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/ff_bottom_nav.dart';
 import 'package:focusflow/core/widgets/ff_dialog.dart';
 import 'package:focusflow/features/quick_add/presentation/quick_add.dart';
-import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class AppShell extends ConsumerWidget {
@@ -38,41 +36,16 @@ class AppShell extends ConsumerWidget {
   /// The Home tab (first branch).
   static const int homeIndex = 0;
 
-  /// Branch indices (app_router.dart): the Prayer branch is registered last
-  /// so the classic four keep theirs.
+  /// Branch indices (app_router.dart), in bar order.
   static const int libraryIndex = 1;
   static const int insightsIndex = 2;
   static const int settingsIndex = 3;
-  static const int prayerIndex = 4;
 
-  /// The branches the bar shows, in bar order: Prayer sits after Library
-  /// when its tab is on.
-  static List<int> visibleBranches({required bool prayerTab}) => [
-    homeIndex,
-    libraryIndex,
-    if (prayerTab) prayerIndex,
-    insightsIndex,
-    settingsIndex,
-  ];
-
-  static List<FFNavItem> _items(List<int> branches) => [
-    for (final b in branches)
-      switch (b) {
-        homeIndex => FFNavItem(icon: FontAwesomeIcons.house, label: tr('Home')),
-        libraryIndex => FFNavItem(
-          icon: FontAwesomeIcons.layerGroup,
-          label: tr('Library'),
-        ),
-        prayerIndex => FFNavItem(
-          icon: FontAwesomeIcons.handsPraying,
-          label: tr('Prayer'),
-        ),
-        insightsIndex => FFNavItem(
-          icon: FontAwesomeIcons.chartPie,
-          label: tr('Insights'),
-        ),
-        _ => FFNavItem(icon: FontAwesomeIcons.gear, label: tr('Settings')),
-      },
+  static List<FFNavItem> get _items => [
+    FFNavItem(icon: FontAwesomeIcons.house, label: tr('Home')),
+    FFNavItem(icon: FontAwesomeIcons.layerGroup, label: tr('Library')),
+    FFNavItem(icon: FontAwesomeIcons.chartPie, label: tr('Insights')),
+    FFNavItem(icon: FontAwesomeIcons.gear, label: tr('Settings')),
   ];
 
   /// Android is the only platform with a back button to handle here.
@@ -97,17 +70,6 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final prayerTab = ref.watch(
-      settingsProvider.select((s) => s.prayer.showTab),
-    );
-    final branches = visibleBranches(prayerTab: prayerTab);
-    final shown = branches.indexOf(shell.currentIndex);
-    if (shown < 0) {
-      // The Prayer tab was switched off while showing: back to Home.
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => shell.goBranch(homeIndex),
-      );
-    }
     return PopScope(
       canPop: !_handlesBack,
       onPopInvokedWithResult: (didPop, _) {
@@ -118,15 +80,12 @@ class AppShell extends ConsumerWidget {
         extendBody: true,
         body: shell,
         bottomNavigationBar: FFBottomNav(
-          currentIndex: shown < 0 ? 0 : shown,
-          items: _items(branches),
-          onTap: (index) {
-            final branch = branches[index];
-            shell.goBranch(
-              branch,
-              initialLocation: branch == shell.currentIndex,
-            );
-          },
+          currentIndex: shell.currentIndex,
+          items: _items,
+          onTap: (index) => shell.goBranch(
+            index,
+            initialLocation: index == shell.currentIndex,
+          ),
           onFab: () => showQuickAdd(context),
         ),
       ),

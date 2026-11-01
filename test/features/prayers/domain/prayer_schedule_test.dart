@@ -248,4 +248,37 @@ void main() {
       expect(to.difference(from).inDays, inInclusiveRange(28, 29));
     });
   });
+
+  group('jamaat', () {
+    PrayerSlot slot(Prayer p) =>
+        PrayerSchedule.dayPlan([p], day, _noSun, const {}).single;
+
+    test('a set time, minutes after the start, none', () {
+      expect(slot(_p('a')).jamaat, isNull);
+      expect(
+        slot(
+          _p('a').copyWith(jamaat: const PrayerJamaat.at(16 * 60 + 15)),
+        ).jamaat,
+        DateTime(2026, 10, 23, 16, 15),
+      );
+      expect(
+        slot(
+          _p('a').copyWith(jamaat: const PrayerJamaat.afterStart(10)),
+        ).jamaat,
+        DateTime(2026, 10, 23, 15, 55),
+      );
+    });
+
+    test('a window past midnight puts an early jamaat on the next day', () {
+      final isha = _p('i', start: 20 * 60, end: 60);
+      expect(
+        slot(isha.copyWith(jamaat: const PrayerJamaat.at(15))).jamaat,
+        DateTime(2026, 10, 24, 0, 15),
+      );
+      expect(
+        slot(isha.copyWith(jamaat: const PrayerJamaat.at(20 * 60 + 30))).jamaat,
+        DateTime(2026, 10, 23, 20, 30),
+      );
+    });
+  });
 }

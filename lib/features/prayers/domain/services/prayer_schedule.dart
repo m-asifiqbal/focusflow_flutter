@@ -5,7 +5,8 @@
 /// What: [PrayerSchedule.isDueOn] (weekdays, optional date range, paused),
 /// [PrayerSchedule.windowOn] (start / end instants from the rules and the
 /// day's sun times) and [PrayerSchedule.dayPlan] — the day's [PrayerSlot]s,
-/// soonest first, each with its log and a [PrayerSlotState] at any instant.
+/// soonest first, each with its log and a [PrayerSlotState] at any instant
+/// — and [PrayerSchedule.jamaatOn], the congregation's time that day.
 /// Why: one place for the window rules the tab, the notification planner,
 /// Home and the statistics all share. An end at or before the start means
 /// the next day (Isha → midnight, a night vigil 23:00 – 01:00).
@@ -85,6 +86,15 @@ class PrayerSlot {
 
   String get id => PrayerLog.idFor(prayer.id, DateUtilsX.dayKey(day));
 
+  /// When the congregation prays that day (null = no jamaat set).
+  DateTime? get jamaat => PrayerSchedule.jamaatOn(
+    prayer,
+    day,
+    window.start,
+    window.until,
+    DateUtilsX.atMinutes,
+  );
+
   PrayerStatus? get status {
     final s = log?.status;
     return s == null || s == PrayerStatus.pending ? null : s;
@@ -126,6 +136,28 @@ class PrayerSlot {
 }
 
 abstract final class PrayerSchedule {
+  /// The jamaat of [p] on [day] whose window runs [start] – [until]: the
+  /// window start + N minutes, or a clock time from [at] (a wall clock) —
+  /// on the next day when the window crosses midnight and the time falls
+  /// after it (Isha until 1 AM, jamaat at 00:15).
+  static DateTime? jamaatOn(
+    Prayer p,
+    DateTime day,
+    DateTime start,
+    DateTime until,
+    DateTime Function(DateTime day, int minutes) at,
+  ) {
+    final j = p.jamaat;
+    if (j == null) return null;
+    if (j.afterStart) return start.add(Duration(minutes: j.minutes));
+    final t = at(day, j.minutes);
+    if (t.isBefore(start)) {
+      final next = at(DateUtilsX.addDays(day, 1), j.minutes);
+      if (next.isBefore(until)) return next;
+    }
+    return t;
+  }
+
   /// "Ends in 18 min": the last stretch of a window is flagged.
   static const Duration endingSoon = Duration(minutes: 20);
 
