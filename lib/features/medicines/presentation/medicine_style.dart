@@ -72,7 +72,6 @@ abstract final class MedicineSizes {
   static const double insightDonutMax = 150;
   static const double barMinWidth = 3;
   static const double barMaxWidth = 22;
-  static const double vennHeight = 230;
 
   /// Scale of a dose's check when it pops in.
   static const double checkPop = 1.25;

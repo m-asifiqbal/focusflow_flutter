@@ -11,7 +11,8 @@
 ///     last 30 days by day, Yearly = the last 12 months by month; the
 ///     window right before it gives the deltas;
 ///   • per prayer, the best run of complete days, prayers in congregation,
-///     where they were prayed, fasts kept and the dhikr tally.
+///     where they were prayed, fasts kept and the dhikr tally;
+///   • the Venn of days and the "when you pray" rows (prayer_timing.dart).
 /// Fasts and counting practices are counted on their own, never in the
 /// prayer outcomes (a missed fast is not a missed prayer). Excused days
 /// are shown but never lower a rate.
@@ -25,6 +26,7 @@ import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_stats.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_timing.dart';
 
 enum PrayerPeriod { daily, monthly, yearly }
 
@@ -150,6 +152,8 @@ class PrayerInsights {
     required this.dhikrTotal,
     required this.dhikrGoalDays,
     required this.places,
+    this.venn = PrayerVenn.zero,
+    this.timing = const [],
   });
 
   final PrayerPeriod period;
@@ -189,6 +193,12 @@ class PrayerInsights {
   /// Where done prayers were prayed, most frequent first (top 4).
   final List<(String, int)> places;
 
+  /// Days by the outcomes they had.
+  final PrayerVenn venn;
+
+  /// Each prayer's typical window and mark times, in the order of the day.
+  final List<PrayerTiming> timing;
+
   bool get hasData =>
       !counts.isEmpty || fastsDue > 0 || fastsKept > 0 || dhikrTotal > 0;
 
@@ -212,7 +222,9 @@ class PrayerInsights {
       other.fastsDue == fastsDue &&
       other.dhikrTotal == dhikrTotal &&
       other.dhikrGoalDays == dhikrGoalDays &&
-      _eq.equals(other.places, places);
+      _eq.equals(other.places, places) &&
+      other.venn == venn &&
+      _eq.equals(other.timing, timing);
 
   @override
   int get hashCode => Object.hash(
@@ -227,6 +239,8 @@ class PrayerInsights {
     fastsKept,
     dhikrTotal,
     _eq.hash(places),
+    venn,
+    _eq.hash(timing),
   );
 }
 
@@ -256,7 +270,9 @@ abstract final class PrayerInsightsCalculator {
   }
 
   /// Insights of [period] at [now] from [prayers] (active ones count) and
-  /// their [logs] (covering [previousWindow] to today).
+  /// their [logs] (covering [previousWindow] to today). [sunFor] gives any
+  /// day's sun times for the windows of the timing rows (defaults to
+  /// [sunToday] for every day).
   static PrayerInsights compute({
     required List<Prayer> prayers,
     required List<PrayerLog> logs,
@@ -264,6 +280,7 @@ abstract final class PrayerInsightsCalculator {
     required DateTime now,
     SolarDay? sunToday,
     SolarDay? sunTomorrow,
+    SolarDay? Function(DateTime day)? sunFor,
   }) {
     final win = window(period, now);
     final prev = previousWindow(period, win);
@@ -296,12 +313,13 @@ abstract final class PrayerInsightsCalculator {
     final byBucket = <int, PrayerCounts>{};
     var complete = 0, trackedDays = 0, best = 0, run = 0;
     var fastsKept = 0, fastsDue = 0;
+    final vennMasks = List.filled(8, 0);
     for (
       var day = win.$1;
       day.isBefore(win.$2) && !day.isAfter(today);
       day = DateUtilsX.addDays(day, 1)
     ) {
-      var dayDue = 0, dayOk = 0;
+      var dayDue = 0, dayOk = 0, mask = 0;
       var open = false;
       for (final p in tracked) {
         final c = cell(p, day);
@@ -316,6 +334,7 @@ abstract final class PrayerInsightsCalculator {
         byBucket[b] = (byBucket[b] ?? PrayerCounts.zero).add(c);
         dayDue++;
         if (c != PrayerCell.missed) dayOk++;
+        mask |= PrayerVenn.maskOf(c);
       }
       for (final p in fasts) {
         final c = cell(p, day);
@@ -328,6 +347,7 @@ abstract final class PrayerInsightsCalculator {
         }
       }
       if (dayDue == 0) continue;
+      vennMasks[mask]++;
       trackedDays++;
       if (dayOk == dayDue && !open) {
         complete++;
@@ -397,6 +417,19 @@ abstract final class PrayerInsightsCalculator {
       dhikrTotal: dhikr,
       dhikrGoalDays: goalDays,
       places: List.unmodifiable(topPlaces.take(4)),
+      venn: PrayerVenn.fromMasks(vennMasks),
+      timing: PrayerTimingCalculator.compute(
+        tracked: tracked,
+        logs: logs,
+        window: win,
+        today: today,
+        sunFor: sunFor ?? (_) => sunToday,
+        step: switch (period) {
+          PrayerPeriod.daily => 1,
+          PrayerPeriod.monthly => 2,
+          PrayerPeriod.yearly => 7,
+        },
+      ),
     );
   }
 

@@ -4,9 +4,11 @@
 ///
 /// What: Daily · Monthly · Yearly chips, then for that period: KPI tiles
 /// (prayed, on time, best streak, complete days), the outcome donut,
-/// prayers by day / month, each prayer's record, and the practice card
-/// (congregation, fasts, dhikr, places). Not set up yet → "Set up Prayer";
-/// nothing marked yet → a pointer to the Prayer page. Every card reveals
+/// prayers by day / month, the trend line, the Venn of days, "When you
+/// pray" (a Gantt of windows and mark times), each prayer's record, the
+/// practice card (congregation, fasts, dhikr, places), and the prayer tip
+/// of the day (also under the empty states). Not set up yet → "Set up
+/// Prayer"; nothing marked yet → a pointer to the Prayer page. Every card reveals
 /// with the Insights stagger; switching periods keeps the previous one on
 /// screen (dimmed) until the next is ready.
 /// Why: lives in the prayers feature; the Insights screen only hosts it.
@@ -25,12 +27,17 @@ import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/presentation/insights_tokens.dart';
 import 'package:focusflow/features/insights/presentation/widgets/insights_kpi_card.dart';
 import 'package:focusflow/features/insights/presentation/widgets/insights_motion.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_insights.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_tips.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayer_insights_providers.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/insights/prayer_insight_breakdowns.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/insights/prayer_insight_charts.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/insights/prayer_insight_shapes.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/insights/prayer_timing_card.dart';
+import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 import 'package:go_router/go_router.dart';
 
 String prayerPeriodLabel(PrayerPeriod p) => switch (p) {
@@ -122,7 +129,24 @@ class _PrayerInsightsViewState extends ConsumerState<PrayerInsightsView> {
             AppSpacing.screen,
             AppSpacing.xxl,
           ),
-          child: body,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              body,
+              if (shown != null) ...[
+                const SizedBox(height: AppSpacing.section),
+                FFTipCard(
+                  title: tr('Prayer tip of the day'),
+                  tips: PrayerTips.forTradition(
+                    PrayerTradition.fromKey(prefs.tradition),
+                  ),
+                  day: ref.watch(todayProvider),
+                  icon: FontAwesomeIcons.solidLightbulb,
+                  colors: PrayerStyle.module,
+                ),
+              ],
+            ],
+          ),
         ),
       ],
     );
@@ -188,6 +212,14 @@ class _Content extends StatelessWidget {
         reveal(PrayerOutcomeCard(insights: s)),
         gap,
         reveal(PrayerBarsCard(insights: s)),
+        gap,
+        reveal(PrayerTrendCard(insights: s)),
+        gap,
+        reveal(PrayerVennCard(insights: s)),
+        if (PrayerTimingCard.hasData(s)) ...[
+          gap,
+          reveal(PrayerTimingCard(insights: s)),
+        ],
         if (s.perPrayer.isNotEmpty) ...[
           gap,
           reveal(PerPrayerCard(insights: s)),

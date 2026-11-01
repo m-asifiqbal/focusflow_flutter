@@ -37,6 +37,11 @@ abstract final class InsightsDimens {
   static const double dotRadius = 4.5;
   static const double dotStroke = 2.5;
 
+  // Venn (three circles + labels) and the Gantt rows
+  static const double vennHeight = 230;
+  static const double ganttBar = 14;
+  static const double ganttTick = 3;
+
   // Donut
   static const double donut = 120;
   static const double donutStroke = 20;

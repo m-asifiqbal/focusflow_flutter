@@ -68,6 +68,7 @@ final prayerInsightsProvider = Provider.autoDispose
           now: now,
           sunToday: sunFor(now),
           sunTomorrow: sunFor(DateUtilsX.addDays(now, 1)),
+          sunFor: sunFor,
         ),
       );
     });

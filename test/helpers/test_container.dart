@@ -35,6 +35,9 @@ class TestHarness {
     required DateTime now,
     List<Override> overrides = const [],
     Map<String, Object> prefs = const {},
+
+    /// This phone's id (two phones in one test need different ones).
+    String deviceId = TestHarness.deviceId,
   }) async {
     final dir = Directory.systemTemp.createTempSync('ff_test');
     final db = AppDatabase(

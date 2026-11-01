@@ -66,11 +66,12 @@ String prayerBucketName(PrayerPeriod p, DateTime d) => p == PrayerPeriod.yearly
     ? DateFormats.of('MMMM y').format(d)
     : DateFormats.of('EEE, MMM d').format(d);
 
-String _bucketLabel(PrayerPeriod p, DateTime d, int i, int n) => switch (p) {
-  PrayerPeriod.daily => DateFormats.of('EEE').format(d),
-  PrayerPeriod.monthly => i % 5 == 0 || i == n - 1 ? '${d.day}' : '',
-  PrayerPeriod.yearly => DateFormats.of('MMMMM').format(d),
-};
+String prayerBucketLabel(PrayerPeriod p, DateTime d, int i, int n) =>
+    switch (p) {
+      PrayerPeriod.daily => DateFormats.of('EEE').format(d),
+      PrayerPeriod.monthly => i % 5 == 0 || i == n - 1 ? '${d.day}' : '',
+      PrayerPeriod.yearly => DateFormats.of('MMMMM').format(d),
+    };
 
 // ─────────────────────────────── Donut ───────────────────────────────
 
@@ -277,7 +278,7 @@ class PrayerBarsCard extends StatelessWidget {
                                     meta: meta,
                                     space: AppSpacing.sm,
                                     child: Text(
-                                      _bucketLabel(
+                                      prayerBucketLabel(
                                         s.period,
                                         buckets[i].start,
                                         i,

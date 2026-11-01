@@ -1,12 +1,11 @@
 /// ============================================================
-/// PRAYER PROGRESS — streak, on time, month, week grid (Prayer page)
+/// PRAYER PROGRESS — streak, on time, month, Day · Week · Month · Year
 /// ============================================================
 ///
 /// What: three tiles (streak with the best one, on-time % of the last 30
-/// days, this month done / due), the last 7 days as a grid — one row per
-/// prayer, one rounded cell per day coloured by what happened (legend
-/// below) — and rows for congregation, fasting days and dhikr this month
-/// when there is anything to count.
+/// days, this month done / due), the Day · Week · Month · Year card
+/// (progress/prayer_progress_card.dart) and rows for congregation, fasting
+/// days and dhikr this month when there is anything to count.
 /// Why: progress sits under "today" on the same tab (scroll down), not in
 /// a separate screen; encouraging but calm — no confetti, a missed prayer
 /// can still be logged as made up.
@@ -18,10 +17,10 @@ import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
-import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_stats.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/progress/prayer_progress_card.dart';
 
 class PrayerProgressSection extends StatelessWidget {
   const PrayerProgressSection({required this.progress, super.key});
@@ -71,10 +70,7 @@ class PrayerProgressSection extends StatelessWidget {
         ),
         if (p.week.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
-          FFCard(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-            child: _WeekGrid(progress: p),
-          ),
+          PrayerProgressCard(progress: p),
         ],
         if (p.congregationThisMonth > 0 ||
             p.fastingDaysThisMonth > 0 ||
@@ -159,121 +155,6 @@ class _Tile extends StatelessWidget {
             ),
         ],
       ),
-    );
-  }
-}
-
-class _WeekGrid extends StatelessWidget {
-  const _WeekGrid({required this.progress});
-
-  final PrayerProgress progress;
-
-  static const double _cell = 14;
-  static const double _nameWidth = 72;
-
-  @override
-  Widget build(BuildContext context) {
-    final ff = context.ff;
-    final text = context.text;
-    final days = progress.weekDays;
-    final initials = DateFormats.of('EEEEE');
-    Widget cell(PrayerCell c) => Container(
-      height: _cell,
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      decoration: BoxDecoration(
-        color: PrayerStyle.cell(ff, c),
-        borderRadius: BorderRadius.circular(4),
-      ),
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(tr('Last 7 days'), style: text.cardTitle.copyWith(fontSize: 15)),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            const SizedBox(width: _nameWidth),
-            for (final d in days)
-              Expanded(
-                child: Text(
-                  initials.format(d),
-                  textAlign: TextAlign.center,
-                  style: text.meta.copyWith(
-                    color: d == days.last ? ff.primary : ff.inkMuted,
-                    fontWeight: d == days.last
-                        ? FontWeight.w700
-                        : FontWeight.w500,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        for (final row in progress.week)
-          Semantics(
-            label: tr('{name}: {done} of {due} days', {
-              'name': row.prayer.displayName,
-              'done': row.cells
-                  .where(
-                    (c) =>
-                        c == PrayerCell.onTime ||
-                        c == PrayerCell.late ||
-                        c == PrayerCell.madeUp,
-                  )
-                  .length,
-              'due': row.cells
-                  .where((c) => c != PrayerCell.none && c != PrayerCell.pending)
-                  .length,
-            }),
-            excludeSemantics: true,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: _nameWidth,
-                    child: Text(
-                      row.prayer.displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.bodySmall.copyWith(fontSize: 12.5),
-                    ),
-                  ),
-                  for (final c in row.cells) Expanded(child: cell(c)),
-                ],
-              ),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.xs,
-          children: [
-            for (final (c, label) in [
-              (PrayerCell.onTime, tr('On time')),
-              (PrayerCell.late, tr('Late')),
-              (PrayerCell.madeUp, tr('Made up')),
-              (PrayerCell.missed, tr('Missed')),
-              (PrayerCell.excused, tr('Excused')),
-            ])
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 9,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      color: PrayerStyle.cell(ff, c),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(label, style: text.meta.copyWith(color: ff.inkMuted)),
-                ],
-              ),
-          ],
-        ),
-      ],
     );
   }
 }

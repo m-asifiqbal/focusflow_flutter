@@ -1,6 +1,7 @@
 /// Prayer screens in the real app: the tab (hero, today's rows, a fast and
 /// a counter, progress; light / dark / 360 pt at text 1.3 captures), "Mark
-/// prayed" from the hero with Undo, the bar without a Prayer tab, the setup picker saving
+/// prayed" from the hero with Undo, the progress Day / Week / Month / Year
+/// views, the bar without a Prayer tab, the setup picker saving
 /// a tradition's prayers, and the editor saving a new prayer.
 library;
 
@@ -8,11 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
-import 'package:focusflow/core/widgets/ff_bottom_nav.dart';
+import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/prayers/domain/repository/prayers_repository.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_presets.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_progress_views.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_hero.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
@@ -115,6 +117,58 @@ void main() {
     );
     expect(tester.takeException(), isNull);
     await captureScreen(tester, 'prayer_tab_360_x13');
+  });
+
+  testWidgets('progress: Day, Week, Month and Year views (captures)', (
+    tester,
+  ) async {
+    final h = await boot(tester);
+    await seed(tester, h);
+    Future<void> open({Size size = const Size(390, 2400), double t = 1}) =>
+        pumpApp(tester, h, AppRoutes.prayers, size: size, textScale: t);
+    Future<void> pick(String view) async {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(FFSegmented<PrayerProgressView>),
+          matching: find.text(view),
+        ),
+      );
+      await settle(tester);
+    }
+
+    await open();
+    // Week is the default.
+    expect(find.text('Last 7 days'), findsOneWidget);
+
+    await pick('Day');
+    expect(find.text('Today'), findsWidgets);
+    expect(find.text('2 of 5 prayed'), findsOneWidget);
+    expect(find.textContaining('Marked'), findsWidgets);
+    expect(find.textContaining('In congregation'), findsWidgets);
+    await captureScreen(tester, 'prayer_progress_day');
+    await tester.tap(find.bySemanticsLabel('Previous day'));
+    await settle(tester);
+    expect(find.text('Yesterday'), findsOneWidget);
+    expect(find.text('5 of 5 prayed'), findsOneWidget);
+
+    await pick('Month');
+    expect(find.text('November 2026'), findsOneWidget);
+    await captureScreen(tester, 'prayer_progress_month');
+    await tester.tap(find.bySemanticsLabel('Previous month'));
+    await settle(tester);
+    expect(find.text('October 2026'), findsOneWidget);
+
+    await pick('Year');
+    expect(find.text('Last 12 months'), findsOneWidget);
+    expect(find.byType(FFHeatmap), findsOneWidget);
+    await captureScreen(tester, 'prayer_progress_year');
+
+    // Every view at 360 pt and text 1.3 without overflow.
+    await open(size: const Size(360, 2800), t: 1.3);
+    for (final view in ['Day', 'Week', 'Month', 'Year']) {
+      await pick(view);
+      expect(tester.takeException(), isNull, reason: view);
+    }
   });
 
   testWidgets('Mark prayed on the hero; Prayer is not a tab', (tester) async {

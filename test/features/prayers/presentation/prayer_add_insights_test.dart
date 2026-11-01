@@ -1,6 +1,7 @@
 /// The Prayer tab's "+" sheet (tradition first, then one of its prayers or
 /// "Create your own"; the editor opens pre-filled) and Insights › Prayer
-/// (KPIs and every card with history; light / dark / 360 pt at text 1.3
+/// (KPIs and every card with history — trend, Venn, "When you pray", the
+/// tip of the day; light / dark / 360 pt at text 1.3
 /// captures; the "Set up Prayer" empty state).
 library;
 
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/insights/presentation/providers/insights_providers.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
@@ -57,6 +59,8 @@ void main() {
         final day = _day.subtract(Duration(days: d));
         for (final p in list) {
           if (d == 2 && p.name == 'Isha') continue;
+          // Marked 10–28 min into the window (the "When you pray" times).
+          h.clock.set(DateUtilsX.atMinutes(day, p.start.minutes + 10 + d * 3));
           await repo.mark(
             p.id,
             day,
@@ -68,6 +72,7 @@ void main() {
           );
         }
       }
+      h.clock.set(_now);
       await repo.mark(list.first.id, _day, PrayerStatus.onTime);
     });
   }
@@ -196,9 +201,15 @@ void main() {
       'In congregation',
       'Where you prayed',
       'Mosque',
+      'Prayer trend',
+      'Your days at a glance',
+      'When you pray',
+      'Prayer tip of the day',
     ]) {
       expect(find.text(title), findsWidgets, reason: title);
     }
+    // Fajr is marked 13–28 min after 5:00 → usually 5:22 AM (median).
+    expect(find.text('Usually 05:22 AM'), findsOneWidget);
     await captureScreen(tester, 'insights_prayer');
 
     await tester.tap(find.text('Yearly'));
