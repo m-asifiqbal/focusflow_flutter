@@ -36,13 +36,15 @@ Widget _tile(IconData icon, ModuleColors c) =>
     FFIconTile(icon: icon, colors: c, size: AppSizes.iconTileSm);
 
 /// SYNC — how the app keeps up with your other devices (shown while a
-/// Google account is connected): "Sync when app opens".
+/// Google account is connected): "Sync when app opens" and "Sync button
+/// on Home" (the floating button, hidden when off).
 class SyncSection extends ConsumerWidget {
   const SyncSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final on = ref.watch(settingsProvider.select((s) => s.syncOnOpen));
+    final button = ref.watch(settingsProvider.select((s) => s.homeSyncButton));
     return FFGroupedList(
       label: tr('Sync'),
       children: [
@@ -56,6 +58,17 @@ class SyncSection extends ConsumerWidget {
           onChanged: (v) => ref
               .read(settingsProvider.notifier)
               .update((s) => s.copyWith(syncOnOpen: v)),
+        ),
+        FFListRow.toggle(
+          leading: _tile(FontAwesomeIcons.house, BackupTints.homeButton),
+          title: tr('Sync button on Home'),
+          subtitle: button
+              ? tr('A floating button on Home syncs in one tap')
+              : tr('Hidden — use Sync now on this page'),
+          value: button,
+          onChanged: (v) => ref
+              .read(settingsProvider.notifier)
+              .update((s) => s.copyWith(homeSyncButton: v)),
         ),
       ],
     );

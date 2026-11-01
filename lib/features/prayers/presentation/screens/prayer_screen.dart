@@ -2,9 +2,8 @@
 /// PRAYER SCREEN — today's prayers, fasts, counters and progress
 /// ============================================================
 ///
-/// What: the Prayer tab (or the same screen pushed from Library / Home / a
-/// notification when the tab is off — [asPage] adds a back button):
-/// header (date · Hijri date, add, settings), a "you moved" banner, a
+/// What: the Prayer page (pushed from Home, Library, Insights or a
+/// notification): header (date · Hijri date, add, settings), a "you moved" banner, a
 /// "set your location" banner while sun-based prayers have none, the hero
 /// (now / next), today's prayers, fasts and counting practices, then
 /// progress and the prayer tip of the day. Not set up yet → the "Set up Prayer" invitation.
@@ -31,6 +30,7 @@ import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_flows.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_add_sheet.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_hero.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_location_sheets.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_log_sheet.dart';
@@ -42,10 +42,7 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class PrayerScreen extends ConsumerStatefulWidget {
-  const PrayerScreen({this.asPage = false, super.key});
-
-  /// Pushed over everything (back button) instead of a tab root.
-  final bool asPage;
+  const PrayerScreen({super.key});
 
   @override
   ConsumerState<PrayerScreen> createState() => _PrayerScreenState();
@@ -123,7 +120,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
       FFRoundIconButton(
         icon: FontAwesomeIcons.plus,
         semanticLabel: tr('Add prayer'),
-        onPressed: () => context.push(AppRoutes.newPrayer),
+        onPressed: () => unawaited(showPrayerAddSheet(context)),
       ),
       FFRoundIconButton(
         icon: FontAwesomeIcons.gear,
@@ -133,22 +130,14 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
     ];
     return MinuteTicker(
       child: FFScaffold(
-        safeBottom: widget.asPage,
         body: Column(
           children: [
-            if (widget.asPage)
-              FFNavHeader(
-                leading: const FFBackButton(),
-                title: tr('Prayer'),
-                subtitle: subtitle,
-                trailing: actions,
-              )
-            else
-              FFLargeHeader(
-                title: tr('Prayer'),
-                subtitle: subtitle,
-                actions: actions,
-              ),
+            FFNavHeader(
+              leading: const FFBackButton(),
+              title: tr('Prayer'),
+              subtitle: subtitle,
+              trailing: actions,
+            ),
             Expanded(
               child: today.when(
                 loading: () => const FFLoadingView(),
@@ -180,7 +169,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
               title: tr('No prayers yet'),
               body: tr('Add a prayer, a fast or a daily remembrance.'),
               ctaLabel: tr('Add prayer'),
-              onCta: () => context.push(AppRoutes.newPrayer),
+              onCta: () => unawaited(showPrayerAddSheet(context)),
               hint: tr('Or start from a tradition'),
               onHint: () => context.push(AppRoutes.prayerSetup),
             )
@@ -213,7 +202,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
         AppSpacing.screen,
         AppSpacing.sm,
         AppSpacing.screen,
-        widget.asPage ? AppSpacing.xxl : context.barClearance,
+        AppSpacing.xxl,
       ),
       children: [
         if (moved != null && lat != null && lng != null) ...[

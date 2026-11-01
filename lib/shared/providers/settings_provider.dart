@@ -97,6 +97,7 @@ class SettingsController extends Notifier<AppSettings> {
       // Backup & sync.
       autoBackupDrive: s.autoBackupDrive,
       syncOnOpen: s.syncOnOpen,
+      homeSyncButton: s.homeSyncButton,
       backupFrequency: s.backupFrequency,
       backupMinutes: s.backupMinutes,
       backupWifiOnly: s.backupWifiOnly,

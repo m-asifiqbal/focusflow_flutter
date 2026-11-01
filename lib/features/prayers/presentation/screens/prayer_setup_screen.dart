@@ -7,7 +7,7 @@
 /// extras (Jumuah, Tahajjud, Ramadan fast …) unticked, each with its window;
 /// choose "Automatic" (sun-based windows, asks for the precise
 /// location with a reason first) or "I'll set the times myself"; Continue
-/// saves them and turns the Prayer tab on.
+/// saves them.
 /// Why: a complete first day in three taps, without assuming one faith —
 /// and nothing is final: every prayer stays editable.
 /// ============================================================
@@ -30,6 +30,7 @@ import 'package:focusflow/features/prayers/presentation/prayer_flows.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_location_sheets.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_tradition_grid.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
@@ -47,24 +48,6 @@ class _PrayerSetupScreenState extends ConsumerState<PrayerSetupScreen> {
   final Set<int> _picked = {};
   bool _manual = false;
   bool _saving = false;
-
-  static IconData _icon(PrayerTradition t) => switch (t) {
-    PrayerTradition.islam => FontAwesomeIcons.solidMoon,
-    PrayerTradition.christianity => FontAwesomeIcons.cross,
-    PrayerTradition.hinduism => FontAwesomeIcons.om,
-    PrayerTradition.buddhism => FontAwesomeIcons.dharmachakra,
-    PrayerTradition.judaism => FontAwesomeIcons.starOfDavid,
-    PrayerTradition.custom => FontAwesomeIcons.plus,
-  };
-
-  static String _hint(PrayerTradition t) => switch (t) {
-    PrayerTradition.islam => tr('5 daily prayers · fasting'),
-    PrayerTradition.christianity => tr('Morning and evening prayer'),
-    PrayerTradition.hinduism => tr('Sandhya · puja'),
-    PrayerTradition.buddhism => tr('Chanting · meditation'),
-    PrayerTradition.judaism => tr('3 daily services'),
-    PrayerTradition.custom => tr('Your own practice'),
-  };
 
   void _pick(PrayerTradition t) {
     final presets = PrayerPresets.of(t, ref.read(clockProvider).now());
@@ -131,7 +114,7 @@ class _PrayerSetupScreenState extends ConsumerState<PrayerSetupScreen> {
                   style: context.text.body.copyWith(color: context.ff.inkMuted),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                _traditions(context),
+                PrayerTraditionGrid(selected: t, onPick: _pick),
                 if (t != null && _presets.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.section),
                   _times(context),
@@ -161,90 +144,6 @@ class _PrayerSetupScreenState extends ConsumerState<PrayerSetupScreen> {
             ),
         ],
       ),
-    );
-  }
-
-  Widget _traditions(BuildContext context) {
-    final ff = context.ff;
-    final text = context.text;
-    // Rows of two equal-height tiles (not a fixed-ratio grid): the hints
-    // wrap to a second line and the tiles grow with the text scale.
-    Widget tile(PrayerTradition t) => Semantics(
-      button: true,
-      selected: t == _tradition,
-      label: '${t.label}, ${_hint(t)}',
-      excludeSemantics: true,
-      child: FFPressable(
-        onTap: () => _pick(t),
-        child: Container(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: t == _tradition ? ff.primarySoft : ff.surface,
-            borderRadius: BorderRadius.circular(AppRadii.card),
-            border: Border.all(
-              color: t == _tradition ? ff.primary : ff.surfaceBorder,
-              width: t == _tradition ? 1.5 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                _icon(t),
-                size: 18,
-                color: t == _tradition ? ff.primaryStrong : ff.inkMuted,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t == PrayerTradition.custom
-                          ? tr('Start from scratch')
-                          : t.label,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.rowTitle.copyWith(fontSize: 14.5),
-                    ),
-                    Text(
-                      _hint(t),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.meta.copyWith(
-                        color: ff.inkMuted,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    const all = PrayerTradition.values;
-    return Column(
-      children: [
-        for (var i = 0; i < all.length; i += 2) ...[
-          if (i > 0) const SizedBox(height: AppSpacing.sm),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: tile(all[i])),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: i + 1 < all.length
-                      ? tile(all[i + 1])
-                      : const SizedBox.shrink(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
     );
   }
 

@@ -243,13 +243,14 @@ abstract final class SettingsIndex {
         keywords: keywords,
         route: AppRoutes.settingsVaultSecurity,
       ),
-    // ── Backup & Sync (34) ──
+    // ── Backup & Sync (35) ──
     for (final (title, keywords) in [
       (tr('Backup & Sync'), ['google drive', 'cloud']),
       (tr('Back up now'), ['sync now', 'drive']),
       (tr('Auto backup to Google Drive'), ['automatic', 'cloud']),
       (tr('Backup frequency'), ['daily', 'weekly']),
       (tr('Sync when app opens'), ['auto sync', 'launch', 'other devices']),
+      (tr('Sync button on Home'), ['floating', 'hide', 'shortcut']),
       (tr('Back up on Wi-Fi only'), ['cellular', 'mobile data']),
       (tr('Encrypt backups'), ['password', 'security']),
       (tr('Local backups'), ['device', 'offline']),

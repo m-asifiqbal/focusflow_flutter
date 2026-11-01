@@ -8,9 +8,10 @@
 /// (PrayerDetailsSection); an existing prayer also gets Pause, Archive and
 /// Delete (the shared lifecycle actions: confirmation + Undo).
 /// Why: the user's field list in one scroll; the draft lives here until
-/// Save, so backing out never half-saves. A new prayer starts from the
-/// chosen tradition, and picking "Fasting" / "Dhikr" pre-fills sensible
-/// windows and reminders.
+/// Save, so backing out never half-saves. A new prayer starts from what
+/// was picked in the + sheet ([initial]: a tradition's prayer, or a blank
+/// one of that tradition), else a blank "Other" of the tradition in use;
+/// picking "Fasting" / "Dhikr" pre-fills sensible windows and reminders.
 /// ============================================================
 library;
 
@@ -38,10 +39,13 @@ import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class PrayerEditorScreen extends ConsumerStatefulWidget {
-  const PrayerEditorScreen({this.prayerId, super.key});
+  const PrayerEditorScreen({this.prayerId, this.initial, super.key});
 
   /// Null = a new prayer.
   final String? prayerId;
+
+  /// The unsaved draft a new prayer starts from (the + sheet's pick).
+  final Prayer? initial;
 
   @override
   ConsumerState<PrayerEditorScreen> createState() => _PrayerEditorScreenState();
@@ -70,16 +74,15 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
     final now = ref.read(clockProvider).now();
     Prayer? p;
     if (id == null) {
-      final tradition = PrayerTradition.fromKey(
-        ref.read(prayerPrefsProvider).tradition,
-      );
-      p = Prayer.draft(
-        now: now,
-        tradition: tradition,
-        kind: tradition == PrayerTradition.islam
-            ? PrayerKind.salah
-            : PrayerKind.custom,
-      ).copyWith(remindBefore: 0);
+      p =
+          widget.initial ??
+          Prayer.draft(
+            now: now,
+            tradition: PrayerTradition.fromKey(
+              ref.read(prayerPrefsProvider).tradition,
+            ),
+            kind: PrayerKind.custom,
+          ).copyWith(remindBefore: 0);
     } else {
       p = await ref.read(prayersRepositoryProvider).getPrayer(id);
     }

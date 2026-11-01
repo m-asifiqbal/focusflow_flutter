@@ -15,6 +15,7 @@ import 'package:focusflow/features/backup/presentation/providers/backup_provider
 import 'package:focusflow/features/backup/presentation/screens/backup_sync_screen.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 
 import '../../../helpers/screen_harness.dart';
 import '../backup_test_support.dart';
@@ -86,11 +87,43 @@ void main() {
     await captureScreen(tester, '34_backup_sync_dark');
   });
 
+  testWidgets('Sync section: "Sync button on Home" switch, below auto sync', (
+    tester,
+  ) async {
+    final (h, _) = await backupHarness(tester);
+    await pumpApp(tester, h, AppRoutes.settingsBackup);
+    final auto = find.text('Sync when app opens');
+    final button = find.text('Sync button on Home');
+    await tester.scrollUntilVisible(
+      button,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await settle(tester);
+    expect(
+      tester.getTopLeft(button).dy,
+      greaterThan(tester.getTopLeft(auto).dy),
+    );
+    expect(
+      find.text('A floating button on Home syncs in one tap'),
+      findsOneWidget,
+    );
+    expect(h.read(settingsProvider).homeSyncButton, isTrue);
+
+    await tester.tap(button);
+    await settle(tester);
+    expect(h.read(settingsProvider).homeSyncButton, isFalse);
+    expect(find.text('Hidden — use Sync now on this page'), findsOneWidget);
+    // The other switch is untouched.
+    expect(h.read(settingsProvider).syncOnOpen, isTrue);
+  });
+
   testWidgets('not connected shows Connect Google Drive', (tester) async {
     final (h, _) = await backupHarness(tester, account: null);
     await pumpApp(tester, h, AppRoutes.settingsBackup);
     expect(find.text('Connect Google Drive'), findsWidgets);
     expect(find.text('Auto backup to Drive'), findsNothing);
+    expect(find.text('Sync button on Home'), findsNothing);
     expect(find.text('Encrypt backups'), findsOneWidget);
     expect(find.text('Disconnect Google account'), findsNothing);
     await captureScreen(tester, '34_backup_not_connected');

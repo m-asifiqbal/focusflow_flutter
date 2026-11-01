@@ -1,5 +1,6 @@
 /// Home's floating Drive sync button: shown in the bottom start corner only
-/// while a Google account is connected (captured light / dark for a look).
+/// while a Google account is connected and Backup & Sync › "Sync button on
+/// Home" is on (captured light / dark for a look).
 library;
 
 import 'package:flutter/material.dart';
@@ -48,6 +49,23 @@ void main() {
     await h.updateSettings((s) => s.copyWith(themeMode: ThemeMode.dark));
     await settle(tester);
     await captureScreen(tester, 'home_sync_button_dark');
+  });
+
+  testWidgets('connected but switched off: hidden, back when on', (
+    tester,
+  ) async {
+    final h = await boot(tester, asifAccount);
+    await tester.runAsync(
+      () => h.updateSettings((s) => s.copyWith(homeSyncButton: false)),
+    );
+    await pumpApp(tester, h, AppRoutes.home);
+    expect(find.byType(HomeSyncButton), findsNothing);
+
+    await tester.runAsync(
+      () => h.updateSettings((s) => s.copyWith(homeSyncButton: true)),
+    );
+    await settle(tester);
+    expect(find.byType(HomeSyncButton), findsOneWidget);
   });
 
   testWidgets('not connected: no sync button', (tester) async {

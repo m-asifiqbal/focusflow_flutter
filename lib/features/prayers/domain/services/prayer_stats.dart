@@ -2,7 +2,7 @@
 /// PRAYER STATS — streak, on-time rate, month, week grid
 /// ============================================================
 ///
-/// What: the "Progress" part of the Prayer tab, from the active prayers and
+/// What: the "Progress" part of the Prayer page, from the active prayers and
 /// their logs: the streak of complete days, the on-time rate of the last 30
 /// days, this month's done / due, congregation and fasting days, dhikr
 /// total, and a 7-day grid (one row per prayer).
@@ -130,13 +130,12 @@ class PrayerProgress {
 }
 
 abstract final class PrayerStats {
-  /// How far back the streak looks (the repository loads this many days).
-  static const int historyDays = 400;
-
-  /// Progress at [now] from [prayers] (active ones count) and their [logs]
-  /// (any range; [historyDays] back is enough). [sunToday] / [sunTomorrow]
-  /// resolve today's windows (null without a location).
-  static PrayerProgress compute({
+  /// What happened to a prayer on a day ([PrayerCell]), for [prayers] and
+  /// their [logs] at [now] — shared by Progress and Insights › Prayer. A
+  /// past day without a log is missed; today is pending until its window
+  /// (resolved with [sunToday] / [sunTomorrow]) ends; days before a
+  /// prayer was created, or when it isn't due, are [PrayerCell.none].
+  static PrayerCell Function(Prayer, DateTime) cellsFor({
     required List<Prayer> prayers,
     required List<PrayerLog> logs,
     required DateTime now,
@@ -144,20 +143,12 @@ abstract final class PrayerStats {
     SolarDay? sunTomorrow,
   }) {
     final today = DateUtilsX.dateOnly(now);
-    final active = [
-      for (final p in prayers)
-        if (p.isActive) p,
-    ];
-    final tracked = [
-      for (final p in active)
-        if (!p.kind.isFast && !p.kind.counts) p,
-    ];
     final byId = {for (final l in logs) l.id: l};
 
     // Today's slots decide whether an unmarked prayer is still pending.
     final todaySlots = {
       for (final s in PrayerSchedule.dayPlan(
-        tracked,
+        prayers,
         today,
         (d) => DateUtilsX.dateOnly(d) == today ? sunToday : sunTomorrow,
         byId,
@@ -165,7 +156,7 @@ abstract final class PrayerStats {
         s.prayer.id: s,
     };
 
-    PrayerCell cell(Prayer p, DateTime day) {
+    return (Prayer p, DateTime day) {
       if (day.isAfter(today) || !PrayerSchedule.isDueOn(p, day)) {
         return PrayerCell.none;
       }
@@ -192,7 +183,38 @@ abstract final class PrayerStats {
             : PrayerCell.pending;
       }
       return PrayerCell.missed;
-    }
+    };
+  }
+
+  /// How far back the streak looks (the repository loads this many days).
+  static const int historyDays = 400;
+
+  /// Progress at [now] from [prayers] (active ones count) and their [logs]
+  /// (any range; [historyDays] back is enough). [sunToday] / [sunTomorrow]
+  /// resolve today's windows (null without a location).
+  static PrayerProgress compute({
+    required List<Prayer> prayers,
+    required List<PrayerLog> logs,
+    required DateTime now,
+    SolarDay? sunToday,
+    SolarDay? sunTomorrow,
+  }) {
+    final today = DateUtilsX.dateOnly(now);
+    final active = [
+      for (final p in prayers)
+        if (p.isActive) p,
+    ];
+    final tracked = [
+      for (final p in active)
+        if (!p.kind.isFast && !p.kind.counts) p,
+    ];
+    final cell = cellsFor(
+      prayers: tracked,
+      logs: logs,
+      now: now,
+      sunToday: sunToday,
+      sunTomorrow: sunTomorrow,
+    );
 
     bool isDone(PrayerCell c) =>
         c == PrayerCell.onTime ||

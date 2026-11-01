@@ -3,9 +3,10 @@
 /// ============================================================
 ///
 /// What: large header "Insights" + share button, the Overview | Medicine
-/// switch, then either range chips and the live [InsightsContent] of the
-/// selected range, or the medicine adherence charts
-/// ([MedicineInsightsView]) — the latter (skeleton on first load,
+/// | Prayer switch, then either range chips and the live [InsightsContent]
+/// of the selected range, the medicine adherence charts
+/// ([MedicineInsightsView]) or the prayer charts ([PrayerInsightsView]) —
+/// the overview (skeleton on first load,
 /// retry on error; the previous range stays visible, dimmed, while the next
 /// one loads). Share renders the whole page (not just the visible
 /// part) to a PNG through a RepaintBoundary around the scroll content and
@@ -35,6 +36,7 @@ import 'package:focusflow/features/insights/presentation/providers/insights_prov
 import 'package:focusflow/features/insights/presentation/widgets/insights_content.dart';
 import 'package:focusflow/features/insights/presentation/widgets/insights_range_bar.dart';
 import 'package:focusflow/features/medicines/presentation/widgets/insights/medicine_insights_view.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/insights/prayer_insights_view.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 
 /// The share sheet integration (override in tests).
@@ -82,6 +84,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
   Widget build(BuildContext context) {
     final view = ref.watch(insightsViewProvider);
     final medicine = view == InsightsView.medicine;
+    final prayer = view == InsightsView.prayer;
     final range = ref.watch(insightsRangeProvider);
     final async = ref.watch(insightsProvider(range));
     final ff = context.ff;
@@ -121,16 +124,18 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           children: [
             FFLargeHeader(
               title: tr('Insights'),
-              subtitle: medicine
-                  ? tr('Your medicines at a glance')
-                  : tr('Your productivity at a glance'),
+              subtitle: switch (view) {
+                InsightsView.medicine => tr('Your medicines at a glance'),
+                InsightsView.prayer => tr('Your prayers at a glance'),
+                InsightsView.overview => tr('Your productivity at a glance'),
+              },
               fitTitle: true,
               actions: [
                 FFRoundIconButton(
                   icon: FontAwesomeIcons.shareNodes,
                   semanticLabel: tr('Share insights'),
                   iconColor: ff.primary,
-                  onPressed: (medicine || async.hasValue) && !_sharing
+                  onPressed: (medicine || prayer || async.hasValue) && !_sharing
                       ? _share
                       : null,
                 ),
@@ -155,6 +160,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                     label: tr('Medicine'),
                     icon: ModuleStyle.medicines.icon,
                   ),
+                  FFSegment(
+                    value: InsightsView.prayer,
+                    label: tr('Prayer'),
+                    icon: ModuleStyle.prayers.icon,
+                  ),
                 ],
                 value: view,
                 onChanged: ref.read(insightsViewProvider.notifier).select,
@@ -171,13 +181,15 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                     color: ff.canvas,
                     child: AnimatedSwitcher(
                       duration: context.motion(AppMotion.normal),
-                      child: medicine
-                          ? const Padding(
-                              key: ValueKey('medicine'),
-                              padding: EdgeInsetsDirectional.only(
+                      child: medicine || prayer
+                          ? Padding(
+                              key: ValueKey(view),
+                              padding: const EdgeInsetsDirectional.only(
                                 top: InsightsDimens.chipsGap,
                               ),
-                              child: MedicineInsightsView(),
+                              child: medicine
+                                  ? const MedicineInsightsView()
+                                  : const PrayerInsightsView(),
                             )
                           : Column(
                               key: const ValueKey('overview'),

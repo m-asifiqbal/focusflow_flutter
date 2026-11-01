@@ -34,10 +34,15 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/ff_haptics.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/backup/presentation/widgets/backup_prompts.dart';
+import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 
-/// Whether Home shows the sync button (a Drive account is connected).
+/// Whether Home shows the sync button: a Drive account is connected and
+/// Backup & Sync › "Sync button on Home" is on.
 final homeSyncVisibleProvider = Provider.autoDispose<bool>((ref) {
+  if (!ref.watch(settingsProvider.select((s) => s.homeSyncButton))) {
+    return false;
+  }
   final account = ref.watch(cloudAccountProvider);
   return account != null && account.hasDrive;
 });

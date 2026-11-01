@@ -21,6 +21,7 @@ import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/quick_add/domain/entities/quick_capture.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_add_sheet.dart';
 import 'package:focusflow/features/quick_add/domain/services/capture_inputs.dart';
 import 'package:focusflow/features/quick_add/presentation/providers/quick_add_providers.dart';
 import 'package:focusflow/features/vault/presentation/vault_gate.dart';
@@ -99,6 +100,9 @@ Future<void> runQuickAddResult(
       context.push(quickCaptureLocation(capture));
     case QuickAddModule(module: AppModule.scan):
       await runQuickScan(context);
+    case QuickAddModule(module: AppModule.prayers):
+      // A tradition and a prayer first, like the Prayer page's +.
+      await showPrayerAddSheet(context);
     case QuickAddModule(module: AppModule.vault):
       if (!await ensureVaultUnlocked(context) || !context.mounted) return;
       context.push(quickModuleLocation(AppModule.vault, date)!);

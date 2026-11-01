@@ -75,6 +75,12 @@ abstract final class PrayerStyle {
 
   static const double rowAccent = 4;
   static const double heroRing = 58;
+
+  // Insights › Prayer.
+  static const double insightDonutMax = 150;
+  static const double barMinWidth = 3;
+  static const double barMaxWidth = 22;
+  static const double progressBar = 8;
 }
 
 abstract final class PrayerFormat {
