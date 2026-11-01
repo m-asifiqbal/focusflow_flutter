@@ -43,6 +43,7 @@ String libraryModuleRoute(ItemType type) => switch (type) {
   ItemType.reminder => AppRoutes.reminders,
   ItemType.habit => AppRoutes.habits,
   ItemType.medicine => AppRoutes.medicines,
+  ItemType.prayer => AppRoutes.prayers,
   ItemType.vault => AppRoutes.vault,
 };
 

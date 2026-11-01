@@ -106,6 +106,14 @@ class SearchDao extends DatabaseAccessor<AppDatabase> with _$SearchDaoMixin {
       weights: '10.0, 3.0, 1.0',
       snippetColumn: 2,
     ),
+    ItemType.prayer: _SearchSpec(
+      fts: 'prayers_fts',
+      table: 'prayers',
+      titleExpr: 'x.name',
+      metaExpr: 'x.place',
+      weights: '10.0, 3.0, 1.0',
+      snippetColumn: 2,
+    ),
     ItemType.vault: _SearchSpec(
       fts: 'vault_fts',
       table: 'vault_items',

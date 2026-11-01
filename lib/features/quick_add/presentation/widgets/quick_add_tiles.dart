@@ -57,6 +57,12 @@ List<_TileSpec> _tiles() => [
     semantics: tr('New medicine'),
   ),
   (
+    module: AppModule.prayers,
+    title: tr('Prayer'),
+    caption: tr('Times'),
+    semantics: tr('New prayer'),
+  ),
+  (
     module: AppModule.vault,
     title: tr('Password'),
     caption: tr('Secure'),

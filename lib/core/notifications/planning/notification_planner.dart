@@ -30,6 +30,7 @@ import 'package:focusflow/core/notifications/planning/habit_planner.dart';
 import 'package:focusflow/core/notifications/planning/medicine_planner.dart';
 import 'package:focusflow/core/notifications/planning/notification_plan.dart';
 import 'package:focusflow/core/notifications/planning/planner_input.dart';
+import 'package:focusflow/core/notifications/planning/prayer_planner.dart';
 import 'package:focusflow/core/notifications/planning/reminder_planner.dart';
 import 'package:focusflow/core/notifications/planning/task_day_index.dart';
 import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
@@ -58,6 +59,7 @@ abstract final class NotificationPlanner {
       ...ReminderPlanner.plan(input, end, pendingUntil: vitalEnd),
       ...HabitPlanner.plan(input, end),
       ...MedicinePlanner.plan(input, end),
+      ...PrayerPlanner.plan(input, end),
       ...DigestPlanner.plan(input, end, tasks: tasks),
     ];
 
@@ -110,13 +112,15 @@ abstract final class NotificationPlanner {
         NotificationCategory.reminder ||
         NotificationCategory.alarm ||
         NotificationCategory.task ||
-        NotificationCategory.medicine => true,
+        NotificationCategory.medicine ||
+        NotificationCategory.prayer => true,
         _ => false,
       } &&
       // A repeat of a reminder (or a dose's follow-up) is a nicety: it
       // never takes a slot from one.
       !ReminderPlanner.isRepeatKey(n.key) &&
-      !MedicinePlanner.isFollowUpKey(n.key);
+      !MedicinePlanner.isFollowUpKey(n.key) &&
+      !PrayerPlanner.isEndKey(n.key);
 
   /// Keeps at most [maxCount] of [sorted] (soonest first). Vital ones take
   /// their slots first, the routine ones fill what is left — a daily
@@ -156,6 +160,9 @@ abstract final class NotificationPlanner {
     }
     if (key.startsWith(MedicinePlanner.prefix)) {
       return MedicinePlanner.stillWanted(input, key);
+    }
+    if (key.startsWith(PrayerPlanner.prefix)) {
+      return PrayerPlanner.stillWanted(input, key);
     }
     return true;
   }

@@ -57,7 +57,8 @@ void main() {
     }
     final m = built.manifest;
     expect(m.counts, original.counts);
-    expect(m.itemCount, 6); // note, task, habit, medicine, reminder, vault
+    expect(m.itemCount, 7); // note, task, habit, medicine, prayer, reminder,
+    // vault
     expect(m.isEncrypted, isFalse);
     expect(m.deviceId, TestHarness.deviceId);
     expect(m.schemaVersion, source.db.schemaVersion);
@@ -233,7 +234,7 @@ void main() {
       engine.inspect(built.bytes),
       mode: RestoreMode.merge,
     );
-    expect(result.report.added, 6); // the seed's six items
+    expect(result.report.added, 7); // the seed's seven items
     expect(result.report.conflicts, 0);
     expect(result.filesRestored, 2);
     expect(await targetFiles.exists('attachments/a1.txt'), isTrue);

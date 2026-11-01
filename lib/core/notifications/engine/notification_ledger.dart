@@ -49,6 +49,7 @@ class LedgerEntry {
     required this.title,
     this.body = '',
     this.ref,
+    this.route,
     this.actions = const [],
     this.reminderId,
     this.exact = true,
@@ -72,6 +73,7 @@ class LedgerEntry {
     title: n.title,
     body: n.body,
     ref: n.inboxRef,
+    route: n.payload.route,
     actions: n.inboxActions,
     reminderId: n.reminderId,
     exact: exact,
@@ -88,6 +90,9 @@ class LedgerEntry {
   final String title;
   final String body;
   final ItemRef? ref;
+
+  /// The notification's route (Open in the inbox when there is no [ref]).
+  final String? route;
   final List<String> actions;
   final String? reminderId;
 
@@ -109,6 +114,7 @@ class LedgerEntry {
     'ti': title,
     if (body.isNotEmpty) 'b': body,
     if (ref != null) 'r': '${ref!.type.key}/${ref!.id}',
+    if (route != null) 'o': route,
     if (actions.isNotEmpty) 'a': actions,
     if (reminderId != null) 'm': reminderId,
     if (!exact) 'x': 0,
@@ -138,6 +144,7 @@ class LedgerEntry {
       title: title is String ? title : '',
       body: j['b'] is String ? j['b'] as String : '',
       ref: ref,
+      route: j['o'] is String ? j['o'] as String : null,
       actions: a is List ? a.whereType<String>().toList() : const [],
       reminderId: j['m'] is String ? j['m'] as String : null,
       exact: j['x'] != 0,

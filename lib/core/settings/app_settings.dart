@@ -15,7 +15,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:focusflow/core/settings/prayer_prefs.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
+
+export 'package:focusflow/core/settings/prayer_prefs.dart';
 
 enum StartScreen { home, library, insights }
 
@@ -47,7 +50,16 @@ enum LocalBackupFrequency { off, daily, weekly }
 enum SwipeAction { none, archive, delete, complete, pin, favourite, snooze }
 
 /// Home sections (Settings › Home layout: show/hide/reorder).
-enum HomeSection { focus, week, upNext, tasks, notes, habits, medicines }
+enum HomeSection {
+  focus,
+  week,
+  upNext,
+  tasks,
+  notes,
+  habits,
+  medicines,
+  prayer,
+}
 
 /// Sign-in mode chosen on screen 02.
 enum AccountMode { none, google, apple, offline }
@@ -95,6 +107,7 @@ class AppSettings {
     this.notifyTasks = true,
     this.notifyHabits = true,
     this.notifyMedicines = true,
+    this.prayer = const PrayerPrefs(),
     this.notifyStreakRisk = true,
     this.notifyVault = true,
     this.notifySync = false,
@@ -145,6 +158,7 @@ class AppSettings {
     // ── Backup & sync ──
     this.autoBackupDrive = true,
     this.syncOnOpen = true,
+    this.homeSyncButton = true,
     this.backupFrequency = BackupFrequency.daily,
     this.backupMinutes = 21 * 60,
     this.backupWifiOnly = true,
@@ -202,6 +216,9 @@ class AppSettings {
 
   /// Medicine dose alerts and their "did you take it?" follow-ups.
   final bool notifyMedicines;
+
+  /// The Prayer module: location, calculation, tab, reminders on/off.
+  final PrayerPrefs prayer;
   final bool notifyStreakRisk;
   final bool notifyVault;
   final bool notifySync;
@@ -286,6 +303,9 @@ class AppSettings {
   /// Sync with Google Drive whenever the app is opened (core/sync/
   /// open_sync.dart); uploads only when the data changed.
   final bool syncOnOpen;
+
+  /// Home shows the floating sync button (while Drive is connected).
+  final bool homeSyncButton;
   final BackupFrequency backupFrequency;
   final int backupMinutes;
   final bool backupWifiOnly;
@@ -334,6 +354,7 @@ class AppSettings {
     bool? notifyTasks,
     bool? notifyHabits,
     bool? notifyMedicines,
+    PrayerPrefs? prayer,
     bool? notifyStreakRisk,
     bool? notifyVault,
     bool? notifySync,
@@ -378,6 +399,7 @@ class AppSettings {
     bool? wipeAfterFailedAttempts,
     bool? autoBackupDrive,
     bool? syncOnOpen,
+    bool? homeSyncButton,
     BackupFrequency? backupFrequency,
     int? backupMinutes,
     bool? backupWifiOnly,
@@ -419,6 +441,7 @@ class AppSettings {
       notifyTasks: notifyTasks ?? this.notifyTasks,
       notifyHabits: notifyHabits ?? this.notifyHabits,
       notifyMedicines: notifyMedicines ?? this.notifyMedicines,
+      prayer: prayer ?? this.prayer,
       notifyStreakRisk: notifyStreakRisk ?? this.notifyStreakRisk,
       notifyVault: notifyVault ?? this.notifyVault,
       notifySync: notifySync ?? this.notifySync,
@@ -473,6 +496,7 @@ class AppSettings {
           wipeAfterFailedAttempts ?? this.wipeAfterFailedAttempts,
       autoBackupDrive: autoBackupDrive ?? this.autoBackupDrive,
       syncOnOpen: syncOnOpen ?? this.syncOnOpen,
+      homeSyncButton: homeSyncButton ?? this.homeSyncButton,
       backupFrequency: backupFrequency ?? this.backupFrequency,
       backupMinutes: backupMinutes ?? this.backupMinutes,
       backupWifiOnly: backupWifiOnly ?? this.backupWifiOnly,
@@ -515,6 +539,7 @@ class AppSettings {
     'notifyTasks': notifyTasks,
     'notifyHabits': notifyHabits,
     'notifyMedicines': notifyMedicines,
+    'prayer': prayer.toJson(),
     'notifyStreakRisk': notifyStreakRisk,
     'notifyVault': notifyVault,
     'notifySync': notifySync,
@@ -559,6 +584,7 @@ class AppSettings {
     'wipeAfterFailedAttempts': wipeAfterFailedAttempts,
     'autoBackupDrive': autoBackupDrive,
     'syncOnOpen': syncOnOpen,
+    'homeSyncButton': homeSyncButton,
     'backupFrequency': backupFrequency.name,
     'backupMinutes': backupMinutes,
     'backupWifiOnly': backupWifiOnly,
@@ -650,6 +676,7 @@ class AppSettings {
       notifyTasks: b('notifyTasks', d.notifyTasks),
       notifyHabits: b('notifyHabits', d.notifyHabits),
       notifyMedicines: b('notifyMedicines', d.notifyMedicines),
+      prayer: PrayerPrefs.fromJson(j['prayer']),
       notifyStreakRisk: b('notifyStreakRisk', d.notifyStreakRisk),
       notifyVault: b('notifyVault', d.notifyVault),
       notifySync: b('notifySync', d.notifySync),
@@ -733,6 +760,7 @@ class AppSettings {
       ),
       autoBackupDrive: b('autoBackupDrive', d.autoBackupDrive),
       syncOnOpen: b('syncOnOpen', d.syncOnOpen),
+      homeSyncButton: b('homeSyncButton', d.homeSyncButton),
       backupFrequency: e(
         BackupFrequency.values,
         j['backupFrequency'],

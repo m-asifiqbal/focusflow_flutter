@@ -135,10 +135,15 @@ void main() {
       ),
     );
     await settle(tester);
-    // Habits swapped above Notes; Medicine stays last.
+    // Habits swapped above Notes; Medicine and Prayer stay last.
     expect(
-      settings().homeSections.sublist(settings().homeSections.length - 3),
-      [HomeSection.habits, HomeSection.notes, HomeSection.medicines],
+      settings().homeSections.sublist(settings().homeSections.length - 4),
+      [
+        HomeSection.habits,
+        HomeSection.notes,
+        HomeSection.medicines,
+        HomeSection.prayer,
+      ],
     );
     semantics.dispose();
 

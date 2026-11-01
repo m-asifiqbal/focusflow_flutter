@@ -31,12 +31,15 @@ String? inboxFallbackRoute(InboxKind kind) => switch (kind) {
   InboxKind.task => AppRoutes.tasks,
   InboxKind.habit => AppRoutes.habits,
   InboxKind.medicine => AppRoutes.medicines,
+  InboxKind.prayer => AppRoutes.prayers,
   InboxKind.security => AppRoutes.vault,
   InboxKind.sync => AppRoutes.settingsBackup,
-  InboxKind.system => null,
+  // Older digest rows saved before entries kept their own route.
+  InboxKind.system => AppRoutes.home,
 };
 
-/// Row tap / View / Open / Fix: marks read and opens the item or the kind's
+/// Row tap / View / Open / Fix: marks read and opens the item, else the
+/// notification's own route (digests: Home / Insights), else the kind's
 /// list — a drill-in, so back returns to the notifications. The lists that
 /// live in the tab shell (Tasks, Reminders, Habits, Backup …) can't be pushed
 /// over this full-screen route (it left a blank screen), so
@@ -46,7 +49,7 @@ void openInboxEntry(BuildContext context, WidgetRef ref, InboxEntry e) {
   final target = e.ref;
   final route = target != null
       ? AppRoutes.open(target)
-      : inboxFallbackRoute(e.kind);
+      : e.route ?? inboxFallbackRoute(e.kind);
   if (route != null) context.openLocation(route);
 }
 

@@ -43,5 +43,6 @@ export 'ff_stat_tile.dart';
 export 'ff_swipe_actions.dart';
 export 'ff_switch.dart';
 export 'ff_tag.dart';
+export 'ff_tip_card.dart';
 export 'ff_week_strip.dart';
 export 'ff_open_origin.dart';

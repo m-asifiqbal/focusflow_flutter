@@ -34,6 +34,8 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/notifications/planning/medicine_planner.dart';
 import 'package:focusflow/features/habits/domain/repository/habits_repository.dart';
 import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
+import 'package:focusflow/features/prayers/domain/repository/prayers_repository.dart';
 import 'package:focusflow/features/reminders/domain/repository/reminders_repository.dart';
 import 'package:focusflow/features/reminders/domain/usecases/complete_reminder.dart';
 import 'package:focusflow/features/tasks/domain/repository/tasks_repository.dart';
@@ -44,6 +46,7 @@ class NotificationActions {
     required this.tasks,
     required this.habits,
     required this.medicines,
+    required this.prayers,
     required this.clock,
     required this.defaultSnoozeMinutes,
   });
@@ -52,6 +55,7 @@ class NotificationActions {
   final TasksRepository tasks;
   final HabitsRepository habits;
   final MedicinesRepository medicines;
+  final PrayersRepository prayers;
   final Clock clock;
   final int defaultSnoozeMinutes;
 
@@ -65,6 +69,9 @@ class NotificationActions {
     try {
       if (target.type == ItemType.medicine) {
         return await _medicine(button, payload);
+      }
+      if (target.type == ItemType.prayer) {
+        return await _prayer(button, payload);
       }
       return switch (button) {
         NotificationButton.done => await markDone(
@@ -140,6 +147,38 @@ class NotificationActions {
     if (h == null || !h.isActive || h.isPaused) return false;
     await habits.increment(h.id, day ?? DateUtilsX.dateOnly(clock.now()));
     return true;
+  }
+
+  /// Done / Snooze on a prayer notification (its day is the payload's).
+  /// Done from a reminder records "on time": the start reminder fires
+  /// before or at the window's start and the end reminder before its end.
+  Future<bool> _prayer(
+    NotificationButton button,
+    NotificationPayload payload,
+  ) async {
+    final target = payload.target!;
+    final day = _day(payload.day) ?? DateUtilsX.dateOnly(clock.now());
+    final p = await prayers.getPrayer(target.id);
+    if (p == null || !p.isActive) return false;
+    switch (button) {
+      case NotificationButton.done:
+        final log = await prayers.log(p.id, day);
+        if (log != null && log.status.done) return false;
+        await prayers.mark(p.id, day, PrayerStatus.onTime);
+        return true;
+      case NotificationButton.snooze:
+        final minutes = payload.snoozeMinutes ?? p.snoozeMinutes;
+        await prayers.snooze(
+          p.id,
+          day,
+          clock.now().add(
+            Duration(minutes: minutes > 0 ? minutes : defaultSnoozeMinutes),
+          ),
+        );
+        return true;
+      case _:
+        return false;
+    }
   }
 
   /// Taken / Skip / Snooze on a medicine notification: applied to every

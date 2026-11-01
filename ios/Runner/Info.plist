@@ -62,6 +62,8 @@
 	<string>FocusFlow uses the camera to scan text into notes, add photos and scan 2FA QR codes.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>FocusFlow uses Face ID to unlock the app when App lock is on and to open your password vault.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>FocusFlow uses your location once, when you ask, to calculate prayer times on this phone. It is never sent anywhere.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>FocusFlow uses the microphone when you dictate a note or a quick capture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

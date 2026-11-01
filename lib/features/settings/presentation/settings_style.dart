@@ -174,6 +174,7 @@ abstract final class SettingsLabels {
     HomeSection.notes => tr('Recent notes'),
     HomeSection.habits => tr('Habit tracker'),
     HomeSection.medicines => tr('Medicine'),
+    HomeSection.prayer => tr('Next prayer'),
   };
 
   static String homeSectionHint(HomeSection s) => switch (s) {
@@ -184,6 +185,7 @@ abstract final class SettingsLabels {
     HomeSection.notes => tr('Your latest notes'),
     HomeSection.habits => tr("Today's habit rings"),
     HomeSection.medicines => tr("Today's doses (when you have medicines)"),
+    HomeSection.prayer => tr('Now or next (when you have prayers)'),
   };
 
   /// Sync pill text, sentence case: "Synced 2 min ago", "Synced just now".

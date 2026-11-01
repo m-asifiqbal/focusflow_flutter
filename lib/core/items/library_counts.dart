@@ -32,6 +32,8 @@ class LibraryCounts {
     this.medicinesTakenToday = 0,
     this.medicinesDueToday = 0,
     this.medicinesLow = 0,
+    this.prayersTotal = 0,
+    this.prayersDoneToday = 0,
     this.vaultTotal = 0,
     this.vaultWeak = 0,
     this.vaultBreached = 0,
@@ -80,6 +82,10 @@ class LibraryCounts {
 
   /// Medicines at or below their refill threshold.
   final int medicinesLow;
+
+  /// Active prayers, and today's marked done (on time / late / made up).
+  final int prayersTotal;
+  final int prayersDoneToday;
   final int vaultTotal;
 
   /// Cached strength ≤ 1 (0–4 scale).
@@ -98,13 +104,14 @@ class LibraryCounts {
   /// Items in Recently Deleted.
   final int trash;
 
-  /// Active items across the six spaces ("113 items across 6 spaces").
+  /// Active items across the seven spaces ("113 items across 6 spaces").
   int get totalItems =>
       notesTotal +
       tasksTotal +
       remindersTotal +
       habitsTotal +
       medicinesTotal +
+      prayersTotal +
       vaultTotal;
 
   /// "Tags & Folders (11)".
@@ -132,6 +139,8 @@ class LibraryCounts {
       other.medicinesTakenToday == medicinesTakenToday &&
       other.medicinesDueToday == medicinesDueToday &&
       other.medicinesLow == medicinesLow &&
+      other.prayersTotal == prayersTotal &&
+      other.prayersDoneToday == prayersDoneToday &&
       other.vaultTotal == vaultTotal &&
       other.vaultWeak == vaultWeak &&
       other.vaultBreached == vaultBreached &&
@@ -163,6 +172,8 @@ class LibraryCounts {
     medicinesTakenToday,
     medicinesDueToday,
     medicinesLow,
+    prayersTotal,
+    prayersDoneToday,
     vaultTotal,
     vaultWeak,
     vaultBreached,

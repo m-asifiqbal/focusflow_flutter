@@ -5,6 +5,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Reminders, task due alerts, habit nudges. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Prayer: the device location, read once while the app is open when
+         the user asks (sun-based prayer times are computed on the phone;
+         no background location). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- Exact reminder times. Android 13+ (API 33): USE_EXACT_ALARM is
          granted at install for apps whose core function is reminders /
          alarms (Play policy: declare "reminders" as the use case in the

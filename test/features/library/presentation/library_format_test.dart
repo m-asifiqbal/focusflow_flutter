@@ -44,11 +44,15 @@ void main() {
     expect(card(ItemType.vault, null, VaultStatus.unlocked).meta, 'Unlocked');
   });
 
-  test('zero states say "Create your first"', () {
+  test('zero states say "Create your first" (Prayer: "Set up Prayer")', () {
     for (final t in ItemType.values) {
       final l = card(t, LibraryCounts.empty);
       expect(l.count, 0);
-      expect(l.highlight, LibraryFormat.createFirst, reason: t.name);
+      expect(
+        l.highlight,
+        t == ItemType.prayer ? 'Set up Prayer' : LibraryFormat.createFirst,
+        reason: t.name,
+      );
     }
     expect(
       card(ItemType.vault, LibraryCounts.empty, VaultStatus.notSetUp).meta,

@@ -27,6 +27,7 @@ const List<(String, String, String)> tombstoneSources = [
   ('reminders', 'reminder', '{r}.id'),
   ('habits', 'habit', '{r}.id'),
   ('medicines', 'medicine', '{r}.id'),
+  ('prayers', 'prayer', '{r}.id'),
   ('vault_items', 'vault', '{r}.id'),
   ('tags', 'tag', '{r}.id'),
   ('folders', 'folder', '{r}.id'),
@@ -35,6 +36,8 @@ const List<(String, String, String)> tombstoneSources = [
   ('habit_logs', 'habit_log', "{r}.habit_id || '|' || {r}.date"),
   // Dose ids are natural keys (medicineId|day|slot), the same everywhere.
   ('medicine_doses', 'medicine_dose', '{r}.id'),
+  // Prayer log ids are natural keys too (prayerId|day).
+  ('prayer_logs', 'prayer_log', '{r}.id'),
 ];
 
 /// Tombstone key of a habit log (matches the trigger expression above).

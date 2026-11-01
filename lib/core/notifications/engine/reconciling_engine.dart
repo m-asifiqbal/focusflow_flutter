@@ -233,6 +233,7 @@ class ReconcilingNotificationEngine implements NotificationEngine {
     'wipeAfterFailedAttempts',
     'autoBackupDrive',
     'syncOnOpen',
+    'homeSyncButton',
     'backupFrequency',
     'backupMinutes',
     'backupWifiOnly',
@@ -245,10 +246,16 @@ class ReconcilingNotificationEngine implements NotificationEngine {
   };
 
   static bool _changesPlan(AppSettings a, AppSettings b) {
+    // The prayer settings are an object (its JSON is a map, which `!=`
+    // would always call changed); only the tab switch plans nothing.
+    if (a.prayer.copyWith(showTab: false) !=
+        b.prayer.copyWith(showTab: false)) {
+      return true;
+    }
     final before = a.toJson();
     final after = b.toJson();
     for (final e in before.entries) {
-      if (_notPlanned.contains(e.key)) continue;
+      if (_notPlanned.contains(e.key) || e.key == 'prayer') continue;
       if (e.value != after[e.key]) return true;
     }
     return false;
@@ -285,6 +292,8 @@ class ReconcilingNotificationEngine implements NotificationEngine {
         db.habitLogs,
         db.medicines,
         db.medicineDoses,
+        db.prayers,
+        db.prayerLogs,
         db.inboxEntries,
       ]);
     }
@@ -492,6 +501,8 @@ class ReconcilingNotificationEngine implements NotificationEngine {
           db.habitLogs,
           db.medicines,
           db.medicineDoses,
+          db.prayers,
+          db.prayerLogs,
         ]).listen((_) => schedule(), onError: error),
       )
       ..add(

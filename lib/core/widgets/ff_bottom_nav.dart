@@ -35,7 +35,8 @@
 ///
 /// Use with `Scaffold(extendBody: true)` (the app shell does) so content
 /// scrolls under the glass; scroll views pad with `context.barClearance`.
-/// [currentIndex] is the tab index 0..3 (the + is not a tab).
+/// [currentIndex] is the index into [FFBottomNav.items] (4 or 5 tabs; the +
+/// is not a tab).
 /// ============================================================
 library;
 
@@ -76,14 +77,14 @@ class FFBottomNav extends StatefulWidget {
   }) : _items = items,
        _fabSemanticLabel = fabSemanticLabel;
 
-  /// Active tab (0..3).
+  /// Active tab (index into [items]).
   final int currentIndex;
   final ValueChanged<int> onTap;
 
   /// The separate "+" (always opens Quick Add).
   final VoidCallback onFab;
 
-  /// Exactly 4 tabs.
+  /// 4 tabs, or 5 with the Prayer tab (the layout shares any count).
   final List<FFNavItem>? _items;
   final String? _fabSemanticLabel;
 
@@ -145,7 +146,7 @@ class _FFBottomNavState extends State<FFBottomNav>
   late double _from = widget.currentIndex.toDouble();
   late double _to = widget.currentIndex.toDouble();
 
-  /// Fractional active-tab position (0..3), eased.
+  /// Fractional active-tab position (0..n-1), eased.
   double get _p =>
       lerpDouble(_from, _to, Curves.easeOutCubic.transform(_c.value))!;
 

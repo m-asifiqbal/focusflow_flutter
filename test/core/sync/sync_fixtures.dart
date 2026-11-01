@@ -18,6 +18,8 @@ import 'package:focusflow/core/sync/snapshot.dart';
 import 'package:focusflow/core/sync/vault_bridge.dart';
 import 'package:focusflow/features/habits/domain/entities/habit.dart';
 import 'package:focusflow/features/medicines/domain/entities/medicine.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 
@@ -133,6 +135,19 @@ Future<SampleIds> seedSample(TestHarness h, AppFiles files) async {
     Medicine.draft(startDate: now, name: 'Metformin').copyWith(stockLeft: 30),
   );
   await medicines.markTaken(medicine, now, 8 * 60);
+
+  final prayers = h.read(prayersRepositoryProvider);
+  final prayer = await prayers.save(
+    Prayer(
+      id: '',
+      name: 'Fajr',
+      start: const PrayerTimeRule.fixed(5 * 60),
+      end: const PrayerTimeRule.fixed(6 * 60 + 15),
+      createdAt: now,
+      updatedAt: now,
+    ),
+  );
+  await prayers.mark(prayer, now, PrayerStatus.onTime);
 
   final gone = await notes.createEmpty(title: 'Gone for good');
   await h.read(itemsRepositoryProvider).deleteForever([

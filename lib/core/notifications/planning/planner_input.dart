@@ -18,6 +18,8 @@ import 'package:focusflow/core/settings/app_settings.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/habits/domain/entities/habit_day_status.dart';
 import 'package:focusflow/features/medicines/domain/repository/medicines_repository.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/reminders/domain/entities/reminder.dart';
 import 'package:focusflow/features/tasks/domain/entities/task_item.dart';
 
@@ -31,6 +33,8 @@ class PlannerInput {
     this.tasks = const [],
     this.habits = const [],
     this.medicines = const [],
+    this.prayers = const [],
+    this.prayerLogs = const [],
     this.horizonDays = 14,
     this.vitalHorizonDays = 14,
     this.maxScheduled = defaultMaxScheduled,
@@ -61,6 +65,11 @@ class PlannerInput {
   /// Schedulable medicines (`MedicinesRepository.schedulable`) with their
   /// dose logs from yesterday to the end of the window.
   final List<MedicineWithDoses> medicines;
+
+  /// Schedulable prayers (`PrayersRepository.schedulable`) and their logs
+  /// from yesterday to the end of the window.
+  final List<Prayer> prayers;
+  final List<PrayerLog> prayerLogs;
 
   /// How many calendar days ahead to plan (the rolling window).
   final int horizonDays;

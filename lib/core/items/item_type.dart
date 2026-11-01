@@ -2,7 +2,7 @@
 /// ITEM TYPE — the shared kernel every module plugs into
 /// ============================================================
 ///
-/// The six "spaces" share one lifecycle (Active → Archive → Recently
+/// The seven "spaces" share one lifecycle (Active → Archive → Recently
 /// Deleted → purged) and one set of list behaviours (pin, favourite, colour,
 /// folder, tags, swipe, long-press sheet, multi-select). [ItemType] + [ItemRef]
 /// let shared screens (Library, Archive, Trash, Search, Calendar, the item
@@ -19,6 +19,7 @@ enum ItemType {
   reminder('reminder'),
   habit('habit'),
   medicine('medicine'),
+  prayer('prayer'),
   vault('vault');
 
   const ItemType(this.key);
@@ -34,6 +35,7 @@ enum ItemType {
     reminder => tr('Reminder'),
     habit => tr('Habit'),
     medicine => tr('Medicine'),
+    prayer => tr('Prayer'),
     vault => tr('Password'),
   };
 
@@ -44,6 +46,7 @@ enum ItemType {
     reminder => tr('Reminders'),
     habit => tr('Habits'),
     medicine => tr('Medicines'),
+    prayer => tr('Prayers'),
     vault => tr('Vault'),
   };
 
@@ -55,6 +58,7 @@ enum ItemType {
     reminder => tr('reminder'),
     habit => tr('habit'),
     medicine => tr('medicine'),
+    prayer => tr('prayer'),
     vault => tr('password'),
   };
 
@@ -66,6 +70,7 @@ enum ItemType {
     reminder => tr('reminders'),
     habit => tr('habits'),
     medicine => tr('medicines'),
+    prayer => tr('prayers'),
     vault => tr('vault'),
   };
 

@@ -14,8 +14,8 @@
 ///   subtasks, item tags and attachment rows replace the local ones;
 ///   otherwise the local children stay.
 /// * Habit logs: last-write-wins per (habit, day) — log ids differ between
-///   devices. Medicine doses: last-write-wins per id (their ids are natural
-///   keys, the same on every device). Vault password history and focus
+///   devices. Medicine doses and prayer logs: last-write-wins per id (their
+///   ids are natural keys, the same on every device). Vault password history and focus
 ///   sessions: union.
 /// * Folders / tags: last-write-wins by `updated_at`; a tag with the same
 ///   name but another id is the same tag (ids are remapped).
@@ -99,6 +99,7 @@ class _MergeRun {
     await _mergeChildren();
     await _mergeHabitLogs();
     await _mergeMedicineDoses();
+    await _mergePrayerLogs();
     await _mergeUnion(
       'vault_history',
       parentTable: 'vault_items',
@@ -271,6 +272,37 @@ class _MergeRun {
     }
   }
 
+  /// Last-write-wins per log id (`prayerId|day`), for logs whose prayer
+  /// exists locally — the medicine-dose rule.
+  Future<void> _mergePrayerLogs() async {
+    final prayers = await t.load('prayers');
+    final local = await t.load('prayer_logs');
+    for (final row in incoming.rows('prayer_logs')) {
+      if (!prayers.containsKey(row['prayer_id'].toString())) continue;
+      final id = row['id'].toString();
+      final mine = local[id];
+      if (mine == null) {
+        if (_deletedLater('prayer_log', id, row['updated_at'])) continue;
+        await t.insert('prayer_logs', row, orIgnore: true);
+      } else if (rawTime(row['updated_at']) > rawTime(mine['updated_at'])) {
+        await t.update(
+          'prayer_logs',
+          row,
+          where: {'id': id},
+          only: const {
+            'status',
+            'logged_at',
+            'place',
+            'congregation',
+            'count',
+            'snoozed_until',
+            'updated_at',
+          },
+        );
+      }
+    }
+  }
+
   /// Last-write-wins per dose id, for doses whose medicine exists locally.
   Future<void> _mergeMedicineDoses() async {
     final medicines = await t.load('medicines');
@@ -364,6 +396,10 @@ class _MergeRun {
           final row = await t.byId('medicine_doses', id);
           if (row != null && rawTime(row['updated_at']) > at) continue;
           if (row != null) await t.delete('medicine_doses', {'id': id});
+        case 'prayer_log':
+          final row = await t.byId('prayer_logs', id);
+          if (row != null && rawTime(row['updated_at']) > at) continue;
+          if (row != null) await t.delete('prayer_logs', {'id': id});
         case 'habit_log':
           final sep = id.lastIndexOf('|');
           if (sep <= 0) continue;

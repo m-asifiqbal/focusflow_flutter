@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/reminders/presentation/state/reminder_alert_options.dart';
 import 'package:focusflow/features/settings/presentation/widgets/notifications/notification_digest_section.dart';
@@ -72,6 +73,16 @@ class NotificationModuleSection extends ConsumerWidget {
           subtitle: tr('At each dose time, and again if not taken'),
           value: s.notifyMedicines,
           onChanged: c.setMedicines,
+        ),
+        FFListRow.toggle(
+          leading: NotificationRowTile(
+            ModuleStyle.prayers.icon,
+            ModuleStyle.prayers.colors,
+          ),
+          title: tr('Prayer times'),
+          subtitle: tr('At the start of each prayer, and before it ends'),
+          value: s.prayer.notify,
+          onChanged: c.setPrayers,
         ),
         FFListRow.toggle(
           leading: const NotificationRowTile(

@@ -81,6 +81,9 @@ String searchHitMeta(
     case ItemType.medicine:
       // The strength ("500 mg").
       parts.add(hit.detail);
+    case ItemType.prayer:
+      // Its usual place ("Mosque").
+      parts.add(hit.detail);
     case ItemType.vault:
       parts.add(vaultUnlocked ? hit.detail : tr('unlock to view'));
   }

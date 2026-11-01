@@ -40,6 +40,8 @@ part 'app_database.g.dart';
     HabitLogs,
     Medicines,
     MedicineDoses,
+    Prayers,
+    PrayerLogs,
     VaultItems,
     VaultHistory,
     GeneratorHistory,
@@ -62,8 +64,10 @@ class AppDatabase extends _$AppDatabase {
   /// v2 — `tombstones` + delete/insert triggers (sync merge, core/sync).
   /// v3 — `notes.lock_verifier` (a note locked with its own PIN).
   ///
-  /// `medicines` + `medicine_doses` came later *without* a version bump:
-  /// they are created on open when missing ([_ensureMedicineSchema]), so
+  /// `medicines` + `medicine_doses` (and later `prayers` + `prayer_logs`)
+  /// came *without* a version bump:
+  /// they are created on open when missing ([_ensureMedicineSchema],
+  /// [_ensurePrayerSchema]), so
   /// backups of this app stay readable by installs that predate them (an
   /// older install skips the tables it doesn't know). Same for
   /// the columns in [addedColumns] ([_ensureAddedColumns]).
@@ -77,6 +81,7 @@ class AppDatabase extends _$AppDatabase {
     'reminder': 'reminders',
     'habit': 'habits',
     'medicine': 'medicines',
+    'prayer': 'prayers',
     'vault': 'vault_items',
   };
 
@@ -88,11 +93,15 @@ class AppDatabase extends _$AppDatabase {
       await _createIndexes();
       await _createTombstoneTriggers();
       await _createMedicineIndexes();
+      await _createPrayerIndexes();
     },
     onUpgrade: (m, from, to) async {
-      // First: the tombstone triggers below include the medicine tables.
+      // First: the tombstone triggers below include the medicine and prayer
+      // tables.
       await m.createTable(medicines);
       await m.createTable(medicineDoses);
+      await m.createTable(prayers);
+      await m.createTable(prayerLogs);
       if (from < 2) {
         await m.createTable(tombstones);
         await _createTombstoneTriggers();
@@ -101,12 +110,14 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(notes, notes.lockVerifier);
       }
       await _ensureMedicineSchema(force: true);
+      await _ensurePrayerSchema(force: true);
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
       await customStatement('PRAGMA recursive_triggers = ON');
       await _ensureQueryIndexes();
       await _ensureMedicineSchema();
+      await _ensurePrayerSchema();
       await _ensureAddedColumns();
     },
   );
@@ -120,6 +131,8 @@ class AppDatabase extends _$AppDatabase {
     ('reminders', 'auto_snooze_minutes', 'INTEGER NOT NULL DEFAULT 2'),
     // A note's paper (lined / grid).
     ('notes', 'paper', 'TEXT'),
+    // A notification-centre row's own destination (digests have no item).
+    ('inbox_entries', 'route', 'TEXT'),
   ];
 
   Future<void> _ensureAddedColumns() async {
@@ -142,6 +155,7 @@ class AppDatabase extends _$AppDatabase {
     ('reminders', 'reminders_fts', ['title', 'note']),
     ('habits', 'habits_fts', ['name', 'category']),
     ('medicines', 'medicines_fts', ['name', 'strength', 'note']),
+    ('prayers', 'prayers_fts', ['name', 'place', 'note']),
     // Vault: plaintext title ONLY — secrets are never indexed.
     ('vault_items', 'vault_fts', ['title']),
   ];
@@ -222,9 +236,43 @@ class AppDatabase extends _$AppDatabase {
     final m = createMigrator();
     await m.createTable(medicines);
     await m.createTable(medicineDoses);
+    // The search index and tombstone triggers below cover the prayer
+    // tables too, so they must exist first.
+    await m.createTable(prayers);
+    await m.createTable(prayerLogs);
     await _createSearchIndex();
     await _createMedicineIndexes();
     await _createTombstoneTriggers();
+  }
+
+  /// The prayer tables, their search index and tombstone triggers on a
+  /// database made before them — the medicine pattern again (no schema
+  /// bump; marker trigger `tomb_prayer_logs_ai`).
+  Future<void> _ensurePrayerSchema({bool force = false}) async {
+    if (!force) {
+      final done = await customSelect(
+        "SELECT 1 FROM sqlite_master WHERE type = 'trigger' "
+        "AND name = 'tomb_prayer_logs_ai'",
+      ).get();
+      if (done.isNotEmpty) return;
+    }
+    final m = createMigrator();
+    await m.createTable(prayers);
+    await m.createTable(prayerLogs);
+    await _createSearchIndex();
+    await _createPrayerIndexes();
+    await _createTombstoneTriggers();
+  }
+
+  Future<void> _createPrayerIndexes() async {
+    const statements = [
+      'CREATE INDEX IF NOT EXISTS idx_prayers_lifecycle ON prayers(deleted_at, archived_at)',
+      'CREATE INDEX IF NOT EXISTS idx_prayer_logs_prayer ON prayer_logs(prayer_id, date)',
+      'CREATE INDEX IF NOT EXISTS idx_prayer_logs_date ON prayer_logs(date)',
+    ];
+    for (final s in statements) {
+      await customStatement(s);
+    }
   }
 
   Future<void> _createMedicineIndexes() async {

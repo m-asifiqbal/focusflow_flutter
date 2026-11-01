@@ -52,6 +52,7 @@ Future<bool> postSystemNotification(
         title: title,
         body: body,
         ref: item,
+        route: route,
         at: now,
       );
   final s = ref.read(settingsProvider);

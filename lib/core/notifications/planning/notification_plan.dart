@@ -46,6 +46,7 @@ enum NotificationChannelId {
   tasks('tasks_v2'),
   habits('habits_v2'),
   medicines('medicines_v2'),
+  prayers('prayers_v2'),
 
   /// Reminders whose sound is "Silent" (Android channel sounds are fixed,
   /// so silence needs a channel of its own).
@@ -69,6 +70,7 @@ enum NotificationChannelId {
     tasks => tr('Tasks'),
     habits => tr('Habits'),
     medicines => tr('Medicine'),
+    prayers => tr('Prayer'),
     silentReminders => tr('Silent reminders'),
     digests => tr('Daily digest'),
     system => tr('Security & sync'),
@@ -85,6 +87,7 @@ enum NotificationChannelId {
     tasks => tr('Task due and overdue alerts'),
     habits => tr('Habit check-ins and streaks at risk'),
     medicines => tr('Dose reminders for your medicines'),
+    prayers => tr('Prayer times: at the start and before the end'),
     silentReminders => tr('Reminders set to Silent: shown without a sound'),
     digests => tr('Morning briefing, evening review and weekly report'),
     system => tr('Vault security alerts and backup / sync status'),
@@ -134,6 +137,7 @@ enum NotificationCategory {
   alarm(NotificationChannelId.alarms, InboxKind.reminder),
   task(NotificationChannelId.tasks, InboxKind.task),
   medicine(NotificationChannelId.medicines, InboxKind.medicine),
+  prayer(NotificationChannelId.prayers, InboxKind.prayer),
   habit(NotificationChannelId.habits, InboxKind.habit),
   streak(NotificationChannelId.habits, InboxKind.habit),
   digest(NotificationChannelId.digests, InboxKind.system),
@@ -146,8 +150,10 @@ enum NotificationCategory {
   final InboxKind inboxKind;
 
   /// Alarm-style reminders ignore quiet hours (screen 31), and so do
-  /// medicine doses: a bedtime dose must not move to the morning.
-  bool get bypassesQuietHours => this == alarm || this == medicine;
+  /// medicine doses (a bedtime dose must not move to the morning) and
+  /// prayers (Fajr is at dawn by definition).
+  bool get bypassesQuietHours =>
+      this == alarm || this == medicine || this == prayer;
 
   /// Ordering when several notifications share a minute and the rolling
   /// window must drop some (lower = more important).

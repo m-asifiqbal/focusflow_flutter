@@ -130,6 +130,15 @@ abstract final class LibraryFormat {
           ? tr('No medicines yet')
           : tr('Stock OK'),
     ),
+    ItemType.prayer => LibraryCardLines(
+      count: c.prayersTotal,
+      highlight: c.prayersTotal == 0
+          ? tr('Set up Prayer')
+          : tr('{n} done today', {'n': c.prayersDoneToday}),
+      meta: c.prayersTotal == 0
+          ? tr('Any tradition')
+          : tr('Times, windows, progress'),
+    ),
     ItemType.vault => LibraryCardLines(
       count: c.vaultTotal,
       highlight: vault == VaultStatus.notSetUp

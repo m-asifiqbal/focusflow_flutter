@@ -42,6 +42,7 @@ class InboxRepositoryImpl extends RepositoryBase implements InboxRepository {
       title: r.title,
       body: r.body,
       ref: type == null || r.itemId == null ? null : ItemRef(type, r.itemId!),
+      route: r.route,
       actions: _actions(r.actionsJson),
       createdAt: r.createdAt,
       readAt: r.readAt,
@@ -55,6 +56,7 @@ class InboxRepositoryImpl extends RepositoryBase implements InboxRepository {
     required String title,
     String body = '',
     ItemRef? ref,
+    String? route,
     List<String> actions = const [],
     DateTime? at,
   }) async {
@@ -78,6 +80,7 @@ class InboxRepositoryImpl extends RepositoryBase implements InboxRepository {
         body: Value(body),
         itemId: Value(ref?.id),
         itemType: Value(ref?.type.key),
+        route: Value(route),
         actionsJson: Value(jsonEncode(actions)),
         createdAt: at ?? now(),
       ),

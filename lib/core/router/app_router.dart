@@ -9,6 +9,7 @@
 ///   ├─ /library ── notes · tasks · reminders · habits · vault · archive ·
 ///   │              trash · pinned · favourites · tags[/:tagId]
 ///   ├─ /insights
+///   ├─ /prayer (5th branch, shown when the Prayer tab is on)
 ///   └─ /settings ── notifications · appearance · vault-security · backup ·
 ///                   import-export · account · …
 /// Root navigator (covers the tab bar): editors, details, search, calendar,
@@ -37,6 +38,7 @@ import 'package:focusflow/features/backup/presentation/backup_routes.dart';
 import 'package:focusflow/features/calendar/presentation/calendar_routes.dart';
 import 'package:focusflow/features/habits/presentation/habits_routes.dart';
 import 'package:focusflow/features/medicines/presentation/medicines_routes.dart';
+import 'package:focusflow/features/prayers/presentation/prayers_routes.dart';
 import 'package:focusflow/features/home/presentation/home_routes.dart';
 import 'package:focusflow/features/insights/presentation/insights_routes.dart';
 import 'package:focusflow/features/library/presentation/library_routes.dart';
@@ -130,6 +132,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               ]),
             ]),
           ),
+          // Last, so the four classic tabs keep their indices; the bar shows
+          // it only when the Prayer tab is switched on (AppShell).
+          StatefulShellBranch(routes: withMaterialPages([prayerTabRoute])),
         ],
       ),
       // Explicit Material pages: see core/router/route_pages.dart.
@@ -144,6 +149,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ...remindersRootRoutes,
         ...habitsRootRoutes,
         ...medicinesRootRoutes,
+        ...prayersRootRoutes,
         ...vaultRootRoutes,
         // focusflow://item/{type}/{id} → the item's editor/detail.
         GoRoute(

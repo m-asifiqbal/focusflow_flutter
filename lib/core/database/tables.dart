@@ -329,6 +329,92 @@ class MedicineDoses extends Table {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Prayers (created on open — see AppDatabase._ensurePrayerSchema)
+// ─────────────────────────────────────────────────────────────
+
+/// A prayer / practice with a daily window: Fajr, a morning prayer, a fast,
+/// a dhikr goal. Each end of the window is either a sun event of the day
+/// (computed from the saved location) ± minutes, or a fixed time.
+@DataClassName('PrayerRow')
+class Prayers extends Table with ItemColumns {
+  TextColumn get name => text().withDefault(const Constant(''))();
+
+  /// PrayerKind key (`salah`, `nafl`, `fasting`, `dhikr`, `recitation`,
+  /// `meditation`, `service`, `custom`).
+  TextColumn get kind => text().withDefault(const Constant('custom'))();
+
+  /// PrayerTradition key of the preset it came from (`islam`, …, `custom`).
+  TextColumn get tradition => text().withDefault(const Constant('custom'))();
+
+  /// Start: a SolarEvent name (auto) — null = the fixed [startMinutes].
+  TextColumn get startEvent => text().nullable()();
+  IntColumn get startOffset => integer().withDefault(const Constant(0))();
+
+  /// Fixed start (minute of the day); also the fallback while no location
+  /// is saved.
+  IntColumn get startMinutes => integer().withDefault(const Constant(360))();
+
+  /// End: a SolarEvent name (auto), else the fixed [endMinutes]; both null
+  /// = no end (a moment, not a window).
+  TextColumn get endEvent => text().nullable()();
+  IntColumn get endOffset => integer().withDefault(const Constant(0))();
+  IntColumn get endMinutes => integer().nullable()();
+
+  /// Bit 0 = Monday … bit 6 = Sunday (127 = every day).
+  IntColumn get weekdaysMask => integer().withDefault(const Constant(127))();
+
+  /// Optional date range (yyyy-MM-dd, inclusive) — a Ramadan fast.
+  TextColumn get startDate => text().nullable()();
+  TextColumn get endDate => text().nullable()();
+
+  /// 0 low (quiet) · 1 normal (notification) · 2 high (alarm).
+  IntColumn get priority => integer().withDefault(const Constant(1))();
+
+  /// Reminder this many minutes before the start; null = none.
+  IntColumn get remindBefore => integer().nullable()();
+
+  /// Reminder this many minutes before the end (if not marked); null = off.
+  IntColumn get remindBeforeEnd => integer().nullable()();
+  TextColumn get sound => text().withDefault(const Constant('chime'))();
+  IntColumn get snoozeMinutes => integer().withDefault(const Constant(10))();
+  TextColumn get place => text().withDefault(const Constant(''))();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// Daily goal of a dhikr / counting practice; null = no goal.
+  IntColumn get targetCount => integer().nullable()();
+  BoolColumn get isPaused => boolean().withDefault(const Constant(false))();
+}
+
+/// One day of one prayer. The id is the natural key `prayerId|yyyy-MM-dd`,
+/// so the same day logged on two devices is one row in a merge.
+@DataClassName('PrayerLogRow')
+class PrayerLogs extends Table {
+  TextColumn get id => text()();
+  TextColumn get prayerId => text()();
+
+  /// Local day (yyyy-MM-dd).
+  TextColumn get date => text()();
+
+  /// PrayerStatus index: 0 pending (snoozed) · 1 on time · 2 late ·
+  /// 3 made up · 4 missed · 5 excused.
+  IntColumn get status => integer().withDefault(const Constant(0))();
+  DateTimeColumn get loggedAt => dateTime().nullable()();
+
+  /// Where it was prayed (overrides the prayer's usual place).
+  TextColumn get place => text().nullable()();
+  BoolColumn get congregation => boolean().withDefault(const Constant(false))();
+
+  /// Dhikr count of the day.
+  IntColumn get count => integer().withDefault(const Constant(0))();
+  DateTimeColumn get snoozedUntil => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+// ─────────────────────────────────────────────────────────────
 // Vault (secrets live ONLY inside encryptedPayload)
 // ─────────────────────────────────────────────────────────────
 
@@ -471,6 +557,10 @@ class InboxEntries extends Table {
   TextColumn get body => text().withDefault(const Constant(''))();
   TextColumn get itemId => text().nullable()();
   TextColumn get itemType => text().nullable()();
+
+  /// Where Open goes when there is no item (a digest → Home / Insights).
+  /// Added after v3: see AppDatabase.addedColumns.
+  TextColumn get route => text().nullable()();
 
   /// JSON list of action keys offered inline (done, snooze, reschedule, view…).
   TextColumn get actionsJson => text().withDefault(const Constant('[]'))();

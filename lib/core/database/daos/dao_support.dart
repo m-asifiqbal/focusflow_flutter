@@ -111,6 +111,7 @@ extension ItemTablesX on AppDatabase {
     ItemType.reminder => reminders,
     ItemType.habit => habits,
     ItemType.medicine => medicines,
+    ItemType.prayer => prayers,
     ItemType.vault => vaultItems,
   };
 
@@ -124,6 +125,7 @@ extension ItemTablesX on AppDatabase {
     reminders,
     habits,
     medicines,
+    prayers,
     vaultItems,
   };
 }

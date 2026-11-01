@@ -131,6 +131,7 @@ class HomeLayoutSettingsScreen extends ConsumerWidget {
     ModuleStyle.medicines.icon,
     ModuleStyle.medicines.colors,
   ),
+  HomeSection.prayer => (ModuleStyle.prayers.icon, ModuleStyle.prayers.colors),
 };
 
 class _SectionsList extends ConsumerWidget {

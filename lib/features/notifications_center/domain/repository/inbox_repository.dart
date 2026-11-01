@@ -13,6 +13,7 @@ abstract interface class InboxRepository {
     required String title,
     String body = '',
     ItemRef? ref,
+    String? route,
     List<String> actions = const [],
     DateTime? at,
   });

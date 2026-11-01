@@ -394,6 +394,27 @@ void main() {
     expect(back.ref, n.inboxRef);
     expect(back.actions, [InboxActions.done]);
     expect(back.fireAt.isAtSameMomentAs(n.fireAt), isTrue);
+    expect(back.route, isNull);
+    // A digest keeps its route: the inbox's Open button needs it.
+    final digest = PlannedNotification(
+      id: 6,
+      key: 'dgm:2026-10-13',
+      fireAt: DateTime.utc(2026, 10, 13, 8),
+      category: NotificationCategory.digest,
+      title: 'Good morning',
+      payload: const NotificationPayload(
+        key: 'dgm:2026-10-13',
+        category: NotificationCategory.digest,
+        route: AppRoutes.home,
+      ),
+      inboxActions: const [InboxActions.open],
+    );
+    expect(
+      SecureLedgerStore.decode(
+        SecureLedgerStore.encode([LedgerEntry.of(digest)]),
+      ).single.route,
+      AppRoutes.home,
+    );
     expect(SecureLedgerStore.decode('garbage'), isEmpty);
     // A ledger of another install (Keychain survives an iOS reinstall).
     final mine = SecureLedgerStore.encode([LedgerEntry.of(n)], owner: 'a');

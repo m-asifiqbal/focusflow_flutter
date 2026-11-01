@@ -40,6 +40,7 @@ void main() {
           ItemType.task,
           ItemType.reminder,
           ItemType.medicine,
+          ItemType.prayer,
           ItemType.vault,
         ],
       );
@@ -77,6 +78,7 @@ void main() {
       ItemType.note,
       ItemType.task,
       ItemType.medicine,
+      ItemType.prayer,
       ItemType.vault,
     ]);
     expect(tester.takeException(), isNull);

@@ -73,6 +73,20 @@ abstract final class AppRoutes {
 
   static const newMedicinePath = '/medicines/new';
   static String medicine(String id) => '/medicines/$id';
+
+  // ── Prayer ──
+  /// The Prayer tab (shown when Settings › Prayer › "Show as a tab" is on).
+  static const prayer = '/prayer';
+
+  /// The same screen as a page over everything (Library, Home, a
+  /// notification) — works whether or not the tab is shown.
+  static const prayers = '/prayers';
+  static const newPrayer = '/prayers/new';
+  static const prayerSetup = '/prayers/setup';
+  static const prayerSettings = '/prayers/settings';
+
+  /// A prayer's editor.
+  static String prayerEdit(String id) => '/prayers/$id';
   static String medicineEdit(String id) => '/medicines/$id/edit';
 
   static const newVaultItemPath = '/vault/new';
@@ -112,6 +126,7 @@ abstract final class AppRoutes {
     ItemType.reminder => reminder(ref.id),
     ItemType.habit => habit(ref.id),
     ItemType.medicine => medicine(ref.id),
+    ItemType.prayer => prayerEdit(ref.id),
     ItemType.vault => vaultItem(ref.id),
   };
 

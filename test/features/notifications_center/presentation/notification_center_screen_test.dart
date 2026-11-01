@@ -13,6 +13,9 @@ import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/features/backup/presentation/screens/backup_sync_screen.dart';
 import 'package:focusflow/features/habits/presentation/screens/habits_list_screen.dart';
+import 'package:focusflow/features/home/presentation/screens/home_screen.dart';
+import 'package:focusflow/features/insights/presentation/screens/insights_screen.dart';
+import 'package:focusflow/features/notifications_center/domain/entities/inbox_entry.dart';
 import 'package:focusflow/features/notifications_center/presentation/screens/notification_center_screen.dart';
 import 'package:focusflow/features/notifications_center/presentation/widgets/inbox_row.dart';
 import 'package:focusflow/features/tasks/presentation/screens/tasks_list_screen.dart';
@@ -265,6 +268,54 @@ void main() {
       expect(h.read(routerProvider).state.uri.toString(), AppRoutes.tasks);
       expect(find.byType(TasksListScreen).hitTestable(), findsOneWidget);
     });
+  });
+
+  // Regression: a digest has no item and its kind (system) had no list, so
+  // its Open button did nothing. It now opens the notification's own route.
+  group('Open on a digest goes to its screen', () {
+    final cases = <(String, String?, String, Type)>[
+      ('Good morning', AppRoutes.home, AppRoutes.home, HomeScreen),
+      ('Evening review', AppRoutes.home, AppRoutes.home, HomeScreen),
+      (
+        'Your weekly report',
+        AppRoutes.insights,
+        AppRoutes.insights,
+        InsightsScreen,
+      ),
+      // A row saved before entries kept their route.
+      ('Good morning (older row)', null, AppRoutes.home, HomeScreen),
+    ];
+    for (final (title, saved, route, screen) in cases) {
+      testWidgets('$title → $route', (tester) async {
+        await boot(tester, withData: false);
+        await tester.runAsync(
+          () => h
+              .read(inboxRepositoryProvider)
+              .add(
+                kind: InboxKind.system,
+                title: title,
+                body: '3 tasks and 1 habit today.',
+                route: saved,
+                actions: const [InboxActions.open],
+                at: inboxNow,
+              ),
+        );
+        // Start somewhere else, so landing on the screen proves the jump.
+        await pumpApp(tester, h, AppRoutes.tasks);
+        final router = h.read(routerProvider);
+        unawaited(router.push<void>(AppRoutes.notificationCenter));
+        await settle(tester);
+
+        await tester.tap(find.text('Open'));
+        await settle(tester);
+
+        expect(tester.takeException(), isNull);
+        expect(router.state.uri.toString(), route);
+        expect(find.byType(NotificationCenterScreen), findsNothing);
+        expect(find.byType(screen).hitTestable(), findsOneWidget);
+        expect(await unread(tester), 0);
+      });
+    }
   });
 
   testWidgets('empty state', (tester) async {

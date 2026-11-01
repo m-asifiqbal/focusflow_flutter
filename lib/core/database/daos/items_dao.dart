@@ -238,6 +238,8 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
       '${count('reminders')} AS reminders_total, '
       '${count('habits')} AS habits_total, '
       '${count('medicines')} AS medicines_total, '
+      '${count('prayers')} AS prayers_total, '
+      '(SELECT COUNT(*) FROM prayer_logs WHERE date = ?3 AND status IN (1, 2, 3)) AS prayers_done_today, '
       '${count('vault_items')} AS vault_total, '
       "${count('vault_items', ' AND password_strength IS NOT NULL AND password_strength <= 1')} AS vault_weak, "
       "${count('vault_items', ' AND breach_count > 0')} AS vault_breached, "
@@ -249,8 +251,15 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
       variables: [
         Variable<DateTime>(DateUtilsX.toStoredDay(dayStart)),
         Variable<DateTime>(DateUtilsX.toStoredDay(dayEnd)),
+        // ?3: today's key for prayer_logs.date (yyyy-MM-dd).
+        Variable.withString(DateUtilsX.dayKey(dayStart)),
       ],
-      readsFrom: {...attachedDatabase.allItemTables, tags, folders},
+      readsFrom: {
+        ...attachedDatabase.allItemTables,
+        attachedDatabase.prayerLogs,
+        tags,
+        folders,
+      },
     );
   }
 }

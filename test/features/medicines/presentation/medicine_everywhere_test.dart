@@ -88,6 +88,11 @@ void main() {
     ]) {
       expect(find.text(title), findsWidgets, reason: title);
     }
+    expect(find.text('Health tip of the day'), findsOneWidget);
+    expect(
+      find.text('General wellness information, not medical advice.'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Monthly'));
     await settle(tester, rounds: 8);

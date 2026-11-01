@@ -83,6 +83,7 @@ String? quickModuleLocation(AppModule module, DateTime? date) =>
       ),
       AppModule.habits => AppRoutes.newHabitPath,
       AppModule.medicines => AppRoutes.newMedicinePath,
+      AppModule.prayers => AppRoutes.newPrayer,
       AppModule.vault => AppRoutes.newVaultItem(),
       AppModule.scan => null,
     };

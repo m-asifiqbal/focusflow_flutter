@@ -165,6 +165,7 @@ void main() {
           HomeSection.notes,
           HomeSection.habits,
           HomeSection.medicines,
+          HomeSection.prayer,
         ],
         hiddenHomeSections: const {HomeSection.notes},
         hiddenLibraryModules: const {'vault'},

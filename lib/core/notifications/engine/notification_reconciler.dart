@@ -367,6 +367,7 @@ class NotificationReconciler {
         title: e.title,
         body: e.body,
         ref: e.ref,
+        route: e.route,
         actions: e.actions,
         at: e.fireAt,
       );

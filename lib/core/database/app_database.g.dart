@@ -9063,6 +9063,2497 @@ class MedicineDosesCompanion extends UpdateCompanion<MedicineDoseRow> {
   }
 }
 
+class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PrayersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _archivedAtMeta = const VerificationMeta(
+    'archivedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> archivedAt = GeneratedColumn<DateTime>(
+    'archived_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _colorHexMeta = const VerificationMeta(
+    'colorHex',
+  );
+  @override
+  late final GeneratedColumn<String> colorHex = GeneratedColumn<String>(
+    'color_hex',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _folderIdMeta = const VerificationMeta(
+    'folderId',
+  );
+  @override
+  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
+    'folder_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<double> sortOrder = GeneratedColumn<double>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _syncVersionMeta = const VerificationMeta(
+    'syncVersion',
+  );
+  @override
+  late final GeneratedColumn<int> syncVersion = GeneratedColumn<int>(
+    'sync_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deviceIdMeta = const VerificationMeta(
+    'deviceId',
+  );
+  @override
+  late final GeneratedColumn<String> deviceId = GeneratedColumn<String>(
+    'device_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('custom'),
+  );
+  static const VerificationMeta _traditionMeta = const VerificationMeta(
+    'tradition',
+  );
+  @override
+  late final GeneratedColumn<String> tradition = GeneratedColumn<String>(
+    'tradition',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('custom'),
+  );
+  static const VerificationMeta _startEventMeta = const VerificationMeta(
+    'startEvent',
+  );
+  @override
+  late final GeneratedColumn<String> startEvent = GeneratedColumn<String>(
+    'start_event',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startOffsetMeta = const VerificationMeta(
+    'startOffset',
+  );
+  @override
+  late final GeneratedColumn<int> startOffset = GeneratedColumn<int>(
+    'start_offset',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _startMinutesMeta = const VerificationMeta(
+    'startMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> startMinutes = GeneratedColumn<int>(
+    'start_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(360),
+  );
+  static const VerificationMeta _endEventMeta = const VerificationMeta(
+    'endEvent',
+  );
+  @override
+  late final GeneratedColumn<String> endEvent = GeneratedColumn<String>(
+    'end_event',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _endOffsetMeta = const VerificationMeta(
+    'endOffset',
+  );
+  @override
+  late final GeneratedColumn<int> endOffset = GeneratedColumn<int>(
+    'end_offset',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _endMinutesMeta = const VerificationMeta(
+    'endMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> endMinutes = GeneratedColumn<int>(
+    'end_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _weekdaysMaskMeta = const VerificationMeta(
+    'weekdaysMask',
+  );
+  @override
+  late final GeneratedColumn<int> weekdaysMask = GeneratedColumn<int>(
+    'weekdays_mask',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(127),
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+    'start_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<String> endDate = GeneratedColumn<String>(
+    'end_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<int> priority = GeneratedColumn<int>(
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _remindBeforeMeta = const VerificationMeta(
+    'remindBefore',
+  );
+  @override
+  late final GeneratedColumn<int> remindBefore = GeneratedColumn<int>(
+    'remind_before',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _remindBeforeEndMeta = const VerificationMeta(
+    'remindBeforeEnd',
+  );
+  @override
+  late final GeneratedColumn<int> remindBeforeEnd = GeneratedColumn<int>(
+    'remind_before_end',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _soundMeta = const VerificationMeta('sound');
+  @override
+  late final GeneratedColumn<String> sound = GeneratedColumn<String>(
+    'sound',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('chime'),
+  );
+  static const VerificationMeta _snoozeMinutesMeta = const VerificationMeta(
+    'snoozeMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> snoozeMinutes = GeneratedColumn<int>(
+    'snooze_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
+  static const VerificationMeta _placeMeta = const VerificationMeta('place');
+  @override
+  late final GeneratedColumn<String> place = GeneratedColumn<String>(
+    'place',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _targetCountMeta = const VerificationMeta(
+    'targetCount',
+  );
+  @override
+  late final GeneratedColumn<int> targetCount = GeneratedColumn<int>(
+    'target_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isPausedMeta = const VerificationMeta(
+    'isPaused',
+  );
+  @override
+  late final GeneratedColumn<bool> isPaused = GeneratedColumn<bool>(
+    'is_paused',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_paused" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    archivedAt,
+    deletedAt,
+    isPinned,
+    isFavorite,
+    colorHex,
+    folderId,
+    sortOrder,
+    syncVersion,
+    lastSyncedAt,
+    deviceId,
+    name,
+    kind,
+    tradition,
+    startEvent,
+    startOffset,
+    startMinutes,
+    endEvent,
+    endOffset,
+    endMinutes,
+    weekdaysMask,
+    startDate,
+    endDate,
+    priority,
+    remindBefore,
+    remindBeforeEnd,
+    sound,
+    snoozeMinutes,
+    place,
+    note,
+    targetCount,
+    isPaused,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'prayers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PrayerRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('archived_at')) {
+      context.handle(
+        _archivedAtMeta,
+        archivedAt.isAcceptableOrUnknown(data['archived_at']!, _archivedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('is_pinned')) {
+      context.handle(
+        _isPinnedMeta,
+        isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta),
+      );
+    }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
+    }
+    if (data.containsKey('color_hex')) {
+      context.handle(
+        _colorHexMeta,
+        colorHex.isAcceptableOrUnknown(data['color_hex']!, _colorHexMeta),
+      );
+    }
+    if (data.containsKey('folder_id')) {
+      context.handle(
+        _folderIdMeta,
+        folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('sync_version')) {
+      context.handle(
+        _syncVersionMeta,
+        syncVersion.isAcceptableOrUnknown(
+          data['sync_version']!,
+          _syncVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
+          _lastSyncedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('device_id')) {
+      context.handle(
+        _deviceIdMeta,
+        deviceId.isAcceptableOrUnknown(data['device_id']!, _deviceIdMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    }
+    if (data.containsKey('tradition')) {
+      context.handle(
+        _traditionMeta,
+        tradition.isAcceptableOrUnknown(data['tradition']!, _traditionMeta),
+      );
+    }
+    if (data.containsKey('start_event')) {
+      context.handle(
+        _startEventMeta,
+        startEvent.isAcceptableOrUnknown(data['start_event']!, _startEventMeta),
+      );
+    }
+    if (data.containsKey('start_offset')) {
+      context.handle(
+        _startOffsetMeta,
+        startOffset.isAcceptableOrUnknown(
+          data['start_offset']!,
+          _startOffsetMeta,
+        ),
+      );
+    }
+    if (data.containsKey('start_minutes')) {
+      context.handle(
+        _startMinutesMeta,
+        startMinutes.isAcceptableOrUnknown(
+          data['start_minutes']!,
+          _startMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('end_event')) {
+      context.handle(
+        _endEventMeta,
+        endEvent.isAcceptableOrUnknown(data['end_event']!, _endEventMeta),
+      );
+    }
+    if (data.containsKey('end_offset')) {
+      context.handle(
+        _endOffsetMeta,
+        endOffset.isAcceptableOrUnknown(data['end_offset']!, _endOffsetMeta),
+      );
+    }
+    if (data.containsKey('end_minutes')) {
+      context.handle(
+        _endMinutesMeta,
+        endMinutes.isAcceptableOrUnknown(data['end_minutes']!, _endMinutesMeta),
+      );
+    }
+    if (data.containsKey('weekdays_mask')) {
+      context.handle(
+        _weekdaysMaskMeta,
+        weekdaysMask.isAcceptableOrUnknown(
+          data['weekdays_mask']!,
+          _weekdaysMaskMeta,
+        ),
+      );
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    }
+    if (data.containsKey('remind_before')) {
+      context.handle(
+        _remindBeforeMeta,
+        remindBefore.isAcceptableOrUnknown(
+          data['remind_before']!,
+          _remindBeforeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remind_before_end')) {
+      context.handle(
+        _remindBeforeEndMeta,
+        remindBeforeEnd.isAcceptableOrUnknown(
+          data['remind_before_end']!,
+          _remindBeforeEndMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sound')) {
+      context.handle(
+        _soundMeta,
+        sound.isAcceptableOrUnknown(data['sound']!, _soundMeta),
+      );
+    }
+    if (data.containsKey('snooze_minutes')) {
+      context.handle(
+        _snoozeMinutesMeta,
+        snoozeMinutes.isAcceptableOrUnknown(
+          data['snooze_minutes']!,
+          _snoozeMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('place')) {
+      context.handle(
+        _placeMeta,
+        place.isAcceptableOrUnknown(data['place']!, _placeMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('target_count')) {
+      context.handle(
+        _targetCountMeta,
+        targetCount.isAcceptableOrUnknown(
+          data['target_count']!,
+          _targetCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_paused')) {
+      context.handle(
+        _isPausedMeta,
+        isPaused.isAcceptableOrUnknown(data['is_paused']!, _isPausedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PrayerRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PrayerRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      archivedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}archived_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      isPinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
+      colorHex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color_hex'],
+      ),
+      folderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}folder_id'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      syncVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sync_version'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_synced_at'],
+      ),
+      deviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      tradition: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tradition'],
+      )!,
+      startEvent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_event'],
+      ),
+      startOffset: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_offset'],
+      )!,
+      startMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_minutes'],
+      )!,
+      endEvent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_event'],
+      ),
+      endOffset: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_offset'],
+      )!,
+      endMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_minutes'],
+      ),
+      weekdaysMask: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}weekdays_mask'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_date'],
+      ),
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_date'],
+      ),
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}priority'],
+      )!,
+      remindBefore: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}remind_before'],
+      ),
+      remindBeforeEnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}remind_before_end'],
+      ),
+      sound: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sound'],
+      )!,
+      snoozeMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}snooze_minutes'],
+      )!,
+      place: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}place'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+      targetCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}target_count'],
+      ),
+      isPaused: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_paused'],
+      )!,
+    );
+  }
+
+  @override
+  $PrayersTable createAlias(String alias) {
+    return $PrayersTable(attachedDatabase, alias);
+  }
+}
+
+class PrayerRow extends DataClass implements Insertable<PrayerRow> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? archivedAt;
+  final DateTime? deletedAt;
+  final bool isPinned;
+  final bool isFavorite;
+
+  /// `RRGGBB`; null = module default / white card.
+  final String? colorHex;
+
+  /// Folder (notes/vault) or list (tasks). See [Folders].
+  final String? folderId;
+
+  /// Manual sort position (lower first). Fractional so a drag only rewrites
+  /// the moved row.
+  final double sortOrder;
+  final int syncVersion;
+  final DateTime? lastSyncedAt;
+
+  /// Device that last wrote the row (core/storage/device_id).
+  final String deviceId;
+  final String name;
+
+  /// PrayerKind key (`salah`, `nafl`, `fasting`, `dhikr`, `recitation`,
+  /// `meditation`, `service`, `custom`).
+  final String kind;
+
+  /// PrayerTradition key of the preset it came from (`islam`, …, `custom`).
+  final String tradition;
+
+  /// Start: a SolarEvent name (auto) — null = the fixed [startMinutes].
+  final String? startEvent;
+  final int startOffset;
+
+  /// Fixed start (minute of the day); also the fallback while no location
+  /// is saved.
+  final int startMinutes;
+
+  /// End: a SolarEvent name (auto), else the fixed [endMinutes]; both null
+  /// = no end (a moment, not a window).
+  final String? endEvent;
+  final int endOffset;
+  final int? endMinutes;
+
+  /// Bit 0 = Monday … bit 6 = Sunday (127 = every day).
+  final int weekdaysMask;
+
+  /// Optional date range (yyyy-MM-dd, inclusive) — a Ramadan fast.
+  final String? startDate;
+  final String? endDate;
+
+  /// 0 low (quiet) · 1 normal (notification) · 2 high (alarm).
+  final int priority;
+
+  /// Reminder this many minutes before the start; null = none.
+  final int? remindBefore;
+
+  /// Reminder this many minutes before the end (if not marked); null = off.
+  final int? remindBeforeEnd;
+  final String sound;
+  final int snoozeMinutes;
+  final String place;
+  final String note;
+
+  /// Daily goal of a dhikr / counting practice; null = no goal.
+  final int? targetCount;
+  final bool isPaused;
+  const PrayerRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.archivedAt,
+    this.deletedAt,
+    required this.isPinned,
+    required this.isFavorite,
+    this.colorHex,
+    this.folderId,
+    required this.sortOrder,
+    required this.syncVersion,
+    this.lastSyncedAt,
+    required this.deviceId,
+    required this.name,
+    required this.kind,
+    required this.tradition,
+    this.startEvent,
+    required this.startOffset,
+    required this.startMinutes,
+    this.endEvent,
+    required this.endOffset,
+    this.endMinutes,
+    required this.weekdaysMask,
+    this.startDate,
+    this.endDate,
+    required this.priority,
+    this.remindBefore,
+    this.remindBeforeEnd,
+    required this.sound,
+    required this.snoozeMinutes,
+    required this.place,
+    required this.note,
+    this.targetCount,
+    required this.isPaused,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<DateTime>(archivedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['is_pinned'] = Variable<bool>(isPinned);
+    map['is_favorite'] = Variable<bool>(isFavorite);
+    if (!nullToAbsent || colorHex != null) {
+      map['color_hex'] = Variable<String>(colorHex);
+    }
+    if (!nullToAbsent || folderId != null) {
+      map['folder_id'] = Variable<String>(folderId);
+    }
+    map['sort_order'] = Variable<double>(sortOrder);
+    map['sync_version'] = Variable<int>(syncVersion);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    map['device_id'] = Variable<String>(deviceId);
+    map['name'] = Variable<String>(name);
+    map['kind'] = Variable<String>(kind);
+    map['tradition'] = Variable<String>(tradition);
+    if (!nullToAbsent || startEvent != null) {
+      map['start_event'] = Variable<String>(startEvent);
+    }
+    map['start_offset'] = Variable<int>(startOffset);
+    map['start_minutes'] = Variable<int>(startMinutes);
+    if (!nullToAbsent || endEvent != null) {
+      map['end_event'] = Variable<String>(endEvent);
+    }
+    map['end_offset'] = Variable<int>(endOffset);
+    if (!nullToAbsent || endMinutes != null) {
+      map['end_minutes'] = Variable<int>(endMinutes);
+    }
+    map['weekdays_mask'] = Variable<int>(weekdaysMask);
+    if (!nullToAbsent || startDate != null) {
+      map['start_date'] = Variable<String>(startDate);
+    }
+    if (!nullToAbsent || endDate != null) {
+      map['end_date'] = Variable<String>(endDate);
+    }
+    map['priority'] = Variable<int>(priority);
+    if (!nullToAbsent || remindBefore != null) {
+      map['remind_before'] = Variable<int>(remindBefore);
+    }
+    if (!nullToAbsent || remindBeforeEnd != null) {
+      map['remind_before_end'] = Variable<int>(remindBeforeEnd);
+    }
+    map['sound'] = Variable<String>(sound);
+    map['snooze_minutes'] = Variable<int>(snoozeMinutes);
+    map['place'] = Variable<String>(place);
+    map['note'] = Variable<String>(note);
+    if (!nullToAbsent || targetCount != null) {
+      map['target_count'] = Variable<int>(targetCount);
+    }
+    map['is_paused'] = Variable<bool>(isPaused);
+    return map;
+  }
+
+  PrayersCompanion toCompanion(bool nullToAbsent) {
+    return PrayersCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      archivedAt: archivedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archivedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      isPinned: Value(isPinned),
+      isFavorite: Value(isFavorite),
+      colorHex: colorHex == null && nullToAbsent
+          ? const Value.absent()
+          : Value(colorHex),
+      folderId: folderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(folderId),
+      sortOrder: Value(sortOrder),
+      syncVersion: Value(syncVersion),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+      deviceId: Value(deviceId),
+      name: Value(name),
+      kind: Value(kind),
+      tradition: Value(tradition),
+      startEvent: startEvent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startEvent),
+      startOffset: Value(startOffset),
+      startMinutes: Value(startMinutes),
+      endEvent: endEvent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endEvent),
+      endOffset: Value(endOffset),
+      endMinutes: endMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endMinutes),
+      weekdaysMask: Value(weekdaysMask),
+      startDate: startDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startDate),
+      endDate: endDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDate),
+      priority: Value(priority),
+      remindBefore: remindBefore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remindBefore),
+      remindBeforeEnd: remindBeforeEnd == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remindBeforeEnd),
+      sound: Value(sound),
+      snoozeMinutes: Value(snoozeMinutes),
+      place: Value(place),
+      note: Value(note),
+      targetCount: targetCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetCount),
+      isPaused: Value(isPaused),
+    );
+  }
+
+  factory PrayerRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PrayerRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      archivedAt: serializer.fromJson<DateTime?>(json['archivedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      colorHex: serializer.fromJson<String?>(json['colorHex']),
+      folderId: serializer.fromJson<String?>(json['folderId']),
+      sortOrder: serializer.fromJson<double>(json['sortOrder']),
+      syncVersion: serializer.fromJson<int>(json['syncVersion']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+      deviceId: serializer.fromJson<String>(json['deviceId']),
+      name: serializer.fromJson<String>(json['name']),
+      kind: serializer.fromJson<String>(json['kind']),
+      tradition: serializer.fromJson<String>(json['tradition']),
+      startEvent: serializer.fromJson<String?>(json['startEvent']),
+      startOffset: serializer.fromJson<int>(json['startOffset']),
+      startMinutes: serializer.fromJson<int>(json['startMinutes']),
+      endEvent: serializer.fromJson<String?>(json['endEvent']),
+      endOffset: serializer.fromJson<int>(json['endOffset']),
+      endMinutes: serializer.fromJson<int?>(json['endMinutes']),
+      weekdaysMask: serializer.fromJson<int>(json['weekdaysMask']),
+      startDate: serializer.fromJson<String?>(json['startDate']),
+      endDate: serializer.fromJson<String?>(json['endDate']),
+      priority: serializer.fromJson<int>(json['priority']),
+      remindBefore: serializer.fromJson<int?>(json['remindBefore']),
+      remindBeforeEnd: serializer.fromJson<int?>(json['remindBeforeEnd']),
+      sound: serializer.fromJson<String>(json['sound']),
+      snoozeMinutes: serializer.fromJson<int>(json['snoozeMinutes']),
+      place: serializer.fromJson<String>(json['place']),
+      note: serializer.fromJson<String>(json['note']),
+      targetCount: serializer.fromJson<int?>(json['targetCount']),
+      isPaused: serializer.fromJson<bool>(json['isPaused']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'archivedAt': serializer.toJson<DateTime?>(archivedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'isPinned': serializer.toJson<bool>(isPinned),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
+      'colorHex': serializer.toJson<String?>(colorHex),
+      'folderId': serializer.toJson<String?>(folderId),
+      'sortOrder': serializer.toJson<double>(sortOrder),
+      'syncVersion': serializer.toJson<int>(syncVersion),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+      'deviceId': serializer.toJson<String>(deviceId),
+      'name': serializer.toJson<String>(name),
+      'kind': serializer.toJson<String>(kind),
+      'tradition': serializer.toJson<String>(tradition),
+      'startEvent': serializer.toJson<String?>(startEvent),
+      'startOffset': serializer.toJson<int>(startOffset),
+      'startMinutes': serializer.toJson<int>(startMinutes),
+      'endEvent': serializer.toJson<String?>(endEvent),
+      'endOffset': serializer.toJson<int>(endOffset),
+      'endMinutes': serializer.toJson<int?>(endMinutes),
+      'weekdaysMask': serializer.toJson<int>(weekdaysMask),
+      'startDate': serializer.toJson<String?>(startDate),
+      'endDate': serializer.toJson<String?>(endDate),
+      'priority': serializer.toJson<int>(priority),
+      'remindBefore': serializer.toJson<int?>(remindBefore),
+      'remindBeforeEnd': serializer.toJson<int?>(remindBeforeEnd),
+      'sound': serializer.toJson<String>(sound),
+      'snoozeMinutes': serializer.toJson<int>(snoozeMinutes),
+      'place': serializer.toJson<String>(place),
+      'note': serializer.toJson<String>(note),
+      'targetCount': serializer.toJson<int?>(targetCount),
+      'isPaused': serializer.toJson<bool>(isPaused),
+    };
+  }
+
+  PrayerRow copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> archivedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? isPinned,
+    bool? isFavorite,
+    Value<String?> colorHex = const Value.absent(),
+    Value<String?> folderId = const Value.absent(),
+    double? sortOrder,
+    int? syncVersion,
+    Value<DateTime?> lastSyncedAt = const Value.absent(),
+    String? deviceId,
+    String? name,
+    String? kind,
+    String? tradition,
+    Value<String?> startEvent = const Value.absent(),
+    int? startOffset,
+    int? startMinutes,
+    Value<String?> endEvent = const Value.absent(),
+    int? endOffset,
+    Value<int?> endMinutes = const Value.absent(),
+    int? weekdaysMask,
+    Value<String?> startDate = const Value.absent(),
+    Value<String?> endDate = const Value.absent(),
+    int? priority,
+    Value<int?> remindBefore = const Value.absent(),
+    Value<int?> remindBeforeEnd = const Value.absent(),
+    String? sound,
+    int? snoozeMinutes,
+    String? place,
+    String? note,
+    Value<int?> targetCount = const Value.absent(),
+    bool? isPaused,
+  }) => PrayerRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    isPinned: isPinned ?? this.isPinned,
+    isFavorite: isFavorite ?? this.isFavorite,
+    colorHex: colorHex.present ? colorHex.value : this.colorHex,
+    folderId: folderId.present ? folderId.value : this.folderId,
+    sortOrder: sortOrder ?? this.sortOrder,
+    syncVersion: syncVersion ?? this.syncVersion,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+    deviceId: deviceId ?? this.deviceId,
+    name: name ?? this.name,
+    kind: kind ?? this.kind,
+    tradition: tradition ?? this.tradition,
+    startEvent: startEvent.present ? startEvent.value : this.startEvent,
+    startOffset: startOffset ?? this.startOffset,
+    startMinutes: startMinutes ?? this.startMinutes,
+    endEvent: endEvent.present ? endEvent.value : this.endEvent,
+    endOffset: endOffset ?? this.endOffset,
+    endMinutes: endMinutes.present ? endMinutes.value : this.endMinutes,
+    weekdaysMask: weekdaysMask ?? this.weekdaysMask,
+    startDate: startDate.present ? startDate.value : this.startDate,
+    endDate: endDate.present ? endDate.value : this.endDate,
+    priority: priority ?? this.priority,
+    remindBefore: remindBefore.present ? remindBefore.value : this.remindBefore,
+    remindBeforeEnd: remindBeforeEnd.present
+        ? remindBeforeEnd.value
+        : this.remindBeforeEnd,
+    sound: sound ?? this.sound,
+    snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
+    place: place ?? this.place,
+    note: note ?? this.note,
+    targetCount: targetCount.present ? targetCount.value : this.targetCount,
+    isPaused: isPaused ?? this.isPaused,
+  );
+  PrayerRow copyWithCompanion(PrayersCompanion data) {
+    return PrayerRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      archivedAt: data.archivedAt.present
+          ? data.archivedAt.value
+          : this.archivedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
+      colorHex: data.colorHex.present ? data.colorHex.value : this.colorHex,
+      folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      syncVersion: data.syncVersion.present
+          ? data.syncVersion.value
+          : this.syncVersion,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+      deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
+      name: data.name.present ? data.name.value : this.name,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      tradition: data.tradition.present ? data.tradition.value : this.tradition,
+      startEvent: data.startEvent.present
+          ? data.startEvent.value
+          : this.startEvent,
+      startOffset: data.startOffset.present
+          ? data.startOffset.value
+          : this.startOffset,
+      startMinutes: data.startMinutes.present
+          ? data.startMinutes.value
+          : this.startMinutes,
+      endEvent: data.endEvent.present ? data.endEvent.value : this.endEvent,
+      endOffset: data.endOffset.present ? data.endOffset.value : this.endOffset,
+      endMinutes: data.endMinutes.present
+          ? data.endMinutes.value
+          : this.endMinutes,
+      weekdaysMask: data.weekdaysMask.present
+          ? data.weekdaysMask.value
+          : this.weekdaysMask,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      remindBefore: data.remindBefore.present
+          ? data.remindBefore.value
+          : this.remindBefore,
+      remindBeforeEnd: data.remindBeforeEnd.present
+          ? data.remindBeforeEnd.value
+          : this.remindBeforeEnd,
+      sound: data.sound.present ? data.sound.value : this.sound,
+      snoozeMinutes: data.snoozeMinutes.present
+          ? data.snoozeMinutes.value
+          : this.snoozeMinutes,
+      place: data.place.present ? data.place.value : this.place,
+      note: data.note.present ? data.note.value : this.note,
+      targetCount: data.targetCount.present
+          ? data.targetCount.value
+          : this.targetCount,
+      isPaused: data.isPaused.present ? data.isPaused.value : this.isPaused,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PrayerRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('colorHex: $colorHex, ')
+          ..write('folderId: $folderId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('syncVersion: $syncVersion, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('tradition: $tradition, ')
+          ..write('startEvent: $startEvent, ')
+          ..write('startOffset: $startOffset, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endEvent: $endEvent, ')
+          ..write('endOffset: $endOffset, ')
+          ..write('endMinutes: $endMinutes, ')
+          ..write('weekdaysMask: $weekdaysMask, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('priority: $priority, ')
+          ..write('remindBefore: $remindBefore, ')
+          ..write('remindBeforeEnd: $remindBeforeEnd, ')
+          ..write('sound: $sound, ')
+          ..write('snoozeMinutes: $snoozeMinutes, ')
+          ..write('place: $place, ')
+          ..write('note: $note, ')
+          ..write('targetCount: $targetCount, ')
+          ..write('isPaused: $isPaused')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    createdAt,
+    updatedAt,
+    archivedAt,
+    deletedAt,
+    isPinned,
+    isFavorite,
+    colorHex,
+    folderId,
+    sortOrder,
+    syncVersion,
+    lastSyncedAt,
+    deviceId,
+    name,
+    kind,
+    tradition,
+    startEvent,
+    startOffset,
+    startMinutes,
+    endEvent,
+    endOffset,
+    endMinutes,
+    weekdaysMask,
+    startDate,
+    endDate,
+    priority,
+    remindBefore,
+    remindBeforeEnd,
+    sound,
+    snoozeMinutes,
+    place,
+    note,
+    targetCount,
+    isPaused,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PrayerRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.archivedAt == this.archivedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.isPinned == this.isPinned &&
+          other.isFavorite == this.isFavorite &&
+          other.colorHex == this.colorHex &&
+          other.folderId == this.folderId &&
+          other.sortOrder == this.sortOrder &&
+          other.syncVersion == this.syncVersion &&
+          other.lastSyncedAt == this.lastSyncedAt &&
+          other.deviceId == this.deviceId &&
+          other.name == this.name &&
+          other.kind == this.kind &&
+          other.tradition == this.tradition &&
+          other.startEvent == this.startEvent &&
+          other.startOffset == this.startOffset &&
+          other.startMinutes == this.startMinutes &&
+          other.endEvent == this.endEvent &&
+          other.endOffset == this.endOffset &&
+          other.endMinutes == this.endMinutes &&
+          other.weekdaysMask == this.weekdaysMask &&
+          other.startDate == this.startDate &&
+          other.endDate == this.endDate &&
+          other.priority == this.priority &&
+          other.remindBefore == this.remindBefore &&
+          other.remindBeforeEnd == this.remindBeforeEnd &&
+          other.sound == this.sound &&
+          other.snoozeMinutes == this.snoozeMinutes &&
+          other.place == this.place &&
+          other.note == this.note &&
+          other.targetCount == this.targetCount &&
+          other.isPaused == this.isPaused);
+}
+
+class PrayersCompanion extends UpdateCompanion<PrayerRow> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> archivedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> isPinned;
+  final Value<bool> isFavorite;
+  final Value<String?> colorHex;
+  final Value<String?> folderId;
+  final Value<double> sortOrder;
+  final Value<int> syncVersion;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<String> deviceId;
+  final Value<String> name;
+  final Value<String> kind;
+  final Value<String> tradition;
+  final Value<String?> startEvent;
+  final Value<int> startOffset;
+  final Value<int> startMinutes;
+  final Value<String?> endEvent;
+  final Value<int> endOffset;
+  final Value<int?> endMinutes;
+  final Value<int> weekdaysMask;
+  final Value<String?> startDate;
+  final Value<String?> endDate;
+  final Value<int> priority;
+  final Value<int?> remindBefore;
+  final Value<int?> remindBeforeEnd;
+  final Value<String> sound;
+  final Value<int> snoozeMinutes;
+  final Value<String> place;
+  final Value<String> note;
+  final Value<int?> targetCount;
+  final Value<bool> isPaused;
+  final Value<int> rowid;
+  const PrayersCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.colorHex = const Value.absent(),
+    this.folderId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.syncVersion = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.tradition = const Value.absent(),
+    this.startEvent = const Value.absent(),
+    this.startOffset = const Value.absent(),
+    this.startMinutes = const Value.absent(),
+    this.endEvent = const Value.absent(),
+    this.endOffset = const Value.absent(),
+    this.endMinutes = const Value.absent(),
+    this.weekdaysMask = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.remindBefore = const Value.absent(),
+    this.remindBeforeEnd = const Value.absent(),
+    this.sound = const Value.absent(),
+    this.snoozeMinutes = const Value.absent(),
+    this.place = const Value.absent(),
+    this.note = const Value.absent(),
+    this.targetCount = const Value.absent(),
+    this.isPaused = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PrayersCompanion.insert({
+    required String id,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.archivedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.isFavorite = const Value.absent(),
+    this.colorHex = const Value.absent(),
+    this.folderId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.syncVersion = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.deviceId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.tradition = const Value.absent(),
+    this.startEvent = const Value.absent(),
+    this.startOffset = const Value.absent(),
+    this.startMinutes = const Value.absent(),
+    this.endEvent = const Value.absent(),
+    this.endOffset = const Value.absent(),
+    this.endMinutes = const Value.absent(),
+    this.weekdaysMask = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.remindBefore = const Value.absent(),
+    this.remindBeforeEnd = const Value.absent(),
+    this.sound = const Value.absent(),
+    this.snoozeMinutes = const Value.absent(),
+    this.place = const Value.absent(),
+    this.note = const Value.absent(),
+    this.targetCount = const Value.absent(),
+    this.isPaused = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<PrayerRow> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? archivedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? isPinned,
+    Expression<bool>? isFavorite,
+    Expression<String>? colorHex,
+    Expression<String>? folderId,
+    Expression<double>? sortOrder,
+    Expression<int>? syncVersion,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<String>? deviceId,
+    Expression<String>? name,
+    Expression<String>? kind,
+    Expression<String>? tradition,
+    Expression<String>? startEvent,
+    Expression<int>? startOffset,
+    Expression<int>? startMinutes,
+    Expression<String>? endEvent,
+    Expression<int>? endOffset,
+    Expression<int>? endMinutes,
+    Expression<int>? weekdaysMask,
+    Expression<String>? startDate,
+    Expression<String>? endDate,
+    Expression<int>? priority,
+    Expression<int>? remindBefore,
+    Expression<int>? remindBeforeEnd,
+    Expression<String>? sound,
+    Expression<int>? snoozeMinutes,
+    Expression<String>? place,
+    Expression<String>? note,
+    Expression<int>? targetCount,
+    Expression<bool>? isPaused,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (archivedAt != null) 'archived_at': archivedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (isPinned != null) 'is_pinned': isPinned,
+      if (isFavorite != null) 'is_favorite': isFavorite,
+      if (colorHex != null) 'color_hex': colorHex,
+      if (folderId != null) 'folder_id': folderId,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (syncVersion != null) 'sync_version': syncVersion,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (deviceId != null) 'device_id': deviceId,
+      if (name != null) 'name': name,
+      if (kind != null) 'kind': kind,
+      if (tradition != null) 'tradition': tradition,
+      if (startEvent != null) 'start_event': startEvent,
+      if (startOffset != null) 'start_offset': startOffset,
+      if (startMinutes != null) 'start_minutes': startMinutes,
+      if (endEvent != null) 'end_event': endEvent,
+      if (endOffset != null) 'end_offset': endOffset,
+      if (endMinutes != null) 'end_minutes': endMinutes,
+      if (weekdaysMask != null) 'weekdays_mask': weekdaysMask,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (priority != null) 'priority': priority,
+      if (remindBefore != null) 'remind_before': remindBefore,
+      if (remindBeforeEnd != null) 'remind_before_end': remindBeforeEnd,
+      if (sound != null) 'sound': sound,
+      if (snoozeMinutes != null) 'snooze_minutes': snoozeMinutes,
+      if (place != null) 'place': place,
+      if (note != null) 'note': note,
+      if (targetCount != null) 'target_count': targetCount,
+      if (isPaused != null) 'is_paused': isPaused,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PrayersCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? archivedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? isPinned,
+    Value<bool>? isFavorite,
+    Value<String?>? colorHex,
+    Value<String?>? folderId,
+    Value<double>? sortOrder,
+    Value<int>? syncVersion,
+    Value<DateTime?>? lastSyncedAt,
+    Value<String>? deviceId,
+    Value<String>? name,
+    Value<String>? kind,
+    Value<String>? tradition,
+    Value<String?>? startEvent,
+    Value<int>? startOffset,
+    Value<int>? startMinutes,
+    Value<String?>? endEvent,
+    Value<int>? endOffset,
+    Value<int?>? endMinutes,
+    Value<int>? weekdaysMask,
+    Value<String?>? startDate,
+    Value<String?>? endDate,
+    Value<int>? priority,
+    Value<int?>? remindBefore,
+    Value<int?>? remindBeforeEnd,
+    Value<String>? sound,
+    Value<int>? snoozeMinutes,
+    Value<String>? place,
+    Value<String>? note,
+    Value<int?>? targetCount,
+    Value<bool>? isPaused,
+    Value<int>? rowid,
+  }) {
+    return PrayersCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      archivedAt: archivedAt ?? this.archivedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      isPinned: isPinned ?? this.isPinned,
+      isFavorite: isFavorite ?? this.isFavorite,
+      colorHex: colorHex ?? this.colorHex,
+      folderId: folderId ?? this.folderId,
+      sortOrder: sortOrder ?? this.sortOrder,
+      syncVersion: syncVersion ?? this.syncVersion,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      deviceId: deviceId ?? this.deviceId,
+      name: name ?? this.name,
+      kind: kind ?? this.kind,
+      tradition: tradition ?? this.tradition,
+      startEvent: startEvent ?? this.startEvent,
+      startOffset: startOffset ?? this.startOffset,
+      startMinutes: startMinutes ?? this.startMinutes,
+      endEvent: endEvent ?? this.endEvent,
+      endOffset: endOffset ?? this.endOffset,
+      endMinutes: endMinutes ?? this.endMinutes,
+      weekdaysMask: weekdaysMask ?? this.weekdaysMask,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      priority: priority ?? this.priority,
+      remindBefore: remindBefore ?? this.remindBefore,
+      remindBeforeEnd: remindBeforeEnd ?? this.remindBeforeEnd,
+      sound: sound ?? this.sound,
+      snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
+      place: place ?? this.place,
+      note: note ?? this.note,
+      targetCount: targetCount ?? this.targetCount,
+      isPaused: isPaused ?? this.isPaused,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<DateTime>(archivedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
+    if (colorHex.present) {
+      map['color_hex'] = Variable<String>(colorHex.value);
+    }
+    if (folderId.present) {
+      map['folder_id'] = Variable<String>(folderId.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<double>(sortOrder.value);
+    }
+    if (syncVersion.present) {
+      map['sync_version'] = Variable<int>(syncVersion.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (deviceId.present) {
+      map['device_id'] = Variable<String>(deviceId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (tradition.present) {
+      map['tradition'] = Variable<String>(tradition.value);
+    }
+    if (startEvent.present) {
+      map['start_event'] = Variable<String>(startEvent.value);
+    }
+    if (startOffset.present) {
+      map['start_offset'] = Variable<int>(startOffset.value);
+    }
+    if (startMinutes.present) {
+      map['start_minutes'] = Variable<int>(startMinutes.value);
+    }
+    if (endEvent.present) {
+      map['end_event'] = Variable<String>(endEvent.value);
+    }
+    if (endOffset.present) {
+      map['end_offset'] = Variable<int>(endOffset.value);
+    }
+    if (endMinutes.present) {
+      map['end_minutes'] = Variable<int>(endMinutes.value);
+    }
+    if (weekdaysMask.present) {
+      map['weekdays_mask'] = Variable<int>(weekdaysMask.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<String>(endDate.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<int>(priority.value);
+    }
+    if (remindBefore.present) {
+      map['remind_before'] = Variable<int>(remindBefore.value);
+    }
+    if (remindBeforeEnd.present) {
+      map['remind_before_end'] = Variable<int>(remindBeforeEnd.value);
+    }
+    if (sound.present) {
+      map['sound'] = Variable<String>(sound.value);
+    }
+    if (snoozeMinutes.present) {
+      map['snooze_minutes'] = Variable<int>(snoozeMinutes.value);
+    }
+    if (place.present) {
+      map['place'] = Variable<String>(place.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (targetCount.present) {
+      map['target_count'] = Variable<int>(targetCount.value);
+    }
+    if (isPaused.present) {
+      map['is_paused'] = Variable<bool>(isPaused.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PrayersCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('colorHex: $colorHex, ')
+          ..write('folderId: $folderId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('syncVersion: $syncVersion, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('deviceId: $deviceId, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('tradition: $tradition, ')
+          ..write('startEvent: $startEvent, ')
+          ..write('startOffset: $startOffset, ')
+          ..write('startMinutes: $startMinutes, ')
+          ..write('endEvent: $endEvent, ')
+          ..write('endOffset: $endOffset, ')
+          ..write('endMinutes: $endMinutes, ')
+          ..write('weekdaysMask: $weekdaysMask, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('priority: $priority, ')
+          ..write('remindBefore: $remindBefore, ')
+          ..write('remindBeforeEnd: $remindBeforeEnd, ')
+          ..write('sound: $sound, ')
+          ..write('snoozeMinutes: $snoozeMinutes, ')
+          ..write('place: $place, ')
+          ..write('note: $note, ')
+          ..write('targetCount: $targetCount, ')
+          ..write('isPaused: $isPaused, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PrayerLogsTable extends PrayerLogs
+    with TableInfo<$PrayerLogsTable, PrayerLogRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PrayerLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _prayerIdMeta = const VerificationMeta(
+    'prayerId',
+  );
+  @override
+  late final GeneratedColumn<String> prayerId = GeneratedColumn<String>(
+    'prayer_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<int> status = GeneratedColumn<int>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _loggedAtMeta = const VerificationMeta(
+    'loggedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
+    'logged_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _placeMeta = const VerificationMeta('place');
+  @override
+  late final GeneratedColumn<String> place = GeneratedColumn<String>(
+    'place',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _congregationMeta = const VerificationMeta(
+    'congregation',
+  );
+  @override
+  late final GeneratedColumn<bool> congregation = GeneratedColumn<bool>(
+    'congregation',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("congregation" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _countMeta = const VerificationMeta('count');
+  @override
+  late final GeneratedColumn<int> count = GeneratedColumn<int>(
+    'count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _snoozedUntilMeta = const VerificationMeta(
+    'snoozedUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> snoozedUntil = GeneratedColumn<DateTime>(
+    'snoozed_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    prayerId,
+    date,
+    status,
+    loggedAt,
+    place,
+    congregation,
+    count,
+    snoozedUntil,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'prayer_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PrayerLogRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('prayer_id')) {
+      context.handle(
+        _prayerIdMeta,
+        prayerId.isAcceptableOrUnknown(data['prayer_id']!, _prayerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_prayerIdMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('logged_at')) {
+      context.handle(
+        _loggedAtMeta,
+        loggedAt.isAcceptableOrUnknown(data['logged_at']!, _loggedAtMeta),
+      );
+    }
+    if (data.containsKey('place')) {
+      context.handle(
+        _placeMeta,
+        place.isAcceptableOrUnknown(data['place']!, _placeMeta),
+      );
+    }
+    if (data.containsKey('congregation')) {
+      context.handle(
+        _congregationMeta,
+        congregation.isAcceptableOrUnknown(
+          data['congregation']!,
+          _congregationMeta,
+        ),
+      );
+    }
+    if (data.containsKey('count')) {
+      context.handle(
+        _countMeta,
+        count.isAcceptableOrUnknown(data['count']!, _countMeta),
+      );
+    }
+    if (data.containsKey('snoozed_until')) {
+      context.handle(
+        _snoozedUntilMeta,
+        snoozedUntil.isAcceptableOrUnknown(
+          data['snoozed_until']!,
+          _snoozedUntilMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PrayerLogRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PrayerLogRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      prayerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prayer_id'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}status'],
+      )!,
+      loggedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}logged_at'],
+      ),
+      place: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}place'],
+      ),
+      congregation: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}congregation'],
+      )!,
+      count: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}count'],
+      )!,
+      snoozedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}snoozed_until'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PrayerLogsTable createAlias(String alias) {
+    return $PrayerLogsTable(attachedDatabase, alias);
+  }
+}
+
+class PrayerLogRow extends DataClass implements Insertable<PrayerLogRow> {
+  final String id;
+  final String prayerId;
+
+  /// Local day (yyyy-MM-dd).
+  final String date;
+
+  /// PrayerStatus index: 0 pending (snoozed) · 1 on time · 2 late ·
+  /// 3 made up · 4 missed · 5 excused.
+  final int status;
+  final DateTime? loggedAt;
+
+  /// Where it was prayed (overrides the prayer's usual place).
+  final String? place;
+  final bool congregation;
+
+  /// Dhikr count of the day.
+  final int count;
+  final DateTime? snoozedUntil;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const PrayerLogRow({
+    required this.id,
+    required this.prayerId,
+    required this.date,
+    required this.status,
+    this.loggedAt,
+    this.place,
+    required this.congregation,
+    required this.count,
+    this.snoozedUntil,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['prayer_id'] = Variable<String>(prayerId);
+    map['date'] = Variable<String>(date);
+    map['status'] = Variable<int>(status);
+    if (!nullToAbsent || loggedAt != null) {
+      map['logged_at'] = Variable<DateTime>(loggedAt);
+    }
+    if (!nullToAbsent || place != null) {
+      map['place'] = Variable<String>(place);
+    }
+    map['congregation'] = Variable<bool>(congregation);
+    map['count'] = Variable<int>(count);
+    if (!nullToAbsent || snoozedUntil != null) {
+      map['snoozed_until'] = Variable<DateTime>(snoozedUntil);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PrayerLogsCompanion toCompanion(bool nullToAbsent) {
+    return PrayerLogsCompanion(
+      id: Value(id),
+      prayerId: Value(prayerId),
+      date: Value(date),
+      status: Value(status),
+      loggedAt: loggedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(loggedAt),
+      place: place == null && nullToAbsent
+          ? const Value.absent()
+          : Value(place),
+      congregation: Value(congregation),
+      count: Value(count),
+      snoozedUntil: snoozedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(snoozedUntil),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory PrayerLogRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PrayerLogRow(
+      id: serializer.fromJson<String>(json['id']),
+      prayerId: serializer.fromJson<String>(json['prayerId']),
+      date: serializer.fromJson<String>(json['date']),
+      status: serializer.fromJson<int>(json['status']),
+      loggedAt: serializer.fromJson<DateTime?>(json['loggedAt']),
+      place: serializer.fromJson<String?>(json['place']),
+      congregation: serializer.fromJson<bool>(json['congregation']),
+      count: serializer.fromJson<int>(json['count']),
+      snoozedUntil: serializer.fromJson<DateTime?>(json['snoozedUntil']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'prayerId': serializer.toJson<String>(prayerId),
+      'date': serializer.toJson<String>(date),
+      'status': serializer.toJson<int>(status),
+      'loggedAt': serializer.toJson<DateTime?>(loggedAt),
+      'place': serializer.toJson<String?>(place),
+      'congregation': serializer.toJson<bool>(congregation),
+      'count': serializer.toJson<int>(count),
+      'snoozedUntil': serializer.toJson<DateTime?>(snoozedUntil),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  PrayerLogRow copyWith({
+    String? id,
+    String? prayerId,
+    String? date,
+    int? status,
+    Value<DateTime?> loggedAt = const Value.absent(),
+    Value<String?> place = const Value.absent(),
+    bool? congregation,
+    int? count,
+    Value<DateTime?> snoozedUntil = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => PrayerLogRow(
+    id: id ?? this.id,
+    prayerId: prayerId ?? this.prayerId,
+    date: date ?? this.date,
+    status: status ?? this.status,
+    loggedAt: loggedAt.present ? loggedAt.value : this.loggedAt,
+    place: place.present ? place.value : this.place,
+    congregation: congregation ?? this.congregation,
+    count: count ?? this.count,
+    snoozedUntil: snoozedUntil.present ? snoozedUntil.value : this.snoozedUntil,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  PrayerLogRow copyWithCompanion(PrayerLogsCompanion data) {
+    return PrayerLogRow(
+      id: data.id.present ? data.id.value : this.id,
+      prayerId: data.prayerId.present ? data.prayerId.value : this.prayerId,
+      date: data.date.present ? data.date.value : this.date,
+      status: data.status.present ? data.status.value : this.status,
+      loggedAt: data.loggedAt.present ? data.loggedAt.value : this.loggedAt,
+      place: data.place.present ? data.place.value : this.place,
+      congregation: data.congregation.present
+          ? data.congregation.value
+          : this.congregation,
+      count: data.count.present ? data.count.value : this.count,
+      snoozedUntil: data.snoozedUntil.present
+          ? data.snoozedUntil.value
+          : this.snoozedUntil,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PrayerLogRow(')
+          ..write('id: $id, ')
+          ..write('prayerId: $prayerId, ')
+          ..write('date: $date, ')
+          ..write('status: $status, ')
+          ..write('loggedAt: $loggedAt, ')
+          ..write('place: $place, ')
+          ..write('congregation: $congregation, ')
+          ..write('count: $count, ')
+          ..write('snoozedUntil: $snoozedUntil, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    prayerId,
+    date,
+    status,
+    loggedAt,
+    place,
+    congregation,
+    count,
+    snoozedUntil,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PrayerLogRow &&
+          other.id == this.id &&
+          other.prayerId == this.prayerId &&
+          other.date == this.date &&
+          other.status == this.status &&
+          other.loggedAt == this.loggedAt &&
+          other.place == this.place &&
+          other.congregation == this.congregation &&
+          other.count == this.count &&
+          other.snoozedUntil == this.snoozedUntil &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PrayerLogsCompanion extends UpdateCompanion<PrayerLogRow> {
+  final Value<String> id;
+  final Value<String> prayerId;
+  final Value<String> date;
+  final Value<int> status;
+  final Value<DateTime?> loggedAt;
+  final Value<String?> place;
+  final Value<bool> congregation;
+  final Value<int> count;
+  final Value<DateTime?> snoozedUntil;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const PrayerLogsCompanion({
+    this.id = const Value.absent(),
+    this.prayerId = const Value.absent(),
+    this.date = const Value.absent(),
+    this.status = const Value.absent(),
+    this.loggedAt = const Value.absent(),
+    this.place = const Value.absent(),
+    this.congregation = const Value.absent(),
+    this.count = const Value.absent(),
+    this.snoozedUntil = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PrayerLogsCompanion.insert({
+    required String id,
+    required String prayerId,
+    required String date,
+    this.status = const Value.absent(),
+    this.loggedAt = const Value.absent(),
+    this.place = const Value.absent(),
+    this.congregation = const Value.absent(),
+    this.count = const Value.absent(),
+    this.snoozedUntil = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       prayerId = Value(prayerId),
+       date = Value(date),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<PrayerLogRow> custom({
+    Expression<String>? id,
+    Expression<String>? prayerId,
+    Expression<String>? date,
+    Expression<int>? status,
+    Expression<DateTime>? loggedAt,
+    Expression<String>? place,
+    Expression<bool>? congregation,
+    Expression<int>? count,
+    Expression<DateTime>? snoozedUntil,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (prayerId != null) 'prayer_id': prayerId,
+      if (date != null) 'date': date,
+      if (status != null) 'status': status,
+      if (loggedAt != null) 'logged_at': loggedAt,
+      if (place != null) 'place': place,
+      if (congregation != null) 'congregation': congregation,
+      if (count != null) 'count': count,
+      if (snoozedUntil != null) 'snoozed_until': snoozedUntil,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PrayerLogsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? prayerId,
+    Value<String>? date,
+    Value<int>? status,
+    Value<DateTime?>? loggedAt,
+    Value<String?>? place,
+    Value<bool>? congregation,
+    Value<int>? count,
+    Value<DateTime?>? snoozedUntil,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return PrayerLogsCompanion(
+      id: id ?? this.id,
+      prayerId: prayerId ?? this.prayerId,
+      date: date ?? this.date,
+      status: status ?? this.status,
+      loggedAt: loggedAt ?? this.loggedAt,
+      place: place ?? this.place,
+      congregation: congregation ?? this.congregation,
+      count: count ?? this.count,
+      snoozedUntil: snoozedUntil ?? this.snoozedUntil,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (prayerId.present) {
+      map['prayer_id'] = Variable<String>(prayerId.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<int>(status.value);
+    }
+    if (loggedAt.present) {
+      map['logged_at'] = Variable<DateTime>(loggedAt.value);
+    }
+    if (place.present) {
+      map['place'] = Variable<String>(place.value);
+    }
+    if (congregation.present) {
+      map['congregation'] = Variable<bool>(congregation.value);
+    }
+    if (count.present) {
+      map['count'] = Variable<int>(count.value);
+    }
+    if (snoozedUntil.present) {
+      map['snoozed_until'] = Variable<DateTime>(snoozedUntil.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PrayerLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('prayerId: $prayerId, ')
+          ..write('date: $date, ')
+          ..write('status: $status, ')
+          ..write('loggedAt: $loggedAt, ')
+          ..write('place: $place, ')
+          ..write('congregation: $congregation, ')
+          ..write('count: $count, ')
+          ..write('snoozedUntil: $snoozedUntil, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $VaultItemsTable extends VaultItems
     with TableInfo<$VaultItemsTable, VaultItemRow> {
   @override
@@ -12902,6 +15393,15 @@ class $InboxEntriesTable extends InboxEntries
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _routeMeta = const VerificationMeta('route');
+  @override
+  late final GeneratedColumn<String> route = GeneratedColumn<String>(
+    'route',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _actionsJsonMeta = const VerificationMeta(
     'actionsJson',
   );
@@ -12953,6 +15453,7 @@ class $InboxEntriesTable extends InboxEntries
     body,
     itemId,
     itemType,
+    route,
     actionsJson,
     createdAt,
     readAt,
@@ -13007,6 +15508,12 @@ class $InboxEntriesTable extends InboxEntries
       context.handle(
         _itemTypeMeta,
         itemType.isAcceptableOrUnknown(data['item_type']!, _itemTypeMeta),
+      );
+    }
+    if (data.containsKey('route')) {
+      context.handle(
+        _routeMeta,
+        route.isAcceptableOrUnknown(data['route']!, _routeMeta),
       );
     }
     if (data.containsKey('actions_json')) {
@@ -13074,6 +15581,10 @@ class $InboxEntriesTable extends InboxEntries
         DriftSqlType.string,
         data['${effectivePrefix}item_type'],
       ),
+      route: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}route'],
+      ),
       actionsJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}actions_json'],
@@ -13109,6 +15620,10 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
   final String? itemId;
   final String? itemType;
 
+  /// Where Open goes when there is no item (a digest → Home / Insights).
+  /// Added after v3: see AppDatabase.addedColumns.
+  final String? route;
+
   /// JSON list of action keys offered inline (done, snooze, reschedule, view…).
   final String actionsJson;
   final DateTime createdAt;
@@ -13121,6 +15636,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
     required this.body,
     this.itemId,
     this.itemType,
+    this.route,
     required this.actionsJson,
     required this.createdAt,
     this.readAt,
@@ -13138,6 +15654,9 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
     }
     if (!nullToAbsent || itemType != null) {
       map['item_type'] = Variable<String>(itemType);
+    }
+    if (!nullToAbsent || route != null) {
+      map['route'] = Variable<String>(route);
     }
     map['actions_json'] = Variable<String>(actionsJson);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -13162,6 +15681,9 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
       itemType: itemType == null && nullToAbsent
           ? const Value.absent()
           : Value(itemType),
+      route: route == null && nullToAbsent
+          ? const Value.absent()
+          : Value(route),
       actionsJson: Value(actionsJson),
       createdAt: Value(createdAt),
       readAt: readAt == null && nullToAbsent
@@ -13185,6 +15707,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
       body: serializer.fromJson<String>(json['body']),
       itemId: serializer.fromJson<String?>(json['itemId']),
       itemType: serializer.fromJson<String?>(json['itemType']),
+      route: serializer.fromJson<String?>(json['route']),
       actionsJson: serializer.fromJson<String>(json['actionsJson']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       readAt: serializer.fromJson<DateTime?>(json['readAt']),
@@ -13201,6 +15724,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
       'body': serializer.toJson<String>(body),
       'itemId': serializer.toJson<String?>(itemId),
       'itemType': serializer.toJson<String?>(itemType),
+      'route': serializer.toJson<String?>(route),
       'actionsJson': serializer.toJson<String>(actionsJson),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'readAt': serializer.toJson<DateTime?>(readAt),
@@ -13215,6 +15739,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
     String? body,
     Value<String?> itemId = const Value.absent(),
     Value<String?> itemType = const Value.absent(),
+    Value<String?> route = const Value.absent(),
     String? actionsJson,
     DateTime? createdAt,
     Value<DateTime?> readAt = const Value.absent(),
@@ -13226,6 +15751,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
     body: body ?? this.body,
     itemId: itemId.present ? itemId.value : this.itemId,
     itemType: itemType.present ? itemType.value : this.itemType,
+    route: route.present ? route.value : this.route,
     actionsJson: actionsJson ?? this.actionsJson,
     createdAt: createdAt ?? this.createdAt,
     readAt: readAt.present ? readAt.value : this.readAt,
@@ -13239,6 +15765,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
       body: data.body.present ? data.body.value : this.body,
       itemId: data.itemId.present ? data.itemId.value : this.itemId,
       itemType: data.itemType.present ? data.itemType.value : this.itemType,
+      route: data.route.present ? data.route.value : this.route,
       actionsJson: data.actionsJson.present
           ? data.actionsJson.value
           : this.actionsJson,
@@ -13259,6 +15786,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
           ..write('body: $body, ')
           ..write('itemId: $itemId, ')
           ..write('itemType: $itemType, ')
+          ..write('route: $route, ')
           ..write('actionsJson: $actionsJson, ')
           ..write('createdAt: $createdAt, ')
           ..write('readAt: $readAt, ')
@@ -13275,6 +15803,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
     body,
     itemId,
     itemType,
+    route,
     actionsJson,
     createdAt,
     readAt,
@@ -13290,6 +15819,7 @@ class InboxRow extends DataClass implements Insertable<InboxRow> {
           other.body == this.body &&
           other.itemId == this.itemId &&
           other.itemType == this.itemType &&
+          other.route == this.route &&
           other.actionsJson == this.actionsJson &&
           other.createdAt == this.createdAt &&
           other.readAt == this.readAt &&
@@ -13303,6 +15833,7 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
   final Value<String> body;
   final Value<String?> itemId;
   final Value<String?> itemType;
+  final Value<String?> route;
   final Value<String> actionsJson;
   final Value<DateTime> createdAt;
   final Value<DateTime?> readAt;
@@ -13315,6 +15846,7 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
     this.body = const Value.absent(),
     this.itemId = const Value.absent(),
     this.itemType = const Value.absent(),
+    this.route = const Value.absent(),
     this.actionsJson = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.readAt = const Value.absent(),
@@ -13328,6 +15860,7 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
     this.body = const Value.absent(),
     this.itemId = const Value.absent(),
     this.itemType = const Value.absent(),
+    this.route = const Value.absent(),
     this.actionsJson = const Value.absent(),
     required DateTime createdAt,
     this.readAt = const Value.absent(),
@@ -13344,6 +15877,7 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
     Expression<String>? body,
     Expression<String>? itemId,
     Expression<String>? itemType,
+    Expression<String>? route,
     Expression<String>? actionsJson,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? readAt,
@@ -13357,6 +15891,7 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
       if (body != null) 'body': body,
       if (itemId != null) 'item_id': itemId,
       if (itemType != null) 'item_type': itemType,
+      if (route != null) 'route': route,
       if (actionsJson != null) 'actions_json': actionsJson,
       if (createdAt != null) 'created_at': createdAt,
       if (readAt != null) 'read_at': readAt,
@@ -13372,6 +15907,7 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
     Value<String>? body,
     Value<String?>? itemId,
     Value<String?>? itemType,
+    Value<String?>? route,
     Value<String>? actionsJson,
     Value<DateTime>? createdAt,
     Value<DateTime?>? readAt,
@@ -13385,6 +15921,7 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
       body: body ?? this.body,
       itemId: itemId ?? this.itemId,
       itemType: itemType ?? this.itemType,
+      route: route ?? this.route,
       actionsJson: actionsJson ?? this.actionsJson,
       createdAt: createdAt ?? this.createdAt,
       readAt: readAt ?? this.readAt,
@@ -13414,6 +15951,9 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
     if (itemType.present) {
       map['item_type'] = Variable<String>(itemType.value);
     }
+    if (route.present) {
+      map['route'] = Variable<String>(route.value);
+    }
     if (actionsJson.present) {
       map['actions_json'] = Variable<String>(actionsJson.value);
     }
@@ -13441,6 +15981,7 @@ class InboxEntriesCompanion extends UpdateCompanion<InboxRow> {
           ..write('body: $body, ')
           ..write('itemId: $itemId, ')
           ..write('itemType: $itemType, ')
+          ..write('route: $route, ')
           ..write('actionsJson: $actionsJson, ')
           ..write('createdAt: $createdAt, ')
           ..write('readAt: $readAt, ')
@@ -14670,6 +17211,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $HabitLogsTable habitLogs = $HabitLogsTable(this);
   late final $MedicinesTable medicines = $MedicinesTable(this);
   late final $MedicineDosesTable medicineDoses = $MedicineDosesTable(this);
+  late final $PrayersTable prayers = $PrayersTable(this);
+  late final $PrayerLogsTable prayerLogs = $PrayerLogsTable(this);
   late final $VaultItemsTable vaultItems = $VaultItemsTable(this);
   late final $VaultHistoryTable vaultHistory = $VaultHistoryTable(this);
   late final $GeneratorHistoryTable generatorHistory = $GeneratorHistoryTable(
@@ -14696,6 +17239,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     habitLogs,
     medicines,
     medicineDoses,
+    prayers,
+    prayerLogs,
     vaultItems,
     vaultHistory,
     generatorHistory,
@@ -18780,6 +21325,1113 @@ typedef $$MedicineDosesTableProcessedTableManager =
       MedicineDoseRow,
       PrefetchHooks Function()
     >;
+typedef $$PrayersTableCreateCompanionBuilder =
+    PrayersCompanion Function({
+      required String id,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<DateTime?> archivedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> isPinned,
+      Value<bool> isFavorite,
+      Value<String?> colorHex,
+      Value<String?> folderId,
+      Value<double> sortOrder,
+      Value<int> syncVersion,
+      Value<DateTime?> lastSyncedAt,
+      Value<String> deviceId,
+      Value<String> name,
+      Value<String> kind,
+      Value<String> tradition,
+      Value<String?> startEvent,
+      Value<int> startOffset,
+      Value<int> startMinutes,
+      Value<String?> endEvent,
+      Value<int> endOffset,
+      Value<int?> endMinutes,
+      Value<int> weekdaysMask,
+      Value<String?> startDate,
+      Value<String?> endDate,
+      Value<int> priority,
+      Value<int?> remindBefore,
+      Value<int?> remindBeforeEnd,
+      Value<String> sound,
+      Value<int> snoozeMinutes,
+      Value<String> place,
+      Value<String> note,
+      Value<int?> targetCount,
+      Value<bool> isPaused,
+      Value<int> rowid,
+    });
+typedef $$PrayersTableUpdateCompanionBuilder =
+    PrayersCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> archivedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> isPinned,
+      Value<bool> isFavorite,
+      Value<String?> colorHex,
+      Value<String?> folderId,
+      Value<double> sortOrder,
+      Value<int> syncVersion,
+      Value<DateTime?> lastSyncedAt,
+      Value<String> deviceId,
+      Value<String> name,
+      Value<String> kind,
+      Value<String> tradition,
+      Value<String?> startEvent,
+      Value<int> startOffset,
+      Value<int> startMinutes,
+      Value<String?> endEvent,
+      Value<int> endOffset,
+      Value<int?> endMinutes,
+      Value<int> weekdaysMask,
+      Value<String?> startDate,
+      Value<String?> endDate,
+      Value<int> priority,
+      Value<int?> remindBefore,
+      Value<int?> remindBeforeEnd,
+      Value<String> sound,
+      Value<int> snoozeMinutes,
+      Value<String> place,
+      Value<String> note,
+      Value<int?> targetCount,
+      Value<bool> isPaused,
+      Value<int> rowid,
+    });
+
+class $$PrayersTableFilterComposer
+    extends Composer<_$AppDatabase, $PrayersTable> {
+  $$PrayersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get colorHex => $composableBuilder(
+    column: $table.colorHex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get folderId => $composableBuilder(
+    column: $table.folderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tradition => $composableBuilder(
+    column: $table.tradition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startEvent => $composableBuilder(
+    column: $table.startEvent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startOffset => $composableBuilder(
+    column: $table.startOffset,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endEvent => $composableBuilder(
+    column: $table.endEvent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endOffset => $composableBuilder(
+    column: $table.endOffset,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weekdaysMask => $composableBuilder(
+    column: $table.weekdaysMask,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get remindBefore => $composableBuilder(
+    column: $table.remindBefore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get remindBeforeEnd => $composableBuilder(
+    column: $table.remindBeforeEnd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sound => $composableBuilder(
+    column: $table.sound,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get snoozeMinutes => $composableBuilder(
+    column: $table.snoozeMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get place => $composableBuilder(
+    column: $table.place,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get targetCount => $composableBuilder(
+    column: $table.targetCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPaused => $composableBuilder(
+    column: $table.isPaused,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PrayersTableOrderingComposer
+    extends Composer<_$AppDatabase, $PrayersTable> {
+  $$PrayersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get colorHex => $composableBuilder(
+    column: $table.colorHex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get folderId => $composableBuilder(
+    column: $table.folderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceId => $composableBuilder(
+    column: $table.deviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tradition => $composableBuilder(
+    column: $table.tradition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startEvent => $composableBuilder(
+    column: $table.startEvent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startOffset => $composableBuilder(
+    column: $table.startOffset,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endEvent => $composableBuilder(
+    column: $table.endEvent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endOffset => $composableBuilder(
+    column: $table.endOffset,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get weekdaysMask => $composableBuilder(
+    column: $table.weekdaysMask,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get remindBefore => $composableBuilder(
+    column: $table.remindBefore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get remindBeforeEnd => $composableBuilder(
+    column: $table.remindBeforeEnd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sound => $composableBuilder(
+    column: $table.sound,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get snoozeMinutes => $composableBuilder(
+    column: $table.snoozeMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get place => $composableBuilder(
+    column: $table.place,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get targetCount => $composableBuilder(
+    column: $table.targetCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPaused => $composableBuilder(
+    column: $table.isPaused,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PrayersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PrayersTable> {
+  $$PrayersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get colorHex =>
+      $composableBuilder(column: $table.colorHex, builder: (column) => column);
+
+  GeneratedColumn<String> get folderId =>
+      $composableBuilder(column: $table.folderId, builder: (column) => column);
+
+  GeneratedColumn<double> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<int> get syncVersion => $composableBuilder(
+    column: $table.syncVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get deviceId =>
+      $composableBuilder(column: $table.deviceId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get tradition =>
+      $composableBuilder(column: $table.tradition, builder: (column) => column);
+
+  GeneratedColumn<String> get startEvent => $composableBuilder(
+    column: $table.startEvent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get startOffset => $composableBuilder(
+    column: $table.startOffset,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get startMinutes => $composableBuilder(
+    column: $table.startMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get endEvent =>
+      $composableBuilder(column: $table.endEvent, builder: (column) => column);
+
+  GeneratedColumn<int> get endOffset =>
+      $composableBuilder(column: $table.endOffset, builder: (column) => column);
+
+  GeneratedColumn<int> get endMinutes => $composableBuilder(
+    column: $table.endMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get weekdaysMask => $composableBuilder(
+    column: $table.weekdaysMask,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<int> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<int> get remindBefore => $composableBuilder(
+    column: $table.remindBefore,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get remindBeforeEnd => $composableBuilder(
+    column: $table.remindBeforeEnd,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sound =>
+      $composableBuilder(column: $table.sound, builder: (column) => column);
+
+  GeneratedColumn<int> get snoozeMinutes => $composableBuilder(
+    column: $table.snoozeMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get place =>
+      $composableBuilder(column: $table.place, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<int> get targetCount => $composableBuilder(
+    column: $table.targetCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPaused =>
+      $composableBuilder(column: $table.isPaused, builder: (column) => column);
+}
+
+class $$PrayersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PrayersTable,
+          PrayerRow,
+          $$PrayersTableFilterComposer,
+          $$PrayersTableOrderingComposer,
+          $$PrayersTableAnnotationComposer,
+          $$PrayersTableCreateCompanionBuilder,
+          $$PrayersTableUpdateCompanionBuilder,
+          (PrayerRow, BaseReferences<_$AppDatabase, $PrayersTable, PrayerRow>),
+          PrayerRow,
+          PrefetchHooks Function()
+        > {
+  $$PrayersTableTableManager(_$AppDatabase db, $PrayersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PrayersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PrayersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PrayersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> archivedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<String?> colorHex = const Value.absent(),
+                Value<String?> folderId = const Value.absent(),
+                Value<double> sortOrder = const Value.absent(),
+                Value<int> syncVersion = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> tradition = const Value.absent(),
+                Value<String?> startEvent = const Value.absent(),
+                Value<int> startOffset = const Value.absent(),
+                Value<int> startMinutes = const Value.absent(),
+                Value<String?> endEvent = const Value.absent(),
+                Value<int> endOffset = const Value.absent(),
+                Value<int?> endMinutes = const Value.absent(),
+                Value<int> weekdaysMask = const Value.absent(),
+                Value<String?> startDate = const Value.absent(),
+                Value<String?> endDate = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<int?> remindBefore = const Value.absent(),
+                Value<int?> remindBeforeEnd = const Value.absent(),
+                Value<String> sound = const Value.absent(),
+                Value<int> snoozeMinutes = const Value.absent(),
+                Value<String> place = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<int?> targetCount = const Value.absent(),
+                Value<bool> isPaused = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PrayersCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                archivedAt: archivedAt,
+                deletedAt: deletedAt,
+                isPinned: isPinned,
+                isFavorite: isFavorite,
+                colorHex: colorHex,
+                folderId: folderId,
+                sortOrder: sortOrder,
+                syncVersion: syncVersion,
+                lastSyncedAt: lastSyncedAt,
+                deviceId: deviceId,
+                name: name,
+                kind: kind,
+                tradition: tradition,
+                startEvent: startEvent,
+                startOffset: startOffset,
+                startMinutes: startMinutes,
+                endEvent: endEvent,
+                endOffset: endOffset,
+                endMinutes: endMinutes,
+                weekdaysMask: weekdaysMask,
+                startDate: startDate,
+                endDate: endDate,
+                priority: priority,
+                remindBefore: remindBefore,
+                remindBeforeEnd: remindBeforeEnd,
+                sound: sound,
+                snoozeMinutes: snoozeMinutes,
+                place: place,
+                note: note,
+                targetCount: targetCount,
+                isPaused: isPaused,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<DateTime?> archivedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> isPinned = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
+                Value<String?> colorHex = const Value.absent(),
+                Value<String?> folderId = const Value.absent(),
+                Value<double> sortOrder = const Value.absent(),
+                Value<int> syncVersion = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<String> deviceId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> tradition = const Value.absent(),
+                Value<String?> startEvent = const Value.absent(),
+                Value<int> startOffset = const Value.absent(),
+                Value<int> startMinutes = const Value.absent(),
+                Value<String?> endEvent = const Value.absent(),
+                Value<int> endOffset = const Value.absent(),
+                Value<int?> endMinutes = const Value.absent(),
+                Value<int> weekdaysMask = const Value.absent(),
+                Value<String?> startDate = const Value.absent(),
+                Value<String?> endDate = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<int?> remindBefore = const Value.absent(),
+                Value<int?> remindBeforeEnd = const Value.absent(),
+                Value<String> sound = const Value.absent(),
+                Value<int> snoozeMinutes = const Value.absent(),
+                Value<String> place = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<int?> targetCount = const Value.absent(),
+                Value<bool> isPaused = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PrayersCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                archivedAt: archivedAt,
+                deletedAt: deletedAt,
+                isPinned: isPinned,
+                isFavorite: isFavorite,
+                colorHex: colorHex,
+                folderId: folderId,
+                sortOrder: sortOrder,
+                syncVersion: syncVersion,
+                lastSyncedAt: lastSyncedAt,
+                deviceId: deviceId,
+                name: name,
+                kind: kind,
+                tradition: tradition,
+                startEvent: startEvent,
+                startOffset: startOffset,
+                startMinutes: startMinutes,
+                endEvent: endEvent,
+                endOffset: endOffset,
+                endMinutes: endMinutes,
+                weekdaysMask: weekdaysMask,
+                startDate: startDate,
+                endDate: endDate,
+                priority: priority,
+                remindBefore: remindBefore,
+                remindBeforeEnd: remindBeforeEnd,
+                sound: sound,
+                snoozeMinutes: snoozeMinutes,
+                place: place,
+                note: note,
+                targetCount: targetCount,
+                isPaused: isPaused,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PrayersTable, PrayerRow>(table),
+                  BaseReferences<_$AppDatabase, $PrayersTable, PrayerRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PrayersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PrayersTable,
+      PrayerRow,
+      $$PrayersTableFilterComposer,
+      $$PrayersTableOrderingComposer,
+      $$PrayersTableAnnotationComposer,
+      $$PrayersTableCreateCompanionBuilder,
+      $$PrayersTableUpdateCompanionBuilder,
+      (PrayerRow, BaseReferences<_$AppDatabase, $PrayersTable, PrayerRow>),
+      PrayerRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PrayerLogsTableCreateCompanionBuilder =
+    PrayerLogsCompanion Function({
+      required String id,
+      required String prayerId,
+      required String date,
+      Value<int> status,
+      Value<DateTime?> loggedAt,
+      Value<String?> place,
+      Value<bool> congregation,
+      Value<int> count,
+      Value<DateTime?> snoozedUntil,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$PrayerLogsTableUpdateCompanionBuilder =
+    PrayerLogsCompanion Function({
+      Value<String> id,
+      Value<String> prayerId,
+      Value<String> date,
+      Value<int> status,
+      Value<DateTime?> loggedAt,
+      Value<String?> place,
+      Value<bool> congregation,
+      Value<int> count,
+      Value<DateTime?> snoozedUntil,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$PrayerLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $PrayerLogsTable> {
+  $$PrayerLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get prayerId => $composableBuilder(
+    column: $table.prayerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get loggedAt => $composableBuilder(
+    column: $table.loggedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get place => $composableBuilder(
+    column: $table.place,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get congregation => $composableBuilder(
+    column: $table.congregation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get snoozedUntil => $composableBuilder(
+    column: $table.snoozedUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PrayerLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PrayerLogsTable> {
+  $$PrayerLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get prayerId => $composableBuilder(
+    column: $table.prayerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get loggedAt => $composableBuilder(
+    column: $table.loggedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get place => $composableBuilder(
+    column: $table.place,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get congregation => $composableBuilder(
+    column: $table.congregation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get snoozedUntil => $composableBuilder(
+    column: $table.snoozedUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PrayerLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PrayerLogsTable> {
+  $$PrayerLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get prayerId =>
+      $composableBuilder(column: $table.prayerId, builder: (column) => column);
+
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get loggedAt =>
+      $composableBuilder(column: $table.loggedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get place =>
+      $composableBuilder(column: $table.place, builder: (column) => column);
+
+  GeneratedColumn<bool> get congregation => $composableBuilder(
+    column: $table.congregation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get snoozedUntil => $composableBuilder(
+    column: $table.snoozedUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PrayerLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PrayerLogsTable,
+          PrayerLogRow,
+          $$PrayerLogsTableFilterComposer,
+          $$PrayerLogsTableOrderingComposer,
+          $$PrayerLogsTableAnnotationComposer,
+          $$PrayerLogsTableCreateCompanionBuilder,
+          $$PrayerLogsTableUpdateCompanionBuilder,
+          (
+            PrayerLogRow,
+            BaseReferences<_$AppDatabase, $PrayerLogsTable, PrayerLogRow>,
+          ),
+          PrayerLogRow,
+          PrefetchHooks Function()
+        > {
+  $$PrayerLogsTableTableManager(_$AppDatabase db, $PrayerLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PrayerLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PrayerLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PrayerLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> prayerId = const Value.absent(),
+                Value<String> date = const Value.absent(),
+                Value<int> status = const Value.absent(),
+                Value<DateTime?> loggedAt = const Value.absent(),
+                Value<String?> place = const Value.absent(),
+                Value<bool> congregation = const Value.absent(),
+                Value<int> count = const Value.absent(),
+                Value<DateTime?> snoozedUntil = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PrayerLogsCompanion(
+                id: id,
+                prayerId: prayerId,
+                date: date,
+                status: status,
+                loggedAt: loggedAt,
+                place: place,
+                congregation: congregation,
+                count: count,
+                snoozedUntil: snoozedUntil,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String prayerId,
+                required String date,
+                Value<int> status = const Value.absent(),
+                Value<DateTime?> loggedAt = const Value.absent(),
+                Value<String?> place = const Value.absent(),
+                Value<bool> congregation = const Value.absent(),
+                Value<int> count = const Value.absent(),
+                Value<DateTime?> snoozedUntil = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PrayerLogsCompanion.insert(
+                id: id,
+                prayerId: prayerId,
+                date: date,
+                status: status,
+                loggedAt: loggedAt,
+                place: place,
+                congregation: congregation,
+                count: count,
+                snoozedUntil: snoozedUntil,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PrayerLogsTable, PrayerLogRow>(table),
+                  BaseReferences<_$AppDatabase, $PrayerLogsTable, PrayerLogRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PrayerLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PrayerLogsTable,
+      PrayerLogRow,
+      $$PrayerLogsTableFilterComposer,
+      $$PrayerLogsTableOrderingComposer,
+      $$PrayerLogsTableAnnotationComposer,
+      $$PrayerLogsTableCreateCompanionBuilder,
+      $$PrayerLogsTableUpdateCompanionBuilder,
+      (
+        PrayerLogRow,
+        BaseReferences<_$AppDatabase, $PrayerLogsTable, PrayerLogRow>,
+      ),
+      PrayerLogRow,
+      PrefetchHooks Function()
+    >;
 typedef $$VaultItemsTableCreateCompanionBuilder =
     VaultItemsCompanion Function({
       required String id,
@@ -20711,6 +24363,7 @@ typedef $$InboxEntriesTableCreateCompanionBuilder =
       Value<String> body,
       Value<String?> itemId,
       Value<String?> itemType,
+      Value<String?> route,
       Value<String> actionsJson,
       required DateTime createdAt,
       Value<DateTime?> readAt,
@@ -20725,6 +24378,7 @@ typedef $$InboxEntriesTableUpdateCompanionBuilder =
       Value<String> body,
       Value<String?> itemId,
       Value<String?> itemType,
+      Value<String?> route,
       Value<String> actionsJson,
       Value<DateTime> createdAt,
       Value<DateTime?> readAt,
@@ -20768,6 +24422,11 @@ class $$InboxEntriesTableFilterComposer
 
   ColumnFilters<String> get itemType => $composableBuilder(
     column: $table.itemType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get route => $composableBuilder(
+    column: $table.route,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -20831,6 +24490,11 @@ class $$InboxEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get route => $composableBuilder(
+    column: $table.route,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get actionsJson => $composableBuilder(
     column: $table.actionsJson,
     builder: (column) => ColumnOrderings(column),
@@ -20878,6 +24542,9 @@ class $$InboxEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get itemType =>
       $composableBuilder(column: $table.itemType, builder: (column) => column);
+
+  GeneratedColumn<String> get route =>
+      $composableBuilder(column: $table.route, builder: (column) => column);
 
   GeneratedColumn<String> get actionsJson => $composableBuilder(
     column: $table.actionsJson,
@@ -20933,6 +24600,7 @@ class $$InboxEntriesTableTableManager
                 Value<String> body = const Value.absent(),
                 Value<String?> itemId = const Value.absent(),
                 Value<String?> itemType = const Value.absent(),
+                Value<String?> route = const Value.absent(),
                 Value<String> actionsJson = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> readAt = const Value.absent(),
@@ -20945,6 +24613,7 @@ class $$InboxEntriesTableTableManager
                 body: body,
                 itemId: itemId,
                 itemType: itemType,
+                route: route,
                 actionsJson: actionsJson,
                 createdAt: createdAt,
                 readAt: readAt,
@@ -20959,6 +24628,7 @@ class $$InboxEntriesTableTableManager
                 Value<String> body = const Value.absent(),
                 Value<String?> itemId = const Value.absent(),
                 Value<String?> itemType = const Value.absent(),
+                Value<String?> route = const Value.absent(),
                 Value<String> actionsJson = const Value.absent(),
                 required DateTime createdAt,
                 Value<DateTime?> readAt = const Value.absent(),
@@ -20971,6 +24641,7 @@ class $$InboxEntriesTableTableManager
                 body: body,
                 itemId: itemId,
                 itemType: itemType,
+                route: route,
                 actionsJson: actionsJson,
                 createdAt: createdAt,
                 readAt: readAt,
@@ -21699,6 +25370,10 @@ class $AppDatabaseManager {
       $$MedicinesTableTableManager(_db, _db.medicines);
   $$MedicineDosesTableTableManager get medicineDoses =>
       $$MedicineDosesTableTableManager(_db, _db.medicineDoses);
+  $$PrayersTableTableManager get prayers =>
+      $$PrayersTableTableManager(_db, _db.prayers);
+  $$PrayerLogsTableTableManager get prayerLogs =>
+      $$PrayerLogsTableTableManager(_db, _db.prayerLogs);
   $$VaultItemsTableTableManager get vaultItems =>
       $$VaultItemsTableTableManager(_db, _db.vaultItems);
   $$VaultHistoryTableTableManager get vaultHistory =>

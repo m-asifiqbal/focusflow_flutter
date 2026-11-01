@@ -19,6 +19,7 @@ import 'package:focusflow/core/database/daos/habits_dao.dart';
 import 'package:focusflow/core/database/daos/inbox_dao.dart';
 import 'package:focusflow/core/database/daos/items_dao.dart';
 import 'package:focusflow/core/database/daos/medicines_dao.dart';
+import 'package:focusflow/core/database/daos/prayers_dao.dart';
 import 'package:focusflow/core/database/daos/organisation_dao.dart';
 import 'package:focusflow/core/database/daos/reminders_dao.dart';
 import 'package:focusflow/core/database/daos/tasks_dao.dart';
@@ -60,6 +61,7 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
        _reminders = RemindersDao(db),
        _habits = HabitsDao(db),
        _medicines = MedicinesDao(db),
+       _prayers = PrayersDao(db),
        _vault = VaultDao(db),
        _inbox = InboxDao(db),
        _focus = FocusSessionsDao(db),
@@ -75,6 +77,7 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
   final RemindersDao _reminders;
   final HabitsDao _habits;
   final MedicinesDao _medicines;
+  final PrayersDao _prayers;
   final VaultDao _vault;
   final InboxDao _inbox;
   final FocusSessionsDao _focus;
@@ -250,6 +253,8 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
           case ItemType.medicine:
             await _deleteReminderRows(await _ownedReminders(type, ids));
             await _medicines.deleteDosesOf(ids);
+          case ItemType.prayer:
+            await _prayers.deleteLogsOf(ids);
           case ItemType.vault:
             await _vault.deleteHistoryOf(ids);
         }
@@ -517,6 +522,8 @@ class ItemsRepositoryImpl extends RepositoryBase implements ItemsRepository {
               .length,
           medicinesDueToday: doses.length,
           medicinesLow: meds?.lowStock.length ?? 0,
+          prayersTotal: r.read<int>('prayers_total'),
+          prayersDoneToday: r.read<int>('prayers_done_today'),
           vaultTotal: r.read<int>('vault_total'),
           vaultWeak: r.read<int>('vault_weak'),
           vaultBreached: r.read<int>('vault_breached'),

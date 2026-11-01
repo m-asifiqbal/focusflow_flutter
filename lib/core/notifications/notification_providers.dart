@@ -49,6 +49,7 @@ final plannerSnapshotLoaderProvider = Provider<PlannerSnapshotLoader>(
     tasks: ref.watch(tasksRepositoryProvider),
     habits: ref.watch(habitsRepositoryProvider),
     medicines: ref.watch(medicinesRepositoryProvider),
+    prayers: ref.watch(prayersRepositoryProvider),
     clock: ref.watch(clockProvider),
     limits: PlannerLimits.current,
   ),
@@ -61,6 +62,7 @@ final notificationActionsProvider = Provider<NotificationActions>(
     tasks: ref.watch(tasksRepositoryProvider),
     habits: ref.watch(habitsRepositoryProvider),
     medicines: ref.watch(medicinesRepositoryProvider),
+    prayers: ref.watch(prayersRepositoryProvider),
     clock: ref.watch(clockProvider),
     defaultSnoozeMinutes: ref.watch(
       settingsProvider.select((s) => s.defaultSnoozeMinutes),

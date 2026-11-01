@@ -36,6 +36,8 @@ abstract final class AppPalette {
   static const emerald800 = Color(0xFF065F46);
   static const emerald900 = Color(0xFF064E3B);
   static const emerald950 = Color(0xFF022C22);
+  static const teal100 = Color(0xFFCCFBF1);
+  static const teal500 = Color(0xFF14B8A6);
   static const teal700 = Color(0xFF0F766E);
 
   // ── Canvas ──

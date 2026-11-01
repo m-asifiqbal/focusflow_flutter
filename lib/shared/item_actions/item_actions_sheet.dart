@@ -29,6 +29,7 @@ import 'package:focusflow/core/widgets/ff_action_sheet.dart';
 import 'package:focusflow/core/widgets/ff_snackbar.dart';
 import 'package:focusflow/features/habits/presentation/habit_item_actions.dart';
 import 'package:focusflow/features/medicines/presentation/medicine_item_actions.dart';
+import 'package:focusflow/features/prayers/presentation/prayer_item_actions.dart';
 import 'package:focusflow/features/notes/presentation/note_item_actions.dart';
 import 'package:focusflow/features/reminders/presentation/reminder_item_actions.dart';
 import 'package:focusflow/features/tasks/presentation/task_item_actions.dart';
@@ -300,6 +301,7 @@ Future<ModuleItemActions> _moduleActions(
   ItemType.reminder => reminderItemActions(context, ref, item),
   ItemType.habit => habitItemActions(context, ref, item),
   ItemType.medicine => medicineItemActions(context, ref, item),
+  ItemType.prayer => prayerItemActions(context, ref, item),
   ItemType.vault => vaultItemActions(context, ref, item),
 };
 
@@ -324,6 +326,10 @@ String _selectedTitle(ItemType? type, int count) => switch (type) {
   ),
   ItemType.medicine => tr(
     '{count, plural, one {# medicine selected} other {# medicines selected}}',
+    {'count': count},
+  ),
+  ItemType.prayer => tr(
+    '{count, plural, one {# prayer selected} other {# prayers selected}}',
     {'count': count},
   ),
   ItemType.vault => tr(

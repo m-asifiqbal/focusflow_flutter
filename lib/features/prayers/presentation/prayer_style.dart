@@ -1,0 +1,136 @@
+/// ============================================================
+/// PRAYER STYLE — colours, sizes and wording shared by the Prayer screens
+/// ============================================================
+///
+/// What: a prayer's own colour (its `colorHex`, else the module teal),
+/// status colours (on time / late / made up / missed / excused) read from
+/// the theme tokens, and the formatters every Prayer widget uses: a time,
+/// a window ("3:42 – 5:21 PM"), a duration ("1h 39m") and "in 1h 12m" /
+/// "ends in 18 min".
+/// Why: one place, so the tab, editor, sheets and Home card read alike and
+/// dark mode / the accent work everywhere for free.
+/// ============================================================
+library;
+
+import 'package:flutter/material.dart';
+import 'package:focusflow/core/l10n/tr.dart';
+import 'package:focusflow/core/theme/app_colors.dart';
+import 'package:focusflow/core/theme/module_style.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_stats.dart';
+
+abstract final class PrayerStyle {
+  static ModuleColors get module => ModuleStyle.prayers.colors;
+
+  /// Colours a prayer can be given in the editor (RRGGBB).
+  static const List<String> palette = [
+    '3B82F6',
+    'F59E0B',
+    '10B981',
+    'F97316',
+    '6366F1',
+    '0EA5E9',
+    '8B5CF6',
+    'EC4899',
+    '14B8A6',
+    'D97706',
+    'EF4444',
+    '64748B',
+  ];
+
+  /// The prayer's own colour (module teal when unset / unreadable).
+  static Color of(Prayer p) => hex(p.colorHex) ?? module.solid;
+
+  static Color? hex(String? rrggbb) {
+    if (rrggbb == null || rrggbb.length != 6) return null;
+    final v = int.tryParse(rrggbb, radix: 16);
+    return v == null ? null : Color(0xFF000000 | v);
+  }
+
+  /// Fill of a week-grid cell.
+  static Color cell(FFColors ff, PrayerCell c) => switch (c) {
+    PrayerCell.onTime => ff.success,
+    PrayerCell.late => ff.warning,
+    PrayerCell.madeUp => Color.lerp(ff.success, ff.warning, 0.35)!,
+    PrayerCell.missed => ff.danger,
+    PrayerCell.excused => ff.inkFaint,
+    PrayerCell.pending => ff.surfaceMuted,
+    // Scale (not replace) the alpha: dark surfaceMuted is already a faint
+    // white, and a flat 0.4 would read as "Excused" grey.
+    PrayerCell.none => ff.surfaceMuted.withValues(
+      alpha: ff.surfaceMuted.a * 0.4,
+    ),
+  };
+
+  /// Colour of a slot's state chip.
+  static Color state(FFColors ff, PrayerSlotState s) => switch (s) {
+    PrayerSlotState.done => ff.success,
+    PrayerSlotState.missed => ff.danger,
+    PrayerSlotState.endingSoon => ff.warning,
+    PrayerSlotState.open => ff.primary,
+    PrayerSlotState.excused || PrayerSlotState.upcoming => ff.inkMuted,
+  };
+
+  static const double rowAccent = 4;
+  static const double heroRing = 58;
+}
+
+abstract final class PrayerFormat {
+  static String time(DateTime t, {required bool use24h}) =>
+      DateUtilsX.time(t, use24h: use24h);
+
+  /// "3:42 – 5:21 PM" ("+1" when the end is on the next day).
+  static String window(PrayerWindow w, {required bool use24h}) {
+    final start = time(w.start, use24h: use24h);
+    final end = w.end;
+    if (end == null) return start;
+    final nextDay = DateUtilsX.dateOnly(end) != DateUtilsX.dateOnly(w.start)
+        ? ' +1'
+        : '';
+    return '$start – ${time(end, use24h: use24h)}$nextDay';
+  }
+
+  /// "1h 39m" / "45 min".
+  static String duration(Duration d) {
+    final minutes = d.inMinutes.abs();
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    if (h == 0) return tr('{m} min', {'m': m});
+    if (m == 0) return tr('{h}h', {'h': h});
+    return tr('{h}h {m}m', {'h': h, 'm': m});
+  }
+
+  /// "in 1h 12m".
+  static String inTime(Duration d) => tr('in {time}', {'time': duration(d)});
+
+  /// "Ends in 18 min".
+  static String endsIn(Duration d) =>
+      tr('Ends in {time}', {'time': duration(d)});
+
+  /// Signed minutes: "+5 min" / "−10 min" / "" for 0.
+  static String offset(int minutes) {
+    if (minutes == 0) return '';
+    final sign = minutes > 0 ? '+' : '−';
+    return '$sign${tr('{m} min', {'m': minutes.abs()})}';
+  }
+
+  /// "Every day", "Mon, Thu", "Fri".
+  static String weekdays(int mask) {
+    if (mask & 0x7F == 0x7F) return tr('Every day');
+    final names = [
+      tr('Mon'),
+      tr('Tue'),
+      tr('Wed'),
+      tr('Thu'),
+      tr('Fri'),
+      tr('Sat'),
+      tr('Sun'),
+    ];
+    return [
+      for (var i = 0; i < 7; i++)
+        if (mask & (1 << i) != 0) names[i],
+    ].join(', ');
+  }
+}

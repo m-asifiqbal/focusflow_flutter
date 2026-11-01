@@ -19,6 +19,7 @@ enum InboxKind {
   task,
   habit,
   medicine,
+  prayer,
   security,
   sync,
   system;
@@ -46,6 +47,7 @@ class InboxEntry {
     required this.title,
     this.body = '',
     this.ref,
+    this.route,
     this.actions = const [],
     required this.createdAt,
     this.readAt,
@@ -59,6 +61,10 @@ class InboxEntry {
 
   /// Item to open on tap (null for app-level events).
   final ItemRef? ref;
+
+  /// Where Open goes when there is no [ref] (the notification's own route:
+  /// morning briefing → Home, weekly report → Insights).
+  final String? route;
 
   /// [InboxActions] keys, in display order.
   final List<String> actions;
@@ -79,6 +85,7 @@ class InboxEntry {
       other.title == title &&
       other.body == body &&
       other.ref == ref &&
+      other.route == route &&
       _eq.equals(other.actions, actions) &&
       other.createdAt == createdAt &&
       other.readAt == readAt &&
@@ -91,6 +98,7 @@ class InboxEntry {
     title,
     body,
     ref,
+    route,
     _eq.hash(actions),
     createdAt,
     readAt,

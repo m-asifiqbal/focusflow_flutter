@@ -222,6 +222,7 @@ final homeFirstRunProvider = Provider.autoDispose<bool>((ref) {
           c.remindersTotal +
           c.habitsTotal +
           c.medicinesTotal +
+          c.prayersTotal +
           c.vaultTotal +
           c.archived +
           c.trash ==

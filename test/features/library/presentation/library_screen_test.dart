@@ -46,6 +46,13 @@ void main() {
     return h;
   }
 
+  /// Scrolls the tag pills into view (below the space cards at 844 pt).
+  Future<void> showTags(WidgetTester tester) => tester.scrollUntilVisible(
+    find.text('#work'),
+    200,
+    scrollable: find.byType(Scrollable).first,
+  );
+
   Future<void> withShadows(Future<void> Function() body) async {
     debugDisableShadows = false;
     try {
@@ -62,7 +69,7 @@ void main() {
       await captureScreen(tester, '05_library');
     });
     expect(find.text('Library'), findsWidgets);
-    expect(find.text('113 items across 6 spaces'), findsOneWidget);
+    expect(find.text('113 items across 7 spaces'), findsOneWidget);
     expect(find.text('3 pinned'), findsOneWidget);
     expect(find.text('Edited 2h ago'), findsOneWidget);
     expect(find.text('7 due today'), findsOneWidget);
@@ -79,6 +86,7 @@ void main() {
     }
     expect(find.text('Auto-deletes after 30 days'), findsOneWidget);
     expect(find.text('Start a focus session'), findsOneWidget);
+    await showTags(tester);
     expect(find.text('#work'), findsOneWidget);
     expect(find.text('#ideas'), findsOneWidget);
     expect(find.bySemanticsLabel('Search'), findsOneWidget);
@@ -116,10 +124,11 @@ void main() {
     final seed = (await tester.runAsync(() => seedLibrary(h)))!;
     await pumpApp(tester, h, AppRoutes.library, size: _mockupSize);
 
-    expect(find.text('3 items across 6 spaces'), findsOneWidget);
+    expect(find.text('3 items across 7 spaces'), findsOneWidget);
     expect(find.text('1 pinned'), findsOneWidget);
     expect(find.text('1 due today'), findsOneWidget);
     expect(find.text(LibraryFormat.createFirst), findsNWidgets(4));
+    await showTags(tester);
     expect(find.text('#work'), findsOneWidget);
 
     await tester.runAsync(
@@ -142,7 +151,7 @@ void main() {
   ) async {
     final h = await harness(tester, mockup: true);
     await pumpApp(tester, h, AppRoutes.library, size: _mockupSize);
-    expect(find.byType(LibraryModuleCard), findsNWidgets(6));
+    expect(find.byType(LibraryModuleCard), findsNWidgets(7));
 
     await tester.runAsync(
       () => h.updateSettings(
@@ -153,8 +162,8 @@ void main() {
       ),
     );
     await settle(tester);
-    expect(find.byType(LibraryModuleCard), findsNWidgets(5));
-    expect(find.text('107 items across 5 spaces'), findsOneWidget);
+    expect(find.byType(LibraryModuleCard), findsNWidgets(6));
+    expect(find.text('107 items across 6 spaces'), findsOneWidget);
     expect(find.text('37'), findsNothing);
     expect(find.text('2/4 done today'), findsNothing);
   });
@@ -173,6 +182,7 @@ void main() {
 
     await tester.tap(find.byType(FFBackButton));
     await settle(tester);
+    await showTags(tester);
     await tester.tap(find.text('#work'));
     await settle(tester);
     // FFNavHeader shows the subtitle as an uppercase caption.
@@ -194,6 +204,7 @@ void main() {
     );
     await pumpApp(tester, h, AppRoutes.library, size: _mockupSize);
 
+    await showTags(tester);
     await tester.longPress(find.text('#work'));
     await settle(tester);
     await tester.tap(find.text('Delete tag'));
