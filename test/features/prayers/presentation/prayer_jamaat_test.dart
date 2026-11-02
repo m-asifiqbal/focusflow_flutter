@@ -269,7 +269,7 @@ void main() {
     final (h, _) = await boot(tester);
     await pumpApp(tester, h, AppRoutes.newPrayer, size: const Size(390, 2200));
     expect(find.byType(PrayerJamaatSection), findsOneWidget);
-    await tester.tap(find.text('Fasting'));
+    await tester.tap(find.text('Fast'));
     await settle(tester);
     expect(find.byType(PrayerJamaatSection), findsNothing);
   });

@@ -3,8 +3,8 @@
 /// ============================================================
 ///
 /// What (one grouped list each):
-///   * DAYS — seven weekday toggles, and "Only between" a date range
-///     (a Ramadan fast; Clear to repeat for good);
+///   * DAYS — "Only between" a date range (the weekdays and calendar rules
+///     are PrayerCalendarSection, just above);
 ///   * REMINDERS — before the start (a fast: Suhoor), before the end while
 ///     not marked (a fast: Iftar, "At the end"), and priority: Low (quiet),
 ///     Normal (notification), High (alarm — rings, full screen);
@@ -22,9 +22,9 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_editor_sheets.dart';
-import 'package:focusflow/features/prayers/presentation/widgets/prayer_log_sheet.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/picker_common.dart';
 
 class PrayerDetailsSection extends StatelessWidget {
@@ -56,45 +56,16 @@ class PrayerDetailsSection extends StatelessWidget {
     final ff = context.ff;
     final text = context.text;
     final fast = draft.kind.isFast;
+    final profile = PrayerTraditionProfile.of(draft.tradition);
     final from = draft.startDate;
     final to = draft.endDate;
     final dates = from == null || to == null
         ? tr('Always')
         : '${DateFormats.of('d MMM y').format(from)} – '
               '${DateFormats.of('d MMM y').format(to)}';
-    final days = [
-      tr('Mon'),
-      tr('Tue'),
-      tr('Wed'),
-      tr('Thu'),
-      tr('Fri'),
-      tr('Sat'),
-      tr('Sun'),
-    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FFSectionLabel(tr('Days')),
-        const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
-          children: [
-            for (var i = 0; i < 7; i++)
-              FFChip(
-                label: days[i],
-                selected: draft.weekdaysMask & (1 << i) != 0,
-                onTap: () {
-                  final mask = draft.weekdaysMask ^ (1 << i);
-                  // At least one day stays on.
-                  if (mask & 0x7F != 0) {
-                    onChanged(draft.copyWith(weekdaysMask: mask));
-                  }
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
         FFGroupedList(
           children: [
             FFListRow(
@@ -131,13 +102,17 @@ class PrayerDetailsSection extends StatelessWidget {
           children: [
             FFListRow(
               leading: _tile(FontAwesomeIcons.solidBell),
-              title: fast ? tr('Suhoor reminder') : tr('Before it starts'),
+              title: fast
+                  ? profile.fast.remindStartLabel
+                  : tr('Before it starts'),
               value: _before(draft.remindBefore, end: false),
               chevron: true,
               onTap: () async {
                 final picked = await showMinutesBeforeSheet(
                   context,
-                  title: fast ? tr('Suhoor reminder') : tr('Before it starts'),
+                  title: fast
+                      ? profile.fast.remindStartLabel
+                      : tr('Before it starts'),
                   selected: draft.remindBefore,
                   choices: const [0, 5, 10, 15, 20, 30, 45, 60],
                   label: (m) => _before(m, end: false),
@@ -153,14 +128,18 @@ class PrayerDetailsSection extends StatelessWidget {
             if (draft.end != null)
               FFListRow(
                 leading: _tile(FontAwesomeIcons.hourglassHalf),
-                title: fast ? tr('Iftar reminder') : tr('Before it ends'),
+                title: fast
+                    ? profile.fast.remindEndLabel
+                    : tr('Before it ends'),
                 subtitle: fast ? null : tr('Only if not marked yet'),
                 value: _before(draft.remindBeforeEnd, end: true),
                 chevron: true,
                 onTap: () async {
                   final picked = await showMinutesBeforeSheet(
                     context,
-                    title: fast ? tr('Iftar reminder') : tr('Before it ends'),
+                    title: fast
+                        ? profile.fast.remindEndLabel
+                        : tr('Before it ends'),
                     selected: draft.remindBeforeEnd,
                     choices: const [0, 5, 10, 15, 20, 30, 45, 60],
                     label: (m) => _before(m, end: true),
@@ -220,9 +199,7 @@ class PrayerDetailsSection extends StatelessWidget {
                   options: [
                     for (final p in {
                       '',
-                      tr('Home'),
-                      ?placeOfWorship(draft.tradition),
-                      tr('Work'),
+                      ...profile.places,
                       if (draft.place.trim().isNotEmpty) draft.place.trim(),
                     })
                       OptionItem(
@@ -260,13 +237,15 @@ class PrayerDetailsSection extends StatelessWidget {
             if (draft.kind.counts)
               FFListRow(
                 leading: _tile(FontAwesomeIcons.bullseye),
-                title: tr('Daily goal'),
+                title: profile.goalTitle,
                 value: draft.targetCount?.toString() ?? tr('No goal'),
                 chevron: true,
                 onTap: () async {
                   final picked = await showGoalSheet(
                     context,
                     selected: draft.targetCount,
+                    goals: profile.goals,
+                    title: profile.goalTitle,
                   );
                   if (picked == null) return;
                   onChanged(
@@ -287,7 +266,7 @@ class PrayerDetailsSection extends StatelessWidget {
                 final typed = await showTextInputSheet(
                   context,
                   title: tr('Notes'),
-                  hint: tr('e.g. pray with family'),
+                  hint: profile.notesHint,
                   initial: draft.note,
                 );
                 if (typed != null) onChanged(draft.copyWith(note: typed));

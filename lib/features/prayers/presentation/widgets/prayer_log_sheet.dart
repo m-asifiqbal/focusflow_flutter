@@ -6,7 +6,8 @@
 /// up / missed / excused — fasts read fasted / broken / …), where it was
 /// prayed (its usual place, Home, the tradition's house of worship, Work,
 /// or typed), "In congregation" (not for fasts and counting practices),
-/// then Save; "Clear mark" when it was marked, and "Edit prayer".
+/// then Save and Close (also a close icon at the top right); "Clear mark"
+/// when it was marked, and "Edit prayer".
 /// Why: the one-tap "Mark prayed" covers the usual case; this covers the
 /// rest — and lets a missed prayer be logged as made up later.
 /// ============================================================
@@ -21,6 +22,7 @@ import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/picker_common.dart';
 
@@ -90,7 +92,7 @@ class _LogSheetState extends State<_LogSheet> {
   Future<void> _typePlace() async {
     final typed = await showTextInputSheet(
       context,
-      title: tr('Where did you pray?'),
+      title: PrayerTraditionProfile.of(_p.tradition).wherePrompt,
       initial: _place ?? '',
     );
     if (typed != null && mounted) setState(() => _place = typed);
@@ -103,11 +105,10 @@ class _LogSheetState extends State<_LogSheet> {
     final kind = _p.kind;
     final praying = !kind.isFast && !kind.counts;
     final usual = _p.place.trim();
+    final profile = PrayerTraditionProfile.of(_p.tradition);
     final places = <String>{
       if (usual.isNotEmpty) usual,
-      tr('Home'),
-      ?placeOfWorship(_p.tradition),
-      tr('Work'),
+      ...profile.places,
       if (_place != null && _place!.isNotEmpty) _place!,
     }.toList();
     final selectedPlace = _place ?? (usual.isEmpty ? null : usual);
@@ -120,6 +121,11 @@ class _LogSheetState extends State<_LogSheet> {
           subtitle: PrayerFormat.window(
             widget.slot.window,
             use24h: widget.use24h,
+          ),
+          trailing: FFRoundIconButton(
+            icon: FontAwesomeIcons.xmark,
+            semanticLabel: tr('Close'),
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -177,7 +183,7 @@ class _LogSheetState extends State<_LogSheet> {
                   colors: PrayerStyle.module,
                   size: AppSizes.iconTileSm,
                 ),
-                title: tr('In congregation'),
+                title: profile.inCongregation,
                 value: _congregation,
                 onChanged: (v) => setState(() => _congregation = v),
               ),
@@ -194,6 +200,11 @@ class _LogSheetState extends State<_LogSheet> {
               praying && _congregation,
             ),
           ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        FFSecondaryButton(
+          label: tr('Close'),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(

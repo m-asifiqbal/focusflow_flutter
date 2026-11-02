@@ -87,7 +87,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
   Widget build(BuildContext context) {
     final today = ref.watch(prayerTodayProvider);
     final prefs = ref.watch(prayerPrefsProvider);
-    final hijri = ref.watch(prayerHijriProvider);
+    final hijri = ref.watch(prayerDateLineProvider);
     final now = ref.watch(minuteClockProvider);
     final date = DateFormats.of('EEEE, d MMMM').format(now);
     final actions = [

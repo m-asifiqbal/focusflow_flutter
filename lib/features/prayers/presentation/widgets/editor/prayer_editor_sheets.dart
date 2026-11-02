@@ -82,6 +82,8 @@ Future<SolarEvent?> showSolarEventSheet(
   required SolarEvent? selected,
   required SolarDay? today,
   required bool use24h,
+  required List<SolarEvent> events,
+  required String Function(SolarEvent) labelOf,
 }) async {
   final picked = await showOptionSheet<SolarEvent?>(
     context,
@@ -90,17 +92,21 @@ Future<SolarEvent?> showSolarEventSheet(
         ? tr('Set your location to see today\'s times')
         : tr('Follows the sun where you are, every day'),
     options: [
-      for (final e in SolarEvent.values)
+      for (final e in events)
         OptionItem(
           value: e,
-          label: e.label,
+          label: labelOf(e),
           subtitle: today == null
               ? null
               : PrayerFormat.time(today.at(e), use24h: use24h),
           icon: switch (e) {
             SolarEvent.dawn || SolarEvent.sunrise => FontAwesomeIcons.solidSun,
-            SolarEvent.noon || SolarEvent.asr => FontAwesomeIcons.sun,
-            SolarEvent.sunset => FontAwesomeIcons.cloudSun,
+            SolarEvent.noon ||
+            SolarEvent.asr ||
+            SolarEvent.sofZmanShema ||
+            SolarEvent.sofZmanTefillah => FontAwesomeIcons.sun,
+            SolarEvent.sunset ||
+            SolarEvent.plagHamincha => FontAwesomeIcons.cloudSun,
             _ => FontAwesomeIcons.solidMoon,
           },
           colors: PrayerStyle.module,
@@ -116,8 +122,8 @@ Future<SolarEvent?> showSolarEventSheet(
 Future<int?> showOffsetSheet(
   BuildContext context, {
   required int selected,
+  required List<int> offsets,
 }) async {
-  const offsets = [-30, -20, -15, -10, -5, 0, 5, 10, 15, 20, 30];
   final picked = await showOptionSheet<int>(
     context,
     title: tr('Adjust by'),
@@ -173,11 +179,12 @@ Future<Picked<int?>?> showMinutesBeforeSheet(
 Future<Picked<int?>?> showGoalSheet(
   BuildContext context, {
   required int? selected,
+  required List<int> goals,
+  required String title,
 }) async {
-  const goals = [33, 34, 50, 99, 100, 108, 1000];
   final picked = await showOptionSheet<int?>(
     context,
-    title: tr('Daily goal'),
+    title: title,
     options: [
       OptionItem(
         value: null,
@@ -205,12 +212,39 @@ Future<Picked<int?>?> showGoalSheet(
   if (picked == null || picked.value != -1 || !context.mounted) return picked;
   final typed = await showTextInputSheet(
     context,
-    title: tr('Daily goal'),
+    title: title,
     hint: '100',
     initial: selected?.toString() ?? '',
   );
   final n = int.tryParse(typed ?? '');
   return n == null || n <= 0 ? null : Picked(n);
+}
+
+/// How long a practice lasts (a 20-minute sit): minutes, null when
+/// dismissed.
+Future<int?> showLengthSheet(
+  BuildContext context, {
+  required int selected,
+}) async {
+  const lengths = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180];
+  final choices = {...lengths, selected}.toList()..sort();
+  final picked = await showOptionSheet<int>(
+    context,
+    title: tr('Length'),
+    subtitle: tr('Moves the end, keeps the start'),
+    options: [
+      for (final m in choices)
+        OptionItem(
+          value: m,
+          label: PrayerFormat.duration(Duration(minutes: m)),
+          icon: FontAwesomeIcons.hourglassHalf,
+          colors: PrayerStyle.module,
+        ),
+    ],
+    selected: selected,
+    accent: PrayerStyle.module.solid,
+  );
+  return picked?.value;
 }
 
 /// The date range of a prayer (a Ramadan fast); null when dismissed.

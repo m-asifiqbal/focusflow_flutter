@@ -12,6 +12,7 @@ import 'package:drift/drift.dart';
 import 'package:focusflow/core/database/app_database.dart';
 import 'package:focusflow/core/items/tag.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
+import 'package:focusflow/features/prayers/domain/entities/calendar_rule.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
@@ -53,6 +54,7 @@ abstract final class PrayerRowMapper {
           ? null
           : DateUtilsX.parseDayKey(r.startDate!),
       endDate: r.endDate == null ? null : DateUtilsX.parseDayKey(r.endDate!),
+      calendar: CalendarRule.parse(r.calendarRule),
       priority: PrayerPriority.fromIndex(r.priority),
       remindBefore: r.remindBefore,
       remindBeforeEnd: r.remindBeforeEnd,
@@ -102,6 +104,7 @@ abstract final class PrayerRowMapper {
         p.startDate == null ? null : DateUtilsX.dayKey(p.startDate!),
       ),
       endDate: Value(p.endDate == null ? null : DateUtilsX.dayKey(p.endDate!)),
+      calendarRule: Value(p.calendar?.serialized),
       priority: Value(p.priority.index),
       remindBefore: Value(p.remindBefore),
       remindBeforeEnd: Value(p.remindBeforeEnd),

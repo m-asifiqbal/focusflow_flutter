@@ -162,6 +162,7 @@ abstract final class PrayerProgressViews {
     required DateTime day,
     SolarDay? sunToday,
     SolarDay? sunTomorrow,
+    int hijriAdjust = 0,
   }) {
     final list = tracked(prayers);
     final cell = PrayerStats.cellsFor(
@@ -170,6 +171,7 @@ abstract final class PrayerProgressViews {
       now: now,
       sunToday: sunToday,
       sunTomorrow: sunTomorrow,
+      hijriAdjust: hijriAdjust,
     );
     final byId = {for (final l in logs) l.id: l};
     final key = DateUtilsX.dayKey(day);
@@ -203,6 +205,7 @@ abstract final class PrayerProgressViews {
     required DateTime month,
     SolarDay? sunToday,
     SolarDay? sunTomorrow,
+    int hijriAdjust = 0,
   }) {
     final list = tracked(prayers);
     final cell = PrayerStats.cellsFor(
@@ -211,6 +214,7 @@ abstract final class PrayerProgressViews {
       now: now,
       sunToday: sunToday,
       sunTomorrow: sunTomorrow,
+      hijriAdjust: hijriAdjust,
     );
     final first = DateTime(month.year, month.month);
     final next = DateTime(month.year, month.month + 1);
@@ -231,6 +235,7 @@ abstract final class PrayerProgressViews {
     required DateTime now,
     SolarDay? sunToday,
     SolarDay? sunTomorrow,
+    int hijriAdjust = 0,
   }) {
     final list = tracked(prayers);
     final cell = PrayerStats.cellsFor(
@@ -239,6 +244,7 @@ abstract final class PrayerProgressViews {
       now: now,
       sunToday: sunToday,
       sunTomorrow: sunTomorrow,
+      hijriAdjust: hijriAdjust,
     );
     final today = DateUtilsX.dateOnly(now);
     final yearStart = DateTime(today.year, today.month - 11);

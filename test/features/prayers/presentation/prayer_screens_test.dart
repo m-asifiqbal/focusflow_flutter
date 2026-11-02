@@ -279,7 +279,13 @@ void main() {
 
   testWidgets('setup: a tradition\'s prayers saved', (tester) async {
     final h = await boot(tester);
-    await pumpApp(tester, h, AppRoutes.prayerSetup);
+    // Tall: the school question and the whole list are on screen.
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.prayerSetup,
+      size: const Size(390, 3200),
+    );
     await tester.tap(find.text('Islam'));
     await settle(tester);
     expect(find.text('Fajr'), findsOneWidget);

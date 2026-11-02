@@ -28,9 +28,10 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
-import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_calendar_section.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_details_section.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_jamaat_section.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_time_section.dart';
@@ -106,16 +107,21 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
       // A fast or a counting practice has no congregation time.
       clearJamaat: !PrayerJamaatSection.appliesTo(k),
     );
+    final profile = PrayerTraditionProfile.of(d.tradition);
     if (k.isFast && !d.kind.isFast) {
+      final (start, end) = profile.fastWindow;
       next = next.copyWith(
-        start: const PrayerTimeRule.auto(SolarEvent.dawn, minutes: 5 * 60),
-        end: const PrayerTimeRule.auto(SolarEvent.sunset, minutes: 18 * 60),
+        start: start,
+        end: end,
         remindBefore: 30,
         remindBeforeEnd: 0,
       );
     }
     if (k.counts && d.targetCount == null) {
-      next = next.copyWith(targetCount: 100, clearRemindBefore: true);
+      next = next.copyWith(
+        targetCount: profile.defaultGoal,
+        clearRemindBefore: true,
+      );
     }
     _set(next);
   }
@@ -145,12 +151,16 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
   Widget build(BuildContext context) {
     final d = _draft;
     final isNew = widget.prayerId == null;
+    final profile = PrayerTraditionProfile.of(
+      d?.tradition ??
+          PrayerTradition.fromKey(ref.read(prayerPrefsProvider).tradition),
+    );
     return FFScaffold(
       body: Column(
         children: [
           FFNavHeader(
             leading: FFBackButton(label: tr('Cancel')),
-            title: isNew ? tr('New prayer') : tr('Edit prayer'),
+            title: isNew ? profile.newTitle : profile.editTitle,
             trailing: [
               if (d != null)
                 FFTextButton(
@@ -184,6 +194,12 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
     final now = ref.watch(clockProvider).now();
     final use24h = ref.watch(settingsProvider.select((s) => s.use24HourTime));
     final sunFor = ref.watch(prayerSunProvider);
+    final profile = PrayerTraditionProfile.of(d.tradition);
+    // This tradition's kinds, and the one the practice has if it is another.
+    final kinds = [
+      ...profile.kinds,
+      if (!profile.kinds.contains(d.kind)) d.kind,
+    ];
     return ListView(
       padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.screen,
@@ -198,7 +214,7 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
           textCapitalization: TextCapitalization.sentences,
           style: text.largeTitle.copyWith(fontSize: 24),
           decoration: InputDecoration(
-            hintText: tr('Prayer name'),
+            hintText: profile.nameHint,
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -210,9 +226,9 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
           spacing: AppSpacing.xs,
           runSpacing: AppSpacing.xs,
           children: [
-            for (final k in PrayerKind.values)
+            for (final k in kinds)
               FFChip(
-                label: k.short,
+                label: profile.kindShort(k),
                 selected: d.kind == k,
                 onTap: () => _kind(k),
               ),
@@ -237,6 +253,13 @@ class _PrayerEditorScreenState extends ConsumerState<PrayerEditorScreen> {
           ),
         ],
         const SizedBox(height: AppSpacing.section),
+        PrayerCalendarSection(
+          draft: d,
+          onChanged: _set,
+          now: now,
+          hijriAdjust: ref.watch(prayerPrefsProvider).hijriAdjust,
+        ),
+        const SizedBox(height: AppSpacing.sm),
         PrayerDetailsSection(draft: d, onChanged: _set, now: now),
         if (widget.prayerId != null) ...[
           const SizedBox(height: AppSpacing.section),

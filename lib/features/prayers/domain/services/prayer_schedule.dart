@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
+import 'package:focusflow/features/prayers/domain/services/calendar_rules.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_jamaat_estimate.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 
@@ -168,14 +169,25 @@ abstract final class PrayerSchedule {
   /// "Ends in 18 min": the last stretch of a window is flagged.
   static const Duration endingSoon = Duration(minutes: 20);
 
-  /// Whether [p] is due on [day] (weekday, date range, pause).
-  static bool isDueOn(Prayer p, DateTime day, {bool ignorePause = false}) {
+  /// Whether [p] is due on [day] (calendar rule or weekday, date range,
+  /// pause). A calendar rule replaces the weekdays; [hijriAdjust] is the
+  /// saved Hijri correction the Hijri rules read.
+  static bool isDueOn(
+    Prayer p,
+    DateTime day, {
+    bool ignorePause = false,
+    int hijriAdjust = 0,
+  }) {
     if (p.isPaused && !ignorePause) return false;
     final d = DateUtilsX.dateOnly(day);
     final from = p.startDate;
     if (from != null && d.isBefore(DateUtilsX.dateOnly(from))) return false;
     final to = p.endDate;
     if (to != null && d.isAfter(DateUtilsX.dateOnly(to))) return false;
+    final rule = p.calendar;
+    if (rule != null) {
+      return CalendarRules.matches(rule, d, hijriAdjust: hijriAdjust);
+    }
     return p.weekdaysMask & (1 << (d.weekday - 1)) != 0;
   }
 
@@ -220,8 +232,9 @@ abstract final class PrayerSchedule {
     Iterable<Prayer> prayers,
     DateTime day,
     SolarDay? Function(DateTime day) sunFor,
-    Map<String, PrayerLog> logsById,
-  ) {
+    Map<String, PrayerLog> logsById, {
+    int hijriAdjust = 0,
+  }) {
     final d = DateUtilsX.dateOnly(day);
     final sun = sunFor(d);
     SolarDay? next;
@@ -237,7 +250,7 @@ abstract final class PrayerSchedule {
     final key = DateUtilsX.dayKey(d);
     final out = <PrayerSlot>[];
     for (final p in prayers) {
-      if (!p.isActive || !isDueOn(p, d)) continue;
+      if (!p.isActive || !isDueOn(p, d, hijriAdjust: hijriAdjust)) continue;
       out.add(
         PrayerSlot(
           prayer: p,

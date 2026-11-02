@@ -32,10 +32,10 @@ extension PrayerTraditionLook on PrayerTradition {
   /// What the tradition's starting set brings.
   String get hint => switch (this) {
     PrayerTradition.islam => tr('5 daily prayers · fasting'),
-    PrayerTradition.christianity => tr('Morning and evening prayer'),
-    PrayerTradition.hinduism => tr('Sandhya · puja'),
-    PrayerTradition.buddhism => tr('Chanting · meditation'),
-    PrayerTradition.judaism => tr('3 daily services'),
+    PrayerTradition.christianity => tr('Hours · Rosary · Sunday service'),
+    PrayerTradition.hinduism => tr('Puja · japa · aarti'),
+    PrayerTradition.buddhism => tr('Sitting · chanting · mala'),
+    PrayerTradition.judaism => tr('3 daily services · Shabbat'),
     PrayerTradition.custom => tr('Your own practice'),
   };
 

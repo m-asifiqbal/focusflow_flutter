@@ -26,13 +26,6 @@
 /// is laid out once (clipped, never re-wrapped), the animated layer sits in a
 /// RepaintBoundary, and only the pill (not the "+") carries a BackdropFilter.
 ///
-/// Edge: the pill has a neumorphic edge, the four-shadow recipe (drop glow
-/// up-start, drop shade down-end, inner shade inside the top-start edge,
-/// inner light inside the bottom-end edge — see [_NeuEdgePainter]). It is a
-/// static paint outside the animated layer (no per-frame cost); the glass
-/// itself is only a touch frostier (blur 15, a hair more translucent, a faint
-/// sheen on the upper half).
-///
 /// Use with `Scaffold(extendBody: true)` (the app shell does) so content
 /// scrolls under the glass; scroll views pad with `context.barClearance`.
 /// [currentIndex] is the index into [FFBottomNav.items] (the + is not a
@@ -220,7 +213,7 @@ class _MaybeBlur extends StatelessWidget {
   @override
   Widget build(BuildContext context) => blur
       ? BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
           child: child,
         )
       : child;
@@ -239,69 +232,56 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const radius = FFBottomNav.height / 2;
-    return CustomPaint(
-      // The bevel's glow / shade lie outside the capsule (never under the
-      // glass).
-      painter: _NeuEdgePainter(glass: glass, radius: radius, rim: false),
-      child: DecoratedBox(
-        // Shadow outside the clip so the capsule lifts off the content.
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
-          boxShadow: glass.shadow,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(radius),
-          child: _MaybeBlur(
-            blur: blur,
-            child: CustomPaint(
-              // The thin bevel rim along the glass edge, over the fill.
-              foregroundPainter: _NeuEdgePainter(
-                glass: glass,
-                radius: radius,
-                rim: true,
-              ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: glass.fill,
-                  borderRadius: BorderRadius.circular(radius),
+    return DecoratedBox(
+      // Shadow outside the clip so the capsule lifts off the content.
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: glass.shadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: _MaybeBlur(
+          blur: blur,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: glass.fill,
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(color: glass.border),
+            ),
+            child: SizedBox(
+              height: FFBottomNav.height,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: FFBottomNav._pillPadding,
                 ),
-                child: SizedBox(
-                  height: FFBottomNav.height,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: FFBottomNav._pillPadding,
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, c) {
-                        // Width of each tab's highlight = icon + label +
-                        // padding (capped to what the pill can hold).
-                        // Measured here — on rebuild, never per animation
-                        // frame.
-                        final items = state.widget.items;
-                        final cap =
-                            c.maxWidth -
-                            (items.length - 1) * FFBottomNav._minSlot;
-                        final activeWidths = [
-                          for (final item in items)
-                            math.min(
-                              cap,
-                              FFBottomNav._iconSize +
-                                  FFBottomNav._iconGap +
-                                  _labelWidth(context, item.label) +
-                                  2 * FFBottomNav._highlightPadding +
-                                  1, // sub-pixel safety
-                            ),
-                        ];
-                        return RepaintBoundary(
-                          child: AnimatedBuilder(
-                            animation: state._c,
-                            builder: (context, _) =>
-                                _tabs(c.maxWidth, state._p, activeWidths),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    // Width of each tab's highlight = icon + label +
+                    // padding (capped to what the pill can hold).
+                    // Measured here — on rebuild, never per animation
+                    // frame.
+                    final items = state.widget.items;
+                    final cap =
+                        c.maxWidth - (items.length - 1) * FFBottomNav._minSlot;
+                    final activeWidths = [
+                      for (final item in items)
+                        math.min(
+                          cap,
+                          FFBottomNav._iconSize +
+                              FFBottomNav._iconGap +
+                              _labelWidth(context, item.label) +
+                              2 * FFBottomNav._highlightPadding +
+                              1, // sub-pixel safety
+                        ),
+                    ];
+                    return RepaintBoundary(
+                      child: AnimatedBuilder(
+                        animation: state._c,
+                        builder: (context, _) =>
+                            _tabs(c.maxWidth, state._p, activeWidths),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -418,34 +398,17 @@ double _labelWidth(BuildContext context, String label) {
 class _GlassColors {
   const _GlassColors({
     required this.fill,
-    required this.glow,
-    required this.shade,
-    required this.innerLight,
-    required this.innerShade,
+    required this.border,
     required this.shadow,
     required this.activeFill,
     required this.activeBorder,
     required this.active,
     required this.inactive,
-    this.edge,
   });
 
   final Gradient fill;
 
-  /// The four shadows: drop glow (up-start) and drop shade (down-end)
-  /// outside the glass; inner light (inside the bottom-end edge: a light rim
-  /// on dark glass, a softer shade on light glass) and inner
-  /// shade (inside the top-start edge).
-  final Color glow;
-  final Color shade;
-  final Color innerLight;
-  final Color innerShade;
-
-  /// A hairline all around the capsule (dark only). On a dark canvas the
-  /// white glow is too faint to outline the start edge, so without it the
-  /// pill's left side melted into the background while the lit bottom-end
-  /// edge stood out.
-  final Color? edge;
+  final Color border;
   final List<BoxShadow> shadow;
   final Color activeFill;
   final Color activeBorder;
@@ -469,16 +432,12 @@ class _GlassColors {
 
   _GlassColors copyWith({Gradient? fill}) => _GlassColors(
     fill: fill ?? this.fill,
-    glow: glow,
-    shade: shade,
-    innerLight: innerLight,
-    innerShade: innerShade,
+    border: border,
     shadow: shadow,
     activeFill: activeFill,
     activeBorder: activeBorder,
     active: active,
     inactive: inactive,
-    edge: edge,
   );
 
   factory _GlassColors._themed(BuildContext context) {
@@ -489,20 +448,15 @@ class _GlassColors {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
+            // A faint sheen on the upper edge, a little more see-through.
             Color.alphaBlend(
-              Colors.white.withValues(alpha: 0.07), // sheen
-              ff.tabBar.withValues(alpha: 0.74),
+              Colors.white.withValues(alpha: 0.05),
+              ff.tabBar.withValues(alpha: 0.70),
             ),
-            ff.tabBar.withValues(alpha: 0.85),
+            ff.tabBar.withValues(alpha: 0.82),
           ],
         ),
-        glow: Colors.white.withValues(alpha: 0.10),
-        shade: Colors.black.withValues(alpha: 0.7),
-        // A lighter inner pair than light mode: a 40 % black lip inside the
-        // top-start edge blacked out the pill's left side on dark canvases.
-        innerLight: Colors.white.withValues(alpha: 0.17),
-        innerShade: Colors.black.withValues(alpha: 0.18),
-        edge: Colors.white.withValues(alpha: 0.12),
+        border: Colors.white.withValues(alpha: 0.14),
         shadow: [
           BoxShadow(
             offset: const Offset(0, 14),
@@ -523,28 +477,22 @@ class _GlassColors {
         end: Alignment.bottomCenter,
         colors: [
           Color.alphaBlend(
-            Colors.white.withValues(alpha: 0.18), // sheen
-            ff.surface.withValues(alpha: 0.76),
+            Colors.white.withValues(alpha: 0.12), // sheen
+            ff.surface.withValues(alpha: 0.72),
           ),
           Color.alphaBlend(
             ff.primarySoft.withValues(alpha: 0.35),
             ff.surface,
-          ).withValues(alpha: 0.68),
+          ).withValues(alpha: 0.64),
         ],
       ),
-      glow: Colors.white.withValues(alpha: 0.9),
-      shade: Colors.black.withValues(alpha: 0.22),
-      // Not white: a white lip vanished into the white glass and left the
-      // right end flat next to the shaded left one. A softer shade than the
-      // top-start one keeps the light coming from the top-start.
-      innerLight: Colors.black.withValues(alpha: 0.14),
-      innerShade: Colors.black.withValues(alpha: 0.19),
+      border: Colors.white.withValues(alpha: 0.75),
       shadow: [
         BoxShadow(
           offset: const Offset(0, 16),
           blurRadius: 36,
           spreadRadius: -14,
-          color: ff.primaryStrong.withValues(alpha: 0.2),
+          color: ff.primaryStrong.withValues(alpha: 0.35),
         ),
         ...ff.cardShadow,
       ],
@@ -554,101 +502,6 @@ class _GlassColors {
       inactive: ff.primary.withValues(alpha: 0.55),
     );
   }
-}
-
-/// The pill's neumorphic edge — the classic four-shadow recipe (two drop, two
-/// inner; Figma: drop white −33/−33 blur 46 @90 %, drop black 28/28 blur 54
-/// @16 %, inner white −33/−33 blur 46 @25 %, inner black 28/28 blur 54
-/// @25 %) scaled down to a 64 pt capsule. Light comes from the top-start.
-///
-/// Painted twice from one class:
-/// * [rim] false, *behind* the glass and clipped to the outside of the
-///   capsule: the two drop shadows — a white glow up-start, a black shade
-///   down-end (no tint: it must read as the same light on any canvas);
-/// * [rim] true, *over* the glass and clipped to the capsule: the two inner
-///   shadows — black along the inside of the top-start edge, white along the
-///   inside of the bottom-end edge. That inner pair is what gives the
-///   pressed-in "lip" of the reference instead of a flat outline. Dark mode
-///   adds a hairline [_GlassColors.edge] on top so every side keeps a
-///   visible outline.
-/// Static: it repaints only when the pill's size or colours change.
-class _NeuEdgePainter extends CustomPainter {
-  const _NeuEdgePainter({
-    required this.glass,
-    required this.radius,
-    required this.rim,
-  });
-
-  final _GlassColors glass;
-  final double radius;
-  final bool rim;
-
-  /// The recipe's offsets and blurs (Figma blur = 2 σ), at 64 pt scale.
-  static const Offset _lightOffset = Offset(-6, -6);
-  static const Offset _darkOffset = Offset(5, 5);
-  static const double _lightSigma = 4.6;
-  static const double _darkSigma = 6;
-
-  static Paint _blurred(Color color, double sigma) => Paint()
-    ..color = color
-    ..maskFilter = MaskFilter.blur(BlurStyle.normal, sigma);
-
-  /// Everything outside [hole] (an inner shadow is a blurred "outside").
-  static Path _outsideOf(RRect hole, Rect box) => Path.combine(
-    PathOperation.difference,
-    Path()..addRect(box.inflate(60)),
-    Path()..addRRect(hole),
-  );
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final box = Offset.zero & size;
-    final shape = RRect.fromRectAndRadius(box, Radius.circular(radius));
-    canvas.save();
-    if (rim) {
-      canvas
-        ..clipRRect(shape)
-        // Dark inside the top-start edge (the hole shifted down-end), light
-        // inside the bottom-end edge (the hole shifted up-start).
-        ..drawPath(
-          _outsideOf(shape.shift(_darkOffset), box),
-          _blurred(glass.innerShade, _darkSigma),
-        )
-        ..drawPath(
-          _outsideOf(shape.shift(_lightOffset), box),
-          _blurred(glass.innerLight, _lightSigma),
-        );
-      final edge = glass.edge;
-      if (edge != null) {
-        canvas.drawRRect(
-          shape.deflate(0.5),
-          Paint()
-            ..color = edge
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1,
-        );
-      }
-    } else {
-      canvas
-        ..clipPath(_outsideOf(shape, box))
-        ..drawRRect(shape.shift(_darkOffset), _blurred(glass.shade, _darkSigma))
-        ..drawRRect(
-          shape.shift(_lightOffset),
-          _blurred(glass.glow, _lightSigma),
-        );
-    }
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_NeuEdgePainter old) =>
-      old.rim != rim ||
-      old.radius != radius ||
-      old.glass.glow != glass.glow ||
-      old.glass.shade != glass.shade ||
-      old.glass.innerLight != glass.innerLight ||
-      old.glass.innerShade != glass.innerShade ||
-      old.glass.edge != glass.edge;
 }
 
 /// One tab slot: the icon (colour eases with [strength]) and, while the tab

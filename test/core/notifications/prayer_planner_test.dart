@@ -159,7 +159,7 @@ void main() {
         end: const PrayerTimeRule.fixed(18 * 60),
         remindBefore: 30,
         remindBeforeEnd: 0,
-      );
+      ).copyWith(tradition: PrayerTradition.islam);
       // 07:00 now: the Suhoor call (04:30) has passed; Iftar remains.
       final fasted = plan([f], logs: [_log(f, day, PrayerStatus.onTime)]);
       expect(fasted.map((n) => n.key), ['pry:2026-10-23:f:e']);
@@ -171,6 +171,25 @@ void main() {
       expect(plan([f], logs: [_log(f, day, PrayerStatus.missed)]), isEmpty);
     },
   );
+
+  test("a fast ends in the tradition's own words", () {
+    String title(PrayerTradition t) {
+      final f = _prayer(
+        'f',
+        kind: PrayerKind.fasting,
+        start: const PrayerTimeRule.fixed(5 * 60),
+        end: const PrayerTimeRule.fixed(18 * 60),
+        remindBefore: null,
+        remindBeforeEnd: 0,
+      ).copyWith(tradition: t);
+      return plan([f]).singleWhere((n) => n.key.endsWith(':e')).title;
+    }
+
+    expect(title(PrayerTradition.islam), 'Iftar time');
+    expect(title(PrayerTradition.judaism), 'The fast ends');
+    expect(title(PrayerTradition.hinduism), 'Time to break the fast');
+    expect(title(PrayerTradition.buddhism), 'The observance ends');
+  });
 
   test('priority: high rings as an alarm, low is silent', () {
     final high = plan([_prayer('h', priority: PrayerPriority.high)]);

@@ -19,7 +19,9 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/src/ff_token_gaps.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 
 class PrayerFastCard extends StatelessWidget {
@@ -46,17 +48,14 @@ class PrayerFastCard extends StatelessWidget {
     final color = PrayerStyle.of(p);
     final state = slot.stateAt(now);
     final status = slot.status;
+    final words = PrayerTraditionProfile.of(p.tradition).fast;
     final String headline;
     if (status != null) {
       headline = status.labelFor(p.kind);
     } else if (now.isBefore(w.start)) {
-      headline = tr('Suhoor ends {when}', {
-        'when': PrayerFormat.inTime(w.start.difference(now)),
-      });
+      headline = words.startsWhen(PrayerFormat.inTime(w.start.difference(now)));
     } else if (now.isBefore(end)) {
-      headline = tr('Iftar {when}', {
-        'when': PrayerFormat.inTime(end.difference(now)),
-      });
+      headline = words.endsWhen(PrayerFormat.inTime(end.difference(now)));
     } else {
       headline = state == PrayerSlotState.missed
           ? tr('Fast over — not marked')
@@ -76,7 +75,9 @@ class PrayerFastCard extends StatelessWidget {
           Row(
             children: [
               FFIconTile.soft(
-                icon: FontAwesomeIcons.solidMoon,
+                icon: p.tradition == PrayerTradition.islam
+                    ? FontAwesomeIcons.solidMoon
+                    : FontAwesomeIcons.bowlFood,
                 colors: ModuleColorsX.from(color),
                 size: AppSizes.iconTileSm,
               ),
@@ -105,10 +106,10 @@ class PrayerFastCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  tr('Suhoor ends {start} · Iftar {end}', {
-                    'start': PrayerFormat.time(w.start, use24h: use24h),
-                    'end': PrayerFormat.time(end, use24h: use24h),
-                  }),
+                  words.span(
+                    PrayerFormat.time(w.start, use24h: use24h),
+                    PrayerFormat.time(end, use24h: use24h),
+                  ),
                   style: text.meta.copyWith(fontWeight: FontWeight.w400),
                 ),
               ),

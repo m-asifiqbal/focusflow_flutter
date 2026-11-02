@@ -397,6 +397,10 @@ class Prayers extends Table with ItemColumns {
 
   /// Reminder this many minutes before the jamaat; null = off.
   IntColumn get remindBeforeJamaat => integer().nullable()();
+
+  /// Repeats on the days of a religious calendar (CalendarRule text);
+  /// null = by weekday. Added after the table shipped.
+  TextColumn get calendarRule => text().nullable()();
   BoolColumn get isPaused => boolean().withDefault(const Constant(false))();
 }
 

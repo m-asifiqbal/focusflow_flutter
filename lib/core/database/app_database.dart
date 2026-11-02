@@ -139,6 +139,8 @@ class AppDatabase extends _$AppDatabase {
     ('prayers', 'remind_before_jamaat', 'INTEGER'),
     // An estimated (typical) jamaat instead of the mosque's own time.
     ('prayers', 'jamaat_estimated', 'INTEGER NOT NULL DEFAULT 0'),
+    // A prayer that repeats on a religious calendar's days.
+    ('prayers', 'calendar_rule', 'TEXT'),
   ];
 
   Future<void> _ensureAddedColumns() async {

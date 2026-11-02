@@ -51,7 +51,7 @@ class HomePrayerSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final today = ref.watch(prayerTodayProvider);
-    final hijri = ref.watch(prayerHijriProvider);
+    final hijri = ref.watch(prayerDateLineProvider);
     final use24h = ref.watch(settingsProvider.select((s) => s.use24HourTime));
     void openAll() => unawaited(context.push(AppRoutes.prayers));
     final Widget body = today.when(

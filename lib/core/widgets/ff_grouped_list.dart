@@ -100,6 +100,7 @@ class FFListRow extends StatelessWidget {
     required this.title,
     this.leading,
     this.subtitle,
+    this.subtitleLines = 2,
     this.value,
     this.valueColor,
     this.trailing,
@@ -125,6 +126,7 @@ class FFListRow extends StatelessWidget {
     super.key,
   }) : switchValue = value,
        onSwitchChanged = onChanged,
+       subtitleLines = 2,
        value = null,
        valueColor = null,
        trailing = null,
@@ -138,6 +140,9 @@ class FFListRow extends StatelessWidget {
   /// Usually an [FFIconTile] of size 32.
   final Widget? leading;
   final String? subtitle;
+
+  /// How many lines the subtitle may take before it is cut (2).
+  final int subtitleLines;
 
   /// Muted right-aligned value before the chevron ("English").
   final String? value;
@@ -191,7 +196,7 @@ class FFListRow extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxs),
           Text(
             subtitle!,
-            maxLines: 2,
+            maxLines: subtitleLines,
             overflow: TextOverflow.ellipsis,
             style: context.text.meta.copyWith(
               fontWeight: FontWeight.w400,

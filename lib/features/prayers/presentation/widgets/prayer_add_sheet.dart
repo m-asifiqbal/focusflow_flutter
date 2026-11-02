@@ -25,10 +25,14 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer_school.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_presets.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
+import 'package:focusflow/features/prayers/presentation/prayer_flows.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_school_picker.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_tradition_grid.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
@@ -134,13 +138,38 @@ class _PrayerAddSheetState extends ConsumerState<PrayerAddSheet> {
     final added = {for (final p in existing) p.displayName.toLowerCase()};
     // Keep the user's mode: their prayers set by hand → fixed times.
     final manual = existing.isNotEmpty && !existing.any((p) => p.usesSun);
+    final school = PrayerSchool.fromKey(
+      ref.watch(prayerPrefsProvider).schoolOf(t.key),
+    );
+    final profile = PrayerTraditionProfile.of(t);
     final presets = [
-      for (final p in PrayerPresets.of(t, now))
-        manual ? PrayerPresets.manual([p.draft]).first : p.draft,
+      for (final p in PrayerPresets.of(t, now, school: school))
+        (manual ? PrayerPresets.manual([p.draft]).first : p.draft, p.hint),
     ];
     return FFGroupedList(
       children: [
-        for (final d in presets)
+        if (PrayerSchool.of(t).isNotEmpty)
+          Padding(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+            child: PrayerSchoolPicker(
+              tradition: t,
+              selected: school,
+              onChanged: (s) => unawaited(savePrayerSchool(ref, t, s)),
+            ),
+          ),
+        FFListRow(
+          leading: FFIconTile(
+            icon: FontAwesomeIcons.plus,
+            colors: PrayerStyle.module,
+            size: AppSizes.iconTileSm,
+          ),
+          title: tr('Create your own'),
+          subtitle: tr('Any prayer, fast or practice'),
+          chevron: true,
+          onTap: () => Navigator.of(context).pop(_blank(t)),
+          semanticLabel: tr('Create your own'),
+        ),
+        for (final (d, hint) in presets)
           () {
             final isAdded = added.contains(d.displayName.toLowerCase());
             final window = PrayerSchedule.windowOn(
@@ -154,18 +183,21 @@ class _PrayerAddSheetState extends ConsumerState<PrayerAddSheet> {
               leading: FFIconTile.soft(
                 icon: isAdded
                     ? FontAwesomeIcons.solidCircleCheck
-                    : FontAwesomeIcons.handsPraying,
+                    : PrayerStyle.kindIcon(d.kind, t),
                 colors: PrayerStyle.module,
                 size: AppSizes.iconTileSm,
               ),
               title: d.displayName,
+              subtitleLines: 3,
               subtitle: [
-                d.kind.short,
-                PrayerFormat.window(window, use24h: use24h),
-                if (d.weekdaysMask != Prayer.everyDay)
-                  PrayerFormat.weekdays(d.weekdaysMask),
-                if (isAdded) tr('Added'),
-              ].join(' · '),
+                [
+                  profile.kindShort(d.kind),
+                  PrayerFormat.window(window, use24h: use24h),
+                  ?PrayerFormat.repeat(d),
+                  if (isAdded) tr('Added'),
+                ].join(' · '),
+                if (hint.isNotEmpty) hint,
+              ].join('\n'),
               chevron: !isAdded,
               onTap: isAdded ? null : () => Navigator.of(context).pop(d),
               semanticLabel: isAdded
@@ -173,18 +205,6 @@ class _PrayerAddSheetState extends ConsumerState<PrayerAddSheet> {
                   : d.displayName,
             );
           }(),
-        FFListRow(
-          leading: FFIconTile(
-            icon: FontAwesomeIcons.plus,
-            colors: PrayerStyle.module,
-            size: AppSizes.iconTileSm,
-          ),
-          title: tr('Create your own'),
-          subtitle: tr('Any prayer, fast or practice'),
-          chevron: true,
-          onTap: () => Navigator.of(context).pop(_blank(t)),
-          semanticLabel: tr('Create your own'),
-        ),
       ],
     );
   }

@@ -198,7 +198,16 @@ enum SolarEvent {
 
   /// Two thirds of the way from this day's sunset to the next dawn — the
   /// night *after* this day, so normally early on the next calendar day.
-  lastThird;
+  lastThird,
+
+  /// Jewish halachic hours: a quarter and a third of the day (sunrise to
+  /// sunset, the GRA's way) after sunrise — the latest time for the morning
+  /// Shema and for the morning prayer — and 10¾ of its 12 hours (plag
+  /// hamincha). Worked out from sunrise and sunset, so they need nothing
+  /// more than the day's sun times.
+  sofZmanShema,
+  sofZmanTefillah,
+  plagHamincha;
 
   String get label => switch (this) {
     dawn => tr('Dawn (Fajr)'),
@@ -209,6 +218,9 @@ enum SolarEvent {
     nightfall => tr('Nightfall (Isha)'),
     midnight => tr('Midnight'),
     lastThird => tr('Last third of the night'),
+    sofZmanShema => tr('Latest Shema'),
+    sofZmanTefillah => tr('Latest morning prayer'),
+    plagHamincha => tr('Plag hamincha'),
   };
 }
 
@@ -287,7 +299,18 @@ class SolarDay {
     SolarEvent.nightfall => nightfall,
     SolarEvent.midnight => midnight,
     SolarEvent.lastThird => lastThird,
+    SolarEvent.sofZmanShema => _dayPart(1 / 4),
+    SolarEvent.sofZmanTefillah => _dayPart(1 / 3),
+    SolarEvent.plagHamincha => _dayPart(43 / 48),
   };
+
+  /// [fraction] of the way from sunrise to sunset, to the nearest minute
+  /// (like every other time here).
+  DateTime _dayPart(double fraction) {
+    final minutes = (sunset.difference(sunrise).inSeconds * fraction / 60)
+        .round();
+    return sunrise.add(Duration(minutes: minutes));
+  }
 
   @override
   bool operator ==(Object other) =>

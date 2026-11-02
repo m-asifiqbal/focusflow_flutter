@@ -141,6 +141,7 @@ abstract final class PrayerStats {
     required DateTime now,
     SolarDay? sunToday,
     SolarDay? sunTomorrow,
+    int hijriAdjust = 0,
   }) {
     final today = DateUtilsX.dateOnly(now);
     final byId = {for (final l in logs) l.id: l};
@@ -152,12 +153,14 @@ abstract final class PrayerStats {
         today,
         (d) => DateUtilsX.dateOnly(d) == today ? sunToday : sunTomorrow,
         byId,
+        hijriAdjust: hijriAdjust,
       ))
         s.prayer.id: s,
     };
 
     return (Prayer p, DateTime day) {
-      if (day.isAfter(today) || !PrayerSchedule.isDueOn(p, day)) {
+      if (day.isAfter(today) ||
+          !PrayerSchedule.isDueOn(p, day, hijriAdjust: hijriAdjust)) {
         return PrayerCell.none;
       }
       // A prayer created after that day was not due yet.
@@ -198,6 +201,7 @@ abstract final class PrayerStats {
     required DateTime now,
     SolarDay? sunToday,
     SolarDay? sunTomorrow,
+    int hijriAdjust = 0,
   }) {
     final today = DateUtilsX.dateOnly(now);
     final active = [
@@ -214,6 +218,7 @@ abstract final class PrayerStats {
       now: now,
       sunToday: sunToday,
       sunTomorrow: sunTomorrow,
+      hijriAdjust: hijriAdjust,
     );
 
     bool isDone(PrayerCell c) =>

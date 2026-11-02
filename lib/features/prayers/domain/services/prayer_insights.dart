@@ -280,6 +280,7 @@ abstract final class PrayerInsightsCalculator {
     required DateTime now,
     SolarDay? sunToday,
     SolarDay? sunTomorrow,
+    int hijriAdjust = 0,
     SolarDay? Function(DateTime day)? sunFor,
   }) {
     final win = window(period, now);
@@ -302,6 +303,7 @@ abstract final class PrayerInsightsCalculator {
       now: now,
       sunToday: sunToday,
       sunTomorrow: sunTomorrow,
+      hijriAdjust: hijriAdjust,
     );
     final today = DateUtilsX.dateOnly(now);
     int bucketOf(DateTime d) => period == PrayerPeriod.yearly
@@ -424,6 +426,7 @@ abstract final class PrayerInsightsCalculator {
         window: win,
         today: today,
         sunFor: sunFor ?? (_) => sunToday,
+        hijriAdjust: hijriAdjust,
         step: switch (period) {
           PrayerPeriod.daily => 1,
           PrayerPeriod.monthly => 2,

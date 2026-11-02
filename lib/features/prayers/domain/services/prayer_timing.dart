@@ -172,6 +172,7 @@ abstract final class PrayerTimingCalculator {
     required DateTime today,
     required SolarDay? Function(DateTime day) sunFor,
     int step = 1,
+    int hijriAdjust = 0,
   }) {
     final startNo = DateUtilsX.dayNumber(window.$1);
     final endNo = DateUtilsX.dayNumber(window.$2);
@@ -201,7 +202,7 @@ abstract final class PrayerTimingCalculator {
         !d.isBefore(window.$1);
         d = DateUtilsX.addDays(d, -step)
       ) {
-        if (d.isBefore(created) || !PrayerSchedule.isDueOn(p, d)) continue;
+        if (d.isBefore(created) || !PrayerSchedule.isDueOn(p, d, hijriAdjust: hijriAdjust)) continue;
         final w = PrayerSchedule.windowOn(
           p,
           d,

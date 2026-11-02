@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
 import 'package:focusflow/core/l10n/tr.dart';
+import 'package:focusflow/features/prayers/domain/entities/calendar_rule.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 
 /// What kind of practice it is (words and defaults follow it).
@@ -222,6 +223,7 @@ class Prayer {
     this.weekdaysMask = everyDay,
     this.startDate,
     this.endDate,
+    this.calendar,
     this.priority = PrayerPriority.normal,
     this.remindBefore = 0,
     this.remindBeforeEnd,
@@ -280,6 +282,10 @@ class Prayer {
   /// Optional inclusive date range (date only).
   final DateTime? startDate;
   final DateTime? endDate;
+
+  /// Repeats on the days of a religious calendar instead of by weekday
+  /// (Ramadan, an Ekadashi, Lent …); null = by [weekdaysMask].
+  final CalendarRule? calendar;
   final PrayerPriority priority;
 
   /// Reminder this many minutes before the start; null = none.
@@ -321,9 +327,18 @@ class Prayer {
   /// Uses a sun event at either end (needs the saved location).
   bool get usesSun => start.isAuto || (end?.isAuto ?? false);
 
-  /// The display name ("Untitled prayer" when blank).
-  String get displayName =>
-      name.trim().isEmpty ? tr('Untitled prayer') : name.trim();
+  /// The display name ("Untitled prayer" when blank). A practice added from
+  /// a tradition is saved under its English name ("Fajr", "Rosary"); it is
+  /// shown in the active language, while a name the person typed or changed
+  /// is shown as it is.
+  String get displayName {
+    final n = name.trim();
+    if (n.isEmpty) return tr('Untitled prayer');
+    if (tradition != PrayerTradition.custom && L10n.has(n)) {
+      return L10n.translate(n);
+    }
+    return n;
+  }
 
   Prayer copyWith({
     String? name,
@@ -336,6 +351,8 @@ class Prayer {
     DateTime? startDate,
     DateTime? endDate,
     bool clearDates = false,
+    CalendarRule? calendar,
+    bool clearCalendar = false,
     PrayerPriority? priority,
     int? remindBefore,
     bool clearRemindBefore = false,
@@ -371,6 +388,7 @@ class Prayer {
     weekdaysMask: weekdaysMask ?? this.weekdaysMask,
     startDate: clearDates ? null : (startDate ?? this.startDate),
     endDate: clearDates ? null : (endDate ?? this.endDate),
+    calendar: clearCalendar ? null : (calendar ?? this.calendar),
     priority: priority ?? this.priority,
     remindBefore: clearRemindBefore
         ? null
@@ -411,6 +429,7 @@ class Prayer {
       other.weekdaysMask == weekdaysMask &&
       other.startDate == startDate &&
       other.endDate == endDate &&
+      other.calendar == calendar &&
       other.priority == priority &&
       other.remindBefore == remindBefore &&
       other.remindBeforeEnd == remindBeforeEnd &&
@@ -443,6 +462,7 @@ class Prayer {
     weekdaysMask,
     startDate,
     endDate,
+    calendar,
     priority,
     remindBefore,
     remindBeforeEnd,

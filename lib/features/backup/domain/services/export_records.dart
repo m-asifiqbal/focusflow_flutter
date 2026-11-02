@@ -252,6 +252,7 @@ class ExportRecords {
           'weekdaysMask': r['weekdays_mask'] ?? 127,
           'startDate': r['start_date'],
           'endDate': r['end_date'],
+          'calendar': r['calendar_rule'],
           'place': r['place'] ?? '',
           'jamaat': _jamaat(
             r['jamaat_minutes'],

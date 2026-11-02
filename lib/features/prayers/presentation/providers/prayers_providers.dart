@@ -20,7 +20,7 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/prayers/domain/repository/prayers_repository.dart';
-import 'package:focusflow/features/prayers/domain/services/hijri_date.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_date_line.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_stats.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_sun.dart';
@@ -170,10 +170,17 @@ PrayerToday _todayOf(
   List<PrayerLog> logs,
   DateTime now,
   SolarDay? Function(DateTime) sunFor,
+  int hijriAdjust,
 ) {
   final byId = {for (final l in logs) l.id: l};
   final today = DateUtilsX.dateOnly(now);
-  final slots = PrayerSchedule.dayPlan(prayers, today, sunFor, byId);
+  final slots = PrayerSchedule.dayPlan(
+    prayers,
+    today,
+    sunFor,
+    byId,
+    hijriAdjust: hijriAdjust,
+  );
   return PrayerToday(
     now: now,
     slots: slots,
@@ -187,6 +194,7 @@ PrayerToday _todayOf(
         DateUtilsX.addDays(today, 1),
         sunFor,
         byId,
+        hijriAdjust: hijriAdjust,
       ),
     ),
     current: PrayerSchedule.current(slots, now),
@@ -204,13 +212,14 @@ final prayerTodayProvider = Provider.autoDispose<AsyncValue<PrayerToday>>((
   final logs = ref.watch(prayerLogsProvider);
   final now = ref.watch(prayerNowProvider);
   final sunFor = ref.watch(prayerSunProvider);
+  final hijriAdjust = ref.watch(prayerPrefsProvider).hijriAdjust;
   if (prayers.hasError) {
     return AsyncValue.error(prayers.error!, prayers.stackTrace!);
   }
   final p = prayers.valueOrNull;
   final l = logs.valueOrNull;
   if (p == null || l == null) return const AsyncValue.loading();
-  return AsyncValue.data(_todayOf(p, l, now, sunFor));
+  return AsyncValue.data(_todayOf(p, l, now, sunFor, hijriAdjust));
 });
 
 /// Streak, on-time rate, month and the week grid.
@@ -227,16 +236,26 @@ final prayerProgressProvider = Provider.autoDispose<PrayerProgress>((ref) {
     now: now,
     sunToday: sunFor(today),
     sunTomorrow: sunFor(DateUtilsX.addDays(today, 1)),
+    hijriAdjust: ref.watch(prayerPrefsProvider).hijriAdjust,
   );
 });
 
-/// Today's Hijri date ("10 Jumada al-Ula 1448") with the saved correction;
-/// null unless the Islamic preset is in use.
-final prayerHijriProvider = Provider.autoDispose<String?>((ref) {
+/// The date in the tradition's own calendar ("10 Jumada al-Ula 1448", the
+/// Hebrew date, "Lent · week 3", "Shukla Ekadashi"); null when there is
+/// nothing to show. Follows the Prayer clock, so it turns over at sunset (the
+/// Hebrew day) and at midnight.
+final prayerDateLineProvider = Provider.autoDispose<String?>((ref) {
   final prefs = ref.watch(prayerPrefsProvider);
-  if (PrayerTradition.fromKey(prefs.tradition) != PrayerTradition.islam) {
-    return null;
-  }
-  final today = ref.watch(todayProvider);
-  return HijriDate.fromGregorian(today, adjustDays: prefs.hijriAdjust).format();
+  final tradition = PrayerTradition.fromKey(prefs.tradition);
+  final now = ref.watch(prayerNowProvider);
+  final sunFor = ref.watch(prayerSunProvider);
+  final today = DateUtilsX.dateOnly(now);
+  return PrayerDateLine.of(
+    tradition,
+    now,
+    sunset: tradition == PrayerTradition.judaism
+        ? sunFor(today)?.at(SolarEvent.sunset)
+        : null,
+    hijriAdjust: prefs.hijriAdjust,
+  );
 });

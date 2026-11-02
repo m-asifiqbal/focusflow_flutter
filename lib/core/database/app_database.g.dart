@@ -9493,6 +9493,17 @@ class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _calendarRuleMeta = const VerificationMeta(
+    'calendarRule',
+  );
+  @override
+  late final GeneratedColumn<String> calendarRule = GeneratedColumn<String>(
+    'calendar_rule',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isPausedMeta = const VerificationMeta(
     'isPaused',
   );
@@ -9547,6 +9558,7 @@ class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
     jamaatAfterStart,
     jamaatEstimated,
     remindBeforeJamaat,
+    calendarRule,
     isPaused,
   ];
   @override
@@ -9825,6 +9837,15 @@ class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
         ),
       );
     }
+    if (data.containsKey('calendar_rule')) {
+      context.handle(
+        _calendarRuleMeta,
+        calendarRule.isAcceptableOrUnknown(
+          data['calendar_rule']!,
+          _calendarRuleMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_paused')) {
       context.handle(
         _isPausedMeta,
@@ -9988,6 +10009,10 @@ class $PrayersTable extends Prayers with TableInfo<$PrayersTable, PrayerRow> {
         DriftSqlType.int,
         data['${effectivePrefix}remind_before_jamaat'],
       ),
+      calendarRule: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calendar_rule'],
+      ),
       isPaused: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_paused'],
@@ -10082,6 +10107,10 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
 
   /// Reminder this many minutes before the jamaat; null = off.
   final int? remindBeforeJamaat;
+
+  /// Repeats on the days of a religious calendar (CalendarRule text);
+  /// null = by weekday. Added after the table shipped.
+  final String? calendarRule;
   final bool isPaused;
   const PrayerRow({
     required this.id,
@@ -10121,6 +10150,7 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     required this.jamaatAfterStart,
     required this.jamaatEstimated,
     this.remindBeforeJamaat,
+    this.calendarRule,
     required this.isPaused,
   });
   @override
@@ -10192,6 +10222,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     map['jamaat_estimated'] = Variable<bool>(jamaatEstimated);
     if (!nullToAbsent || remindBeforeJamaat != null) {
       map['remind_before_jamaat'] = Variable<int>(remindBeforeJamaat);
+    }
+    if (!nullToAbsent || calendarRule != null) {
+      map['calendar_rule'] = Variable<String>(calendarRule);
     }
     map['is_paused'] = Variable<bool>(isPaused);
     return map;
@@ -10266,6 +10299,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
       remindBeforeJamaat: remindBeforeJamaat == null && nullToAbsent
           ? const Value.absent()
           : Value(remindBeforeJamaat),
+      calendarRule: calendarRule == null && nullToAbsent
+          ? const Value.absent()
+          : Value(calendarRule),
       isPaused: Value(isPaused),
     );
   }
@@ -10313,6 +10349,7 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
       jamaatAfterStart: serializer.fromJson<bool>(json['jamaatAfterStart']),
       jamaatEstimated: serializer.fromJson<bool>(json['jamaatEstimated']),
       remindBeforeJamaat: serializer.fromJson<int?>(json['remindBeforeJamaat']),
+      calendarRule: serializer.fromJson<String?>(json['calendarRule']),
       isPaused: serializer.fromJson<bool>(json['isPaused']),
     );
   }
@@ -10357,6 +10394,7 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
       'jamaatAfterStart': serializer.toJson<bool>(jamaatAfterStart),
       'jamaatEstimated': serializer.toJson<bool>(jamaatEstimated),
       'remindBeforeJamaat': serializer.toJson<int?>(remindBeforeJamaat),
+      'calendarRule': serializer.toJson<String?>(calendarRule),
       'isPaused': serializer.toJson<bool>(isPaused),
     };
   }
@@ -10399,6 +10437,7 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     bool? jamaatAfterStart,
     bool? jamaatEstimated,
     Value<int?> remindBeforeJamaat = const Value.absent(),
+    Value<String?> calendarRule = const Value.absent(),
     bool? isPaused,
   }) => PrayerRow(
     id: id ?? this.id,
@@ -10444,6 +10483,7 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     remindBeforeJamaat: remindBeforeJamaat.present
         ? remindBeforeJamaat.value
         : this.remindBeforeJamaat,
+    calendarRule: calendarRule.present ? calendarRule.value : this.calendarRule,
     isPaused: isPaused ?? this.isPaused,
   );
   PrayerRow copyWithCompanion(PrayersCompanion data) {
@@ -10519,6 +10559,9 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
       remindBeforeJamaat: data.remindBeforeJamaat.present
           ? data.remindBeforeJamaat.value
           : this.remindBeforeJamaat,
+      calendarRule: data.calendarRule.present
+          ? data.calendarRule.value
+          : this.calendarRule,
       isPaused: data.isPaused.present ? data.isPaused.value : this.isPaused,
     );
   }
@@ -10563,6 +10606,7 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
           ..write('jamaatAfterStart: $jamaatAfterStart, ')
           ..write('jamaatEstimated: $jamaatEstimated, ')
           ..write('remindBeforeJamaat: $remindBeforeJamaat, ')
+          ..write('calendarRule: $calendarRule, ')
           ..write('isPaused: $isPaused')
           ..write(')'))
         .toString();
@@ -10607,6 +10651,7 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
     jamaatAfterStart,
     jamaatEstimated,
     remindBeforeJamaat,
+    calendarRule,
     isPaused,
   ]);
   @override
@@ -10650,6 +10695,7 @@ class PrayerRow extends DataClass implements Insertable<PrayerRow> {
           other.jamaatAfterStart == this.jamaatAfterStart &&
           other.jamaatEstimated == this.jamaatEstimated &&
           other.remindBeforeJamaat == this.remindBeforeJamaat &&
+          other.calendarRule == this.calendarRule &&
           other.isPaused == this.isPaused);
 }
 
@@ -10691,6 +10737,7 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
   final Value<bool> jamaatAfterStart;
   final Value<bool> jamaatEstimated;
   final Value<int?> remindBeforeJamaat;
+  final Value<String?> calendarRule;
   final Value<bool> isPaused;
   final Value<int> rowid;
   const PrayersCompanion({
@@ -10731,6 +10778,7 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     this.jamaatAfterStart = const Value.absent(),
     this.jamaatEstimated = const Value.absent(),
     this.remindBeforeJamaat = const Value.absent(),
+    this.calendarRule = const Value.absent(),
     this.isPaused = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -10772,6 +10820,7 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     this.jamaatAfterStart = const Value.absent(),
     this.jamaatEstimated = const Value.absent(),
     this.remindBeforeJamaat = const Value.absent(),
+    this.calendarRule = const Value.absent(),
     this.isPaused = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -10815,6 +10864,7 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     Expression<bool>? jamaatAfterStart,
     Expression<bool>? jamaatEstimated,
     Expression<int>? remindBeforeJamaat,
+    Expression<String>? calendarRule,
     Expression<bool>? isPaused,
     Expression<int>? rowid,
   }) {
@@ -10857,6 +10907,7 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
       if (jamaatEstimated != null) 'jamaat_estimated': jamaatEstimated,
       if (remindBeforeJamaat != null)
         'remind_before_jamaat': remindBeforeJamaat,
+      if (calendarRule != null) 'calendar_rule': calendarRule,
       if (isPaused != null) 'is_paused': isPaused,
       if (rowid != null) 'rowid': rowid,
     });
@@ -10900,6 +10951,7 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     Value<bool>? jamaatAfterStart,
     Value<bool>? jamaatEstimated,
     Value<int?>? remindBeforeJamaat,
+    Value<String?>? calendarRule,
     Value<bool>? isPaused,
     Value<int>? rowid,
   }) {
@@ -10941,6 +10993,7 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
       jamaatAfterStart: jamaatAfterStart ?? this.jamaatAfterStart,
       jamaatEstimated: jamaatEstimated ?? this.jamaatEstimated,
       remindBeforeJamaat: remindBeforeJamaat ?? this.remindBeforeJamaat,
+      calendarRule: calendarRule ?? this.calendarRule,
       isPaused: isPaused ?? this.isPaused,
       rowid: rowid ?? this.rowid,
     );
@@ -11060,6 +11113,9 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
     if (remindBeforeJamaat.present) {
       map['remind_before_jamaat'] = Variable<int>(remindBeforeJamaat.value);
     }
+    if (calendarRule.present) {
+      map['calendar_rule'] = Variable<String>(calendarRule.value);
+    }
     if (isPaused.present) {
       map['is_paused'] = Variable<bool>(isPaused.value);
     }
@@ -11109,6 +11165,7 @@ class PrayersCompanion extends UpdateCompanion<PrayerRow> {
           ..write('jamaatAfterStart: $jamaatAfterStart, ')
           ..write('jamaatEstimated: $jamaatEstimated, ')
           ..write('remindBeforeJamaat: $remindBeforeJamaat, ')
+          ..write('calendarRule: $calendarRule, ')
           ..write('isPaused: $isPaused, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -21593,6 +21650,7 @@ typedef $$PrayersTableCreateCompanionBuilder =
       Value<bool> jamaatAfterStart,
       Value<bool> jamaatEstimated,
       Value<int?> remindBeforeJamaat,
+      Value<String?> calendarRule,
       Value<bool> isPaused,
       Value<int> rowid,
     });
@@ -21635,6 +21693,7 @@ typedef $$PrayersTableUpdateCompanionBuilder =
       Value<bool> jamaatAfterStart,
       Value<bool> jamaatEstimated,
       Value<int?> remindBeforeJamaat,
+      Value<String?> calendarRule,
       Value<bool> isPaused,
       Value<int> rowid,
     });
@@ -21830,6 +21889,11 @@ class $$PrayersTableFilterComposer
 
   ColumnFilters<int> get remindBeforeJamaat => $composableBuilder(
     column: $table.remindBeforeJamaat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calendarRule => $composableBuilder(
+    column: $table.calendarRule,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -22033,6 +22097,11 @@ class $$PrayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get calendarRule => $composableBuilder(
+    column: $table.calendarRule,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isPaused => $composableBuilder(
     column: $table.isPaused,
     builder: (column) => ColumnOrderings(column),
@@ -22193,6 +22262,11 @@ class $$PrayersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get calendarRule => $composableBuilder(
+    column: $table.calendarRule,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get isPaused =>
       $composableBuilder(column: $table.isPaused, builder: (column) => column);
 }
@@ -22262,6 +22336,7 @@ class $$PrayersTableTableManager
                 Value<bool> jamaatAfterStart = const Value.absent(),
                 Value<bool> jamaatEstimated = const Value.absent(),
                 Value<int?> remindBeforeJamaat = const Value.absent(),
+                Value<String?> calendarRule = const Value.absent(),
                 Value<bool> isPaused = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PrayersCompanion(
@@ -22302,6 +22377,7 @@ class $$PrayersTableTableManager
                 jamaatAfterStart: jamaatAfterStart,
                 jamaatEstimated: jamaatEstimated,
                 remindBeforeJamaat: remindBeforeJamaat,
+                calendarRule: calendarRule,
                 isPaused: isPaused,
                 rowid: rowid,
               ),
@@ -22344,6 +22420,7 @@ class $$PrayersTableTableManager
                 Value<bool> jamaatAfterStart = const Value.absent(),
                 Value<bool> jamaatEstimated = const Value.absent(),
                 Value<int?> remindBeforeJamaat = const Value.absent(),
+                Value<String?> calendarRule = const Value.absent(),
                 Value<bool> isPaused = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PrayersCompanion.insert(
@@ -22384,6 +22461,7 @@ class $$PrayersTableTableManager
                 jamaatAfterStart: jamaatAfterStart,
                 jamaatEstimated: jamaatEstimated,
                 remindBeforeJamaat: remindBeforeJamaat,
+                calendarRule: calendarRule,
                 isPaused: isPaused,
                 rowid: rowid,
               ),

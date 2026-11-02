@@ -73,6 +73,7 @@ final prayerDayViewProvider =
           day: day,
           sunToday: sunFor(today),
           sunTomorrow: sunFor(DateUtilsX.addDays(today, 1)),
+          hijriAdjust: ref.watch(prayerPrefsProvider).hijriAdjust,
         ),
       );
     });
@@ -95,6 +96,7 @@ final prayerMonthViewProvider = Provider.autoDispose<List<PrayerMonthDay>?>((
     month: DateTime(today.year, today.month + back),
     sunToday: sunFor(today),
     sunTomorrow: sunFor(DateUtilsX.addDays(today, 1)),
+    hijriAdjust: ref.watch(prayerPrefsProvider).hijriAdjust,
   );
 });
 
@@ -112,5 +114,6 @@ final prayerYearViewProvider = Provider.autoDispose<PrayerYear?>((ref) {
     now: now,
     sunToday: sunFor(today),
     sunTomorrow: sunFor(DateUtilsX.addDays(today, 1)),
+    hijriAdjust: ref.watch(prayerPrefsProvider).hijriAdjust,
   );
 });

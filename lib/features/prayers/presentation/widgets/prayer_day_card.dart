@@ -26,6 +26,7 @@ import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_day_parts.dart';
 
@@ -138,12 +139,13 @@ class _Row extends StatelessWidget {
     final fast = p.kind.isFast;
 
     // Line 2: what it is and when.
+    final profile = PrayerTraditionProfile.of(p.tradition);
     final details = [
-      p.kind.short,
+      profile.kindShort(p.kind),
       if (fast)
-        tr('Iftar {time}', {
-          'time': PrayerFormat.time(w.end ?? w.until, use24h: use24h),
-        })
+        profile.fast.endsWhen(
+          PrayerFormat.time(w.end ?? w.until, use24h: use24h),
+        )
       else if (w.end != null)
         tr('until {time}', {'time': PrayerFormat.time(w.end!, use24h: use24h)}),
     ].join(' · ');
@@ -158,9 +160,7 @@ class _Row extends StatelessWidget {
             : tr('{count} / {goal} today', {'count': count, 'goal': goal}),
       PrayerSlotState.open || PrayerSlotState.endingSoon when w.end != null =>
         fast
-            ? tr('Iftar {when}', {
-                'when': PrayerFormat.inTime(w.end!.difference(now)),
-              })
+            ? profile.fast.endsWhen(PrayerFormat.inTime(w.end!.difference(now)))
             : PrayerFormat.endsIn(w.end!.difference(now)),
       _ => null,
     };
@@ -170,7 +170,7 @@ class _Row extends StatelessWidget {
 
     final mark = markInRow && open && status == null && !counts
         ? PrayerMarkButton(
-            label: fast ? tr('Mark fasted') : tr('Mark prayed'),
+            label: profile.markLabel(p.kind),
             color: color,
             onTap: onMark,
           )

@@ -18,11 +18,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
+import 'package:focusflow/core/settings/prayer_prefs.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/data/location/prayer_locator.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer_school.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_presets.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
@@ -154,6 +156,7 @@ Future<void> savePrayerSetup(
   PrayerTradition tradition,
   List<Prayer> drafts, {
   required bool manual,
+  PrayerSchool? school,
 }) async {
   final prayers = manual ? PrayerPresets.manual(drafts) : drafts;
   if (prayers.isNotEmpty) {
@@ -162,8 +165,44 @@ Future<void> savePrayerSetup(
   await ref
       .read(settingsProvider.notifier)
       .update(
-        (s) => s.copyWith(prayer: s.prayer.copyWith(tradition: tradition.key)),
+        (s) => s.copyWith(
+          prayer: _withSchool(
+            s.prayer.copyWith(tradition: tradition.key),
+            tradition,
+            school,
+          ),
+        ),
       );
+}
+
+/// Remembers the school chosen for [tradition] (null = skipped / cleared).
+/// A Muslim's choice also sets the Asr time: the Hanafi shadow, or the
+/// standard one for every other school.
+Future<void> savePrayerSchool(
+  WidgetRef ref,
+  PrayerTradition tradition,
+  PrayerSchool? school,
+) => ref
+    .read(settingsProvider.notifier)
+    .update(
+      (s) => s.copyWith(prayer: _withSchool(s.prayer, tradition, school)),
+    );
+
+PrayerPrefs _withSchool(
+  PrayerPrefs prefs,
+  PrayerTradition tradition,
+  PrayerSchool? school,
+) {
+  final schools = {...prefs.schools};
+  if (school == null) {
+    schools.remove(tradition.key);
+  } else {
+    schools[tradition.key] = school.key;
+  }
+  final asr = tradition == PrayerTradition.islam && school != null
+      ? (school == PrayerSchool.hanafi ? 'hanafi' : 'standard')
+      : null;
+  return prefs.copyWith(schools: schools, asrSchool: asr);
 }
 
 /// A label for coordinates: "Near Dhaka" (nearest bundled city), else the

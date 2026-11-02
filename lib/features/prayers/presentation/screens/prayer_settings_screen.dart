@@ -73,6 +73,26 @@ class PrayerSettingsScreen extends ConsumerWidget {
         HighLatitudeRule.angleBased;
     final islam =
         PrayerTradition.fromKey(prefs.tradition) == PrayerTradition.islam;
+    final judaism =
+        PrayerTradition.fromKey(prefs.tradition) == PrayerTradition.judaism;
+    // The calculation method only matters to times worked out from an
+    // angle (dawn, afternoon, nightfall, the last third): Islam, and any
+    // practice of another tradition that uses one. Sunrise, sunset, noon
+    // and the halachic hours need nothing, so a Jewish or Hindu day does
+    // not show it.
+    final prayers = ref.watch(prayersProvider).valueOrNull ?? const [];
+    const angled = {
+      SolarEvent.dawn,
+      SolarEvent.asr,
+      SolarEvent.nightfall,
+      SolarEvent.lastThird,
+    };
+    final usesMethod =
+        islam ||
+        prayers.any(
+          (p) =>
+              angled.contains(p.start.event) || angled.contains(p.end?.event),
+        );
     String time(SolarEvent e) =>
         sun == null ? '' : PrayerFormat.time(sun.at(e), use24h: use24h);
     final located = prefs.locatedAt;
@@ -131,132 +151,138 @@ class PrayerSettingsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                gap,
-                FFGroupedList(
-                  label: tr('Calculation'),
-                  footer: sun == null
-                      ? null
-                      : tr(
-                          'Today: dawn {dawn} · noon {noon} · Asr {asr} · sunset {sunset}',
-                          {
-                            'dawn': time(SolarEvent.dawn),
-                            'noon': time(SolarEvent.noon),
-                            'asr': time(SolarEvent.asr),
-                            'sunset': time(SolarEvent.sunset),
-                          },
-                        ),
-                  children: [
-                    FFListRow(
-                      leading: _tile(FontAwesomeIcons.calculator),
-                      title: tr('Method'),
-                      value: method.label,
-                      chevron: true,
-                      onTap: () async {
-                        final picked = await showOptionSheet<PrayerCalcMethod>(
-                          context,
-                          title: tr('Calculation method'),
-                          subtitle: suggested == null
-                              ? null
-                              : tr('Suggested for your place: {method}', {
-                                  'method': suggested.label,
-                                }),
-                          options: [
-                            for (final m in [
-                              ?suggested,
-                              for (final m in PrayerCalcMethod.values)
-                                if (m != suggested) m,
-                            ])
-                              OptionItem(
-                                value: m,
-                                label: m.label,
-                                subtitle: m.ishaMinutes != null
-                                    ? tr(
-                                        'Fajr {f}° · Isha {i} min after sunset',
-                                        {'f': m.fajrAngle, 'i': m.ishaMinutes},
-                                      )
-                                    : tr('Fajr {f}° · Isha {i}°', {
-                                        'f': m.fajrAngle,
-                                        'i': m.ishaAngle ?? 0,
-                                      }),
-                                icon: FontAwesomeIcons.calculator,
-                                colors: PrayerStyle.module,
-                              ),
-                          ],
-                          selected: method,
-                          accent: PrayerStyle.module.solid,
-                        );
-                        if (picked != null) {
-                          await _edit(
-                            ref,
-                            (p) => p.copyWith(method: picked.value.name),
-                          );
-                        }
-                      },
-                    ),
-                    FFListRow(
-                      leading: _tile(FontAwesomeIcons.sun),
-                      title: tr('Asr'),
-                      value: asr.label,
-                      chevron: true,
-                      onTap: () async {
-                        final picked = await showOptionSheet<AsrSchool>(
-                          context,
-                          title: tr('Asr time'),
-                          options: [
-                            for (final a in AsrSchool.values)
-                              OptionItem(
-                                value: a,
-                                label: a.label,
-                                icon: FontAwesomeIcons.sun,
-                                colors: PrayerStyle.module,
-                              ),
-                          ],
-                          selected: asr,
-                          accent: PrayerStyle.module.solid,
-                        );
-                        if (picked != null) {
-                          await _edit(
-                            ref,
-                            (p) => p.copyWith(asrSchool: picked.value.name),
-                          );
-                        }
-                      },
-                    ),
-                    FFListRow(
-                      leading: _tile(FontAwesomeIcons.globe),
-                      title: tr('High latitudes'),
-                      value: high.label,
-                      chevron: true,
-                      onTap: () async {
-                        final picked = await showOptionSheet<HighLatitudeRule>(
-                          context,
-                          title: tr('High latitudes'),
-                          subtitle: tr(
-                            'Where dawn or nightfall never quite happen in summer',
+                if (usesMethod) ...[
+                  gap,
+                  FFGroupedList(
+                    label: tr('Calculation'),
+                    footer: sun == null
+                        ? null
+                        : tr(
+                            'Today: dawn {dawn} · noon {noon} · Asr {asr} · sunset {sunset}',
+                            {
+                              'dawn': time(SolarEvent.dawn),
+                              'noon': time(SolarEvent.noon),
+                              'asr': time(SolarEvent.asr),
+                              'sunset': time(SolarEvent.sunset),
+                            },
                           ),
-                          options: [
-                            for (final r in HighLatitudeRule.values)
-                              OptionItem(
-                                value: r,
-                                label: r.label,
-                                icon: FontAwesomeIcons.globe,
-                                colors: PrayerStyle.module,
-                              ),
-                          ],
-                          selected: high,
-                          accent: PrayerStyle.module.solid,
-                        );
-                        if (picked != null) {
-                          await _edit(
-                            ref,
-                            (p) =>
-                                p.copyWith(highLatitudeRule: picked.value.name),
+                    children: [
+                      FFListRow(
+                        leading: _tile(FontAwesomeIcons.calculator),
+                        title: tr('Method'),
+                        value: method.label,
+                        chevron: true,
+                        onTap: () async {
+                          final picked = await showOptionSheet<PrayerCalcMethod>(
+                            context,
+                            title: tr('Calculation method'),
+                            subtitle: suggested == null
+                                ? null
+                                : tr('Suggested for your place: {method}', {
+                                    'method': suggested.label,
+                                  }),
+                            options: [
+                              for (final m in [
+                                ?suggested,
+                                for (final m in PrayerCalcMethod.values)
+                                  if (m != suggested) m,
+                              ])
+                                OptionItem(
+                                  value: m,
+                                  label: m.label,
+                                  subtitle: m.ishaMinutes != null
+                                      ? tr(
+                                          'Fajr {f}° · Isha {i} min after sunset',
+                                          {
+                                            'f': m.fajrAngle,
+                                            'i': m.ishaMinutes,
+                                          },
+                                        )
+                                      : tr('Fajr {f}° · Isha {i}°', {
+                                          'f': m.fajrAngle,
+                                          'i': m.ishaAngle ?? 0,
+                                        }),
+                                  icon: FontAwesomeIcons.calculator,
+                                  colors: PrayerStyle.module,
+                                ),
+                            ],
+                            selected: method,
+                            accent: PrayerStyle.module.solid,
                           );
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                          if (picked != null) {
+                            await _edit(
+                              ref,
+                              (p) => p.copyWith(method: picked.value.name),
+                            );
+                          }
+                        },
+                      ),
+                      FFListRow(
+                        leading: _tile(FontAwesomeIcons.sun),
+                        title: tr('Asr'),
+                        value: asr.label,
+                        chevron: true,
+                        onTap: () async {
+                          final picked = await showOptionSheet<AsrSchool>(
+                            context,
+                            title: tr('Asr time'),
+                            options: [
+                              for (final a in AsrSchool.values)
+                                OptionItem(
+                                  value: a,
+                                  label: a.label,
+                                  icon: FontAwesomeIcons.sun,
+                                  colors: PrayerStyle.module,
+                                ),
+                            ],
+                            selected: asr,
+                            accent: PrayerStyle.module.solid,
+                          );
+                          if (picked != null) {
+                            await _edit(
+                              ref,
+                              (p) => p.copyWith(asrSchool: picked.value.name),
+                            );
+                          }
+                        },
+                      ),
+                      FFListRow(
+                        leading: _tile(FontAwesomeIcons.globe),
+                        title: tr('High latitudes'),
+                        value: high.label,
+                        chevron: true,
+                        onTap: () async {
+                          final picked = await showOptionSheet<HighLatitudeRule>(
+                            context,
+                            title: tr('High latitudes'),
+                            subtitle: tr(
+                              'Where dawn or nightfall never quite happen in summer',
+                            ),
+                            options: [
+                              for (final r in HighLatitudeRule.values)
+                                OptionItem(
+                                  value: r,
+                                  label: r.label,
+                                  icon: FontAwesomeIcons.globe,
+                                  colors: PrayerStyle.module,
+                                ),
+                            ],
+                            selected: high,
+                            accent: PrayerStyle.module.solid,
+                          );
+                          if (picked != null) {
+                            await _edit(
+                              ref,
+                              (p) => p.copyWith(
+                                highLatitudeRule: picked.value.name,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
                 if (islam) ...[
                   gap,
                   FFGroupedList(
@@ -306,6 +332,34 @@ class PrayerSettingsScreen extends ConsumerWidget {
                             );
                           }
                         },
+                      ),
+                    ],
+                  ),
+                ],
+                if (judaism) ...[
+                  gap,
+                  FFGroupedList(
+                    label: tr('Shabbat and Yom Tov'),
+                    footer: tr(
+                      'Reminders stay silent from candle lighting to nightfall. Times follow your saved location.',
+                    ),
+                    children: [
+                      FFListRow.toggle(
+                        leading: _tile(FontAwesomeIcons.menorah),
+                        title: tr('No reminders on Shabbat and Yom Tov'),
+                        value: prefs.shabbatQuiet,
+                        onChanged: (v) => unawaited(
+                          _edit(ref, (p) => p.copyWith(shabbatQuiet: v)),
+                        ),
+                      ),
+                      FFListRow.toggle(
+                        leading: _tile(FontAwesomeIcons.earthAmericas),
+                        title: tr('I keep Yom Tov in Israel'),
+                        subtitle: tr('One day instead of two'),
+                        value: prefs.inIsrael,
+                        onChanged: (v) => unawaited(
+                          _edit(ref, (p) => p.copyWith(inIsrael: v)),
+                        ),
                       ),
                     ],
                   ),

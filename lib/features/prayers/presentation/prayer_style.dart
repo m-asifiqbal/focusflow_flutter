@@ -19,8 +19,10 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/theme/module_style.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/services/calendar_rules.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_stats.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
 
 abstract final class PrayerStyle {
   static ModuleColors get module => ModuleStyle.prayers.colors;
@@ -140,6 +142,36 @@ abstract final class PrayerStyle {
   /// The moon's tone high in the sky (a pale cool token); low it is warm.
   static const Color moon = AppPalette.indigo100;
 
+  /// The icon of a kind of practice in [tradition]'s world: the Quran for
+  /// Islamic reading, a Bible, a Torah scroll, a lamp for puja, a leaf for
+  /// a sit.
+  static IconData kindIcon(PrayerKind kind, PrayerTradition tradition) {
+    if (kind.isFast) return FontAwesomeIcons.bowlFood;
+    return switch (kind) {
+      PrayerKind.dhikr => FontAwesomeIcons.ellipsis,
+      PrayerKind.meditation => FontAwesomeIcons.spa,
+      PrayerKind.recitation => switch (tradition) {
+        PrayerTradition.islam => FontAwesomeIcons.bookQuran,
+        PrayerTradition.christianity => FontAwesomeIcons.bookBible,
+        PrayerTradition.judaism => FontAwesomeIcons.scroll,
+        _ => FontAwesomeIcons.bookOpen,
+      },
+      PrayerKind.service => switch (tradition) {
+        PrayerTradition.christianity => FontAwesomeIcons.church,
+        PrayerTradition.judaism ||
+        PrayerTradition.hinduism => FontAwesomeIcons.fire,
+        PrayerTradition.buddhism => FontAwesomeIcons.vihara,
+        _ => FontAwesomeIcons.placeOfWorship,
+      },
+      _ => switch (tradition) {
+        PrayerTradition.islam => FontAwesomeIcons.personPraying,
+        PrayerTradition.hinduism => FontAwesomeIcons.om,
+        PrayerTradition.buddhism => FontAwesomeIcons.dharmachakra,
+        _ => FontAwesomeIcons.handsPraying,
+      },
+    };
+  }
+
   /// The icon of a place: Home, Work, a house of worship (by the words in
   /// the active language or English, so a typed "Masjid" or "office"
   /// works too), else a map pin.
@@ -208,9 +240,9 @@ abstract final class PrayerFormat {
     final clock = PrayerFormat.time(at, use24h: use24h);
     // An estimate is marked "~" (not the mosque's own time).
     final time = s.prayer.jamaat?.estimated ?? false ? '~$clock' : clock;
-    final label = s.prayer.tradition == PrayerTradition.islam
-        ? tr('Jamaat {time}', {'time': time})
-        : tr('Congregation {time}', {'time': time});
+    final label = PrayerTraditionProfile.of(
+      s.prayer.tradition,
+    ).congregationLine(time);
     final ahead = at.difference(now);
     if (s.status != null || ahead.isNegative || ahead.inHours >= 3) {
       return label;
@@ -229,7 +261,16 @@ abstract final class PrayerFormat {
     return '$sign${tr('{m} min', {'m': minutes.abs()})}';
   }
 
-  /// "Every day", "Mon, Thu", "Fri".
+  /// How [p] repeats when not every day: the calendar rule ("Ramadan") or
+  /// the weekdays; null for every day.
+  static String? repeat(Prayer p) {
+    final rule = p.calendar;
+    if (rule != null) return CalendarRules.describe(rule);
+    return p.weekdaysMask & 0x7F == 0x7F ? null : weekdays(p.weekdaysMask);
+  }
+
+  /// "Every day", "Mon, Thu", "Fri", "Mon – Fri, Sun" (a run of three or
+  /// more days is written as a range).
   static String weekdays(int mask) {
     if (mask & 0x7F == 0x7F) return tr('Every day');
     final names = [
@@ -241,9 +282,26 @@ abstract final class PrayerFormat {
       tr('Sat'),
       tr('Sun'),
     ];
-    return [
-      for (var i = 0; i < 7; i++)
-        if (mask & (1 << i) != 0) names[i],
-    ].join(', ');
+    final parts = <String>[];
+    var i = 0;
+    while (i < 7) {
+      if (mask & (1 << i) == 0) {
+        i++;
+        continue;
+      }
+      var j = i;
+      while (j + 1 < 7 && mask & (1 << (j + 1)) != 0) {
+        j++;
+      }
+      if (j - i >= 2) {
+        parts.add('${names[i]} – ${names[j]}');
+      } else {
+        for (var k = i; k <= j; k++) {
+          parts.add(names[k]);
+        }
+      }
+      i = j + 1;
+    }
+    return parts.join(', ');
   }
 }

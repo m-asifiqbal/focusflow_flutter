@@ -26,6 +26,7 @@ import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_jamaat_estimate.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_editor_sheets.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/picker_common.dart';
@@ -54,7 +55,8 @@ class PrayerJamaatSection extends StatelessWidget {
   static const _afterChoices = [0, 5, 10, 15, 20, 30, 45, 60, 90];
   static const _remindChoices = [0, 5, 10, 15, 20, 30];
 
-  bool get _islam => draft.tradition == PrayerTradition.islam;
+  PrayerTraditionProfile get _profile =>
+      PrayerTraditionProfile.of(draft.tradition);
 
   PrayerWindow get _window => PrayerSchedule.windowOn(
     draft,
@@ -104,7 +106,7 @@ class PrayerJamaatSection extends StatelessWidget {
 
   String _remindLabel(int? m) {
     if (m == null) return tr('Off');
-    if (m == 0) return tr('At the jamaat');
+    if (m == 0) return _profile.congregationAtLabel;
     return tr('{m} min before', {'m': m});
   }
 
@@ -137,9 +139,7 @@ class PrayerJamaatSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FFSectionLabel(
-          _islam ? tr('Jamaat (congregation)') : tr('Congregation time'),
-        ),
+        FFSectionLabel(_profile.congregationTitle),
         const SizedBox(height: AppSpacing.sm),
         // Chips, not a segmented bar: four choices still fit (wrapping) at
         // 360 pt, large text and in every language.
@@ -150,7 +150,8 @@ class PrayerJamaatSection extends StatelessWidget {
             for (final (m, label, icon) in [
               (_Mode.off, tr('Off'), null),
               // Only the five daily prayers have a typical time.
-              if (role != null || mode == _Mode.auto)
+              if (_profile.hasCongregationEstimate &&
+                  (role != null || mode == _Mode.auto))
                 (_Mode.auto, tr('Auto'), FontAwesomeIcons.wandMagicSparkles),
               (_Mode.at, tr('Set time'), null),
               (_Mode.after, tr('After start'), null),
@@ -225,9 +226,7 @@ class PrayerJamaatSection extends StatelessWidget {
                   onTap: () async {
                     final m = await showPrayerTimeSheet(
                       context,
-                      title: _islam
-                          ? tr('Jamaat time')
-                          : tr('Congregation time'),
+                      title: _profile.congregationTimeLabel,
                       minutes: j.minutes,
                       use24h: use24h,
                     );
@@ -264,9 +263,7 @@ class PrayerJamaatSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               [
-                _islam
-                    ? tr('Today: jamaat at {time}', {'time': todayAt})
-                    : tr('Today: congregation at {time}', {'time': todayAt}),
+                _profile.congregationToday(todayAt),
                 if (outside) tr('outside today\'s window'),
               ].join(' · '),
               style: text.meta.copyWith(

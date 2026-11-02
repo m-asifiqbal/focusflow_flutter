@@ -24,12 +24,14 @@ import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/entities/prayer_school.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_presets.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_flows.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_location_sheets.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_school_picker.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_tradition_grid.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
@@ -44,15 +46,25 @@ class PrayerSetupScreen extends ConsumerStatefulWidget {
 
 class _PrayerSetupScreenState extends ConsumerState<PrayerSetupScreen> {
   PrayerTradition? _tradition;
+  PrayerSchool? _school;
   List<PrayerPreset> _presets = const [];
   final Set<int> _picked = {};
   bool _manual = false;
   bool _saving = false;
 
   void _pick(PrayerTradition t) {
-    final presets = PrayerPresets.of(t, ref.read(clockProvider).now());
+    // The school chosen before for this tradition stays chosen.
+    final school = PrayerSchool.fromKey(
+      ref.read(prayerPrefsProvider).schoolOf(t.key),
+    );
+    final presets = PrayerPresets.of(
+      t,
+      ref.read(clockProvider).now(),
+      school: school,
+    );
     setState(() {
       _tradition = t;
+      _school = school;
       _presets = presets;
       _picked
         ..clear()
@@ -62,6 +74,27 @@ class _PrayerSetupScreenState extends ConsumerState<PrayerSetupScreen> {
         ]);
       // Sun-based by default only where the tradition times by the sun.
       _manual = !t.solar && !presets.any((p) => p.draft.usesSun);
+    });
+  }
+
+  /// A school (or "Not sure") picked: its own starting set.
+  void _setSchool(PrayerSchool? school) {
+    final t = _tradition;
+    if (t == null) return;
+    final presets = PrayerPresets.of(
+      t,
+      ref.read(clockProvider).now(),
+      school: school,
+    );
+    setState(() {
+      _school = school;
+      _presets = presets;
+      _picked
+        ..clear()
+        ..addAll([
+          for (var i = 0; i < presets.length; i++)
+            if (presets[i].core) i,
+        ]);
     });
   }
 
@@ -79,7 +112,7 @@ class _PrayerSetupScreenState extends ConsumerState<PrayerSetupScreen> {
         !ref.read(prayerPrefsProvider).hasLocation;
     if (wantsPlace) await showPrayerLocationSheet(context, ref);
     if (!mounted) return;
-    await savePrayerSetup(ref, t, drafts, manual: _manual);
+    await savePrayerSetup(ref, t, drafts, manual: _manual, school: _school);
     if (!mounted) return;
     if (t == PrayerTradition.custom || drafts.isEmpty) {
       context.pushReplacement(AppRoutes.newPrayer);
@@ -115,6 +148,14 @@ class _PrayerSetupScreenState extends ConsumerState<PrayerSetupScreen> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 PrayerTraditionGrid(selected: t, onPick: _pick),
+                if (t != null && PrayerSchool.of(t).isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.section),
+                  PrayerSchoolPicker(
+                    tradition: t,
+                    selected: _school,
+                    onChanged: _setSchool,
+                  ),
+                ],
                 if (t != null && _presets.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.section),
                   _times(context),
@@ -224,12 +265,15 @@ class _PrayerSetupScreenState extends ConsumerState<PrayerSetupScreen> {
                     color: on ? PrayerStyle.of(draft) : ff.inkFaint,
                   ),
                   title: draft.displayName,
+                  subtitleLines: 3,
                   subtitle: [
-                    PrayerFormat.window(window, use24h: use24h),
-                    if (draft.weekdaysMask != Prayer.everyDay)
-                      PrayerFormat.weekdays(draft.weekdaysMask),
-                    if (!_presets[i].core) tr('Optional'),
-                  ].join(' · '),
+                    [
+                      PrayerFormat.window(window, use24h: use24h),
+                      ?PrayerFormat.repeat(draft),
+                      if (!_presets[i].core) tr('Optional'),
+                    ].join(' · '),
+                    if (_presets[i].hint.isNotEmpty) _presets[i].hint,
+                  ].join('\n'),
                   onTap: () =>
                       setState(() => on ? _picked.remove(i) : _picked.add(i)),
                   semanticLabel: draft.displayName,

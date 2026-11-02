@@ -14,6 +14,8 @@
 ///     congregation's time (jamaat), only while the prayer is not marked;
 ///   • `pry:<day>:<id>:z` — a snoozed start reminder, at the snooze end
 ///     (its own key, so the original alarm is cancelled, not doubled).
+/// With Settings › Prayer › Shabbat and Yom Tov on, none of these is planned
+/// inside Shabbat or a Yom Tov (PrayerQuiet).
 /// Sun-based windows come from the saved location (PrayerSun); without one
 /// every rule uses its fallback clock time. Prayer reminders ignore quiet
 /// hours: Fajr is at dawn by definition.
@@ -27,6 +29,8 @@ import 'package:focusflow/core/notifications/planning/zone_calendar.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
+import 'package:focusflow/features/prayers/domain/services/tradition_profile.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_quiet.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_sun.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
@@ -66,6 +70,10 @@ abstract final class PrayerPlanner {
     final now = input.now;
     final sunFor = PrayerSun.dayFn(prefs);
     final logs = {for (final l in input.prayerLogs) l.id: l};
+    // Shabbat and Yom Tov: no reminders (a Jewish practice, opt-in).
+    final quiet =
+        prefs.shabbatQuiet &&
+        PrayerTradition.fromKey(prefs.tradition) == PrayerTradition.judaism;
     final out = <PlannedNotification>[];
     // Yesterday too: a window that began yesterday may end tonight.
     for (
@@ -75,15 +83,21 @@ abstract final class PrayerPlanner {
     ) {
       final dayKey = ZoneCalendar.dayKey(day);
       for (final p in input.prayers) {
-        if (!PrayerSchedule.isDueOn(p, day)) continue;
+        if (!PrayerSchedule.isDueOn(p, day, hijriAdjust: prefs.hijriAdjust)) {
+          continue;
+        }
         final (start, end) = window(input, p, day, sunFor);
         final log = logs[PrayerLog.idFor(p.id, dayKey)];
         final status = log?.status;
         final marked = status != null && status != PrayerStatus.pending;
         void add(PlannedNotification? n) {
-          if (n != null && n.fireAt.isAfter(now) && n.fireAt.isBefore(until)) {
-            out.add(n);
+          if (n == null || !n.fireAt.isAfter(now)) return;
+          if (!n.fireAt.isBefore(until)) return;
+          if (quiet &&
+              PrayerQuiet.isQuiet(n.fireAt, sunFor, inIsrael: prefs.inIsrael)) {
+            return;
           }
+          out.add(n);
         }
 
         final snooze = log?.snoozedUntil;
@@ -207,7 +221,7 @@ abstract final class PrayerPlanner {
     if (input.settings.prayer.discreet) {
       title = tr('Reminder · {time}', {'time': time});
     } else if (p.kind.isFast) {
-      title = tr('Suhoor ends at {time}', {'time': time});
+      title = PrayerTraditionProfile.of(p.tradition).fast.startsAt(time);
     } else if (!snoozed && lead > 0) {
       title = tr('{name} in {m} min', {'name': name, 'm': lead});
     } else {
@@ -240,28 +254,19 @@ abstract final class PrayerPlanner {
     final name = p.displayName;
     final time = input.formatTime(jamaat);
     final lead = p.remindBeforeJamaat ?? 0;
-    final islam = p.tradition == PrayerTradition.islam;
+    final profile = PrayerTraditionProfile.of(p.tradition);
     final String title;
     if (input.settings.prayer.discreet) {
       title = tr('Reminder · {time}', {'time': time});
     } else if (lead <= 0) {
-      title = islam
-          ? tr('{name} jamaat now', {'name': name})
-          : tr('{name} with the congregation now', {'name': name});
+      title = profile.congregationNow(name);
     } else {
-      title = islam
-          ? tr('{name} jamaat in {m} min', {'name': name, 'm': lead})
-          : tr('{name} with the congregation in {m} min', {
-              'name': name,
-              'm': lead,
-            });
+      title = profile.congregationSoon(name, lead);
     }
     final body = input.settings.prayer.discreet
         ? '$name · $time'
         : [
-            islam
-                ? tr('Jamaat at {time}', {'time': time})
-                : tr('Congregation at {time}', {'time': time}),
+            profile.congregationBody(time),
             if (p.place.trim().isNotEmpty) p.place.trim(),
           ].join(' · ');
     return _notification(
@@ -292,9 +297,8 @@ abstract final class PrayerPlanner {
     if (input.settings.prayer.discreet) {
       title = tr('Reminder · {time}', {'time': time});
     } else if (p.kind.isFast) {
-      title = before <= 0
-          ? tr('Iftar time')
-          : tr('Iftar in {m} min', {'m': before});
+      final fast = PrayerTraditionProfile.of(p.tradition).fast;
+      title = before <= 0 ? fast.endsNow : fast.endsIn(before);
     } else {
       title = before <= 0
           ? tr('{name} is ending', {'name': name})
