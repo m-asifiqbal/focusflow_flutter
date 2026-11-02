@@ -60,7 +60,7 @@ class HabitDetailHero extends StatelessWidget {
           color: colors.solid,
           trackColor: colors.softFor(ff.brightness),
           semanticLabel: tr('Today {name}: {ringValue}', {
-            'name': habit.name,
+            'name': habit.displayName,
             'ringValue': ringValue,
           }),
           child: Column(
@@ -91,7 +91,7 @@ class HabitDetailHero extends StatelessWidget {
         Semantics(
           header: true,
           child: Text(
-            habit.name,
+            habit.displayName,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

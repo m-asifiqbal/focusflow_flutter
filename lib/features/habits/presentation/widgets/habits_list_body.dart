@@ -119,7 +119,7 @@ class _HabitRow extends ConsumerWidget {
       item: itemRef,
       isPinned: habit.isPinned,
       isFavorite: habit.isFavorite,
-      title: habit.name,
+      title: habit.displayName,
       completeLabel: tr('Log'),
       onComplete: () => logHabitToday(context, ref, habit.id),
       child: tracked,
@@ -131,7 +131,7 @@ class _HabitRow extends ConsumerWidget {
     WidgetRef ref,
     ItemRef itemRef,
   ) {
-    final name = status.habit.name;
+    final name = status.habit.displayName;
     return showFFActionSheet(
       context,
       FFActionSheetData(
@@ -235,7 +235,9 @@ class HabitReorderGroup extends ConsumerWidget {
               child: ReorderableDragStartListener(
                 index: i,
                 child: Semantics(
-                  label: tr('Reorder {name}', {'name': list[i].habit.name}),
+                  label: tr('Reorder {name}', {
+                    'name': list[i].habit.displayName,
+                  }),
                   button: true,
                   child: SizedBox(
                     width: AppSizes.minTap + AppSpacing.lg,

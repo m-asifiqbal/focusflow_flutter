@@ -33,7 +33,7 @@ Future<void> checkInHabit(
     showUndoSnackbar(
       context,
       message: tr('Slip logged · "{name}" streak reset', {
-        'name': status.habit.name,
+        'name': status.habit.displayName,
       }),
       icon: FontAwesomeIcons.rotateLeft,
       onUndo: () => logger.undo(status.habit, before),

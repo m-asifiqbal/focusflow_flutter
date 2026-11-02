@@ -210,7 +210,7 @@ abstract final class CalendarRules {
     }
     return CalendarEntry(
       ref: s.habit.ref,
-      title: s.habit.name,
+      title: s.habit.displayName,
       meta: _meta(ItemType.habit, detail),
       done: s.isDone,
     );

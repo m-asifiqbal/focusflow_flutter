@@ -115,7 +115,7 @@ abstract final class HabitPlanner {
 
   static String _title(HabitDayStatus s, bool isToday) {
     final h = s.habit;
-    final name = h.name.trim().isEmpty ? tr('Habit') : h.name.trim();
+    final name = h.displayName.isEmpty ? tr('Habit') : h.displayName;
     if (h.isQuit || h.isYesNo) return name;
     final count = isToday ? s.count : 0;
     return '$name — $count/${h.targetCount}';
@@ -216,7 +216,7 @@ abstract final class HabitPlanner {
     final dayKey = ZoneCalendar.dayKey(day);
     final key = 'stk:$dayKey';
     final single = atRisk.length == 1 ? atRisk.first : null;
-    final names = atRisk.map((r) => r.$1.habit.name.trim()).join(', ');
+    final names = atRisk.map((r) => r.$1.habit.displayName.trim()).join(', ');
     final habit = single?.$1.habit;
     return PlannedNotification(
       id: notificationIdForKey(key),

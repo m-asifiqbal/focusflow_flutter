@@ -218,7 +218,7 @@ class WidgetSnapshotBuilder {
           for (final s in dueHabits.take(maxItems))
             {
               'id': s.habit.id,
-              't': s.habit.name,
+              't': s.habit.displayName,
               'sub': s.progressLabel,
               'done': s.isDone,
               'c': s.count,

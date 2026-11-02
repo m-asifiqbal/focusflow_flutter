@@ -113,9 +113,9 @@ class _HabitDayLogSheetState extends ConsumerState<HabitDayLogSheet> {
         const SizedBox(height: AppSpacing.xs),
         Text(
           habit.isQuit
-              ? tr('{name} · slips that day', {'name': habit.name})
+              ? tr('{name} · slips that day', {'name': habit.displayName})
               : tr('{name} · goal {targetCount} {unit}', {
-                  'name': habit.name,
+                  'name': habit.displayName,
                   'targetCount': habit.targetCount,
                   'unit': HabitWords.shown(habit.unit),
                 }),

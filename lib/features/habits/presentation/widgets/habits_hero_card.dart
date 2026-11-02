@@ -109,7 +109,9 @@ class HabitsHeroCard extends StatelessWidget {
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
-                                TextSpan(text: ' · ${longest.habit.name}'),
+                                TextSpan(
+                                  text: ' · ${longest.habit.displayName}',
+                                ),
                               ],
                             ),
                       maxLines: 3,

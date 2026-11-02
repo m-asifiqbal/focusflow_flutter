@@ -104,8 +104,8 @@ class HabitEditorScreen extends ConsumerWidget {
     if (habit == null) return;
     final refs = [habit.ref];
     final done = delete
-        ? await deleteItems(context, ref, refs, title: habit.name)
-        : await archiveItems(context, ref, refs, title: habit.name);
+        ? await deleteItems(context, ref, refs, title: habit.displayName)
+        : await archiveItems(context, ref, refs, title: habit.displayName);
     if (done && context.mounted) context.go(AppRoutes.habits);
   }
 

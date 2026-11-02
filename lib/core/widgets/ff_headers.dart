@@ -118,10 +118,14 @@ class FFNavHeader extends StatelessWidget {
     this.padding = const EdgeInsetsDirectional.symmetric(
       horizontal: AppSpacing.xl,
     ),
+    this.titleSize = 17,
     super.key,
   });
 
   final String? title;
+
+  /// The title's font size.
+  final double titleSize;
 
   /// Replaces [title] (e.g. a tappable month picker).
   final Widget? titleWidget;
@@ -152,7 +156,7 @@ class FFNavHeader extends StatelessWidget {
                 title!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.text.navTitle.copyWith(fontSize: 17),
+                style: context.text.navTitle.copyWith(fontSize: titleSize),
               ),
             ),
           if (subtitle != null) ...[

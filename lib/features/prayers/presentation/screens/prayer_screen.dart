@@ -113,6 +113,7 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
               FFNavHeader(
                 leading: const FFBackButton(),
                 title: tr('Prayer'),
+                titleSize: 18.5,
                 trailing: actions,
               ),
               Expanded(

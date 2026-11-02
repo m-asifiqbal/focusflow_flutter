@@ -330,7 +330,7 @@ class InsightsAggregator {
           b.streak.best,
         ).compareTo(weight(a.streak, a.streak.best));
         if (best != 0) return best;
-        return a.habit.name.toLowerCase().compareTo(b.habit.name.toLowerCase());
+        return a.habit.displayName.toLowerCase().compareTo(b.habit.displayName.toLowerCase());
       });
     final top = maxStreakRows == null
         ? sorted
@@ -342,7 +342,7 @@ class InsightsAggregator {
       for (final s in top)
         StreakRow(
           habitId: s.habit.id,
-          name: s.habit.name,
+          name: s.habit.displayName,
           iconKey: s.habit.iconKey,
           colorHex: s.habit.colorHex,
           streak: s.streak,

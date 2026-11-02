@@ -51,7 +51,7 @@ class HabitCard extends StatelessWidget {
 
   /// The button's spoken action for [s].
   static String checkLabel(HabitDayStatus s) {
-    final name = s.habit.name;
+    final name = s.habit.displayName;
     if (s.habit.isQuit) {
       return s.isDone
           ? tr('Log a slip for {name}', {'name': name})
@@ -84,7 +84,7 @@ class HabitCard extends StatelessWidget {
           stroke: HabitDimens.cardRingStroke,
           color: colors.solid,
           trackColor: colors.softFor(brightness),
-          semanticLabel: tr('{name} progress', {'name': habit.name}),
+          semanticLabel: tr('{name} progress', {'name': habit.displayName}),
           child: Icon(
             HabitIcons.of(habit.iconKey),
             size: HabitDimens.cardIcon,
@@ -98,7 +98,7 @@ class HabitCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                habit.name,
+                habit.displayName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: text.cardTitle.copyWith(color: ff.ink),
@@ -122,7 +122,7 @@ class HabitCard extends StatelessWidget {
     return FFCard(
       onTap: onTap,
       onLongPress: onLongPress,
-      semanticLabel: '${habit.name}, ${status.progressLabel}',
+      semanticLabel: '${habit.displayName}, ${status.progressLabel}',
       padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,

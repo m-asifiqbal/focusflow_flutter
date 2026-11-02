@@ -82,7 +82,7 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
   /// Undo message for Save, when the new amount takes progress away.
   String? _saveUndo() {
     final s = widget.status;
-    final name = s.habit.name;
+    final name = s.habit.displayName;
     if (s.habit.isQuit) {
       return _count > s.count
           ? tr('Slip logged · "{name}" streak reset', {'name': name})
@@ -118,7 +118,7 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          habit.name,
+          habit.displayName,
           textAlign: TextAlign.center,
           style: text.title,
           maxLines: 2,
@@ -184,7 +184,9 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
                 icon: FontAwesomeIcons.forward,
                 onPressed: () => _run(
                   (l) => l.skip(widget.status),
-                  undo: tr('Skipped today · "{name}"', {'name': habit.name}),
+                  undo: tr('Skipped today · "{name}"', {
+                    'name': habit.displayName,
+                  }),
                 ),
               ),
             ),
@@ -198,7 +200,9 @@ class _HabitAmountSheetState extends ConsumerState<HabitAmountSheet> {
                   (l) => l.clear(widget.status),
                   undo: widget.status.log == null
                       ? null
-                      : tr('Cleared today · "{name}"', {'name': habit.name}),
+                      : tr('Cleared today · "{name}"', {
+                          'name': habit.displayName,
+                        }),
                 ),
               ),
             ),

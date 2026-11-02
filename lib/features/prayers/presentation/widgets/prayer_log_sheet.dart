@@ -129,7 +129,9 @@ class _LogSheetState extends State<_LogSheet> {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        FFGroupedList(
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: [
             for (final s in [
               PrayerStatus.onTime,
@@ -138,17 +140,10 @@ class _LogSheetState extends State<_LogSheet> {
               PrayerStatus.missed,
               PrayerStatus.excused,
             ])
-              FFListRow(
-                title: s.labelFor(kind),
-                leading: Icon(
-                  s == _status
-                      ? FontAwesomeIcons.solidCircleCheck
-                      : FontAwesomeIcons.circle,
-                  size: 18,
-                  color: s == _status ? ff.primary : ff.inkFaint,
-                ),
+              FFChip(
+                label: s.labelFor(kind),
+                selected: s == _status,
                 onTap: () => setState(() => _status = s),
-                semanticLabel: s.labelFor(kind),
               ),
           ],
         ),
@@ -191,20 +186,30 @@ class _LogSheetState extends State<_LogSheet> {
           ),
         ],
         const SizedBox(height: AppSpacing.xl),
-        FFPrimaryButton(
-          label: tr('Save'),
-          onPressed: () => Navigator.of(context).pop(
-            PrayerLogSave(
-              _status,
-              praying ? selectedPlace : null,
-              praying && _congregation,
+        Row(
+          children: [
+            Expanded(
+              child: FFSecondaryButton(
+                height: AppSizes.secondaryButton - 2,
+                label: tr('Close'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        FFSecondaryButton(
-          label: tr('Close'),
-          onPressed: () => Navigator.of(context).pop(),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: FFPrimaryButton(
+                height: AppSizes.primaryButton - 2,
+                label: tr('Save'),
+                onPressed: () => Navigator.of(context).pop(
+                  PrayerLogSave(
+                    _status,
+                    praying ? selectedPlace : null,
+                    praying && _congregation,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(

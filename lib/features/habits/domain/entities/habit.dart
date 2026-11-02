@@ -121,6 +121,11 @@ class Habit {
   bool get isNew => id.isEmpty;
   bool get isQuit => kind == HabitKind.quit;
 
+  /// The name to show: a quick-start habit ("Meditate", "Drink water") is
+  /// saved under its English name and shown in the active language; any
+  /// other name is shown as typed.
+  String get displayName => HabitWords.shown(name.trim());
+
   /// Yes/no habit (target 1): the list button toggles instead of counting.
   bool get isYesNo => targetCount <= 1;
   bool get isArchived => archivedAt != null;

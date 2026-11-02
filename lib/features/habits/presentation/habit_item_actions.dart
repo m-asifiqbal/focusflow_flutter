@@ -49,8 +49,8 @@ Future<ModuleItemActions> habitItemActions(
           showUndoSnackbar(
             context,
             message: paused
-                ? tr('"{name}" resumed', {'name': habit.name})
-                : tr('"{name}" paused', {'name': habit.name}),
+                ? tr('"{name}" resumed', {'name': habit.displayName})
+                : tr('"{name}" paused', {'name': habit.displayName}),
             icon: paused ? FontAwesomeIcons.play : FontAwesomeIcons.pause,
             onUndo: () => logger.setPaused(habit.id, paused),
           );

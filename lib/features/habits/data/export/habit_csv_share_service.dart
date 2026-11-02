@@ -38,7 +38,7 @@ class HabitCsvShareService {
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path, mimeType: 'text/csv')],
-          subject: tr('{name} history', {'name': habit.name}),
+          subject: tr('{name} history', {'name': habit.displayName}),
         ),
       );
       return result.status != ShareResultStatus.dismissed;

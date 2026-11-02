@@ -129,8 +129,8 @@ class _HabitRing extends ConsumerWidget {
     return Semantics(
       button: true,
       label: done
-          ? tr('{name}, done', {'name': habit.name})
-          : tr('{name}, {n} percent', {'name': habit.name, 'n': percent}),
+          ? tr('{name}, done', {'name': habit.displayName})
+          : tr('{name}, {n} percent', {'name': habit.displayName, 'n': percent}),
       hint: habit.isYesNo ? tr('Toggle today') : tr('Log one more'),
       onLongPressHint: tr('Open habit'),
       excludeSemantics: true,
@@ -163,7 +163,7 @@ class _HabitRing extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              habit.name,
+              habit.displayName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,

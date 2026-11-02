@@ -456,7 +456,8 @@ class _GlassColors {
             ff.tabBar.withValues(alpha: 0.82),
           ],
         ),
-        border: Colors.white.withValues(alpha: 0.14),
+        // A fine light edge: on a dark canvas the capsule needs an outline.
+        border: Colors.white.withValues(alpha: 0.24),
         shadow: [
           BoxShadow(
             offset: const Offset(0, 14),
@@ -486,7 +487,9 @@ class _GlassColors {
           ).withValues(alpha: 0.64),
         ],
       ),
-      border: Colors.white.withValues(alpha: 0.75),
+      // White vanishes on a light canvas: a hairline in the accent reads
+      // as the glass edge there.
+      border: ff.primaryStrong.withValues(alpha: 0.20),
       shadow: [
         BoxShadow(
           offset: const Offset(0, 16),

@@ -51,7 +51,9 @@ Future<void> logFromDetail(
   if (outcome == HabitLogOutcome.slipped && context.mounted) {
     showUndoSnackbar(
       context,
-      message: tr('Slip logged · "{name}" streak reset', {'name': habit.name}),
+      message: tr('Slip logged · "{name}" streak reset', {
+        'name': habit.displayName,
+      }),
       icon: FontAwesomeIcons.rotateLeft,
       onUndo: () => logger.undo(habit, todayLog),
     );
@@ -75,7 +77,7 @@ Future<void> skipFromDetail(
   if (!context.mounted) return;
   showUndoSnackbar(
     context,
-    message: tr('"{name}" skipped today', {'name': habit.name}),
+    message: tr('"{name}" skipped today', {'name': habit.displayName}),
     icon: FontAwesomeIcons.forward,
     onUndo: () => logger.undo(habit, todayLog),
   );
@@ -147,7 +149,7 @@ Future<void> showHabitDetailMore(
   }
 
   final header = FFActionSheetHeader(
-    title: habit.name,
+    title: habit.displayName,
     icon: HabitIcons.of(habit.iconKey),
     colors: habit.colors,
     meta: habit.isDeleted
@@ -171,12 +173,17 @@ Future<void> showHabitDetailMore(
             label: tr('Restore'),
             colors: habit.colors,
             onTap: () =>
-                restoreFromTrash(context, ref, refs, title: habit.name),
+                restoreFromTrash(context, ref, refs, title: habit.displayName),
           ),
         ],
         deleteLabel: tr('Delete forever'),
         onDelete: () async {
-          if (await deleteItemsForever(context, ref, refs, title: habit.name)) {
+          if (await deleteItemsForever(
+            context,
+            ref,
+            refs,
+            title: habit.displayName,
+          )) {
             leave();
           }
         },
@@ -203,8 +210,8 @@ Future<void> showHabitDetailMore(
               showUndoSnackbar(
                 context,
                 message: habit.isPaused
-                    ? tr('"{name}" resumed', {'name': habit.name})
-                    : tr('"{name}" paused', {'name': habit.name}),
+                    ? tr('"{name}" resumed', {'name': habit.displayName})
+                    : tr('"{name}" paused', {'name': habit.displayName}),
                 icon: habit.isPaused
                     ? FontAwesomeIcons.play
                     : FontAwesomeIcons.pause,
@@ -241,12 +248,19 @@ Future<void> showHabitDetailMore(
       onArchive: habit.isArchived
           ? null
           : () async {
-              if (await archiveItems(context, ref, refs, title: habit.name)) {
+              if (await archiveItems(
+                context,
+                ref,
+                refs,
+                title: habit.displayName,
+              )) {
                 leave();
               }
             },
       onDelete: () async {
-        if (await deleteItems(context, ref, refs, title: habit.name)) leave();
+        if (await deleteItems(context, ref, refs, title: habit.displayName)) {
+          leave();
+        }
       },
     ),
   );
