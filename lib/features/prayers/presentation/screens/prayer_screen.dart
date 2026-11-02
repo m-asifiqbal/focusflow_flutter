@@ -31,6 +31,7 @@ import 'package:focusflow/features/prayers/presentation/prayer_flows.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_add_sheet.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_clock_ticker.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_day_card.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_hero.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_location_sheets.dart';
@@ -101,31 +102,36 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
         onPressed: () => context.push(AppRoutes.prayerSettings),
       ),
     ];
+    // The page wakes at the exact second a waqt begins or ends (the minute
+    // clock alone could leave the hero up to a minute behind).
     return MinuteTicker(
-      child: FFScaffold(
-        body: Column(
-          children: [
-            FFNavHeader(
-              leading: const FFBackButton(),
-              title: tr('Prayer'),
-              trailing: actions,
-            ),
-            Expanded(
-              child: today.when(
-                loading: () => const FFLoadingView(),
-                error: (e, _) => Padding(
-                  padding: const EdgeInsetsDirectional.all(AppSpacing.screen),
-                  child: FFErrorBanner(
-                    message: tr('Couldn\'t load your prayers.'),
-                    onRetry: () => ref.invalidate(prayersProvider),
-                  ),
-                ),
-                data: (d) => d.hasPrayers
-                    ? _content(context, d, prefs.hasLocation, date, hijri)
-                    : _empty(context, prefs.isSetUp),
+      child: PrayerClockTicker(
+        at: today.valueOrNull?.nextChange,
+        child: FFScaffold(
+          body: Column(
+            children: [
+              FFNavHeader(
+                leading: const FFBackButton(),
+                title: tr('Prayer'),
+                trailing: actions,
               ),
-            ),
-          ],
+              Expanded(
+                child: today.when(
+                  loading: () => const FFLoadingView(),
+                  error: (e, _) => Padding(
+                    padding: const EdgeInsetsDirectional.all(AppSpacing.screen),
+                    child: FFErrorBanner(
+                      message: tr('Couldn\'t load your prayers.'),
+                      onRetry: () => ref.invalidate(prayersProvider),
+                    ),
+                  ),
+                  data: (d) => d.hasPrayers
+                      ? _content(context, d, prefs.hasLocation, date, hijri)
+                      : _empty(context, prefs.isSetUp),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -206,19 +212,21 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
         _DateLine(date: date, hijri: hijri),
         const SizedBox(height: AppSpacing.md),
         PrayerHeroCard(
-          slot: d.focus,
+          slot: d.card,
           now: d.now,
           use24h: use24h,
-          sun: ref.watch(prayerSunProvider)(d.now),
-          onMark: () {
-            final f = d.focus;
-            if (f != null) unawaited(markPrayer(context, ref, f));
-          },
+          sunFor: ref.watch(prayerSunProvider),
+          located: hasLocation,
+          southern: (lat ?? 0) < 0,
           onOpen: () {
-            final f = d.focus;
-            if (f != null) unawaited(_openLog(f));
+            final n = d.card;
+            if (n != null) unawaited(_openLog(n));
           },
         ),
+        if (d.allDone) ...[
+          const SizedBox(height: AppSpacing.md),
+          const _AllDone(),
+        ],
         const SizedBox(height: AppSpacing.section),
         FFSectionHeader(
           title: tr('Today'),
@@ -237,7 +245,6 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
           ),
         if (d.prayers.isNotEmpty) ...[
           PrayerDayCard(
-            markInRow: false,
             slots: d.prayers,
             now: d.now,
             use24h: use24h,
@@ -285,6 +292,48 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
           colors: PrayerStyle.module,
         ),
       ],
+    );
+  }
+}
+
+/// "All prayers done today" under the card (not in it: the card keeps
+/// showing what comes next).
+class _AllDone extends StatelessWidget {
+  const _AllDone();
+
+  @override
+  Widget build(BuildContext context) {
+    final ff = context.ff;
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        decoration: BoxDecoration(
+          color: ff.success.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(AppRadii.card),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              FontAwesomeIcons.solidCircleCheck,
+              size: 20,
+              color: ff.success,
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                tr('All prayers done today'),
+                style: context.text.rowTitle.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

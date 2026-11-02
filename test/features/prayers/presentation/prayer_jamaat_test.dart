@@ -81,9 +81,10 @@ void main() {
 
     await pumpApp(tester, h, AppRoutes.prayers, size: const Size(390, 1400));
     expect(find.text('Jamaat 04:00 PM · in 10 min'), findsWidgets);
+    // Asr is open: its jamaat is on its row (the card shows what's next).
     expect(
       find.descendant(
-        of: find.byType(PrayerHeroCard),
+        of: find.byType(PrayerDayCard),
         matching: find.textContaining('Jamaat 04:00 PM'),
       ),
       findsOneWidget,
@@ -100,10 +101,11 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('hero: jamaat with people icon, place icon, sun arc', (
+  testWidgets('card: next prayer with jamaat, people and place icons, sky', (
     tester,
   ) async {
     final (h, list) = await boot(tester);
+    // At 3:50 PM Asr is open and not marked: the card shows it.
     final asr = list.firstWhere((p) => p.name == 'Asr');
     await tester.runAsync(() async {
       await h.updateSettings(
@@ -141,6 +143,8 @@ void main() {
       ),
       findsNothing,
     );
+    // The sky arc's travel and pop-in finish first.
+    await tester.pump(const Duration(seconds: 3));
     await captureScreen(tester, 'prayer_hero_sun');
     await pumpApp(
       tester,
@@ -149,6 +153,8 @@ void main() {
       size: const Size(390, 1400),
       dark: true,
     );
+    // The sky arc's travel and pop-in finish first.
+    await tester.pump(const Duration(seconds: 3));
     await captureScreen(tester, 'prayer_hero_sun_dark');
     await pumpApp(
       tester,
@@ -195,6 +201,68 @@ void main() {
     await settle(tester);
     final off = await reload(tester, h, maghrib.id);
     expect((off.jamaat, off.remindBeforeJamaat), (null, null));
+  });
+
+  testWidgets('Auto: an estimated jamaat; settings fills in the rest', (
+    tester,
+  ) async {
+    final (h, list) = await boot(tester);
+    final asr = list.firstWhere((p) => p.name == 'Asr');
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.prayerEdit(asr.id),
+      size: const Size(390, 2200),
+    );
+    await tester.tap(find.text('Auto'));
+    await settle(tester);
+    expect(find.text('Estimated'), findsOneWidget);
+    // Asr 3:45 PM + 15 min, on a 5-minute mark.
+    expect(find.text('Today: jamaat at ~04:00 PM'), findsOneWidget);
+    await captureScreen(tester, 'prayer_editor_jamaat_auto');
+    await tester.tap(find.text('Save').last);
+    await settle(tester);
+    expect(
+      (await reload(tester, h, asr.id)).jamaat,
+      const PrayerJamaat.estimated(),
+    );
+
+    // The four other daily prayers from Settings › Prayer.
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.prayerSettings,
+      size: const Size(390, 2400),
+    );
+    expect(find.text('1 of 5'), findsOneWidget);
+    await tester.tap(find.text('Estimated jamaat times'));
+    await settle(tester);
+    await tester.tap(find.text('Fill in the rest'));
+    await settle(tester);
+    expect(find.text('4 prayers updated'), findsOneWidget);
+    final all = (await tester.runAsync(
+      () => h
+          .read(prayersRepositoryProvider)
+          .watchPrayers(PrayersScope.active)
+          .first,
+    ))!;
+    expect(all.where((p) => p.jamaat?.estimated ?? false), hasLength(5));
+    await settle(tester);
+    expect(find.text('5 of 5'), findsOneWidget);
+
+    await pumpApp(tester, h, AppRoutes.prayers, size: const Size(390, 1400));
+    expect(find.textContaining('Jamaat ~04:00 PM'), findsWidgets);
+
+    // Four segments at 360 pt and text 1.3.
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.prayerEdit(asr.id),
+      size: const Size(360, 2400),
+      textScale: 1.3,
+    );
+    expect(tester.takeException(), isNull);
+    await captureScreen(tester, 'prayer_editor_jamaat_auto_360_x13');
   });
 
   testWidgets('a fast has no jamaat section', (tester) async {

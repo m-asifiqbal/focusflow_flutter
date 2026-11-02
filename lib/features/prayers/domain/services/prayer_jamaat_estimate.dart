@@ -77,17 +77,13 @@ abstract final class PrayerJamaatEstimate {
   /// [until] that day.
   static DateTime at(DailyPrayer role, DateTime start, DateTime until) {
     final step = Duration(minutes: role.roundTo);
-    var t = start.add(Duration(minutes: role.delay));
-    // Round up to the step on the wall clock.
+    final raw = start.add(Duration(minutes: role.delay));
+    // Whole minutes (sun times carry seconds), then up to the step on the
+    // wall clock.
+    var t = DateTime(raw.year, raw.month, raw.day, raw.hour, raw.minute);
     final into = (t.hour * 60 + t.minute) % role.roundTo;
-    if (into != 0 || t.second != 0) {
-      t = DateTime(
-        t.year,
-        t.month,
-        t.day,
-        t.hour,
-        t.minute - into,
-      ).add(step);
+    if (into != 0) {
+      t = DateTime(t.year, t.month, t.day, t.hour, t.minute - into).add(step);
     }
     // Never so late the window is nearly over (short Fajr / Maghrib).
     final latest = until.subtract(endMargin);

@@ -2,11 +2,13 @@
 /// PRAYER JAMAAT SECTION — when the congregation prays, and its reminder
 /// ============================================================
 ///
-/// What: Off · Set time · After start. "Set time" is the mosque's clock
-/// time (1:30 PM); "After start" is minutes after the window opens (Maghrib
-/// "10 min after the adhan" keeps following sunset). Then "Remind me" (Off,
-/// at the jamaat, or N min before) and today's jamaat under them — with a
-/// note when it falls outside today's window.
+/// What: Off · Auto · Set time · After start. "Auto" (the five daily
+/// prayers only) is an offline estimate of a typical mosque's time that
+/// follows the season (PrayerJamaatEstimate), marked "~"; "Set time" is
+/// the mosque's clock time (1:30 PM); "After start" is minutes after the
+/// window opens (Maghrib "10 min after the adhan" keeps following sunset).
+/// The choices are chips (they wrap at any width). Then "Remind me" (Off, at the jamaat, or N min before) and today's
+/// jamaat under them — with a note when it falls outside today's window.
 /// Why: praying with the congregation needs its own time, not the window's
 /// start. Shown for prayers (not fasts or counting practices); the words
 /// say "Jamaat" for Islam and "Congregation" for every other tradition.
@@ -21,13 +23,14 @@ import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_jamaat_estimate.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/editor/prayer_editor_sheets.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/picker_common.dart';
 
-enum _Mode { off, at, after }
+enum _Mode { off, auto, at, after }
 
 class PrayerJamaatSection extends StatelessWidget {
   const PrayerJamaatSection({
@@ -67,6 +70,15 @@ class PrayerJamaatSection extends StatelessWidget {
     switch (m) {
       case _Mode.off:
         onChanged(draft.copyWith(clearJamaat: true));
+      case _Mode.auto:
+        onChanged(
+          draft.copyWith(
+            jamaat: const PrayerJamaat.estimated(),
+            remindBeforeJamaat: draft.jamaat == null
+                ? 10
+                : draft.remindBeforeJamaat,
+          ),
+        );
       case _Mode.at:
         final s = _window.start.add(const Duration(minutes: 15));
         final minutes = (s.hour * 60 + s.minute + 4) ~/ 5 * 5;
@@ -101,8 +113,11 @@ class PrayerJamaatSection extends StatelessWidget {
     final ff = context.ff;
     final text = context.text;
     final j = draft.jamaat;
+    final role = PrayerJamaatEstimate.roleOf(draft);
     final mode = j == null
         ? _Mode.off
+        : j.estimated
+        ? _Mode.auto
         : j.afterStart
         ? _Mode.after
         : _Mode.at;
@@ -115,6 +130,10 @@ class PrayerJamaatSection extends StatelessWidget {
       DateUtilsX.atMinutes,
     );
     final outside = at != null && !window.contains(at);
+    final todayAt = at == null
+        ? ''
+        : '${j?.estimated ?? false ? '~' : ''}'
+              '${PrayerFormat.time(at, use24h: use24h)}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -122,21 +141,44 @@ class PrayerJamaatSection extends StatelessWidget {
           _islam ? tr('Jamaat (congregation)') : tr('Congregation time'),
         ),
         const SizedBox(height: AppSpacing.sm),
-        FFSegmented<_Mode>(
-          segments: [
-            FFSegment(value: _Mode.off, label: tr('Off')),
-            FFSegment(value: _Mode.at, label: tr('Set time')),
-            FFSegment(value: _Mode.after, label: tr('After start')),
+        // Chips, not a segmented bar: four choices still fit (wrapping) at
+        // 360 pt, large text and in every language.
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final (m, label, icon) in [
+              (_Mode.off, tr('Off'), null),
+              // Only the five daily prayers have a typical time.
+              if (role != null || mode == _Mode.auto)
+                (_Mode.auto, tr('Auto'), FontAwesomeIcons.wandMagicSparkles),
+              (_Mode.at, tr('Set time'), null),
+              (_Mode.after, tr('After start'), null),
+            ])
+              FFChip(
+                label: label,
+                icon: icon,
+                selected: mode == m,
+                activeColor: PrayerStyle.module.solid,
+                onTap: () => _switch(m),
+              ),
           ],
-          value: mode,
-          onChanged: _switch,
-          height: 40,
         ),
         if (j != null) ...[
           const SizedBox(height: AppSpacing.sm),
           FFGroupedList(
             children: [
-              if (j.afterStart)
+              if (j.estimated)
+                FFListRow(
+                  leading: _tile(FontAwesomeIcons.wandMagicSparkles),
+                  title: tr('Estimated'),
+                  subtitle: role == null
+                      ? null
+                      : tr('About {m} min after it begins, rounded', {
+                          'm': role.delay,
+                        }),
+                )
+              else if (j.afterStart)
                 FFListRow(
                   leading: _tile(FontAwesomeIcons.hourglassStart),
                   title: tr('After the start'),
@@ -223,12 +265,8 @@ class PrayerJamaatSection extends StatelessWidget {
             Text(
               [
                 _islam
-                    ? tr('Today: jamaat at {time}', {
-                        'time': PrayerFormat.time(at, use24h: use24h),
-                      })
-                    : tr('Today: congregation at {time}', {
-                        'time': PrayerFormat.time(at, use24h: use24h),
-                      }),
+                    ? tr('Today: jamaat at {time}', {'time': todayAt})
+                    : tr('Today: congregation at {time}', {'time': todayAt}),
                 if (outside) tr('outside today\'s window'),
               ].join(' · '),
               style: text.meta.copyWith(

@@ -72,21 +72,29 @@ class VaultDao extends DatabaseAccessor<AppDatabase> with _$VaultDaoMixin {
     )..addColumns([max])).map((r) => r.read(max)).getSingle();
   }
 
-  /// Active item counts per `item_type` code + favourites / weak /
-  /// breached / with-TOTP.
-  Selectable<QueryRow> counts() => customSelect(
-    'SELECT COUNT(*) AS total, '
-    'COALESCE(SUM(CASE WHEN item_type = 0 THEN 1 ELSE 0 END), 0) AS logins, '
-    'COALESCE(SUM(CASE WHEN item_type = 1 THEN 1 ELSE 0 END), 0) AS cards, '
-    'COALESCE(SUM(CASE WHEN item_type = 2 THEN 1 ELSE 0 END), 0) AS wifi, '
-    'COALESCE(SUM(CASE WHEN item_type = 3 THEN 1 ELSE 0 END), 0) AS notes, '
-    'COALESCE(SUM(CASE WHEN is_favorite = 1 THEN 1 ELSE 0 END), 0) AS favourites, '
-    'COALESCE(SUM(CASE WHEN password_strength IS NOT NULL AND password_strength <= 1 THEN 1 ELSE 0 END), 0) AS weak, '
-    'COALESCE(SUM(CASE WHEN breach_count > 0 THEN 1 ELSE 0 END), 0) AS breached, '
-    'COALESCE(SUM(CASE WHEN has_totp = 1 THEN 1 ELSE 0 END), 0) AS totp '
-    'FROM vault_items WHERE ${activeSql()}',
-    readsFrom: {vaultItems},
-  );
+  /// Active item counts: one `t<code>` column per `item_type` code in
+  /// [typeCodes] (the caller owns the list, so a new vault type needs no
+  /// SQL change) + favourites / weak / breached / with-TOTP, in ONE pass.
+  /// The codes are ints from an enum, never user text, so interpolating
+  /// them is safe.
+  Selectable<QueryRow> counts(Iterable<int> typeCodes) {
+    final perType = StringBuffer();
+    for (final c in typeCodes) {
+      perType.write(
+        'COALESCE(SUM(CASE WHEN item_type = $c THEN 1 ELSE 0 END), 0) AS t$c, ',
+      );
+    }
+    return customSelect(
+      'SELECT COUNT(*) AS total, '
+      '$perType'
+      'COALESCE(SUM(CASE WHEN is_favorite = 1 THEN 1 ELSE 0 END), 0) AS favourites, '
+      'COALESCE(SUM(CASE WHEN password_strength IS NOT NULL AND password_strength <= 1 THEN 1 ELSE 0 END), 0) AS weak, '
+      'COALESCE(SUM(CASE WHEN breach_count > 0 THEN 1 ELSE 0 END), 0) AS breached, '
+      'COALESCE(SUM(CASE WHEN has_totp = 1 THEN 1 ELSE 0 END), 0) AS totp '
+      'FROM vault_items WHERE ${activeSql()}',
+      readsFrom: {vaultItems},
+    );
+  }
 
   // ───────────────────────────── History ──────────────────────────────
 

@@ -17,12 +17,35 @@ import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/core/items/tag.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 
-/// Stored as 0 login · 1 card · 2 wifi · 3 secure note ([index]).
+/// Stored as its [index] in `vault_items.item_type`: 0 login · 1 card ·
+/// 2 wifi · 3 secure note · 4 bank account · 5 crypto wallet · 6 insurance ·
+/// 7 identity · 8 passport · 9 driver's licence · 10 national ID · 11 health ·
+/// 12 email account · 13 server · 14 API key · 15 software licence ·
+/// 16 membership · 17 vehicle.
+///
+/// APPEND ONLY — the index is the database code (and the code inside every
+/// backup), so never reorder, insert or delete a value. Types 4+ are
+/// *schema types*: their fields are described in vault_item_schema.dart
+/// and stored in [VaultPayload.fields].
 enum VaultItemType {
   login,
   card,
   wifi,
-  secureNote;
+  secureNote,
+  bankAccount,
+  cryptoWallet,
+  insurance,
+  identity,
+  passport,
+  driverLicense,
+  nationalId,
+  medical,
+  emailAccount,
+  server,
+  apiKey,
+  softwareLicense,
+  membership,
+  vehicle;
 
   /// Singular display name (a getter, so it follows the active language).
   String get label => switch (this) {
@@ -30,6 +53,20 @@ enum VaultItemType {
     card => tr('Card'),
     wifi => tr('Wi-Fi'),
     secureNote => tr('Secure note'),
+    bankAccount => tr('Bank account'),
+    cryptoWallet => tr('Crypto wallet'),
+    insurance => tr('Insurance'),
+    identity => tr('Identity'),
+    passport => tr('Passport'),
+    driverLicense => tr("Driver's licence"),
+    nationalId => tr('National ID'),
+    medical => tr('Health'),
+    emailAccount => tr('Email account'),
+    server => tr('Server'),
+    apiKey => tr('API key'),
+    softwareLicense => tr('Software licence'),
+    membership => tr('Membership'),
+    vehicle => tr('Vehicle'),
   };
 
   /// Plural display name.
@@ -38,6 +75,20 @@ enum VaultItemType {
     card => tr('Cards'),
     wifi => tr('Wi-Fi'),
     secureNote => tr('Secure notes'),
+    bankAccount => tr('Bank accounts'),
+    cryptoWallet => tr('Crypto wallets'),
+    insurance => tr('Insurance'),
+    identity => tr('Identities'),
+    passport => tr('Passports'),
+    driverLicense => tr("Driver's licences"),
+    nationalId => tr('National IDs'),
+    medical => tr('Health'),
+    emailAccount => tr('Email accounts'),
+    server => tr('Servers'),
+    apiKey => tr('API keys'),
+    softwareLicense => tr('Software licences'),
+    membership => tr('Memberships'),
+    vehicle => tr('Vehicles'),
   };
 
   static VaultItemType fromValue(int v) =>

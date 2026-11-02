@@ -6,9 +6,10 @@
 ///   favourites, search text, sort).
 /// * [vaultRecordsProvider] — live ciphertext records from the repository.
 /// * [vaultListProvider]    — rows for the list: the record + its
-///   decrypted *subtitle only* (username / masked card / SSID) + status
-///   badge. Passwords are decrypted on demand by the copy action, never
-///   here. Watches the session key, so locking drops every plaintext.
+///   decrypted *subtitle and expiry date only* (username / masked card /
+///   SSID; the earliest document date) + status badge. Passwords are
+///   decrypted on demand by the copy action, never here. Watches the session
+///   key, so locking drops every plaintext.
 /// * [vaultCountsProvider], [vaultFoldersProvider], [vaultBreachedProvider],
 ///   [vaultReusedFingerprintsProvider] — header / tiles / banner / badges.
 /// * [vaultAutoLockRemainingProvider] — the "auto-locks in 4:59" countdown.
@@ -23,15 +24,18 @@ import 'package:focusflow/core/crypto/vault_key.dart';
 import 'package:focusflow/core/items/folder.dart';
 import 'package:focusflow/core/items/item_type.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
+import 'package:focusflow/features/vault/domain/entities/vault_item_schema.dart';
+import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
 import 'package:focusflow/features/vault/domain/repository/vault_repository.dart';
 import 'package:focusflow/features/vault/domain/services/vault_payload_codec.dart';
+import 'package:focusflow/features/vault/domain/services/vault_validators.dart';
 import 'package:focusflow/features/vault/presentation/notifiers/vault_session_controller.dart';
 import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
 /// Status badge of a list row (screen 18).
-enum VaultBadge { strong, fair, weak, reused, breached }
+enum VaultBadge { strong, fair, weak, reused, breached, expired, expiring }
 
 /// One row of the vault list.
 @immutable
@@ -40,6 +44,7 @@ class VaultListEntry {
     required this.record,
     required this.subtitle,
     this.badge,
+    this.expiry,
   });
 
   final VaultItemRecord record;
@@ -48,16 +53,27 @@ class VaultListEntry {
   final String subtitle;
   final VaultBadge? badge;
 
+  /// The earliest document / card date (`yyyy-MM-dd`), null when none.
+  final String? expiry;
+
   @override
   String toString() => 'VaultListEntry(${record.id})';
 }
 
-/// Badge for [record]: breached > reused > weak / fair / strong; null when
-/// the item has no password (cards, notes).
-VaultBadge? vaultBadgeFor(VaultItemRecord record, Set<String> reused) {
+/// Badge for [record]: breached > expired > reused > expiring > weak / fair /
+/// strong; null when the item has no password and nothing to flag (notes,
+/// a card that is not near its date). [expiry] is the status of its
+/// earliest document date.
+VaultBadge? vaultBadgeFor(
+  VaultItemRecord record,
+  Set<String> reused, {
+  VaultExpiryStatus? expiry,
+}) {
   if (record.isBreached) return VaultBadge.breached;
+  if (expiry == VaultExpiryStatus.expired) return VaultBadge.expired;
   final fp = record.passwordFingerprint;
   if (fp != null && reused.contains(fp)) return VaultBadge.reused;
+  if (expiry == VaultExpiryStatus.soon) return VaultBadge.expiring;
   final s = record.passwordStrength;
   if (s == null) return null;
   if (s <= 1) return VaultBadge.weak;
@@ -171,22 +187,47 @@ final vaultLockedPreviewProvider = Provider.autoDispose<List<VaultItemRecord>>((
   ].take(2).toList();
 });
 
-class _SubtitleCache {
-  final Map<String, (Uint8List, String)> _entries = {};
+/// What a list row shows from the decrypted payload: never a secret.
+typedef _RowInfo = ({String subtitle, String? expiry});
 
-  Future<String> subtitle(VaultKey key, VaultItemRecord r) async {
+/// The earliest date of [p] that can expire: the expiry-flagged fields of a
+/// schema type, or the end of a card's MM/YY month. `yyyy-MM-dd` or null.
+String? _earliestExpiry(VaultItemRecord r, VaultPayload p) {
+  final dates = <DateTime>[];
+  if (r.type == VaultItemType.card) {
+    final end = VaultDates.cardExpiryEnd(p.cardExpiry);
+    if (end != null) dates.add(end);
+  } else {
+    for (final k in r.type.expiryKeys) {
+      final d = VaultDates.tryParse(p.field(k));
+      if (d != null) dates.add(d);
+    }
+  }
+  if (dates.isEmpty) return null;
+  dates.sort();
+  return VaultDates.key(dates.first);
+}
+
+class _SubtitleCache {
+  final Map<String, (Uint8List, _RowInfo)> _entries = {};
+
+  Future<_RowInfo> info(VaultKey key, VaultItemRecord r) async {
     final hit = _entries[r.id];
     if (hit != null && listEquals(hit.$1, r.encryptedPayload)) return hit.$2;
-    String value;
+    _RowInfo value;
     try {
       final payload = await VaultPayloadCodec.open(
         key,
         r.encryptedPayload,
         itemId: r.id,
       );
-      value = payload.subtitle(r.type);
+      value = (
+        subtitle: payload.subtitle(r.type),
+        expiry: _earliestExpiry(r, payload),
+      );
     } on Object {
-      value = ''; // unreadable blob (other vault / corrupted): show no line
+      // Unreadable blob (other vault / corrupted): show no line.
+      value = (subtitle: '', expiry: null);
     }
     _entries[r.id] = (r.encryptedPayload, value);
     return value;
@@ -221,19 +262,27 @@ final vaultListProvider = FutureProvider.autoDispose
       if (key == null || key.isDestroyed) return const [];
       final reused = ref.watch(vaultReusedFingerprintsProvider);
       final cache = ref.watch(_subtitleCacheProvider);
+      final now = ref.watch(clockProvider).now();
       final entries = <VaultListEntry>[];
       for (final r in records) {
-        final subtitle = await cache.subtitle(key, r);
+        final info = await cache.info(key, r);
+        final subtitle = info.subtitle;
         if (needle.isNotEmpty &&
             !r.title.toLowerCase().contains(needle) &&
             !subtitle.toLowerCase().contains(needle)) {
           continue;
         }
+        final expiry = info.expiry;
         entries.add(
           VaultListEntry(
             record: r,
             subtitle: subtitle,
-            badge: vaultBadgeFor(r, reused),
+            expiry: expiry,
+            badge: vaultBadgeFor(
+              r,
+              reused,
+              expiry: expiry == null ? null : VaultDates.status(expiry, now),
+            ),
           ),
         );
       }

@@ -16,7 +16,6 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
-import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
@@ -29,7 +28,7 @@ import 'package:focusflow/features/vault/presentation/vault_style.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_avatar.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_header.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_lock_card.dart';
-import 'package:go_router/go_router.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_type_picker.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 
 class VaultLockedView extends ConsumerWidget {
@@ -63,7 +62,7 @@ class VaultLockedView extends ConsumerWidget {
           ),
           onAdd: () async {
             if (await ensureVaultUnlocked(context) && context.mounted) {
-              unawaited(context.push(AppRoutes.newVaultItem()));
+              unawaited(addVaultItem(context));
             }
           },
         ),

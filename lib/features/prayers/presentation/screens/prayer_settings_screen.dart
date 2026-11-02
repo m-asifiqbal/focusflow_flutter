@@ -8,6 +8,8 @@
 ///   * CALCULATION — method (the suggested one for the place first), Asr
 ///     school, high-latitude rule — only for sun-based prayers;
 ///   * HIJRI DATE — a ±2 day correction for local moon sighting (Islam);
+///   * JAMAAT — estimated jamaat times for the five daily prayers
+///     (PrayerJamaatSettingsGroup);
 ///   * GENERAL — Prayer reminders on / off, discreet notification titles,
 ///     and Set up from a tradition again.
 /// Why: everything that changes "what time is Asr today" in one place,
@@ -32,6 +34,7 @@ import 'package:focusflow/features/prayers/domain/services/prayer_sun.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_jamaat_settings.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_location_sheets.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 import 'package:focusflow/features/tasks/presentation/widgets/pickers/picker_common.dart';
@@ -307,6 +310,7 @@ class PrayerSettingsScreen extends ConsumerWidget {
                     ],
                   ),
                 ],
+                const PrayerJamaatSettingsGroup(),
                 gap,
                 FFGroupedList(
                   label: tr('General'),

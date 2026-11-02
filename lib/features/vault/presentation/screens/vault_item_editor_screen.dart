@@ -35,7 +35,7 @@ import 'package:focusflow/features/vault/presentation/widgets/editor/vault_edito
 import 'package:focusflow/features/vault/presentation/widgets/editor/vault_editor_header.dart';
 import 'package:focusflow/features/vault/presentation/widgets/editor/vault_editor_custom_fields.dart';
 import 'package:focusflow/features/vault/presentation/widgets/editor/vault_editor_organise.dart';
-import 'package:focusflow/features/vault/presentation/widgets/editor/vault_editor_sheets.dart';
+import 'package:focusflow/features/vault/presentation/widgets/editor/vault_icon_picker.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_screen_guard.dart';
 import 'package:go_router/go_router.dart';
 

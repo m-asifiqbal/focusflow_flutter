@@ -1,348 +1,298 @@
 /// ============================================================
-/// PRAYER SUN ARC — the sun's path today, on the Prayer hero card
+/// PRAYER SUN ARC — the card's sky: a living scene with the curve on it
 /// ============================================================
 ///
-/// What: a half arc from sunrise (start) to sunset (end) over a dashed
-/// horizon, split into the day's four parts — morning (sunrise → mid
-/// morning), late morning (→ noon), afternoon (→ Asr) and evening
-/// (→ sunset) — with small gaps between them. The part of the day already
-/// gone is bright, the rest faint; the sun sits where it is now, glowing,
-/// and the current part's name is under it with a small "1h 29m left"
-/// countdown — the time left in this part of the day (this waqt: noon → Asr is
-/// Dhuhr's, Asr → sunset is Asr's). Sunrise and sunset times below the
-/// ends. Before sunrise / after sunset the arc is dim, a moon shows
-/// instead and the countdown runs to sunrise.
-/// The sun travels from sunrise to "now" when the card appears and glides
-/// on as the minutes pass (no animation with reduce motion).
-/// Why: the user asked for a sense of where the day stands, in the space
-/// the hero card had free beside the prayer's name.
-/// Sun times come from the saved location; without one the arc uses a
-/// plain 6 AM – 6 PM day and leaves the times out (they would be made up).
+/// What: fills the Prayer card behind its text. A scene (sky by the hour,
+/// drifting clouds, stars and moon at night, hills in the accent colour —
+/// see sky/prayer_sky_painter.dart) melts into the card's gradient on the
+/// text side; on the other side the four-part curve with the sun or moon in
+/// front of it, the part's name with a live countdown inside it
+/// ("1:29:05 left"), and sunrise / sunset at its two ends.
+/// Time: once a second the widget reads the app clock again, so the part,
+/// the countdown, the body's place and the sky's colour move on at the exact
+/// second a waqt ends — no minute lag, and no need to leave the screen.
+/// Motion: when first shown (once per visit — the hero is kept alive while
+/// the page is open) the body travels from the curve's start to "now";
+/// afterwards clouds drift and stars twinkle at ~30 fps; at sunrise and
+/// sunset the old curve fades out and the new one in. Reduce motion or
+/// reduced effects: the same picture, standing still.
+/// Without a saved location: a plain 6 AM – 6 PM day and no end times.
 /// ============================================================
 library;
 
-import 'dart:math' as math;
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
-import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
-import 'package:focusflow/core/theme/fa_icons.dart';
-import 'package:focusflow/core/utils/date_utils.dart';
+import 'package:focusflow/core/widgets/src/ff_token_gaps.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/sky/prayer_sky_painter.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/sky/sky_palette.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/sky/sky_path.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/sky/sky_sprites.dart';
+import 'package:focusflow/shared/providers/core_providers.dart';
 
-/// The four parts of the daylight, in order.
-enum SunPart { morning, lateMorning, afternoon, evening }
+export 'package:focusflow/features/prayers/presentation/widgets/sky/sky_path.dart';
 
-extension SunPartLabel on SunPart {
-  String get label => switch (this) {
-    SunPart.morning => tr('Morning'),
-    SunPart.lateMorning => tr('Late morning'),
-    SunPart.afternoon => tr('Afternoon'),
-    SunPart.evening => tr('Evening'),
-  };
-}
-
-/// Where the day stands: the part boundaries and "now" as fractions of
-/// sunrise → sunset (now < 0 before sunrise, > 1 after sunset).
-@immutable
-class SunPath {
-  const SunPath({required this.bounds, required this.now, required this.left});
-
-  /// From today's sun times ([sun] null = a plain 6 AM – 6 PM day).
-  factory SunPath.of(SolarDay? sun, DateTime now) {
-    final day = DateUtilsX.dateOnly(now);
-    final rise = sun?.sunrise ?? DateUtilsX.atMinutes(day, 6 * 60);
-    final noon = sun?.noon ?? DateUtilsX.atMinutes(day, 12 * 60);
-    final asr = sun?.asr ?? DateUtilsX.atMinutes(day, 15 * 60 + 30);
-    final set = sun?.sunset ?? DateUtilsX.atMinutes(day, 18 * 60);
-    final span = set.difference(rise).inSeconds;
-    double f(DateTime t) => span <= 0 ? 0 : t.difference(rise).inSeconds / span;
-    final mid = rise.add(noon.difference(rise) ~/ 2);
-    final ends = [mid, noon, asr.isBefore(noon) ? noon : asr, set];
-    // Time left in this part; at night, until the next sunrise (tomorrow's
-    // is close enough to today's + 1 day for a countdown).
-    final DateTime until;
-    if (now.isBefore(rise)) {
-      until = rise;
-    } else if (!now.isBefore(set)) {
-      until = rise.add(const Duration(days: 1));
-    } else {
-      until = ends.firstWhere((e) => e.isAfter(now), orElse: () => set);
-    }
-    return SunPath(
-      bounds: [0, f(mid), f(noon), f(asr).clamp(f(noon), 1.0), 1],
-      now: f(now),
-      left: until.difference(now),
-    );
-  }
-
-  /// 5 fractions: sunrise, mid morning, noon, Asr, sunset.
-  final List<double> bounds;
-  final double now;
-
-  /// Until this part ends (at night: until sunrise).
-  final Duration left;
-
-  bool get isDay => now >= 0 && now <= 1;
-
-  /// The part of the day at [now] (null at night).
-  SunPart? get part {
-    if (!isDay) return null;
-    for (var i = 1; i < bounds.length; i++) {
-      if (now < bounds[i]) return SunPart.values[i - 1];
-    }
-    return SunPart.evening;
-  }
-}
-
-class PrayerSunArc extends StatelessWidget {
+class PrayerSunArc extends ConsumerStatefulWidget {
   const PrayerSunArc({
-    required this.sun,
-    required this.now,
+    required this.sunFor,
     required this.use24h,
-    required this.color,
+    required this.ground,
+    this.located = true,
+    this.southern = false,
     super.key,
   });
 
-  /// Today's sun times (null without a location).
-  final SolarDay? sun;
-  final DateTime now;
+  /// Sun times of a day (null without a location).
+  final SolarDay? Function(DateTime day) sunFor;
   final bool use24h;
 
-  /// Ink on the card (the hero's on-gradient white).
-  final Color color;
+  /// The card's accent colour (the hills are this, darkened).
+  final Color ground;
+
+  /// False without a saved location: the end times are left out.
+  final bool located;
+
+  /// The moon's lit side flips south of the equator.
+  final bool southern;
+
+  @override
+  ConsumerState<PrayerSunArc> createState() => _PrayerSunArcState();
+}
+
+class _PrayerSunArcState extends ConsumerState<PrayerSunArc>
+    with TickerProviderStateMixin {
+  late final AnimationController _intro = AnimationController(
+    vsync: this,
+    duration: PrayerStyle.skyIntro,
+  );
+  late final AnimationController _swap = AnimationController(
+    vsync: this,
+    duration: PrayerStyle.skySwap,
+    value: 1,
+  );
+  final ValueNotifier<double> _ambient = ValueNotifier(0);
+  late final Ticker _ticker = createTicker(_onTick);
+  Timer? _clock;
+
+  late DateTime _now;
+  late SkyFrame _frame;
+  SkyPath? _previous;
+  double _base = 0;
+  Duration _lastPaint = Duration.zero;
+  bool _still = false;
+  bool _settled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _frame = _compute();
+    _base = _epochSeconds();
+    _ambient.value = _base;
+    SkySprites.instance.ensureClouds();
+    _clock = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  /// A week of seconds: clouds and stars are functions of this, so a card
+  /// recreated later shows the same sky.
+  double _epochSeconds() =>
+      ref.read(clockProvider).now().millisecondsSinceEpoch / 1000 % 604800;
+
+  SkyFrame _compute() {
+    _now = ref.read(clockProvider).now();
+    return SkyFrame(
+      path: SkyPath.of(widget.sunFor, _now),
+      colors: SkyPalette.at(_now, widget.sunFor),
+      previous: _previous,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final still = context.reduceMotion || FFEffects.reducedOf(context);
+    if (still) {
+      _still = true;
+      _ticker.stop();
+      _intro.value = 1;
+      _swap.value = 1;
+    } else {
+      _still = false;
+      if (!_settled) {
+        _settled = true;
+        _intro.forward();
+      }
+      if (!_ticker.isActive) _ticker.start();
+    }
+  }
+
+  @override
+  void didUpdateWidget(PrayerSunArc old) {
+    super.didUpdateWidget(old);
+    if (old.sunFor != widget.sunFor) _frame = _compute();
+  }
+
+  void _onTick(Duration elapsed) {
+    // ~30 fps is plenty for slow clouds and twinkling stars.
+    if ((elapsed - _lastPaint).inMilliseconds < 33) return;
+    _lastPaint = elapsed;
+    _ambient.value =
+        _base + elapsed.inMicroseconds / Duration.microsecondsPerSecond;
+  }
+
+  void _tick() {
+    if (!mounted) return;
+    final next = _compute();
+    if (next.path.isDay != _frame.path.isDay) {
+      _previous = _frame.path;
+      if (_still) {
+        _swap.value = 1;
+      } else {
+        _swap.forward(from: 0);
+      }
+    }
+    setState(() {
+      _frame = SkyFrame(
+        path: next.path,
+        colors: next.colors,
+        previous: _previous,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _clock?.cancel();
+    _ticker.dispose();
+    _intro.dispose();
+    _swap.dispose();
+    _ambient.dispose();
+    super.dispose();
+  }
+
+  /// "1:29:05" (hours unpadded; minutes and seconds two digits).
+  static String hms(Duration d) {
+    final s = d.isNegative ? 0 : d.inSeconds;
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${s ~/ 3600}:${two(s ~/ 60 % 60)}:${two(s % 60)}';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final path = SunPath.of(sun, now);
+    final path = _frame.path;
     final part = path.part;
-    final s = sun;
-    final label = context.text.meta.copyWith(
-      color: color.withValues(alpha: 0.78),
-      fontSize: PrayerStyle.sunArcLabel,
+    final ink = context.ff.onGradient;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final left = hms(path.until.difference(_now));
+    String at(DateTime t) => PrayerFormat.time(t, use24h: widget.use24h);
+    final shadows = [
+      const Shadow(
+        color: PrayerStyle.skyTextShadow,
+        blurRadius: 4,
+        offset: Offset(0, 1),
+      ),
+    ];
+    final ends = context.text.meta.copyWith(
+      color: ink.withValues(alpha: 0.88),
+      fontSize: PrayerStyle.skyEndFont,
+      fontWeight: FontWeight.w600,
+      shadows: shadows,
     );
-    String at(DateTime t) => PrayerFormat.time(t, use24h: use24h);
     return Semantics(
       label: [
-        if (part != null) part.label else tr('Night'),
-        if (part != null)
-          tr('{time} left', {'time': PrayerFormat.duration(path.left)})
-        else
-          tr('Sunrise in {time}', {'time': PrayerFormat.duration(path.left)}),
-        if (s != null) tr('Sunrise {time}', {'time': at(s.sunrise)}),
-        if (s != null) tr('Sunset {time}', {'time': at(s.sunset)}),
+        part.label,
+        tr('{time} left', {'time': left}),
+        if (widget.located && path.isDay) ...[
+          tr('Sunrise {time}', {'time': at(path.from)}),
+          tr('Sunset {time}', {'time': at(path.to)}),
+        ],
+        if (widget.located && !path.isDay) ...[
+          tr('Sunset {time}', {'time': at(path.from)}),
+          tr('Sunrise {time}', {'time': at(path.to)}),
+        ],
       ].join(', '),
       excludeSemantics: true,
-      child: SizedBox(
-        width: PrayerStyle.sunArcWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: PrayerStyle.sunArcHeight,
-              child: TweenAnimationBuilder<double>(
-                // From sunrise to now on first show, then glides on.
-                tween: Tween(
-                  begin: context.reduceMotion ? path.now : 0,
-                  end: path.now,
-                ),
-                duration: context.motion(AppMotion.slow * 4),
-                curve: Curves.easeOutCubic,
-                builder: (context, t, _) => CustomPaint(
-                  size: const Size(
-                    PrayerStyle.sunArcWidth,
-                    PrayerStyle.sunArcHeight,
-                  ),
-                  painter: _ArcPainter(
-                    bounds: path.bounds,
-                    now: t,
-                    day: path.isDay,
-                    ink: color,
-                    sun: PrayerStyle.sun,
-                  ),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        bottom: AppSpacing.xs,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (part == null)
-                            Icon(
-                              FontAwesomeIcons.solidMoon,
-                              size: PrayerStyle.sunArcMoon,
-                              color: color.withValues(alpha: 0.9),
-                            )
-                          else
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                part.label,
-                                maxLines: 1,
-                                style: label.copyWith(
-                                  color: color,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          _Countdown(
-                            text: part == null
-                                ? tr('Sunrise in {time}', {
-                                    'time': PrayerFormat.duration(path.left),
-                                  })
-                                : tr('{time} left', {
-                                    'time': PrayerFormat.duration(path.left),
-                                  }),
-                            color: color,
-                          ),
-                        ],
-                      ),
-                    ),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final lay = SkyLayout.of(c.maxWidth, rtl: rtl);
+          final x0 = lay.cx - lay.radius - 12;
+          final x1 = lay.cx + lay.radius + 12;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              RepaintBoundary(
+                child: CustomPaint(
+                  painter: PrayerSkyPainter(
+                    frame: _frame,
+                    ground: widget.ground,
+                    rtl: rtl,
+                    southern: widget.southern,
+                    moonAge: SkyMoon.age(_now),
+                    animated: !_still,
+                    ambient: _ambient,
+                    intro: _intro,
+                    swap: _swap,
+                    sprites: SkySprites.instance,
                   ),
                 ),
               ),
-            ),
-            if (s != null) ...[
-              const SizedBox(height: AppSpacing.xxs),
-              Row(
-                children: [
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(at(s.sunrise), maxLines: 1, style: label),
-                    ),
+              Positioned(
+                left: lay.cx - 50,
+                width: 100,
+                bottom: c.maxHeight - lay.horizon + 8,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        part.label,
+                        maxLines: 1,
+                        style: context.text.meta.copyWith(
+                          color: ink,
+                          fontSize: PrayerStyle.skyPartFont,
+                          fontWeight: FontWeight.w800,
+                          shadows: shadows,
+                        ),
+                      ),
+                      Text(
+                        tr('{time} left', {'time': left}),
+                        maxLines: 1,
+                        style: context.text.meta.copyWith(
+                          fontSize: PrayerStyle.sunLeftFont,
+                          fontWeight: FontWeight.w600,
+                          color: ink.withValues(alpha: 0.88),
+                          shadows: shadows,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
                   ),
-                  const Spacer(),
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(at(s.sunset), maxLines: 1, style: label),
-                    ),
-                  ),
-                ],
+                ),
               ),
+              if (widget.located) ...[
+                // The dial is not mirrored: sunrise stays on the left.
+                Positioned(
+                  left: x0,
+                  top: lay.horizon + 8,
+                  child: Text(at(path.from), maxLines: 1, style: ends),
+                ),
+                Positioned(
+                  right: c.maxWidth - x1,
+                  top: lay.horizon + 8,
+                  child: Text(at(path.to), maxLines: 1, style: ends),
+                ),
+              ],
             ],
-          ],
-        ),
+          );
+        },
       ),
     );
   }
-}
-
-/// "1h 29m left": plain small text under the part's name — the time left
-/// in this waqt, no chip (user's choice), tabular digits so it doesn't
-/// jiggle as it counts down.
-class _Countdown extends StatelessWidget {
-  const _Countdown({required this.text, required this.color});
-
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => ConstrainedBox(
-    // Fits inside the arc's opening.
-    constraints: const BoxConstraints(maxWidth: PrayerStyle.sunArcWidth * 0.68),
-    child: FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Text(
-        text,
-        maxLines: 1,
-        style: context.text.meta.copyWith(
-          fontSize: PrayerStyle.sunLeftFont,
-          fontWeight: FontWeight.w600,
-          color: color.withValues(alpha: 0.85),
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
-      ),
-    ),
-  );
-}
-
-class _ArcPainter extends CustomPainter {
-  _ArcPainter({
-    required this.bounds,
-    required this.now,
-    required this.day,
-    required this.ink,
-    required this.sun,
-  });
-
-  final List<double> bounds;
-  final double now;
-  final bool day;
-  final Color ink;
-  final Color sun;
-
-  /// Angle gap between two parts.
-  static const double _gap = 0.05;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const stroke = PrayerStyle.sunArcStroke;
-    final pad = PrayerStyle.sunDot + 2;
-    final r = math.min(size.width / 2 - pad, size.height - pad);
-    final centre = Offset(size.width / 2, size.height - stroke / 2);
-    final rect = Rect.fromCircle(center: centre, radius: r);
-    // RTL is not mirrored: the sun rises in the east (left) on any script,
-    // like a clock face.
-    double angle(double f) => math.pi + f.clamp(0.0, 1.0) * math.pi;
-
-    // Horizon.
-    final dash = Paint()
-      ..color = ink.withValues(alpha: 0.35)
-      ..strokeWidth = 1;
-    for (var x = 0.0; x < size.width; x += 6) {
-      canvas.drawLine(
-        Offset(x, centre.dy),
-        Offset(math.min(x + 3, size.width), centre.dy),
-        dash,
-      );
-    }
-
-    final faint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round
-      ..color = ink.withValues(alpha: day ? 0.28 : 0.18);
-    final bright = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round
-      ..color = ink.withValues(alpha: 0.95);
-    for (var i = 0; i < bounds.length - 1; i++) {
-      final a = angle(bounds[i]) + (i == 0 ? 0 : _gap / 2);
-      final b = angle(bounds[i + 1]) - (i == bounds.length - 2 ? 0 : _gap / 2);
-      if (b <= a) continue;
-      canvas.drawArc(rect, a, b - a, false, faint);
-      if (!day) continue;
-      final lit = math.min(b, angle(now));
-      if (lit > a) canvas.drawArc(rect, a, lit - a, false, bright);
-    }
-
-    if (!day) return;
-    final t = angle(now);
-    final at = centre + Offset(math.cos(t) * r, math.sin(t) * r);
-    canvas.drawCircle(
-      at,
-      PrayerStyle.sunDot * 2,
-      Paint()..color = sun.withValues(alpha: 0.25),
-    );
-    canvas.drawCircle(at, PrayerStyle.sunDot, Paint()..color = sun);
-  }
-
-  @override
-  bool shouldRepaint(_ArcPainter old) =>
-      old.now != now ||
-      old.day != day ||
-      old.ink != ink ||
-      old.sun != sun ||
-      old.bounds.length != bounds.length ||
-      [
-        for (var i = 0; i < bounds.length; i++) old.bounds[i] != bounds[i],
-      ].any((d) => d);
 }

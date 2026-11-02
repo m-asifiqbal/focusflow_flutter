@@ -135,12 +135,10 @@ class AppDatabase extends _$AppDatabase {
     ('inbox_entries', 'route', 'TEXT'),
     // A prayer's congregation (jamaat) time and its reminder.
     ('prayers', 'jamaat_minutes', 'INTEGER'),
-    (
-      'prayers',
-      'jamaat_after_start',
-      'INTEGER NOT NULL DEFAULT 0',
-    ),
+    ('prayers', 'jamaat_after_start', 'INTEGER NOT NULL DEFAULT 0'),
     ('prayers', 'remind_before_jamaat', 'INTEGER'),
+    // An estimated (typical) jamaat instead of the mosque's own time.
+    ('prayers', 'jamaat_estimated', 'INTEGER NOT NULL DEFAULT 0'),
   ];
 
   Future<void> _ensureAddedColumns() async {

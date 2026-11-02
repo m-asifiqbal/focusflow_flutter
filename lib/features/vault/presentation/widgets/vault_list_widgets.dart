@@ -21,13 +21,7 @@ import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart'
 import 'package:focusflow/features/vault/domain/repository/vault_repository.dart';
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
-
-IconData vaultTypeIcon(VaultItemType type) => switch (type) {
-  VaultItemType.login => FontAwesomeIcons.key,
-  VaultItemType.card => FontAwesomeIcons.solidCreditCard,
-  VaultItemType.wifi => FontAwesomeIcons.wifi,
-  VaultItemType.secureNote => FontAwesomeIcons.solidNoteSticky,
-};
+import 'package:focusflow/features/vault/presentation/vault_type_style.dart';
 
 class VaultCategoryTiles extends StatelessWidget {
   const VaultCategoryTiles({
@@ -41,6 +35,17 @@ class VaultCategoryTiles extends StatelessWidget {
   final VaultItemType? selected;
   final ValueChanged<VaultItemType> onSelect;
 
+  /// The four everyday types always, then every other type that has items
+  /// (or is the active filter): eighteen tiles would bury the list, and the
+  /// filter sheet reaches the rest.
+  List<VaultItemType> _shown() => [
+    for (final t in VaultItemType.values)
+      if (t.index <= VaultItemType.secureNote.index ||
+          (counts?.byType[t] ?? 0) > 0 ||
+          t == selected)
+        t,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -52,8 +57,8 @@ class VaultCategoryTiles extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final type in VaultItemType.values) ...[
-            if (type.index > 0) const SizedBox(width: VaultSizes.gapTile),
+          for (final (i, type) in _shown().indexed) ...[
+            if (i > 0) const SizedBox(width: VaultSizes.gapTile),
             _CategoryTile(
               type: type,
               count: counts?.byType[type] ?? 0,

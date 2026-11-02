@@ -390,6 +390,11 @@ class Prayers extends Table with ItemColumns {
   BoolColumn get jamaatAfterStart =>
       boolean().withDefault(const Constant(false))();
 
+  /// The jamaat is the offline estimate for this daily prayer (with
+  /// [jamaatMinutes] 0 and [jamaatAfterStart] true underneath).
+  BoolColumn get jamaatEstimated =>
+      boolean().withDefault(const Constant(false))();
+
   /// Reminder this many minutes before the jamaat; null = off.
   IntColumn get remindBeforeJamaat => integer().nullable()();
   BoolColumn get isPaused => boolean().withDefault(const Constant(false))();

@@ -53,6 +53,7 @@ class VaultAvatar extends StatelessWidget {
       colorHex: colorHex,
       fallback: ff.vaultAvatarFallback,
       onFallback: ff.vaultInk,
+      typeColor: ff.vaultCategory(type),
     );
     return ExcludeSemantics(
       child: Container(

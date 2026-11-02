@@ -63,6 +63,7 @@ abstract final class PrayerRowMapper {
       targetCount: r.targetCount,
       jamaat: switch (r.jamaatMinutes) {
         null => null,
+        _ when r.jamaatEstimated => const PrayerJamaat.estimated(),
         final m when r.jamaatAfterStart => PrayerJamaat.afterStart(
           m.clamp(0, 24 * 60),
         ),
@@ -111,6 +112,7 @@ abstract final class PrayerRowMapper {
       targetCount: Value(p.targetCount),
       jamaatMinutes: Value(p.jamaat?.minutes),
       jamaatAfterStart: Value(p.jamaat?.afterStart ?? false),
+      jamaatEstimated: Value(p.jamaat?.estimated ?? false),
       remindBeforeJamaat: Value(p.jamaat == null ? null : p.remindBeforeJamaat),
       colorHex: Value(p.colorHex),
     );

@@ -189,6 +189,8 @@ String _badgeText(VaultBadge b) => switch (b) {
   VaultBadge.weak => tr('WEAK'),
   VaultBadge.reused => tr('REUSED'),
   VaultBadge.breached => tr('BREACHED'),
+  VaultBadge.expired => tr('EXPIRED'),
+  VaultBadge.expiring => tr('EXPIRING'),
 };
 
 /// Small uppercase status pill.
@@ -206,6 +208,8 @@ class VaultStatusBadge extends StatelessWidget {
       VaultBadge.weak => ff.vaultWeak,
       VaultBadge.reused => ff.vaultReused,
       VaultBadge.breached => ff.vaultBreached,
+      VaultBadge.expired => ff.vaultExpired,
+      VaultBadge.expiring => ff.vaultExpiring,
     };
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(

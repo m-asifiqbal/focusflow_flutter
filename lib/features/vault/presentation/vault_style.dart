@@ -140,7 +140,25 @@ extension VaultColors on FFColors {
     VaultItemType.card => AppPalette.amber400,
     VaultItemType.wifi => AppPalette.blue400,
     VaultItemType.secureNote => AppPalette.indigo400,
+    VaultItemType.bankAccount => AppPalette.teal500,
+    VaultItemType.cryptoWallet => AppPalette.orange400,
+    VaultItemType.insurance => AppPalette.sage300,
+    VaultItemType.identity => AppPalette.pink400,
+    VaultItemType.passport => AppPalette.lavender300,
+    VaultItemType.driverLicense => AppPalette.amethyst300,
+    VaultItemType.nationalId => AppPalette.violet500,
+    VaultItemType.medical => AppPalette.rose300,
+    VaultItemType.emailAccount => AppPalette.sky500,
+    VaultItemType.server => AppPalette.slate400,
+    VaultItemType.apiKey => AppPalette.mocha300,
+    VaultItemType.softwareLicense => AppPalette.indigo500,
+    VaultItemType.membership => AppPalette.amber300,
+    VaultItemType.vehicle => AppPalette.red500,
   };
+
+  /// Soft expiry badges: a date passed / coming up (documents, cards).
+  VaultTone get vaultExpired => vaultBreached;
+  VaultTone get vaultExpiring => vaultFair;
 
   /// Letter-avatar fill when an item has no brand / colour.
   Color get vaultAvatarFallback => AppPalette.emerald700;

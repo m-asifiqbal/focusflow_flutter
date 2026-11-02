@@ -14,11 +14,11 @@ import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_colors.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
-import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
+import 'package:focusflow/features/vault/presentation/vault_type_style.dart';
 
 class VaultEditorTopBar extends StatelessWidget {
   const VaultEditorTopBar({
@@ -113,14 +113,6 @@ class VaultEditorTopBar extends StatelessWidget {
     );
   }
 }
-
-/// Icon of each vault type (chips, icon fallback).
-IconData vaultTypeIcon(VaultItemType type) => switch (type) {
-  VaultItemType.login => FontAwesomeIcons.key,
-  VaultItemType.card => FontAwesomeIcons.solidCreditCard,
-  VaultItemType.wifi => FontAwesomeIcons.wifi,
-  VaultItemType.secureNote => FontAwesomeIcons.solidNoteSticky,
-};
 
 class VaultTypeChips extends StatelessWidget {
   const VaultTypeChips({

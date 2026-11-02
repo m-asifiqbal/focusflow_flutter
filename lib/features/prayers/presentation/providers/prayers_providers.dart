@@ -26,6 +26,7 @@ import 'package:focusflow/features/prayers/domain/services/prayer_stats.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_sun.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
+import 'package:focusflow/shared/providers/core_providers.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
@@ -62,6 +63,28 @@ final prayerLogsProvider = StreamProvider.autoDispose<List<PrayerLog>>((ref) {
       );
 });
 
+/// "Now" for the Prayer page: the real instant, re-read every minute with
+/// the shared minute clock and — through [PrayerClockTicker] — at the very
+/// second a window opens or closes, so the hero and the day list never show
+/// a waqt that is already over.
+class PrayerClock extends Notifier<DateTime> {
+  @override
+  DateTime build() {
+    ref.watch(minuteClockProvider);
+    return ref.read(clockProvider).now();
+  }
+
+  /// Re-reads the clock (listeners rebuild when it moved).
+  void refresh() {
+    final t = ref.read(clockProvider).now();
+    if (t != state) state = t;
+  }
+}
+
+final prayerNowProvider = NotifierProvider<PrayerClock, DateTime>(
+  PrayerClock.new,
+);
+
 /// Everything the Prayer page shows for today.
 @immutable
 class PrayerToday {
@@ -70,6 +93,9 @@ class PrayerToday {
     required this.slots,
     required this.focus,
     required this.hasPrayers,
+    this.next,
+    this.current,
+    this.allDone = false,
   });
 
   final DateTime now;
@@ -77,11 +103,28 @@ class PrayerToday {
   /// Today's prayers and practices, soonest first.
   final List<PrayerSlot> slots;
 
-  /// The hero: the open prayer, else the next one (null = day done).
+  /// The open prayer, else the next one today (null = day done) — Home.
   final PrayerSlot? focus;
+
+  /// The next prayer to begin, today or tomorrow.
+  final PrayerSlot? next;
+
+  /// The open prayer not marked yet (its waqt is still running).
+  final PrayerSlot? current;
+
+  /// The Prayer page's card: the open unmarked prayer, else the next one.
+  PrayerSlot? get card => current ?? next;
+
+  /// Every prayer of today done or excused.
+  final bool allDone;
 
   /// Any active prayer at all (else the setup / empty state).
   final bool hasPrayers;
+
+  /// When the page next changes by itself (see
+  /// [PrayerSchedule.nextChange]); includes tomorrow's first prayer while
+  /// that is the card.
+  DateTime? get nextChange => PrayerSchedule.nextChange([...slots, ?next], now);
 
   /// Prayers that are neither fasts nor counting practices.
   List<PrayerSlot> get prayers => [
@@ -105,11 +148,21 @@ class PrayerToday {
       other.now == now &&
       listEquals(other.slots, slots) &&
       other.focus == focus &&
+      other.next == next &&
+      other.current == current &&
+      other.allDone == allDone &&
       other.hasPrayers == hasPrayers;
 
   @override
-  int get hashCode =>
-      Object.hash(now, Object.hashAll(slots), focus, hasPrayers);
+  int get hashCode => Object.hash(
+    now,
+    Object.hashAll(slots),
+    focus,
+    next,
+    current,
+    allDone,
+    hasPrayers,
+  );
 }
 
 PrayerToday _todayOf(
@@ -125,17 +178,31 @@ PrayerToday _todayOf(
     now: now,
     slots: slots,
     focus: PrayerSchedule.focus(slots, now),
+    next: PrayerSchedule.next(
+      slots,
+      now,
+      // Only planned when nothing is left today.
+      tomorrow: () => PrayerSchedule.dayPlan(
+        prayers,
+        DateUtilsX.addDays(today, 1),
+        sunFor,
+        byId,
+      ),
+    ),
+    current: PrayerSchedule.current(slots, now),
+    allDone: PrayerSchedule.allDone(slots),
     hasPrayers: prayers.isNotEmpty,
   );
 }
 
-/// Today's plan (recomputed every minute and on every write).
+/// Today's plan (recomputed every minute, at each window's start / end and
+/// on every write).
 final prayerTodayProvider = Provider.autoDispose<AsyncValue<PrayerToday>>((
   ref,
 ) {
   final prayers = ref.watch(prayersProvider);
   final logs = ref.watch(prayerLogsProvider);
-  final now = ref.watch(minuteClockProvider);
+  final now = ref.watch(prayerNowProvider);
   final sunFor = ref.watch(prayerSunProvider);
   if (prayers.hasError) {
     return AsyncValue.error(prayers.error!, prayers.stackTrace!);

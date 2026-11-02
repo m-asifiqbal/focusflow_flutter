@@ -112,6 +112,10 @@ class VaultEditorController
   void setWifiSecurity(String v) =>
       _payload((p) => p.copyWith(wifiSecurity: v));
 
+  /// A typed value of a schema type (empty clears it).
+  void setField(String key, String v) =>
+      _payload((p) => p.withField(key, v));
+
   /// 2FA secret: a Base32 key or an `otpauth://` URI (empty clears it).
   /// A scanned URI with an issuer also fills an empty title.
   void setTotp(String v) {

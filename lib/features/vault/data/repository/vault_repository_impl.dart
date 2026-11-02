@@ -206,16 +206,14 @@ class VaultRepositoryImpl extends RepositoryBase implements VaultRepository {
 
   @override
   Stream<VaultCounts> watchCounts() => _dao
-      .counts()
+      .counts([for (final t in VaultItemType.values) t.index])
       .watchSingle()
       .map(
         (r) => VaultCounts(
           total: r.read<int>('total'),
           byType: {
-            VaultItemType.login: r.read<int>('logins'),
-            VaultItemType.card: r.read<int>('cards'),
-            VaultItemType.wifi: r.read<int>('wifi'),
-            VaultItemType.secureNote: r.read<int>('notes'),
+            for (final t in VaultItemType.values)
+              t: r.read<int>('t${t.index}'),
           },
           favourites: r.read<int>('favourites'),
           weak: r.read<int>('weak'),

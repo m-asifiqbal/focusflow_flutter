@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/crypto/password_strength.dart';
 import 'package:focusflow/core/crypto/totp.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
+import 'package:focusflow/features/vault/domain/entities/vault_item_schema.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
 import 'package:focusflow/features/vault/domain/services/vault_item_service.dart';
 
@@ -81,9 +82,9 @@ class VaultEditorState {
 
   bool get isNew => original == null;
 
-  /// Logins and Wi-Fi have a password (strength meter, expiry reminder).
-  bool get hasPassword =>
-      type == VaultItemType.login || type == VaultItemType.wifi;
+  /// Logins, Wi-Fi and the account-like schema types have a password
+  /// (strength meter, expiry reminder).
+  bool get hasPassword => type.hasPassword;
 
   /// Live strength of the password being typed.
   PasswordStrength get strength =>

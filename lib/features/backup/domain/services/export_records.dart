@@ -216,7 +216,8 @@ class ExportRecords {
   /// Prayers with their daily logs inlined (oldest first). A window end
   /// reads `HH:mm` when fixed, or `sunset`, `sunset+10`, `dawn-5` (the sun
   /// event ± minutes) when it follows the sun; `end` is null for a moment
-  /// with no end. `jamaat` is `HH:mm`, `N min after start`, or null.
+  /// with no end. `jamaat` is `HH:mm`, `N min after start`, `estimated`
+  /// (a typical time worked out each day), or null.
   /// Not read back by the FocusFlow importer yet (a .ffbackup restores
   /// prayers).
   List<Map<String, Object?>> prayers() {
@@ -252,7 +253,11 @@ class ExportRecords {
           'startDate': r['start_date'],
           'endDate': r['end_date'],
           'place': r['place'] ?? '',
-          'jamaat': _jamaat(r['jamaat_minutes'], r['jamaat_after_start']),
+          'jamaat': _jamaat(
+            r['jamaat_minutes'],
+            r['jamaat_after_start'],
+            r['jamaat_estimated'],
+          ),
           'target': r['target_count'],
           'note': r['note'] ?? '',
           'paused': _b(r['is_paused']),
@@ -271,8 +276,9 @@ class ExportRecords {
     return _hhmm(minutes);
   }
 
-  static String? _jamaat(Object? minutes, Object? afterStart) {
+  static String? _jamaat(Object? minutes, Object? afterStart, Object? est) {
     if (minutes is! int) return null;
+    if (_b(est)) return 'estimated';
     return _b(afterStart) ? '$minutes min after start' : _hhmm(minutes);
   }
 

@@ -166,30 +166,48 @@ class PrayerTimeRule {
 }
 
 /// When the congregation prays (the mosque's jamaat, a church service):
-/// a set clock time, or a number of minutes after the window opens (Maghrib
-/// "10 minutes after the adhan" follows the sun by itself).
+/// a set clock time, a number of minutes after the window opens (Maghrib
+/// "10 minutes after the adhan" follows the sun by itself), or — for the
+/// five daily prayers — an offline estimate of a typical mosque's time
+/// (PrayerJamaatEstimate), which moves with the seasons too.
 @immutable
 class PrayerJamaat {
   /// At [minutes] after midnight.
-  const PrayerJamaat.at(this.minutes) : afterStart = false;
+  const PrayerJamaat.at(this.minutes) : afterStart = false, estimated = false;
 
   /// [minutes] after the window's start.
-  const PrayerJamaat.afterStart(this.minutes) : afterStart = true;
+  const PrayerJamaat.afterStart(this.minutes)
+    : afterStart = true,
+      estimated = false;
+
+  /// A typical time for this daily prayer, worked out each day. Stored as
+  /// "after start, 0" plus a flag, so an app without the flag still shows
+  /// a jamaat (at the start) rather than none.
+  const PrayerJamaat.estimated()
+    : minutes = 0,
+      afterStart = true,
+      estimated = true;
 
   final int minutes;
   final bool afterStart;
+  final bool estimated;
 
   @override
   bool operator ==(Object other) =>
       other is PrayerJamaat &&
       other.minutes == minutes &&
-      other.afterStart == afterStart;
+      other.afterStart == afterStart &&
+      other.estimated == estimated;
 
   @override
-  int get hashCode => Object.hash(minutes, afterStart);
+  int get hashCode => Object.hash(minutes, afterStart, estimated);
 
   @override
-  String toString() => afterStart ? 'jamaat(+$minutes)' : 'jamaat(@$minutes)';
+  String toString() => estimated
+      ? 'jamaat(~)'
+      : afterStart
+      ? 'jamaat(+$minutes)'
+      : 'jamaat(@$minutes)';
 }
 
 @immutable

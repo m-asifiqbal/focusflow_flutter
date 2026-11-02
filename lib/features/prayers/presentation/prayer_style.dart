@@ -93,19 +93,52 @@ abstract final class PrayerStyle {
   static const double barMaxWidth = 22;
   static const double progressBar = 8;
 
-  // The hero's sun arc (PrayerSunArc).
-  static const double sunArcWidth = 100;
-  static const double sunArcHeight = 54;
-  static const double sunArcStroke = 3.5;
-  static const double sunDot = 6;
-  static const double sunArcLabel = 10;
-  static const double sunArcMoon = 14;
+  /// The Prayer card's name, and how much its texts sit under the page's
+  /// defaults (eyebrow, name, window, jamaat: −1.5 pt each).
+  static const double heroName = 26;
+  static const double heroShrink = 1.5;
 
-  /// The "1h 29m left" countdown under the part's name.
-  static const double sunLeftFont = 8.5;
+  // The card's sky (PrayerSunArc): the four-part curve with the sun or moon
+  // on it, over a living sky that melts into the text half. The card is at
+  // least [heroMinHeight] tall and the horizon sits [skyHorizon] from its
+  // top, so the scene looks the same whatever the text above it does.
+  static const double heroMinHeight = 212;
+  static const double skyHorizon = 152;
+  static const double skyArcRadius = 74;
+  static const double skyArcStroke = 6;
 
-  /// The sun on the arc (a warm token, readable on the accent gradient).
+  /// Gap between the card's edge and the curve's far end.
+  static const double skyEdge = 14;
+
+  /// The text column's share of the card's width (the sky melts in beside
+  /// it).
+  static const double heroTextShare = .48;
+
+  /// Radius of the sun's disc and of the moon.
+  static const double sunRadius = 10;
+  static const double moonRadius = 10.5;
+  static const double skyPartFont = 12;
+  static const double skyEndFont = 10.5;
+
+  /// The "1:29:05 left" countdown under the part's name.
+  static const double sunLeftFont = 10;
+
+  /// The body travelling from the curve's start to "now" when the card is
+  /// first shown (once per visit to the page).
+  static const Duration skyIntro = Duration(milliseconds: 1600);
+
+  /// Sunrise ↔ sunset: the old curve and body fade out, the new ones in.
+  static const Duration skySwap = Duration(milliseconds: 600);
+
+  /// Soft shadow under the white texts that sit on the sky.
+  static const Color skyTextShadow = Color(0x80001E3C);
+
+  /// The sun (a warm token; its colour runs from orange at the horizon to
+  /// pale yellow overhead).
   static const Color sun = AppPalette.amber300;
+
+  /// The moon's tone high in the sky (a pale cool token); low it is warm.
+  static const Color moon = AppPalette.indigo100;
 
   /// The icon of a place: Home, Work, a house of worship (by the words in
   /// the active language or English, so a typed "Masjid" or "office"

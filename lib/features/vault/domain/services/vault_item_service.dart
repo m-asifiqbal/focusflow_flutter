@@ -20,6 +20,7 @@ import 'package:focusflow/core/crypto/vault_cipher.dart';
 import 'package:focusflow/core/crypto/vault_key.dart';
 import 'package:focusflow/core/items/tag.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
+import 'package:focusflow/features/vault/domain/entities/vault_item_schema.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
 import 'package:focusflow/features/vault/domain/repository/vault_repository.dart';
 import 'package:focusflow/features/vault/domain/services/vault_payload_codec.dart';
@@ -168,6 +169,38 @@ class VaultItemService {
         notes: p.notes,
         customFields: fields,
       ),
+      // Schema types: only this type's own keys survive, and the password /
+      // 2FA slots only when the type has them (a Passport switched from a
+      // Login must not keep a hidden password).
+      _ => VaultPayload(
+        password: type.hasPassword ? p.password : '',
+        totpSecret: type.hasTotp && totp != null && totp.isNotEmpty
+            ? totp
+            : null,
+        notes: notes,
+        fields: _typedFor(type, p.fields),
+        customFields: fields,
+      ),
     };
+  }
+
+  /// [fields] limited to the keys [type] defines, trimmed, non-empty and
+  /// within the stored size limit (so a saved payload always decodes whole).
+  static Map<String, String> _typedFor(
+    VaultItemType type,
+    Map<String, String> fields,
+  ) {
+    final allowed = type.fieldKeys;
+    final out = <String, String>{};
+    for (final e in fields.entries) {
+      if (!allowed.contains(e.key)) continue;
+      var v = e.value.trim();
+      if (v.isEmpty) continue;
+      if (v.length > VaultPayload.maxFieldValue) {
+        v = v.substring(0, VaultPayload.maxFieldValue);
+      }
+      out[e.key] = v;
+    }
+    return out;
   }
 }

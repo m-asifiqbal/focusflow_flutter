@@ -29,6 +29,7 @@ import 'package:focusflow/features/vault/presentation/widgets/vault_header.dart'
 import 'package:focusflow/features/vault/presentation/widgets/vault_item_row.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_list_widgets.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_tab_bar.dart';
+import 'package:focusflow/features/vault/presentation/widgets/vault_type_picker.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
@@ -103,7 +104,7 @@ class _VaultListViewState extends ConsumerState<VaultListView> {
             subtitle: subtitle,
             onLock: () =>
                 unawaited(ref.read(vaultSessionProvider.notifier).lock()),
-            onAdd: () => unawaited(context.push(AppRoutes.newVaultItem())),
+            onAdd: () => unawaited(addVaultItem(context)),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
@@ -304,7 +305,7 @@ class _EmptyList extends StatelessWidget {
           'Logins, cards, Wi-Fi and secure notes — encrypted on this device with your master PIN.',
         ),
         ctaLabel: tr('Add password'),
-        onCta: () => unawaited(context.push(AppRoutes.newVaultItem())),
+        onCta: () => unawaited(addVaultItem(context)),
         hint: tr('Import from Bitwarden / 1Password CSV'),
         onHint: () => unawaited(context.push(AppRoutes.settingsImportExport)),
       );

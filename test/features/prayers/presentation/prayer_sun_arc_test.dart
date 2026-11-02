@@ -1,7 +1,7 @@
-/// The hero's sun arc and place icons: where "now" sits on today's sun
-/// path and which of the four parts of the day it is in (night before
-/// sunrise / after sunset), the plain 6 AM – 6 PM day without a location,
-/// and the icon picked for a place (in English or as typed).
+/// The Prayer card's sky arc and place icons: day (sunrise → sunset) and
+/// night (sunset → sunrise) halves, their four parts and the time left in
+/// the current one, the plain 6 AM – 6 PM day without a location, and the
+/// icon picked for a place (in English or as typed).
 library;
 
 import 'package:flutter/widgets.dart';
@@ -13,64 +13,72 @@ import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_sun_arc.dart';
 
 void main() {
-  final day = DateTime(2026, 11, 1);
   DateTime at(int h, [int m = 0]) => DateTime(2026, 11, 1, h, m);
-  // Dhaka, 1 Nov 2026 (approximate is enough here).
-  final sun = PrayerTimes.compute(
-    const PrayerCalcSettings(
-      location: GeoPoint(23.81, 90.41),
-      method: PrayerCalcMethod.karachi,
-    ),
-    day,
+  // Dhaka.
+  const dhaka = PrayerCalcSettings(
+    location: GeoPoint(23.81, 90.41),
+    method: PrayerCalcMethod.karachi,
   );
+  SolarDay sunFor(DateTime d) => PrayerTimes.compute(dhaka, d);
+  SolarDay? none(DateTime _) => null;
+  final today = sunFor(at(0));
+  const five = Duration(minutes: 5);
 
-  group('SunPath', () {
+  group('day', () {
     test('four parts between sunrise and sunset', () {
-      final p = SunPath.of(sun, sun.sunrise.add(const Duration(minutes: 5)));
+      final p = SkyPath.of(sunFor, today.sunrise.add(five));
+      expect(p.isDay, isTrue);
       expect(p.bounds.first, 0);
       expect(p.bounds.last, 1);
       for (var i = 1; i < p.bounds.length; i++) {
         expect(p.bounds[i], greaterThan(p.bounds[i - 1]));
       }
-      expect(p.part, SunPart.morning);
+      expect(p.part, SkyPart.morning);
       expect(
-        SunPath.of(sun, sun.noon.subtract(const Duration(minutes: 5))).part,
-        SunPart.lateMorning,
+        SkyPath.of(sunFor, today.noon.subtract(five)).part,
+        SkyPart.lateMorning,
       );
-      expect(
-        SunPath.of(sun, sun.noon.add(const Duration(minutes: 5))).part,
-        SunPart.afternoon,
-      );
-      expect(
-        SunPath.of(sun, sun.asr.add(const Duration(minutes: 5))).part,
-        SunPart.evening,
-      );
-    });
-
-    test('night before sunrise and after sunset', () {
-      expect(SunPath.of(sun, at(4)).isDay, isFalse);
-      expect(SunPath.of(sun, at(4)).part, isNull);
-      expect(SunPath.of(sun, at(21)).isDay, isFalse);
-    });
-
-    test('time left in this part, and until sunrise at night', () {
-      // No location: mid morning 9:00, noon, Asr 3:30 PM, sunset 6 PM.
-      expect(
-        SunPath.of(null, at(14)).left,
-        const Duration(hours: 1, minutes: 30),
-      );
-      expect(SunPath.of(null, at(17, 15)).left, const Duration(minutes: 45));
-      expect(SunPath.of(null, at(8)).left, const Duration(hours: 1));
-      expect(SunPath.of(null, at(5)).left, const Duration(hours: 1));
-      // After sunset: until tomorrow's sunrise.
-      expect(SunPath.of(null, at(20)).left, const Duration(hours: 10));
+      expect(SkyPath.of(sunFor, today.noon.add(five)).part, SkyPart.afternoon);
+      final evening = SkyPath.of(sunFor, today.asr.add(five));
+      expect(evening.part, SkyPart.evening);
+      // Asr → sunset: the time left in this waqt.
+      expect(evening.left, today.sunset.difference(today.asr.add(five)));
+      expect(evening.from, today.sunrise);
+      expect(evening.to, today.sunset);
     });
 
     test('without a location: a 6 AM – 6 PM day', () {
-      final p = SunPath.of(null, at(12));
+      final p = SkyPath.of(none, at(12));
       expect(p.now, closeTo(0.5, 1e-9));
-      expect(p.part, SunPart.afternoon);
-      expect(SunPath.of(null, at(9)).now, closeTo(0.25, 1e-9));
+      expect(p.part, SkyPart.afternoon);
+      expect(SkyPath.of(none, at(9)).now, closeTo(0.25, 1e-9));
+      // Noon → Asr 3:30 PM.
+      expect(SkyPath.of(none, at(14)).left, const Duration(minutes: 90));
+    });
+  });
+
+  group('night', () {
+    test('after sunset: dusk, then night after nightfall (Isha)', () {
+      final dusk = SkyPath.of(sunFor, today.sunset.add(five));
+      expect(dusk.isDay, isFalse);
+      expect(dusk.part, SkyPart.dusk);
+      expect(dusk.from, today.sunset);
+      expect(dusk.to, sunFor(DateTime(2026, 11, 2)).sunrise);
+      expect(dusk.left, today.nightfall.difference(today.sunset.add(five)));
+      expect(SkyPath.of(sunFor, today.nightfall.add(five)).part, SkyPart.night);
+    });
+
+    test('before sunrise: the night that began yesterday evening', () {
+      final yesterday = sunFor(DateTime(2026, 10, 31));
+      final p = SkyPath.of(sunFor, at(4));
+      expect(p.isDay, isFalse);
+      expect(p.from, yesterday.sunset);
+      expect(p.to, today.sunrise);
+      expect(p.part, anyOf(SkyPart.lateNight, SkyPart.beforeDawn));
+      // Without a location: 6 PM – 6 AM, 4 AM is after 2 AM → before dawn.
+      final plain = SkyPath.of(none, at(4));
+      expect(plain.part, SkyPart.beforeDawn);
+      expect(plain.left, const Duration(hours: 2));
     });
   });
 

@@ -15,7 +15,9 @@ import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
 import 'package:focusflow/features/prayers/domain/repository/prayers_repository.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_presets.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_progress_views.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_day_card.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_hero.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/prayer_sun_arc.dart';
 import 'package:focusflow/shared/providers/repository_providers.dart';
 import 'package:focusflow/shared/providers/settings_provider.dart';
 
@@ -171,7 +173,8 @@ void main() {
     }
   });
 
-  testWidgets('Mark prayed on the hero; Prayer is not a tab', (tester) async {
+  testWidgets('Mark prayed in the list; the card shows what comes next; '
+      'Prayer is not a tab', (tester) async {
     final h = await boot(tester);
     await seed(tester, h);
     // Set up, and still the four classic tabs.
@@ -183,15 +186,38 @@ void main() {
       'Insights',
       'Settings',
     ]);
-    await pumpApp(tester, h, AppRoutes.prayers);
-    await tester.tap(
+    await pumpApp(tester, h, AppRoutes.prayers, size: const Size(390, 1800));
+    Finder inCard(Finder f) =>
+        find.descendant(of: find.byType(PrayerHeroCard), matching: f);
+    // 3:50 PM: Asr's waqt is open and not marked → the card shows it ("NOW",
+    // time left), without a Mark button; it is marked from its row.
+    expect(inCard(find.text('Asr')), findsOneWidget);
+    expect(inCard(find.text('NOW')), findsOneWidget);
+    expect(inCard(find.textContaining('Ends in')), findsOneWidget);
+    // The sky arc's live H:MM:SS countdown.
+    expect(
+      inCard(find.textContaining(RegExp(r'^\d+:\d\d:\d\d left$'))),
+      findsOneWidget,
+    );
+    expect(
       find.descendant(
         of: find.byType(PrayerHeroCard),
+        matching: find.text('Mark prayed'),
+      ),
+      findsNothing,
+    );
+    expect(find.byType(PrayerSunArc), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PrayerDayCard),
         matching: find.text('Mark prayed'),
       ),
     );
     await settle(tester);
     expect(find.text('UNDO'), findsOneWidget);
+    // Marked → the card moves on to the next prayer.
+    expect(inCard(find.text('Maghrib')), findsOneWidget);
+    expect(inCard(find.text('NEXT')), findsOneWidget);
     final asr = (await tester.runAsync(
       () => h
           .read(prayersRepositoryProvider)
@@ -202,6 +228,53 @@ void main() {
       () => h.read(prayersRepositoryProvider).log(asr.id, _day),
     );
     expect(log?.status, PrayerStatus.onTime);
+  });
+
+  testWidgets('all done: a line under the card, which shows tomorrow', (
+    tester,
+  ) async {
+    final h = await boot(tester);
+    await seed(tester, h);
+    await tester.runAsync(() async {
+      final repo = h.read(prayersRepositoryProvider);
+      final list = await repo.watchPrayers(PrayersScope.active).first;
+      for (final p in list) {
+        if (p.kind != PrayerKind.salah) continue;
+        await repo.mark(p.id, _day, PrayerStatus.onTime);
+      }
+    });
+    // Late evening: nothing left today.
+    h.clock.set(DateTime(2026, 11, 1, 23, 50));
+    await pumpApp(tester, h, AppRoutes.prayers, size: const Size(390, 1800));
+    expect(find.text('All prayers done today'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(PrayerHeroCard),
+        matching: find.text('All prayers done today'),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(PrayerHeroCard),
+        matching: find.text('Fajr'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('NEXT · TOMORROW'), findsOneWidget);
+    // The sky arc's travel and pop-in finish first.
+    await tester.pump(const Duration(seconds: 3));
+    await captureScreen(tester, 'prayer_all_done_night');
+    await pumpApp(
+      tester,
+      h,
+      AppRoutes.prayers,
+      size: const Size(390, 1800),
+      dark: true,
+    );
+    // The sky arc's travel and pop-in finish first.
+    await tester.pump(const Duration(seconds: 3));
+    await captureScreen(tester, 'prayer_all_done_night_dark');
   });
 
   testWidgets('setup: a tradition\'s prayers saved', (tester) async {

@@ -19,6 +19,7 @@ import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
+import 'package:focusflow/features/vault/domain/entities/vault_item_schema.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_payload.dart';
 import 'package:focusflow/features/vault/domain/services/vault_payload_codec.dart';
 import 'package:focusflow/features/vault/presentation/notifiers/vault_session_controller.dart';
@@ -92,6 +93,13 @@ Future<bool> copyVaultSecret(
         tr('Note'),
         tr('No note saved'),
       ),
+      // Schema types copy their primary field (IBAN, licence key …).
+      _ when record.type.isSchemaType => (
+        payload.primarySecret(record.type),
+        record.type.primaryOf(payload.fields, payload.password).spec?.label ??
+            record.type.label,
+        tr('Nothing to copy'),
+      ),
       _ => (
         payload.primarySecret(record.type),
         tr('Password'),
@@ -142,7 +150,23 @@ Future<void> openVaultWebsite(
 ) async {
   if (!await ensureVaultUnlocked(context)) return;
   final payload = await readVaultPayload(ref, record);
-  final uri = payload == null ? null : vaultWebsiteUri(payload.url);
+  if (!context.mounted) return;
+  await openVaultAddress(
+    context,
+    ref,
+    payload?.websiteFor(record.type) ?? '',
+  );
+}
+
+/// Opens the http(s) address [raw] in the browser (never javascript:, file:,
+/// intent: …). Used by the detail's link rows and "Open website".
+Future<void> openVaultAddress(
+  BuildContext context,
+  WidgetRef ref,
+  String raw,
+) async {
+  if (!await ensureVaultUnlocked(context)) return;
+  final uri = vaultWebsiteUri(raw);
   if (!context.mounted) return;
   if (uri == null) {
     showFFToast(context, tr('No website saved'));

@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart';
 import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
+import 'package:focusflow/features/prayers/domain/services/prayer_jamaat_estimate.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 
 /// A prayer's window on one day.
@@ -137,7 +138,8 @@ class PrayerSlot {
 
 abstract final class PrayerSchedule {
   /// The jamaat of [p] on [day] whose window runs [start] – [until]: the
-  /// window start + N minutes, or a clock time from [at] (a wall clock) —
+  /// estimate for a daily prayer, the window start + N minutes, or a clock
+  /// time from [at] (a wall clock) —
   /// on the next day when the window crosses midnight and the time falls
   /// after it (Isha until 1 AM, jamaat at 00:15).
   static DateTime? jamaatOn(
@@ -149,6 +151,11 @@ abstract final class PrayerSchedule {
   ) {
     final j = p.jamaat;
     if (j == null) return null;
+    if (j.estimated) {
+      final role = PrayerJamaatEstimate.roleOf(p);
+      // Not one of the five daily prayers (renamed?): at the start.
+      return role == null ? start : PrayerJamaatEstimate.at(role, start, until);
+    }
     if (j.afterStart) return start.add(Duration(minutes: j.minutes));
     final t = at(day, j.minutes);
     if (t.isBefore(start)) {
@@ -253,6 +260,80 @@ abstract final class PrayerSchedule {
       return c != 0 ? c : a.prayer.sortOrder.compareTo(b.prayer.sortOrder);
     });
     return out;
+  }
+
+  /// The next prayer to begin after [now]: the first of [today] (soonest
+  /// first) whose window starts later, else the first of [tomorrow] (null
+  /// = nothing ahead). Fasts and counting practices are never "next".
+  static PrayerSlot? next(
+    List<PrayerSlot> today,
+    DateTime now, {
+    List<PrayerSlot> Function()? tomorrow,
+  }) {
+    bool prayer(PrayerSlot s) => !s.prayer.kind.isFast && !s.prayer.kind.counts;
+    for (final s in today) {
+      if (prayer(s) && s.window.start.isAfter(now)) return s;
+    }
+    for (final s in tomorrow?.call() ?? const <PrayerSlot>[]) {
+      if (prayer(s)) return s;
+    }
+    return null;
+  }
+
+  /// The prayer whose window is open at [now] and that is not marked yet
+  /// (the one ending soonest when several are; null = none). Fasts and
+  /// counting practices never count.
+  static PrayerSlot? current(List<PrayerSlot> slots, DateTime now) {
+    PrayerSlot? out;
+    for (final s in slots) {
+      if (s.prayer.kind.isFast || s.prayer.kind.counts) continue;
+      if (s.status != null) continue;
+      final st = s.stateAt(now);
+      if (st != PrayerSlotState.open && st != PrayerSlotState.endingSoon) {
+        continue;
+      }
+      if (out == null || s.window.until.isBefore(out.window.until)) out = s;
+    }
+    return out;
+  }
+
+  /// The next instant after [now] at which something on the Prayer page
+  /// changes by itself: a window opens, enters its last [endingSoon]
+  /// stretch or ends, a jamaat time comes into view (3 hours ahead) or
+  /// passes, or the day rolls over. The page wakes at exactly this instant
+  /// instead of waiting for the next minute tick (null = nothing ahead,
+  /// which only happens for an empty list).
+  static DateTime? nextChange(Iterable<PrayerSlot> slots, DateTime now) {
+    DateTime? best;
+    void consider(DateTime? t) {
+      if (t == null || !t.isAfter(now)) return;
+      if (best == null || t.isBefore(best!)) best = t;
+    }
+
+    for (final s in slots) {
+      final end = s.window.end;
+      consider(s.window.start);
+      consider(end);
+      if (end != null) consider(end.subtract(endingSoon));
+      final j = s.jamaat;
+      consider(j);
+      if (j != null) consider(j.subtract(const Duration(hours: 3)));
+    }
+    consider(DateUtilsX.addDays(DateUtilsX.dateOnly(now), 1));
+    return best;
+  }
+
+  /// Whether every prayer of the day (not fasts or counters) is done or
+  /// excused — false for a day with none.
+  static bool allDone(List<PrayerSlot> slots) {
+    var any = false;
+    for (final s in slots) {
+      if (s.prayer.kind.isFast || s.prayer.kind.counts) continue;
+      any = true;
+      final st = s.status;
+      if (st == null || !(st.done || st == PrayerStatus.excused)) return false;
+    }
+    return any;
   }
 
   /// The slot to put in the "next prayer" hero at [now]: the open one

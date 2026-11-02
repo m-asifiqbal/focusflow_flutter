@@ -20,21 +20,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
-import 'package:focusflow/core/theme/fa_icons.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/vault/domain/entities/vault_item_record.dart';
+import 'package:focusflow/features/vault/domain/entities/vault_item_schema.dart';
 import 'package:focusflow/features/vault/presentation/notifiers/vault_editor_controller.dart';
 import 'package:focusflow/features/vault/presentation/state/vault_editor_state.dart';
 import 'package:focusflow/features/vault/presentation/vault_style.dart';
 import 'package:focusflow/features/vault/presentation/widgets/editor/vault_editor_fields.dart';
-import 'package:focusflow/features/vault/presentation/widgets/editor/vault_generate_sheet.dart';
-import 'package:focusflow/features/vault/presentation/widgets/editor/vault_password_widgets.dart';
 import 'package:focusflow/features/vault/presentation/widgets/editor/vault_editor_sheets.dart';
-import 'package:focusflow/features/vault/presentation/widgets/editor/vault_qr_scanner.dart';
+import 'package:focusflow/features/vault/presentation/widgets/editor/vault_schema_sections.dart';
+import 'package:focusflow/features/vault/presentation/widgets/editor/vault_secret_controls.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_avatar.dart';
 import 'package:focusflow/features/vault/presentation/widgets/vault_fields.dart';
-import 'package:focusflow/features/vault/presentation/widgets/vault_reauth_sheet.dart';
-import 'package:focusflow/shared/providers/settings_provider.dart';
 import 'package:focusflow/features/vault/presentation/vault_tokens.dart';
 
 class VaultTitleCard extends StatelessWidget {
@@ -158,6 +155,20 @@ class VaultTitleCard extends StatelessWidget {
     VaultItemType.card => 'Visa Platinum', // product name
     VaultItemType.wifi => tr('Home Wi-Fi'),
     VaultItemType.secureNote => tr('Passport'),
+    VaultItemType.bankAccount => tr('Savings account'),
+    VaultItemType.cryptoWallet => tr('Hardware wallet'),
+    VaultItemType.insurance => tr('Car insurance'),
+    VaultItemType.identity => tr('Personal details'),
+    VaultItemType.passport => tr('My passport'),
+    VaultItemType.driverLicense => tr('Driving licence'),
+    VaultItemType.nationalId => tr('National ID card'),
+    VaultItemType.medical => tr('Health insurance card'),
+    VaultItemType.emailAccount => tr('Work email'),
+    VaultItemType.server => tr('Production server'),
+    VaultItemType.apiKey => tr('Payments API'),
+    VaultItemType.softwareLicense => tr('Design software'),
+    VaultItemType.membership => tr('Gym membership'),
+    VaultItemType.vehicle => tr('Family car'),
   };
 }
 
@@ -178,75 +189,18 @@ class VaultCredentialsCard extends ConsumerStatefulWidget {
       _VaultCredentialsCardState();
 }
 
-class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
-  final Set<String> _shown = {};
+class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard>
+    with VaultSecretControls<VaultCredentialsCard> {
+  @override
+  VaultEditorArgs get editorArgs => widget.args;
 
   @override
-  void initState() {
-    super.initState();
-    // The password being edited is visible (as in the mockup) unless the
-    // user asked for re-authentication before revealing secrets.
-    if (!ref.read(settingsProvider).vaultReauthToReveal) _shown.add('password');
-  }
+  VaultEditorTexts get editorTexts => widget.texts;
 
-  VaultEditorController get _c =>
-      ref.read(vaultEditorProvider(widget.args).notifier);
+  VaultEditorController get _c => editor;
 
   TextEditingController _t(String field, String initial) =>
-      widget.texts.of(field, initial);
-
-  Widget _eye(String field, String name) {
-    final shown = _shown.contains(field);
-    return VaultIconButton(
-      // The icon shows the current state (eye = visible), as in the mockup.
-      icon: shown ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
-      semanticLabel: shown
-          ? tr('Hide {name}', {'name': name})
-          : tr('Show {name}', {'name': name}),
-      onTap: () => unawaited(_toggle(field)),
-    );
-  }
-
-  Future<void> _toggle(String field) async {
-    if (_shown.contains(field)) {
-      setState(() => _shown.remove(field));
-      return;
-    }
-    if (!await confirmVaultReveal(context, ref) || !mounted) return;
-    setState(() => _shown.add(field));
-  }
-
-  Future<void> _generate() async {
-    final value = await showVaultGenerateSheet(context);
-    if (value == null || !mounted) return;
-    widget.texts.set('password', value);
-    _c.setPassword(value);
-  }
-
-  Future<void> _scan() async {
-    final uri = await scanVaultTotpQr(context, ref);
-    if (uri == null || !mounted) return;
-    widget.texts.set('totp', uri);
-    _c.setTotp(uri);
-    final title = ref.read(vaultEditorProvider(widget.args)).valueOrNull?.title;
-    if (title != null && widget.texts.of('title').text != title) {
-      widget.texts.set('title', title);
-    }
-  }
-
-  Widget _password(VaultEditorState s) => VaultTextRow(
-    label: tr('Password'),
-    controller: _t('password', s.payload.password),
-    onChanged: _c.setPassword,
-    mono: true,
-    obscure: !_shown.contains('password'),
-    autofillHints: const [AutofillHints.newPassword],
-    trailing: [
-      _eye('password', tr('password')),
-      VaultGeneratePill(onTap: () => unawaited(_generate())),
-    ],
-    below: VaultStrengthMeter(strength: s.strength),
-  );
+      textOf(field, initial);
 
   @override
   Widget build(BuildContext context) {
@@ -262,7 +216,7 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.username],
         ),
-        _password(s),
+        passwordRow(s),
         VaultTextRow(
           label: tr('Website'),
           hint: 'example.com',
@@ -270,20 +224,7 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
           onChanged: c.setUrl,
           keyboardType: TextInputType.url,
         ),
-        VaultTextRow(
-          label: tr('2FA secret (TOTP)'),
-          hint: tr('Scan QR or paste key'),
-          controller: _t('totp', p.totpSecret ?? ''),
-          onChanged: c.setTotp,
-          errorText: s.totpInvalid ? tr('Not a valid 2FA key') : null,
-          trailing: [
-            VaultIconButton(
-              icon: FontAwesomeIcons.qrcode,
-              semanticLabel: tr('Scan 2FA QR code'),
-              onTap: () => unawaited(_scan()),
-            ),
-          ],
-        ),
+        totpRow(s),
       ],
       VaultItemType.card => [
         VaultTextRow(
@@ -322,20 +263,20 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
           controller: _t('cardCvv', p.cardCvv),
           onChanged: c.setCardCvv,
           mono: true,
-          obscure: !_shown.contains('cvv'),
+          obscure: !shownSecrets.contains('cvv'),
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          trailing: [_eye('cvv', tr('security code'))],
+          trailing: [eye('cvv', tr('security code'))],
         ),
         VaultTextRow(
           label: tr('PIN'),
           controller: _t('cardPin', p.cardPin),
           onChanged: c.setCardPin,
           mono: true,
-          obscure: !_shown.contains('pin'),
+          obscure: !shownSecrets.contains('pin'),
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          trailing: [_eye('pin', tr('PIN'))],
+          trailing: [eye('pin', tr('PIN'))],
         ),
       ],
       VaultItemType.wifi => [
@@ -344,7 +285,7 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
           controller: _t('wifiSsid', p.wifiSsid),
           onChanged: c.setWifiSsid,
         ),
-        _password(s),
+        passwordRow(s),
         VaultValueRow(
           label: tr('Security'),
           value: vaultWifiSecurityName(
@@ -354,7 +295,16 @@ class _VaultCredentialsCardState extends ConsumerState<VaultCredentialsCard> {
         ),
       ],
       VaultItemType.secureNote => const <Widget>[],
+      // Schema types render their own sections (see VaultSchemaSections).
+      _ => const <Widget>[],
     };
+    if (s.type.isSchemaType) {
+      return VaultSchemaSections(
+        args: widget.args,
+        state: s,
+        texts: widget.texts,
+      );
+    }
     if (rows.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

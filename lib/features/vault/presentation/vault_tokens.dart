@@ -161,6 +161,9 @@ abstract final class VaultSizes {
   static const double lockRingInner = 80;
   static const double totpCard = 82;
   static const double lockRingOuter = 96;
+  /// Type-picker tile and its icon disc.
+  static const double typeTile = 96;
+  static const double typeTileIcon = 38;
   static const double categoryCardWidth = 111;
   static const double categoryCard = 116;
   static const double scoreGauge = 168;
