@@ -4,8 +4,8 @@
 ///
 /// What: soft-deleted items, newest first, each with its purge countdown
 /// ("29 days"); the rose "Auto-deletes after 30 days" card; "N ITEMS" /
-/// "2 SELECTED · 5 ITEMS" label; swipe → Recover / Delete forever; tap or
-/// long-press → multi-select (Cancel · All); sticky raised bar
+/// "2 SELECTED · 5 ITEMS" label; swipe → Recover / Delete forever; tap opens a
+/// deleted note read-only, long-press → multi-select (Cancel · All); sticky raised bar
 /// "Recover all · Empty trash" or "Recover (2) · Delete (2)".
 /// Why: the last chance to get an item back. Permanent deletes ask for
 /// confirmation (dialog 28, permanent variant — no Undo); recovering shows

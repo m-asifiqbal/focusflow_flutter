@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/items/item_type.dart';
+import 'package:focusflow/core/router/app_router.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/archive/presentation/widgets/archive_rows.dart';
@@ -102,7 +103,9 @@ void main() {
     expect(find.text('Note · deleted today'), findsOneWidget);
     expect(find.text('Task · deleted yesterday'), findsOneWidget);
 
-    await tapText(tester, 'Random thoughts');
+    // Long-press starts the selection; taps then add to it.
+    await tester.longPress(find.text('Random thoughts'));
+    await settle(tester);
     await tapText(tester, 'Buy printer ink');
     expect(find.text('2 SELECTED · 5 ITEMS'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
@@ -190,6 +193,31 @@ void main() {
     expect(trash!.length, 3);
   });
 
+  testWidgets('Trash: tap opens a deleted note, long-press selects', (
+    tester,
+  ) async {
+    final h = await harness(tester);
+    final seed = (await tester.runAsync(() => seedArchive(h)))!;
+    await pumpApp(tester, h, AppRoutes.trash);
+    final router = h.read(routerProvider);
+
+    // Single tap: the note opens to be read.
+    await tester.tap(find.text('Random thoughts'));
+    await settle(tester);
+    expect(router.state.uri.path, AppRoutes.note(seed.trashed));
+    router.pop();
+    await settle(tester);
+    expect(router.state.uri.path, AppRoutes.trash);
+    // …and nothing got selected by it.
+    expect(find.text('Recover all'), findsOneWidget);
+
+    // Long-press: marks it (selection mode) instead of opening.
+    await tester.longPress(find.text('Random thoughts'));
+    await settle(tester);
+    expect(router.state.uri.path, AppRoutes.trash);
+    expect(find.text('Recover (1)'), findsOneWidget);
+  });
+
   testWidgets('Trash: recover, delete forever, empty trash, empty state', (
     tester,
   ) async {
@@ -203,8 +231,9 @@ void main() {
     await pumpApp(tester, h, AppRoutes.trash);
     expect(find.text('2 ITEMS'), findsOneWidget);
 
-    // Swipe-free bulk path: select one, recover it.
-    await tapText(tester, 'Random thoughts');
+    // Swipe-free bulk path: long-press selects one, recover it.
+    await tester.longPress(find.text('Random thoughts'));
+    await settle(tester);
     await tapText(tester, 'Recover (1)');
     expect(find.text('Random thoughts'), findsNothing);
     expect(find.text('"Random thoughts" restored'), findsOneWidget);

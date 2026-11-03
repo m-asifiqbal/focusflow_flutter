@@ -44,13 +44,15 @@ class ArchiveActions {
   ItemSelection get _selection =>
       ref.read(itemSelectionProvider(_scope).notifier);
 
-  /// Tap: toggles in selection mode; otherwise opens the archived item
-  /// (Archive) or starts selecting it (Trash — deleted items don't open).
+  /// Tap: toggles in selection mode; otherwise opens the item. Archived
+  /// items always open; deleted ones open only where the editor has a
+  /// read-only view (notes), so their text can be read before recovering —
+  /// other deleted items start a selection instead.
   void tap(ItemSummary item) {
     final sel = ref.read(itemSelectionProvider(_scope));
     if (sel.active) {
       _selection.toggle(item.ref);
-    } else if (list == ArchiveList.archive) {
+    } else if (list == ArchiveList.archive || item.type == ItemType.note) {
       openLibraryItem(context, item.ref);
     } else {
       _selection.start(item.ref);

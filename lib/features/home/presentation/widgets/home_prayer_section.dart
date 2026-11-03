@@ -26,11 +26,14 @@ import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
 import 'package:focusflow/core/theme/app_theme.dart';
 import 'package:focusflow/core/theme/fa_icons.dart';
+import 'package:focusflow/core/utils/date_utils.dart';
 import 'package:focusflow/core/widgets/widgets.dart';
 import 'package:focusflow/features/home/presentation/home_tokens.dart';
+import 'package:focusflow/features/home/presentation/providers/home_providers.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_section_link.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_section_states.dart';
 import 'package:focusflow/features/prayers/domain/services/prayer_schedule.dart';
+import 'package:focusflow/features/tasks/presentation/providers/minute_clock.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_flows.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/providers/prayers_providers.dart';
@@ -50,33 +53,11 @@ class HomePrayerSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final today = ref.watch(prayerTodayProvider);
-    final hijri = ref.watch(prayerDateLineProvider);
-    final use24h = ref.watch(settingsProvider.select((s) => s.use24HourTime));
+    // The week strip's day: today shows the live plan, a past day what was
+    // marked, a future day what is coming.
+    final day = ref.watch(homeDayProvider);
+    final isToday = DateUtilsX.isSameDay(day, ref.watch(todayProvider));
     void openAll() => unawaited(context.push(AppRoutes.prayers));
-    final Widget body = today.when(
-      skipLoadingOnReload: true,
-      error: (_, _) =>
-          HomeErrorCard(onRetry: () => ref.invalidate(prayersProvider)),
-      loading: () => const FFSkeletonList(count: 1),
-      data: (d) {
-        final summary = PrayerDaySummary(today: d, hijri: hijri);
-        if (d.slots.isEmpty) {
-          return FFCard(onTap: openAll, child: summary);
-        }
-        return PrayerDayCard(
-          header: summary,
-          slots: d.slots,
-          now: d.now,
-          use24h: use24h,
-          onMark: (s) => unawaited(markPrayer(context, ref, s)),
-          onCount: (s) => unawaited(countPrayer(ref, s, 1)),
-          onTap: (s) => s.prayer.kind.counts
-              ? unawaited(context.push(AppRoutes.prayerEdit(s.prayer.id)))
-              : unawaited(openPrayerLog(context, ref, s)),
-        );
-      },
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -85,11 +66,101 @@ class HomePrayerSection extends ConsumerWidget {
           trailing: HomeSectionLink(tr('All'), onPressed: openAll),
         ),
         const SizedBox(height: HomeDimens.linkHeaderGap),
-        body,
+        if (isToday)
+          _TodayCard(onOpenAll: openAll)
+        else
+          _OtherDayCard(day: day, onOpenAll: openAll),
       ],
     );
   }
 }
+
+/// Today: done ring, what is on now / next, every prayer with its actions.
+class _TodayCard extends ConsumerWidget {
+  const _TodayCard({required this.onOpenAll});
+
+  final VoidCallback onOpenAll;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final today = ref.watch(prayerTodayProvider);
+    final hijri = ref.watch(prayerDateLineProvider);
+    final use24h = ref.watch(settingsProvider.select((s) => s.use24HourTime));
+    return today.when(
+      skipLoadingOnReload: true,
+      error: (_, _) =>
+          HomeErrorCard(onRetry: () => ref.invalidate(prayersProvider)),
+      loading: () => const FFSkeletonList(count: 1),
+      data: (d) {
+        final summary = PrayerDaySummary(today: d, hijri: hijri);
+        if (d.slots.isEmpty) {
+          return FFCard(onTap: onOpenAll, child: summary);
+        }
+        return PrayerDayCard(
+          header: summary,
+          slots: d.slots,
+          now: d.now,
+          use24h: use24h,
+          onMark: (s) => unawaited(markPrayer(context, ref, s)),
+          onCount: (s) => unawaited(countPrayer(ref, s, 1)),
+          onTap: (s) => _open(context, ref, s),
+        );
+      },
+    );
+  }
+}
+
+/// Another day of the week strip. A past day lists what was prayed (and what
+/// has no record); a future day lists the schedule to come. Nothing is
+/// markable here except through a row's log sheet.
+class _OtherDayCard extends ConsumerWidget {
+  const _OtherDayCard({required this.day, required this.onOpenAll});
+
+  final DateTime day;
+  final VoidCallback onOpenAll;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plan = ref.watch(prayerDayPlanProvider(day));
+    final now = ref.watch(prayerNowProvider);
+    final hijri = ref.watch(prayerDateLineOnProvider(day));
+    final use24h = ref.watch(settingsProvider.select((s) => s.use24HourTime));
+    return plan.when(
+      skipLoadingOnReload: true,
+      error: (_, _) =>
+          HomeErrorCard(onRetry: () => ref.invalidate(prayersProvider)),
+      loading: () => const FFSkeletonList(count: 1),
+      data: (plan) {
+        // Counting practices are a "today" tally: left out of other days.
+        final slots = [
+          for (final s in plan)
+            if (!s.prayer.kind.counts) s,
+        ];
+        final summary = PrayerOtherDaySummary(
+          day: day,
+          slots: slots,
+          now: now,
+          hijri: hijri,
+        );
+        if (slots.isEmpty) return FFCard(onTap: onOpenAll, child: summary);
+        return PrayerDayCard(
+          header: summary,
+          slots: slots,
+          now: now,
+          use24h: use24h,
+          onMark: (s) => unawaited(markPrayer(context, ref, s)),
+          onTap: (s) => _open(context, ref, s),
+        );
+      },
+    );
+  }
+}
+
+/// A row's tap: a counter opens its editor, anything else its log sheet.
+void _open(BuildContext context, WidgetRef ref, PrayerSlot s) =>
+    s.prayer.kind.counts
+    ? unawaited(context.push(AppRoutes.prayerEdit(s.prayer.id)))
+    : unawaited(openPrayerLog(context, ref, s));
 
 /// The day's summary: done ring, now / next, the Hijri date.
 class PrayerDaySummary extends StatelessWidget {
@@ -100,8 +171,6 @@ class PrayerDaySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ff = context.ff;
-    final text = context.text;
     final now = today.now;
     final prayers = today.prayers;
     final done = prayers
@@ -126,10 +195,92 @@ class PrayerDaySummary extends StatelessWidget {
             : PrayerFormat.endsIn(f.window.end!.difference(now)),
       ),
     };
+    return _SummaryRow(
+      done: done,
+      total: total,
+      headline: headline,
+      line: line,
+      hijri: hijri,
+      doneToday: true,
+    );
+  }
+}
+
+/// The summary of a past or future day: how many were prayed (past), or what
+/// is scheduled (future), with the day's date.
+class PrayerOtherDaySummary extends StatelessWidget {
+  const PrayerOtherDaySummary({
+    required this.day,
+    required this.slots,
+    required this.now,
+    this.hijri,
+    super.key,
+  });
+
+  final DateTime day;
+  final List<PrayerSlot> slots;
+  final DateTime now;
+  final String? hijri;
+
+  @override
+  Widget build(BuildContext context) {
+    final prayers = [
+      for (final s in slots)
+        if (!s.prayer.kind.isFast && !s.prayer.kind.counts) s,
+    ];
+    final done = prayers
+        .where((s) => s.stateAt(now) == PrayerSlotState.done)
+        .length;
+    final future = day.isAfter(DateUtilsX.dateOnly(now));
+    final headline = switch (prayers.length) {
+      0 => tr('No prayers due on this day.'),
+      _ when future => tr('Upcoming'),
+      _ when done == 0 => tr('Not marked'),
+      final total => tr('{done} of {total} prayed', {
+        'done': done,
+        'total': total,
+      }),
+    };
+    return _SummaryRow(
+      done: done,
+      total: prayers.length,
+      headline: headline,
+      line: DateFormats.of('EEEE, MMM d').format(day),
+      hijri: hijri,
+    );
+  }
+}
+
+/// Ring · headline · line · date, shared by today's and other days' summary.
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({
+    required this.done,
+    required this.total,
+    required this.headline,
+    required this.line,
+    required this.hijri,
+    this.doneToday = false,
+  });
+
+  final int done;
+  final int total;
+  final String headline;
+  final String? line;
+  final String? hijri;
+
+  /// Today's summary reads "x of y done today"; another day's headline
+  /// already says what the ring means.
+  final bool doneToday;
+
+  @override
+  Widget build(BuildContext context) {
+    final ff = context.ff;
+    final text = context.text;
     final accent = PrayerStyle.module.inkFor(ff.brightness);
     return Semantics(
       label: [
-        tr('{done} of {total} done today', {'done': done, 'total': total}),
+        if (doneToday)
+          tr('{done} of {total} done today', {'done': done, 'total': total}),
         headline,
         ?line,
         ?hijri,
@@ -163,7 +314,7 @@ class PrayerDaySummary extends StatelessWidget {
                 ),
                 if (line != null)
                   Text(
-                    line,
+                    line!,
                     style: text.bodySmall.copyWith(
                       color: accent,
                       fontWeight: FontWeight.w600,

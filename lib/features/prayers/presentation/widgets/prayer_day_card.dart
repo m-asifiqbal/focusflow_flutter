@@ -210,7 +210,9 @@ class _Row extends StatelessWidget {
         color: ff.danger,
         icon: FontAwesomeIcons.circleExclamation,
       );
-    } else if (state == PrayerSlotState.upcoming) {
+    } else if (state == PrayerSlotState.upcoming &&
+        DateUtilsX.isSameDay(slot.day, now)) {
+      // "in 1h 12m" is for today; another day's rows just show their time.
       trailing = Text(
         PrayerFormat.inTime(w.start.difference(now)),
         style: text.meta.copyWith(color: ff.inkMuted),
@@ -234,7 +236,9 @@ class _Row extends StatelessWidget {
       ?left,
       ?jamaat,
       if (status != null) status.labelFor(p.kind),
-      if (status == null && state == PrayerSlotState.upcoming)
+      if (status == null &&
+          state == PrayerSlotState.upcoming &&
+          DateUtilsX.isSameDay(slot.day, now))
         PrayerFormat.inTime(w.start.difference(now)),
     ].join(', ');
     // The text reads as one button (tap = log sheet); the time and the rail

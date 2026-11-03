@@ -23,6 +23,8 @@
 /// ============================================================
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:focusflow/core/l10n/tr.dart';
 import 'package:focusflow/core/theme/app_spacing.dart';
@@ -37,6 +39,7 @@ import 'package:focusflow/features/prayers/domain/services/prayer_times.dart';
 import 'package:focusflow/features/prayers/presentation/prayer_style.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_hero_parts.dart';
 import 'package:focusflow/features/prayers/presentation/widgets/prayer_sun_arc.dart';
+import 'package:focusflow/features/prayers/presentation/widgets/sky/sky_frame.dart';
 
 class PrayerHeroCard extends StatefulWidget {
   const PrayerHeroCard({
@@ -217,6 +220,19 @@ class _PrayerHeroCardState extends State<PrayerHeroCard>
       LayoutBuilder(
         builder: (context, c) {
           final textWidth = _textWidth(c.maxWidth);
+          // The bar stops short of the curve's foot: with a place / alarm
+          // line under it the bar rises to the horizon, where it used to run
+          // into the sun's half circle.
+          final cardWidth = c.maxWidth + 2 * AppSpacing.xl;
+          final barWidth = math.max(
+            0.0,
+            math.min(
+              textWidth,
+              SkyLayout.of(cardWidth).nearEdge -
+                  AppSpacing.xl -
+                  PrayerStyle.heroBarGap,
+            ),
+          );
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -320,7 +336,7 @@ class _PrayerHeroCardState extends State<PrayerHeroCard>
                     Align(
                       alignment: AlignmentDirectional.centerStart,
                       child: SizedBox(
-                        width: textWidth,
+                        width: barWidth,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(AppRadii.pill),
                           child: TweenAnimationBuilder<double>(

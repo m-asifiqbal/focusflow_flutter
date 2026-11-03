@@ -58,4 +58,10 @@ class SkyLayout {
 
   /// Its centre on the card.
   double get cx => rtl ? width - cxL : cxL;
+
+  /// How far the curve's near foot (with its glow) is from the card's
+  /// *start* edge — the text side. Anything on the text side (the time-left
+  /// bar) must stop short of it. Mirrored with the sky, so it is the same
+  /// number in right-to-left.
+  double get nearEdge => cxL - radius - 12;
 }

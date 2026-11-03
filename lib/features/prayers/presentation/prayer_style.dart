@@ -116,6 +116,9 @@ abstract final class PrayerStyle {
   /// it).
   static const double heroTextShare = .48;
 
+  /// Air between the time-left bar and the curve's near foot.
+  static const double heroBarGap = 8;
+
   /// Radius of the sun's disc and of the moon.
   static const double sunRadius = 10;
   static const double moonRadius = 10.5;

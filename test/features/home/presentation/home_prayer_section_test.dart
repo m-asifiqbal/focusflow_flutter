@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focusflow/core/router/app_routes.dart';
 import 'package:focusflow/core/settings/app_settings.dart';
+import 'package:focusflow/features/home/presentation/providers/home_providers.dart';
 import 'package:focusflow/features/home/presentation/widgets/home_prayer_section.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer.dart';
 import 'package:focusflow/features/prayers/domain/entities/prayer_log.dart';
@@ -134,5 +135,77 @@ void main() {
     await showSection(tester);
     expect(tester.takeException(), isNull);
     await captureScreen(tester, 'home_prayer_360_x13');
+  });
+
+  /// Picks [day] in the week strip (as a tap on its tile does).
+  void pick(TestHarness h, DateTime day) =>
+      h.read(homeSelectedDayProvider.notifier).select(day, today: _day);
+
+  testWidgets('a past day shows what was prayed, else "Not marked"', (
+    tester,
+  ) async {
+    final h = await boot(tester);
+    final yesterday = DateTime(2026, 10, 31);
+    await tester.runAsync(() async {
+      final repo = h.read(prayersRepositoryProvider);
+      final list = await repo.watchPrayers(PrayersScope.active).first;
+      await repo.mark(
+        list.firstWhere((p) => p.name == 'Fajr').id,
+        yesterday,
+        PrayerStatus.onTime,
+      );
+    });
+    await pumpApp(tester, h, AppRoutes.home, size: const Size(390, 2400));
+    pick(h, yesterday);
+    await showSection(tester);
+
+    // Yesterday's log, not today's: 1 of 5 prayed, the rest not marked.
+    expect(find.text('1/5'), findsOneWidget);
+    expect(find.text('1 of 5 prayed'), findsOneWidget);
+    expect(find.text('On time'), findsOneWidget);
+    expect(find.text('Not marked'), findsWidgets);
+    expect(find.text('Mark prayed'), findsNothing);
+    expect(find.text('Asr now'), findsNothing);
+    // Today's counter tally is not shown on another day.
+    expect(find.text('Evening adhkar'), findsNothing);
+
+    // A day with nothing on file: the summary says so.
+    pick(h, DateTime(2026, 10, 30));
+    await settle(tester);
+    expect(find.text('0/5'), findsOneWidget);
+    expect(find.text('Not marked'), findsWidgets);
+    expect(find.text('On time'), findsNothing);
+  });
+
+  testWidgets('a future day shows the schedule to come', (tester) async {
+    final h = await boot(tester);
+    await pumpApp(tester, h, AppRoutes.home, size: const Size(390, 2400));
+    pick(h, DateTime(2026, 11, 3));
+    await showSection(tester);
+
+    expect(find.text('Upcoming'), findsWidgets);
+    expect(find.text('0/5'), findsOneWidget);
+    for (final name in ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']) {
+      expect(
+        find.descendant(
+          of: find.byType(PrayerDayCard),
+          matching: find.text(name),
+        ),
+        findsOneWidget,
+        reason: name,
+      );
+    }
+    // Nothing is done, open or overdue on a day that has not come.
+    expect(find.text('Mark prayed'), findsNothing);
+    expect(find.text('Not marked'), findsNothing);
+    expect(find.text('On time'), findsNothing);
+    // No countdown to a day days away.
+    expect(find.textContaining('in 4'), findsNothing);
+    expect(find.textContaining('in 5'), findsNothing);
+
+    // Back to today: the live plan returns.
+    pick(h, _day);
+    await settle(tester);
+    expect(find.text('Asr now'), findsOneWidget);
   });
 }

@@ -222,6 +222,29 @@ final prayerTodayProvider = Provider.autoDispose<AsyncValue<PrayerToday>>((
   return AsyncValue.data(_todayOf(p, l, now, sunFor, hijriAdjust));
 });
 
+/// The plan of any [day] (date only): its prayers with the logs on file.
+/// A past day shows what was marked, a future day what is coming — Home's
+/// week strip uses it for the selected day; today's richer view is
+/// [prayerTodayProvider].
+final prayerDayPlanProvider = Provider.autoDispose
+    .family<AsyncValue<List<PrayerSlot>>, DateTime>((ref, day) {
+      final prayers = ref.watch(prayersProvider);
+      final logs = ref.watch(prayerLogsProvider);
+      final sunFor = ref.watch(prayerSunProvider);
+      final hijriAdjust = ref.watch(prayerPrefsProvider).hijriAdjust;
+      if (prayers.hasError) {
+        return AsyncValue.error(prayers.error!, prayers.stackTrace!);
+      }
+      final p = prayers.valueOrNull;
+      final l = logs.valueOrNull;
+      if (p == null || l == null) return const AsyncValue.loading();
+      return AsyncValue.data(
+        PrayerSchedule.dayPlan(p, day, sunFor, {
+          for (final log in l) log.id: log,
+        }, hijriAdjust: hijriAdjust),
+      );
+    });
+
 /// Streak, on-time rate, month and the week grid.
 final prayerProgressProvider = Provider.autoDispose<PrayerProgress>((ref) {
   final prayers = ref.watch(prayersProvider).valueOrNull;
@@ -259,3 +282,15 @@ final prayerDateLineProvider = Provider.autoDispose<String?>((ref) {
     hijriAdjust: prefs.hijriAdjust,
   );
 });
+
+/// [prayerDateLineProvider] for another [day] (noon stands in for "now").
+final prayerDateLineOnProvider = Provider.autoDispose.family<String?, DateTime>(
+  (ref, day) {
+    final prefs = ref.watch(prayerPrefsProvider);
+    return PrayerDateLine.of(
+      PrayerTradition.fromKey(prefs.tradition),
+      DateTime(day.year, day.month, day.day, 12),
+      hijriAdjust: prefs.hijriAdjust,
+    );
+  },
+);
